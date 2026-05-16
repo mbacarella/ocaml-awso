@@ -4,79 +4,59 @@ val delete_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScalingPolicyRequest.t ->
-        (DeleteScalingPolicyResponse.t,
-          [ `AWS of DeleteScalingPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteScalingPolicyResponse.t, DeleteScalingPolicyResponse.error)
+          Result.t Async.Deferred.t
 val delete_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScheduledActionRequest.t ->
         (DeleteScheduledActionResponse.t,
-          [ `AWS of DeleteScheduledActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteScheduledActionResponse.error) Result.t Async.Deferred.t
 val deregister_scalable_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterScalableTargetRequest.t ->
         (DeregisterScalableTargetResponse.t,
-          [ `AWS of DeregisterScalableTargetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeregisterScalableTargetResponse.error) Result.t Async.Deferred.t
 val describe_scalable_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalableTargetsRequest.t ->
         (DescribeScalableTargetsResponse.t,
-          [ `AWS of DescribeScalableTargetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeScalableTargetsResponse.error) Result.t Async.Deferred.t
 val describe_scaling_activities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingActivitiesRequest.t ->
         (DescribeScalingActivitiesResponse.t,
-          [ `AWS of DescribeScalingActivitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeScalingActivitiesResponse.error) Result.t Async.Deferred.t
 val describe_scaling_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingPoliciesRequest.t ->
         (DescribeScalingPoliciesResponse.t,
-          [ `AWS of DescribeScalingPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeScalingPoliciesResponse.error) Result.t Async.Deferred.t
 val describe_scheduled_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScheduledActionsRequest.t ->
         (DescribeScheduledActionsResponse.t,
-          [ `AWS of DescribeScheduledActionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeScheduledActionsResponse.error) Result.t Async.Deferred.t
 val put_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutScalingPolicyRequest.t ->
-        (PutScalingPolicyResponse.t,
-          [ `AWS of PutScalingPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutScalingPolicyResponse.t, PutScalingPolicyResponse.error) Result.t
           Async.Deferred.t
 val put_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutScheduledActionRequest.t ->
-        (PutScheduledActionResponse.t,
-          [ `AWS of PutScheduledActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutScheduledActionResponse.t, PutScheduledActionResponse.error)
+          Result.t Async.Deferred.t
 val register_scalable_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterScalableTargetRequest.t ->
         (RegisterScalableTargetResponse.t,
-          [ `AWS of RegisterScalableTargetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RegisterScalableTargetResponse.error) Result.t Async.Deferred.t

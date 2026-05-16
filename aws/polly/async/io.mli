@@ -4,71 +4,53 @@ val delete_lexicon :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLexiconInput.t ->
-        (DeleteLexiconOutput.t,
-          [ `AWS of DeleteLexiconOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLexiconOutput.t, DeleteLexiconOutput.error) Result.t
           Async.Deferred.t
 val describe_voices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVoicesInput.t ->
-        (DescribeVoicesOutput.t,
-          [ `AWS of DescribeVoicesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVoicesOutput.t, DescribeVoicesOutput.error) Result.t
           Async.Deferred.t
 val get_lexicon :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLexiconInput.t ->
-        (GetLexiconOutput.t,
-          [ `AWS of GetLexiconOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetLexiconOutput.t, GetLexiconOutput.error) Result.t
           Async.Deferred.t
 val get_speech_synthesis_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSpeechSynthesisTaskInput.t ->
-        (GetSpeechSynthesisTaskOutput.t,
-          [ `AWS of GetSpeechSynthesisTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetSpeechSynthesisTaskOutput.t, GetSpeechSynthesisTaskOutput.error)
+          Result.t Async.Deferred.t
 val list_lexicons :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLexiconsInput.t ->
-        (ListLexiconsOutput.t,
-          [ `AWS of ListLexiconsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLexiconsOutput.t, ListLexiconsOutput.error) Result.t
           Async.Deferred.t
 val list_speech_synthesis_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSpeechSynthesisTasksInput.t ->
         (ListSpeechSynthesisTasksOutput.t,
-          [ `AWS of ListSpeechSynthesisTasksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSpeechSynthesisTasksOutput.error) Result.t Async.Deferred.t
 val put_lexicon :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLexiconInput.t ->
-        (PutLexiconOutput.t,
-          [ `AWS of PutLexiconOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutLexiconOutput.t, PutLexiconOutput.error) Result.t
           Async.Deferred.t
 val start_speech_synthesis_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSpeechSynthesisTaskInput.t ->
         (StartSpeechSynthesisTaskOutput.t,
-          [ `AWS of StartSpeechSynthesisTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartSpeechSynthesisTaskOutput.error) Result.t Async.Deferred.t
 val synthesize_speech :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SynthesizeSpeechInput.t ->
-        (SynthesizeSpeechOutput.t,
-          [ `AWS of SynthesizeSpeechOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SynthesizeSpeechOutput.t, SynthesizeSpeechOutput.error) Result.t
           Async.Deferred.t

@@ -519,191 +519,198 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFileSystem -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateAccessPoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AccessPointDescription.error_of_json)
-       | Ok resp ->
-           Ok (AccessPointDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AccessPointDescription.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some AccessPointDescription.error_of_json))
   | CreateFileSystem ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FileSystemDescription.error_of_json)
-       | Ok resp ->
-           Ok (FileSystemDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FileSystemDescription.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some FileSystemDescription.error_of_json))
   | CreateMountTarget ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some MountTargetDescription.error_of_json)
-       | Ok resp ->
-           Ok (MountTargetDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (MountTargetDescription.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some MountTargetDescription.error_of_json))
   | CreateReplicationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ReplicationConfigurationDescription.error_of_json)
-       | Ok resp ->
-           Ok
-             (ReplicationConfigurationDescription.of_json
-                (response_to_json resp)))
-  | CreateTags -> Ok ()
-  | DeleteAccessPoint -> Ok ()
-  | DeleteFileSystem -> Ok ()
-  | DeleteFileSystemPolicy -> Ok ()
-  | DeleteMountTarget -> Ok ()
-  | DeleteReplicationConfiguration -> Ok ()
-  | DeleteTags -> Ok ()
+      if is_success
+      then
+        Ok
+          (ReplicationConfigurationDescription.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ReplicationConfigurationDescription.error_of_json))
+  | CreateTags -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAccessPoint ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFileSystem ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFileSystemPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMountTarget ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteReplicationConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTags -> if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAccessPoints ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAccessPointsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAccessPointsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAccessPointsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAccessPointsResponse.error_of_json))
   | DescribeAccountPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAccountPreferencesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAccountPreferencesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeAccountPreferencesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountPreferencesResponse.error_of_json))
   | DescribeBackupPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BackupPolicyDescription.error_of_json)
-       | Ok resp ->
-           Ok (BackupPolicyDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BackupPolicyDescription.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BackupPolicyDescription.error_of_json))
   | DescribeFileSystemPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FileSystemPolicyDescription.error_of_json)
-       | Ok resp ->
-           Ok (FileSystemPolicyDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FileSystemPolicyDescription.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some FileSystemPolicyDescription.error_of_json))
   | DescribeFileSystems ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeFileSystemsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeFileSystemsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeFileSystemsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeFileSystemsResponse.error_of_json))
   | DescribeLifecycleConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some LifecycleConfigurationDescription.error_of_json)
-       | Ok resp ->
-           Ok
-             (LifecycleConfigurationDescription.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (LifecycleConfigurationDescription.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some LifecycleConfigurationDescription.error_of_json))
   | DescribeMountTargetSecurityGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeMountTargetSecurityGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeMountTargetSecurityGroupsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeMountTargetSecurityGroupsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMountTargetSecurityGroupsResponse.error_of_json))
   | DescribeMountTargets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeMountTargetsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeMountTargetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeMountTargetsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeMountTargetsResponse.error_of_json))
   | DescribeReplicationConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeReplicationConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeReplicationConfigurationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeReplicationConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReplicationConfigurationsResponse.error_of_json))
   | DescribeTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeTagsResponse.error_of_json)
-       | Ok resp -> Ok (DescribeTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeTagsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeTagsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
-  | ModifyMountTargetSecurityGroups -> Ok ()
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ModifyMountTargetSecurityGroups ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutAccountPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutAccountPreferencesResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutAccountPreferencesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutAccountPreferencesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutAccountPreferencesResponse.error_of_json))
   | PutBackupPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BackupPolicyDescription.error_of_json)
-       | Ok resp ->
-           Ok (BackupPolicyDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BackupPolicyDescription.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BackupPolicyDescription.error_of_json))
   | PutFileSystemPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FileSystemPolicyDescription.error_of_json)
-       | Ok resp ->
-           Ok (FileSystemPolicyDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FileSystemPolicyDescription.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some FileSystemPolicyDescription.error_of_json))
   | PutLifecycleConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some LifecycleConfigurationDescription.error_of_json)
-       | Ok resp ->
-           Ok
-             (LifecycleConfigurationDescription.of_json
-                (response_to_json resp)))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        Ok
+          (LifecycleConfigurationDescription.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some LifecycleConfigurationDescription.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateFileSystem ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FileSystemDescription.error_of_json)
-       | Ok resp ->
-           Ok (FileSystemDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FileSystemDescription.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some FileSystemDescription.error_of_json))

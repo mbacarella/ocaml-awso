@@ -4,393 +4,294 @@ val add_instance_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddInstanceFleetInput.t ->
-        (AddInstanceFleetOutput.t,
-          [ `AWS of AddInstanceFleetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AddInstanceFleetOutput.t, AddInstanceFleetOutput.error) Result.t
           Async.Deferred.t
 val add_instance_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddInstanceGroupsInput.t ->
-        (AddInstanceGroupsOutput.t,
-          [ `AWS of AddInstanceGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AddInstanceGroupsOutput.t, AddInstanceGroupsOutput.error) Result.t
           Async.Deferred.t
 val add_job_flow_steps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddJobFlowStepsInput.t ->
-        (AddJobFlowStepsOutput.t,
-          [ `AWS of AddJobFlowStepsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AddJobFlowStepsOutput.t, AddJobFlowStepsOutput.error) Result.t
           Async.Deferred.t
 val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsInput.t ->
-        (AddTagsOutput.t,
-          [ `AWS of AddTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AddTagsOutput.t, AddTagsOutput.error) Result.t Async.Deferred.t
 val cancel_steps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelStepsInput.t ->
-        (CancelStepsOutput.t,
-          [ `AWS of CancelStepsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelStepsOutput.t, CancelStepsOutput.error) Result.t
           Async.Deferred.t
 val create_security_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSecurityConfigurationInput.t ->
         (CreateSecurityConfigurationOutput.t,
-          [ `AWS of CreateSecurityConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateSecurityConfigurationOutput.error) Result.t Async.Deferred.t
 val create_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStudioInput.t ->
-        (CreateStudioOutput.t,
-          [ `AWS of CreateStudioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateStudioOutput.t, CreateStudioOutput.error) Result.t
           Async.Deferred.t
 val create_studio_session_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStudioSessionMappingInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_security_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSecurityConfigurationInput.t ->
         (DeleteSecurityConfigurationOutput.t,
-          [ `AWS of DeleteSecurityConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteSecurityConfigurationOutput.error) Result.t Async.Deferred.t
 val delete_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteStudioInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteStudioInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_studio_session_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStudioSessionMappingInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val describe_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterInput.t ->
-        (DescribeClusterOutput.t,
-          [ `AWS of DescribeClusterOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeClusterOutput.t, DescribeClusterOutput.error) Result.t
           Async.Deferred.t
 val describe_job_flows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobFlowsInput.t ->
-        (DescribeJobFlowsOutput.t,
-          [ `AWS of DescribeJobFlowsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeJobFlowsOutput.t, DescribeJobFlowsOutput.error) Result.t
           Async.Deferred.t
 val describe_notebook_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNotebookExecutionInput.t ->
         (DescribeNotebookExecutionOutput.t,
-          [ `AWS of DescribeNotebookExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeNotebookExecutionOutput.error) Result.t Async.Deferred.t
 val describe_release_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReleaseLabelInput.t ->
-        (DescribeReleaseLabelOutput.t,
-          [ `AWS of DescribeReleaseLabelOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeReleaseLabelOutput.t, DescribeReleaseLabelOutput.error)
+          Result.t Async.Deferred.t
 val describe_security_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSecurityConfigurationInput.t ->
         (DescribeSecurityConfigurationOutput.t,
-          [ `AWS of DescribeSecurityConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeSecurityConfigurationOutput.error) Result.t
           Async.Deferred.t
 val describe_step :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStepInput.t ->
-        (DescribeStepOutput.t,
-          [ `AWS of DescribeStepOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeStepOutput.t, DescribeStepOutput.error) Result.t
           Async.Deferred.t
 val describe_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStudioInput.t ->
-        (DescribeStudioOutput.t,
-          [ `AWS of DescribeStudioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeStudioOutput.t, DescribeStudioOutput.error) Result.t
           Async.Deferred.t
 val get_auto_termination_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAutoTerminationPolicyInput.t ->
         (GetAutoTerminationPolicyOutput.t,
-          [ `AWS of GetAutoTerminationPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetAutoTerminationPolicyOutput.error) Result.t Async.Deferred.t
 val get_block_public_access_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBlockPublicAccessConfigurationInput.t ->
         (GetBlockPublicAccessConfigurationOutput.t,
-          [ `AWS of GetBlockPublicAccessConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetBlockPublicAccessConfigurationOutput.error) Result.t
           Async.Deferred.t
 val get_managed_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetManagedScalingPolicyInput.t ->
         (GetManagedScalingPolicyOutput.t,
-          [ `AWS of GetManagedScalingPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetManagedScalingPolicyOutput.error) Result.t Async.Deferred.t
 val get_studio_session_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStudioSessionMappingInput.t ->
         (GetStudioSessionMappingOutput.t,
-          [ `AWS of GetStudioSessionMappingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetStudioSessionMappingOutput.error) Result.t Async.Deferred.t
 val list_bootstrap_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBootstrapActionsInput.t ->
-        (ListBootstrapActionsOutput.t,
-          [ `AWS of ListBootstrapActionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListBootstrapActionsOutput.t, ListBootstrapActionsOutput.error)
+          Result.t Async.Deferred.t
 val list_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClustersInput.t ->
-        (ListClustersOutput.t,
-          [ `AWS of ListClustersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListClustersOutput.t, ListClustersOutput.error) Result.t
           Async.Deferred.t
 val list_instance_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstanceFleetsInput.t ->
-        (ListInstanceFleetsOutput.t,
-          [ `AWS of ListInstanceFleetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListInstanceFleetsOutput.t, ListInstanceFleetsOutput.error) Result.t
           Async.Deferred.t
 val list_instance_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstanceGroupsInput.t ->
-        (ListInstanceGroupsOutput.t,
-          [ `AWS of ListInstanceGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListInstanceGroupsOutput.t, ListInstanceGroupsOutput.error) Result.t
           Async.Deferred.t
 val list_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstancesInput.t ->
-        (ListInstancesOutput.t,
-          [ `AWS of ListInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListInstancesOutput.t, ListInstancesOutput.error) Result.t
           Async.Deferred.t
 val list_notebook_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNotebookExecutionsInput.t ->
-        (ListNotebookExecutionsOutput.t,
-          [ `AWS of ListNotebookExecutionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListNotebookExecutionsOutput.t, ListNotebookExecutionsOutput.error)
+          Result.t Async.Deferred.t
 val list_release_labels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReleaseLabelsInput.t ->
-        (ListReleaseLabelsOutput.t,
-          [ `AWS of ListReleaseLabelsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListReleaseLabelsOutput.t, ListReleaseLabelsOutput.error) Result.t
           Async.Deferred.t
 val list_security_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSecurityConfigurationsInput.t ->
         (ListSecurityConfigurationsOutput.t,
-          [ `AWS of ListSecurityConfigurationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSecurityConfigurationsOutput.error) Result.t Async.Deferred.t
 val list_steps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStepsInput.t ->
-        (ListStepsOutput.t,
-          [ `AWS of ListStepsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListStepsOutput.t, ListStepsOutput.error) Result.t Async.Deferred.t
 val list_studio_session_mappings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStudioSessionMappingsInput.t ->
         (ListStudioSessionMappingsOutput.t,
-          [ `AWS of ListStudioSessionMappingsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListStudioSessionMappingsOutput.error) Result.t Async.Deferred.t
 val list_studios :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStudiosInput.t ->
-        (ListStudiosOutput.t,
-          [ `AWS of ListStudiosOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStudiosOutput.t, ListStudiosOutput.error) Result.t
           Async.Deferred.t
 val modify_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterInput.t ->
-        (ModifyClusterOutput.t,
-          [ `AWS of ModifyClusterOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyClusterOutput.t, ModifyClusterOutput.error) Result.t
           Async.Deferred.t
 val modify_instance_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ModifyInstanceFleetInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      ModifyInstanceFleetInput.t -> (unit, unit) Result.t Async.Deferred.t
 val modify_instance_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ModifyInstanceGroupsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      ModifyInstanceGroupsInput.t -> (unit, unit) Result.t Async.Deferred.t
 val put_auto_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAutoScalingPolicyInput.t ->
-        (PutAutoScalingPolicyOutput.t,
-          [ `AWS of PutAutoScalingPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutAutoScalingPolicyOutput.t, PutAutoScalingPolicyOutput.error)
+          Result.t Async.Deferred.t
 val put_auto_termination_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAutoTerminationPolicyInput.t ->
         (PutAutoTerminationPolicyOutput.t,
-          [ `AWS of PutAutoTerminationPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutAutoTerminationPolicyOutput.error) Result.t Async.Deferred.t
 val put_block_public_access_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutBlockPublicAccessConfigurationInput.t ->
         (PutBlockPublicAccessConfigurationOutput.t,
-          [ `AWS of PutBlockPublicAccessConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutBlockPublicAccessConfigurationOutput.error) Result.t
           Async.Deferred.t
 val put_managed_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutManagedScalingPolicyInput.t ->
         (PutManagedScalingPolicyOutput.t,
-          [ `AWS of PutManagedScalingPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutManagedScalingPolicyOutput.error) Result.t Async.Deferred.t
 val remove_auto_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveAutoScalingPolicyInput.t ->
         (RemoveAutoScalingPolicyOutput.t,
-          [ `AWS of RemoveAutoScalingPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RemoveAutoScalingPolicyOutput.error) Result.t Async.Deferred.t
 val remove_auto_termination_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveAutoTerminationPolicyInput.t ->
         (RemoveAutoTerminationPolicyOutput.t,
-          [ `AWS of RemoveAutoTerminationPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RemoveAutoTerminationPolicyOutput.error) Result.t Async.Deferred.t
 val remove_managed_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveManagedScalingPolicyInput.t ->
         (RemoveManagedScalingPolicyOutput.t,
-          [ `AWS of RemoveManagedScalingPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RemoveManagedScalingPolicyOutput.error) Result.t Async.Deferred.t
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsInput.t ->
-        (RemoveTagsOutput.t,
-          [ `AWS of RemoveTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RemoveTagsOutput.t, RemoveTagsOutput.error) Result.t
           Async.Deferred.t
 val run_job_flow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RunJobFlowInput.t ->
-        (RunJobFlowOutput.t,
-          [ `AWS of RunJobFlowOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RunJobFlowOutput.t, RunJobFlowOutput.error) Result.t
           Async.Deferred.t
 val set_termination_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetTerminationProtectionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val set_visible_to_all_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetVisibleToAllUsersInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetVisibleToAllUsersInput.t -> (unit, unit) Result.t Async.Deferred.t
 val start_notebook_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartNotebookExecutionInput.t ->
-        (StartNotebookExecutionOutput.t,
-          [ `AWS of StartNotebookExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartNotebookExecutionOutput.t, StartNotebookExecutionOutput.error)
+          Result.t Async.Deferred.t
 val stop_notebook_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StopNotebookExecutionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      StopNotebookExecutionInput.t -> (unit, unit) Result.t Async.Deferred.t
 val terminate_job_flows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TerminateJobFlowsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TerminateJobFlowsInput.t -> (unit, unit) Result.t Async.Deferred.t
 val update_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateStudioInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateStudioInput.t -> (unit, unit) Result.t Async.Deferred.t
 val update_studio_session_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStudioSessionMappingInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t

@@ -652,290 +652,285 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDeviceMetadata -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateApplicationInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateApplicationInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateApplicationInstanceResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateApplicationInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateApplicationInstanceResponse.error_of_json))
   | CreateJobForDevices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateJobForDevicesResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateJobForDevicesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateJobForDevicesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateJobForDevicesResponse.error_of_json))
   | CreateNodeFromTemplateJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateNodeFromTemplateJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateNodeFromTemplateJobResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateNodeFromTemplateJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateNodeFromTemplateJobResponse.error_of_json))
   | CreatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreatePackageResponse.error_of_json))
   | CreatePackageImportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreatePackageImportJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreatePackageImportJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreatePackageImportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePackageImportJobResponse.error_of_json))
   | DeleteDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDeviceResponse.error_of_json)
-       | Ok resp -> Ok (DeleteDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDeviceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDeviceResponse.error_of_json))
   | DeletePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePackageResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeletePackageResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeletePackageResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeletePackageResponse.error_of_json))
   | DeregisterPackageVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeregisterPackageVersionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeregisterPackageVersionResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeregisterPackageVersionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterPackageVersionResponse.error_of_json))
   | DescribeApplicationInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeApplicationInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeApplicationInstanceResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeApplicationInstanceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeApplicationInstanceResponse.error_of_json))
   | DescribeApplicationInstanceDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeApplicationInstanceDetailsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeApplicationInstanceDetailsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeApplicationInstanceDetailsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeApplicationInstanceDetailsResponse.error_of_json))
   | DescribeDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDeviceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDeviceResponse.error_of_json))
   | DescribeDeviceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDeviceJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDeviceJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDeviceJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDeviceJobResponse.error_of_json))
   | DescribeNode ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeNodeResponse.error_of_json)
-       | Ok resp -> Ok (DescribeNodeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeNodeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeNodeResponse.error_of_json))
   | DescribeNodeFromTemplateJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeNodeFromTemplateJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeNodeFromTemplateJobResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeNodeFromTemplateJobResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeNodeFromTemplateJobResponse.error_of_json))
   | DescribePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribePackageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribePackageResponse.error_of_json))
   | DescribePackageImportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribePackageImportJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribePackageImportJobResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribePackageImportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribePackageImportJobResponse.error_of_json))
   | DescribePackageVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribePackageVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribePackageVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribePackageVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribePackageVersionResponse.error_of_json))
   | ListApplicationInstanceDependencies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListApplicationInstanceDependenciesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListApplicationInstanceDependenciesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListApplicationInstanceDependenciesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationInstanceDependenciesResponse.error_of_json))
   | ListApplicationInstanceNodeInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListApplicationInstanceNodeInstancesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListApplicationInstanceNodeInstancesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListApplicationInstanceNodeInstancesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationInstanceNodeInstancesResponse.error_of_json))
   | ListApplicationInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListApplicationInstancesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListApplicationInstancesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListApplicationInstancesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationInstancesResponse.error_of_json))
   | ListDevices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDevicesResponse.error_of_json)
-       | Ok resp -> Ok (ListDevicesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDevicesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDevicesResponse.error_of_json))
   | ListDevicesJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDevicesJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDevicesJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDevicesJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDevicesJobsResponse.error_of_json))
   | ListNodeFromTemplateJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListNodeFromTemplateJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListNodeFromTemplateJobsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListNodeFromTemplateJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNodeFromTemplateJobsResponse.error_of_json))
   | ListNodes ->
-      (match resp with
-       | Error err -> handle_error err (Some ListNodesResponse.error_of_json)
-       | Ok resp -> Ok (ListNodesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNodesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListNodesResponse.error_of_json))
   | ListPackageImportJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPackageImportJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPackageImportJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPackageImportJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPackageImportJobsResponse.error_of_json))
   | ListPackages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPackagesResponse.error_of_json)
-       | Ok resp -> Ok (ListPackagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPackagesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPackagesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ProvisionDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ProvisionDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ProvisionDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ProvisionDeviceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ProvisionDeviceResponse.error_of_json))
   | RegisterPackageVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegisterPackageVersionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (RegisterPackageVersionResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RegisterPackageVersionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterPackageVersionResponse.error_of_json))
   | RemoveApplicationInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RemoveApplicationInstanceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (RemoveApplicationInstanceResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (RemoveApplicationInstanceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveApplicationInstanceResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateDeviceMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDeviceMetadataResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDeviceMetadataResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDeviceMetadataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateDeviceMetadataResponse.error_of_json))

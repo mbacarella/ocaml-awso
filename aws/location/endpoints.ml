@@ -1185,424 +1185,405 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateRouteCalculator -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateTracker -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateTrackerConsumer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateTrackerConsumerResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateTrackerConsumerResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateTrackerConsumerResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateTrackerConsumerResponse.error_of_json))
   | BatchDeleteDevicePositionHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDeleteDevicePositionHistoryResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDeleteDevicePositionHistoryResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchDeleteDevicePositionHistoryResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteDevicePositionHistoryResponse.error_of_json))
   | BatchDeleteGeofence ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchDeleteGeofenceResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchDeleteGeofenceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchDeleteGeofenceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchDeleteGeofenceResponse.error_of_json))
   | BatchEvaluateGeofences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchEvaluateGeofencesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchEvaluateGeofencesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (BatchEvaluateGeofencesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchEvaluateGeofencesResponse.error_of_json))
   | BatchGetDevicePosition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchGetDevicePositionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchGetDevicePositionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (BatchGetDevicePositionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetDevicePositionResponse.error_of_json))
   | BatchPutGeofence ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchPutGeofenceResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchPutGeofenceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchPutGeofenceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchPutGeofenceResponse.error_of_json))
   | BatchUpdateDevicePosition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchUpdateDevicePositionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchUpdateDevicePositionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchUpdateDevicePositionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchUpdateDevicePositionResponse.error_of_json))
   | CalculateRoute ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CalculateRouteResponse.error_of_json)
-       | Ok resp ->
-           Ok (CalculateRouteResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CalculateRouteResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CalculateRouteResponse.error_of_json))
   | CalculateRouteMatrix ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CalculateRouteMatrixResponse.error_of_json)
-       | Ok resp ->
-           Ok (CalculateRouteMatrixResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CalculateRouteMatrixResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CalculateRouteMatrixResponse.error_of_json))
   | CreateGeofenceCollection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateGeofenceCollectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateGeofenceCollectionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateGeofenceCollectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateGeofenceCollectionResponse.error_of_json))
   | CreateMap ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateMapResponse.error_of_json)
-       | Ok resp -> Ok (CreateMapResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMapResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateMapResponse.error_of_json))
   | CreatePlaceIndex ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePlaceIndexResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreatePlaceIndexResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePlaceIndexResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreatePlaceIndexResponse.error_of_json))
   | CreateRouteCalculator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateRouteCalculatorResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateRouteCalculatorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRouteCalculatorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRouteCalculatorResponse.error_of_json))
   | CreateTracker ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTrackerResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateTrackerResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateTrackerResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateTrackerResponse.error_of_json))
   | DeleteGeofenceCollection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteGeofenceCollectionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteGeofenceCollectionResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteGeofenceCollectionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteGeofenceCollectionResponse.error_of_json))
   | DeleteMap ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteMapResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteMapResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteMapResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteMapResponse.error_of_json))
   | DeletePlaceIndex ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePlaceIndexResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeletePlaceIndexResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeletePlaceIndexResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeletePlaceIndexResponse.error_of_json))
   | DeleteRouteCalculator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRouteCalculatorResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteRouteCalculatorResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteRouteCalculatorResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteRouteCalculatorResponse.error_of_json))
   | DeleteTracker ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTrackerResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteTrackerResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTrackerResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteTrackerResponse.error_of_json))
   | DescribeGeofenceCollection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeGeofenceCollectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeGeofenceCollectionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeGeofenceCollectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeGeofenceCollectionResponse.error_of_json))
   | DescribeMap ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeMapResponse.error_of_json)
-       | Ok resp -> Ok (DescribeMapResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeMapResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeMapResponse.error_of_json))
   | DescribePlaceIndex ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePlaceIndexResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribePlaceIndexResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribePlaceIndexResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribePlaceIndexResponse.error_of_json))
   | DescribeRouteCalculator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRouteCalculatorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeRouteCalculatorResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeRouteCalculatorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRouteCalculatorResponse.error_of_json))
   | DescribeTracker ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeTrackerResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeTrackerResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeTrackerResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeTrackerResponse.error_of_json))
   | DisassociateTrackerConsumer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateTrackerConsumerResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateTrackerConsumerResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateTrackerConsumerResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateTrackerConsumerResponse.error_of_json))
   | GetDevicePosition ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDevicePositionResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDevicePositionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDevicePositionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDevicePositionResponse.error_of_json))
   | GetDevicePositionHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDevicePositionHistoryResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetDevicePositionHistoryResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetDevicePositionHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDevicePositionHistoryResponse.error_of_json))
   | GetGeofence ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetGeofenceResponse.error_of_json)
-       | Ok resp -> Ok (GetGeofenceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetGeofenceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetGeofenceResponse.error_of_json))
   | GetMapGlyphs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMapGlyphsResponse.error_of_json)
-       | Ok resp ->
-           let body = Blob.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GetMapGlyphsResponse.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = Blob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetMapGlyphsResponse.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetMapGlyphsResponse.error_of_json))
   | GetMapSprites ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMapSpritesResponse.error_of_json)
-       | Ok resp ->
-           let body = Blob.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GetMapSpritesResponse.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = Blob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetMapSpritesResponse.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetMapSpritesResponse.error_of_json))
   | GetMapStyleDescriptor ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMapStyleDescriptorResponse.error_of_json)
-       | Ok resp ->
-           let body = Blob.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (GetMapStyleDescriptorResponse.of_header_and_body
-                (headers, body)))
+      if is_success
+      then
+        let body = Blob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetMapStyleDescriptorResponse.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetMapStyleDescriptorResponse.error_of_json))
   | GetMapTile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMapTileResponse.error_of_json)
-       | Ok resp ->
-           let body = Blob.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GetMapTileResponse.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = Blob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetMapTileResponse.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetMapTileResponse.error_of_json))
   | ListDevicePositions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDevicePositionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDevicePositionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDevicePositionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDevicePositionsResponse.error_of_json))
   | ListGeofenceCollections ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListGeofenceCollectionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListGeofenceCollectionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListGeofenceCollectionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListGeofenceCollectionsResponse.error_of_json))
   | ListGeofences ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGeofencesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListGeofencesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGeofencesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListGeofencesResponse.error_of_json))
   | ListMaps ->
-      (match resp with
-       | Error err -> handle_error err (Some ListMapsResponse.error_of_json)
-       | Ok resp -> Ok (ListMapsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMapsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMapsResponse.error_of_json))
   | ListPlaceIndexes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPlaceIndexesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPlaceIndexesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPlaceIndexesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPlaceIndexesResponse.error_of_json))
   | ListRouteCalculators ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRouteCalculatorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListRouteCalculatorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRouteCalculatorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRouteCalculatorsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTrackerConsumers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTrackerConsumersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTrackerConsumersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTrackerConsumersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTrackerConsumersResponse.error_of_json))
   | ListTrackers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTrackersResponse.error_of_json)
-       | Ok resp -> Ok (ListTrackersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTrackersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTrackersResponse.error_of_json))
   | PutGeofence ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutGeofenceResponse.error_of_json)
-       | Ok resp -> Ok (PutGeofenceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutGeofenceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some PutGeofenceResponse.error_of_json))
   | SearchPlaceIndexForPosition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SearchPlaceIndexForPositionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SearchPlaceIndexForPositionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (SearchPlaceIndexForPositionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchPlaceIndexForPositionResponse.error_of_json))
   | SearchPlaceIndexForSuggestions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SearchPlaceIndexForSuggestionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SearchPlaceIndexForSuggestionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (SearchPlaceIndexForSuggestionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchPlaceIndexForSuggestionsResponse.error_of_json))
   | SearchPlaceIndexForText ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SearchPlaceIndexForTextResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SearchPlaceIndexForTextResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (SearchPlaceIndexForTextResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchPlaceIndexForTextResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateGeofenceCollection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateGeofenceCollectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateGeofenceCollectionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateGeofenceCollectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateGeofenceCollectionResponse.error_of_json))
   | UpdateMap ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateMapResponse.error_of_json)
-       | Ok resp -> Ok (UpdateMapResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateMapResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateMapResponse.error_of_json))
   | UpdatePlaceIndex ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePlaceIndexResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdatePlaceIndexResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePlaceIndexResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdatePlaceIndexResponse.error_of_json))
   | UpdateRouteCalculator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateRouteCalculatorResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRouteCalculatorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRouteCalculatorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRouteCalculatorResponse.error_of_json))
   | UpdateTracker ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTrackerResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateTrackerResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateTrackerResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateTrackerResponse.error_of_json))

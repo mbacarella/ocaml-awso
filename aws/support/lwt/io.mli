@@ -4,97 +4,81 @@ val add_attachments_to_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddAttachmentsToSetRequest.t ->
-        (AddAttachmentsToSetResponse.t,
-          [ `AWS of AddAttachmentsToSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddAttachmentsToSetResponse.t, AddAttachmentsToSetResponse.error)
+          Result.t Lwt.t
 val add_communication_to_case :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddCommunicationToCaseRequest.t ->
         (AddCommunicationToCaseResponse.t,
-          [ `AWS of AddCommunicationToCaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddCommunicationToCaseResponse.error) Result.t Lwt.t
 val create_case :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCaseRequest.t ->
-        (CreateCaseResponse.t,
-          [ `AWS of CreateCaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCaseResponse.t, CreateCaseResponse.error) Result.t Lwt.t
 val describe_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAttachmentRequest.t ->
-        (DescribeAttachmentResponse.t,
-          [ `AWS of DescribeAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAttachmentResponse.t, DescribeAttachmentResponse.error)
+          Result.t Lwt.t
 val describe_cases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCasesRequest.t ->
-        (DescribeCasesResponse.t,
-          [ `AWS of DescribeCasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCasesResponse.t, DescribeCasesResponse.error) Result.t Lwt.t
 val describe_communications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCommunicationsRequest.t ->
         (DescribeCommunicationsResponse.t,
-          [ `AWS of DescribeCommunicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCommunicationsResponse.error) Result.t Lwt.t
 val describe_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServicesRequest.t ->
-        (DescribeServicesResponse.t,
-          [ `AWS of DescribeServicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeServicesResponse.t, DescribeServicesResponse.error) Result.t
+          Lwt.t
 val describe_severity_levels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSeverityLevelsRequest.t ->
         (DescribeSeverityLevelsResponse.t,
-          [ `AWS of DescribeSeverityLevelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSeverityLevelsResponse.error) Result.t Lwt.t
 val describe_trusted_advisor_check_refresh_statuses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrustedAdvisorCheckRefreshStatusesRequest.t ->
         (DescribeTrustedAdvisorCheckRefreshStatusesResponse.t,
-          [ `AWS of DescribeTrustedAdvisorCheckRefreshStatusesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTrustedAdvisorCheckRefreshStatusesResponse.error) Result.t
+          Lwt.t
 val describe_trusted_advisor_check_result :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrustedAdvisorCheckResultRequest.t ->
         (DescribeTrustedAdvisorCheckResultResponse.t,
-          [ `AWS of DescribeTrustedAdvisorCheckResultResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTrustedAdvisorCheckResultResponse.error) Result.t Lwt.t
 val describe_trusted_advisor_check_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrustedAdvisorCheckSummariesRequest.t ->
         (DescribeTrustedAdvisorCheckSummariesResponse.t,
-          [ `AWS of DescribeTrustedAdvisorCheckSummariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTrustedAdvisorCheckSummariesResponse.error) Result.t Lwt.t
 val describe_trusted_advisor_checks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrustedAdvisorChecksRequest.t ->
         (DescribeTrustedAdvisorChecksResponse.t,
-          [ `AWS of DescribeTrustedAdvisorChecksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTrustedAdvisorChecksResponse.error) Result.t Lwt.t
 val refresh_trusted_advisor_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RefreshTrustedAdvisorCheckRequest.t ->
         (RefreshTrustedAdvisorCheckResponse.t,
-          [ `AWS of RefreshTrustedAdvisorCheckResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RefreshTrustedAdvisorCheckResponse.error) Result.t Lwt.t
 val resolve_case :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResolveCaseRequest.t ->
-        (ResolveCaseResponse.t,
-          [ `AWS of ResolveCaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResolveCaseResponse.t, ResolveCaseResponse.error) Result.t Lwt.t

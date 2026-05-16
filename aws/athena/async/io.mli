@@ -4,279 +4,209 @@ val batch_get_named_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetNamedQueryInput.t ->
-        (BatchGetNamedQueryOutput.t,
-          [ `AWS of BatchGetNamedQueryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchGetNamedQueryOutput.t, BatchGetNamedQueryOutput.error) Result.t
           Async.Deferred.t
 val batch_get_query_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetQueryExecutionInput.t ->
-        (BatchGetQueryExecutionOutput.t,
-          [ `AWS of BatchGetQueryExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchGetQueryExecutionOutput.t, BatchGetQueryExecutionOutput.error)
+          Result.t Async.Deferred.t
 val create_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataCatalogInput.t ->
-        (CreateDataCatalogOutput.t,
-          [ `AWS of CreateDataCatalogOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDataCatalogOutput.t, CreateDataCatalogOutput.error) Result.t
           Async.Deferred.t
 val create_named_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNamedQueryInput.t ->
-        (CreateNamedQueryOutput.t,
-          [ `AWS of CreateNamedQueryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateNamedQueryOutput.t, CreateNamedQueryOutput.error) Result.t
           Async.Deferred.t
 val create_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePreparedStatementInput.t ->
         (CreatePreparedStatementOutput.t,
-          [ `AWS of CreatePreparedStatementOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreatePreparedStatementOutput.error) Result.t Async.Deferred.t
 val create_work_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkGroupInput.t ->
-        (CreateWorkGroupOutput.t,
-          [ `AWS of CreateWorkGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateWorkGroupOutput.t, CreateWorkGroupOutput.error) Result.t
           Async.Deferred.t
 val delete_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDataCatalogInput.t ->
-        (DeleteDataCatalogOutput.t,
-          [ `AWS of DeleteDataCatalogOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteDataCatalogOutput.t, DeleteDataCatalogOutput.error) Result.t
           Async.Deferred.t
 val delete_named_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNamedQueryInput.t ->
-        (DeleteNamedQueryOutput.t,
-          [ `AWS of DeleteNamedQueryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteNamedQueryOutput.t, DeleteNamedQueryOutput.error) Result.t
           Async.Deferred.t
 val delete_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePreparedStatementInput.t ->
         (DeletePreparedStatementOutput.t,
-          [ `AWS of DeletePreparedStatementOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeletePreparedStatementOutput.error) Result.t Async.Deferred.t
 val delete_work_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkGroupInput.t ->
-        (DeleteWorkGroupOutput.t,
-          [ `AWS of DeleteWorkGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteWorkGroupOutput.t, DeleteWorkGroupOutput.error) Result.t
           Async.Deferred.t
 val get_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataCatalogInput.t ->
-        (GetDataCatalogOutput.t,
-          [ `AWS of GetDataCatalogOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDataCatalogOutput.t, GetDataCatalogOutput.error) Result.t
           Async.Deferred.t
 val get_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDatabaseInput.t ->
-        (GetDatabaseOutput.t,
-          [ `AWS of GetDatabaseOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDatabaseOutput.t, GetDatabaseOutput.error) Result.t
           Async.Deferred.t
 val get_named_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNamedQueryInput.t ->
-        (GetNamedQueryOutput.t,
-          [ `AWS of GetNamedQueryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetNamedQueryOutput.t, GetNamedQueryOutput.error) Result.t
           Async.Deferred.t
 val get_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPreparedStatementInput.t ->
-        (GetPreparedStatementOutput.t,
-          [ `AWS of GetPreparedStatementOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPreparedStatementOutput.t, GetPreparedStatementOutput.error)
+          Result.t Async.Deferred.t
 val get_query_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueryExecutionInput.t ->
-        (GetQueryExecutionOutput.t,
-          [ `AWS of GetQueryExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetQueryExecutionOutput.t, GetQueryExecutionOutput.error) Result.t
           Async.Deferred.t
 val get_query_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueryResultsInput.t ->
-        (GetQueryResultsOutput.t,
-          [ `AWS of GetQueryResultsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetQueryResultsOutput.t, GetQueryResultsOutput.error) Result.t
           Async.Deferred.t
 val get_table_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTableMetadataInput.t ->
-        (GetTableMetadataOutput.t,
-          [ `AWS of GetTableMetadataOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTableMetadataOutput.t, GetTableMetadataOutput.error) Result.t
           Async.Deferred.t
 val get_work_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkGroupInput.t ->
-        (GetWorkGroupOutput.t,
-          [ `AWS of GetWorkGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWorkGroupOutput.t, GetWorkGroupOutput.error) Result.t
           Async.Deferred.t
 val list_data_catalogs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDataCatalogsInput.t ->
-        (ListDataCatalogsOutput.t,
-          [ `AWS of ListDataCatalogsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDataCatalogsOutput.t, ListDataCatalogsOutput.error) Result.t
           Async.Deferred.t
 val list_databases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatabasesInput.t ->
-        (ListDatabasesOutput.t,
-          [ `AWS of ListDatabasesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDatabasesOutput.t, ListDatabasesOutput.error) Result.t
           Async.Deferred.t
 val list_engine_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEngineVersionsInput.t ->
-        (ListEngineVersionsOutput.t,
-          [ `AWS of ListEngineVersionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListEngineVersionsOutput.t, ListEngineVersionsOutput.error) Result.t
           Async.Deferred.t
 val list_named_queries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNamedQueriesInput.t ->
-        (ListNamedQueriesOutput.t,
-          [ `AWS of ListNamedQueriesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListNamedQueriesOutput.t, ListNamedQueriesOutput.error) Result.t
           Async.Deferred.t
 val list_prepared_statements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPreparedStatementsInput.t ->
-        (ListPreparedStatementsOutput.t,
-          [ `AWS of ListPreparedStatementsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPreparedStatementsOutput.t, ListPreparedStatementsOutput.error)
+          Result.t Async.Deferred.t
 val list_query_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListQueryExecutionsInput.t ->
-        (ListQueryExecutionsOutput.t,
-          [ `AWS of ListQueryExecutionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListQueryExecutionsOutput.t, ListQueryExecutionsOutput.error)
+          Result.t Async.Deferred.t
 val list_table_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTableMetadataInput.t ->
-        (ListTableMetadataOutput.t,
-          [ `AWS of ListTableMetadataOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTableMetadataOutput.t, ListTableMetadataOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val list_work_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkGroupsInput.t ->
-        (ListWorkGroupsOutput.t,
-          [ `AWS of ListWorkGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWorkGroupsOutput.t, ListWorkGroupsOutput.error) Result.t
           Async.Deferred.t
 val start_query_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartQueryExecutionInput.t ->
-        (StartQueryExecutionOutput.t,
-          [ `AWS of StartQueryExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartQueryExecutionOutput.t, StartQueryExecutionOutput.error)
+          Result.t Async.Deferred.t
 val stop_query_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopQueryExecutionInput.t ->
-        (StopQueryExecutionOutput.t,
-          [ `AWS of StopQueryExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopQueryExecutionOutput.t, StopQueryExecutionOutput.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t
           Async.Deferred.t
 val update_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDataCatalogInput.t ->
-        (UpdateDataCatalogOutput.t,
-          [ `AWS of UpdateDataCatalogOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateDataCatalogOutput.t, UpdateDataCatalogOutput.error) Result.t
           Async.Deferred.t
 val update_named_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNamedQueryInput.t ->
-        (UpdateNamedQueryOutput.t,
-          [ `AWS of UpdateNamedQueryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateNamedQueryOutput.t, UpdateNamedQueryOutput.error) Result.t
           Async.Deferred.t
 val update_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePreparedStatementInput.t ->
         (UpdatePreparedStatementOutput.t,
-          [ `AWS of UpdatePreparedStatementOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdatePreparedStatementOutput.error) Result.t Async.Deferred.t
 val update_work_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkGroupInput.t ->
-        (UpdateWorkGroupOutput.t,
-          [ `AWS of UpdateWorkGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateWorkGroupOutput.t, UpdateWorkGroupOutput.error) Result.t
           Async.Deferred.t

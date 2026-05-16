@@ -4,398 +4,328 @@ val batch_delete_worlds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteWorldsRequest.t ->
-        (BatchDeleteWorldsResponse.t,
-          [ `AWS of BatchDeleteWorldsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDeleteWorldsResponse.t, BatchDeleteWorldsResponse.error)
+          Result.t Lwt.t
 val batch_describe_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDescribeSimulationJobRequest.t ->
         (BatchDescribeSimulationJobResponse.t,
-          [ `AWS of BatchDescribeSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDescribeSimulationJobResponse.error) Result.t Lwt.t
 val cancel_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelDeploymentJobRequest.t ->
-        (CancelDeploymentJobResponse.t,
-          [ `AWS of CancelDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelDeploymentJobResponse.t, CancelDeploymentJobResponse.error)
+          Result.t Lwt.t
 val cancel_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelSimulationJobRequest.t ->
-        (CancelSimulationJobResponse.t,
-          [ `AWS of CancelSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelSimulationJobResponse.t, CancelSimulationJobResponse.error)
+          Result.t Lwt.t
 val cancel_simulation_job_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelSimulationJobBatchRequest.t ->
         (CancelSimulationJobBatchResponse.t,
-          [ `AWS of CancelSimulationJobBatchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelSimulationJobBatchResponse.error) Result.t Lwt.t
 val cancel_world_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelWorldExportJobRequest.t ->
-        (CancelWorldExportJobResponse.t,
-          [ `AWS of CancelWorldExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelWorldExportJobResponse.t, CancelWorldExportJobResponse.error)
+          Result.t Lwt.t
 val cancel_world_generation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelWorldGenerationJobRequest.t ->
         (CancelWorldGenerationJobResponse.t,
-          [ `AWS of CancelWorldGenerationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelWorldGenerationJobResponse.error) Result.t Lwt.t
 val create_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentJobRequest.t ->
-        (CreateDeploymentJobResponse.t,
-          [ `AWS of CreateDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeploymentJobResponse.t, CreateDeploymentJobResponse.error)
+          Result.t Lwt.t
 val create_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFleetRequest.t ->
-        (CreateFleetResponse.t,
-          [ `AWS of CreateFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFleetResponse.t, CreateFleetResponse.error) Result.t Lwt.t
 val create_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRobotRequest.t ->
-        (CreateRobotResponse.t,
-          [ `AWS of CreateRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRobotResponse.t, CreateRobotResponse.error) Result.t Lwt.t
 val create_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRobotApplicationRequest.t ->
         (CreateRobotApplicationResponse.t,
-          [ `AWS of CreateRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateRobotApplicationResponse.error) Result.t Lwt.t
 val create_robot_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRobotApplicationVersionRequest.t ->
         (CreateRobotApplicationVersionResponse.t,
-          [ `AWS of CreateRobotApplicationVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateRobotApplicationVersionResponse.error) Result.t Lwt.t
 val create_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSimulationApplicationRequest.t ->
         (CreateSimulationApplicationResponse.t,
-          [ `AWS of CreateSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSimulationApplicationResponse.error) Result.t Lwt.t
 val create_simulation_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSimulationApplicationVersionRequest.t ->
         (CreateSimulationApplicationVersionResponse.t,
-          [ `AWS of CreateSimulationApplicationVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSimulationApplicationVersionResponse.error) Result.t Lwt.t
 val create_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSimulationJobRequest.t ->
-        (CreateSimulationJobResponse.t,
-          [ `AWS of CreateSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSimulationJobResponse.t, CreateSimulationJobResponse.error)
+          Result.t Lwt.t
 val create_world_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorldExportJobRequest.t ->
-        (CreateWorldExportJobResponse.t,
-          [ `AWS of CreateWorldExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWorldExportJobResponse.t, CreateWorldExportJobResponse.error)
+          Result.t Lwt.t
 val create_world_generation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorldGenerationJobRequest.t ->
         (CreateWorldGenerationJobResponse.t,
-          [ `AWS of CreateWorldGenerationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateWorldGenerationJobResponse.error) Result.t Lwt.t
 val create_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorldTemplateRequest.t ->
-        (CreateWorldTemplateResponse.t,
-          [ `AWS of CreateWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWorldTemplateResponse.t, CreateWorldTemplateResponse.error)
+          Result.t Lwt.t
 val delete_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFleetRequest.t ->
-        (DeleteFleetResponse.t,
-          [ `AWS of DeleteFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFleetResponse.t, DeleteFleetResponse.error) Result.t Lwt.t
 val delete_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRobotRequest.t ->
-        (DeleteRobotResponse.t,
-          [ `AWS of DeleteRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRobotResponse.t, DeleteRobotResponse.error) Result.t Lwt.t
 val delete_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRobotApplicationRequest.t ->
         (DeleteRobotApplicationResponse.t,
-          [ `AWS of DeleteRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRobotApplicationResponse.error) Result.t Lwt.t
 val delete_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSimulationApplicationRequest.t ->
         (DeleteSimulationApplicationResponse.t,
-          [ `AWS of DeleteSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteSimulationApplicationResponse.error) Result.t Lwt.t
 val delete_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorldTemplateRequest.t ->
-        (DeleteWorldTemplateResponse.t,
-          [ `AWS of DeleteWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWorldTemplateResponse.t, DeleteWorldTemplateResponse.error)
+          Result.t Lwt.t
 val deregister_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterRobotRequest.t ->
-        (DeregisterRobotResponse.t,
-          [ `AWS of DeregisterRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeregisterRobotResponse.t, DeregisterRobotResponse.error) Result.t
+          Lwt.t
 val describe_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeploymentJobRequest.t ->
         (DescribeDeploymentJobResponse.t,
-          [ `AWS of DescribeDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDeploymentJobResponse.error) Result.t Lwt.t
 val describe_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetRequest.t ->
-        (DescribeFleetResponse.t,
-          [ `AWS of DescribeFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeFleetResponse.t, DescribeFleetResponse.error) Result.t Lwt.t
 val describe_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRobotRequest.t ->
-        (DescribeRobotResponse.t,
-          [ `AWS of DescribeRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRobotResponse.t, DescribeRobotResponse.error) Result.t Lwt.t
 val describe_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRobotApplicationRequest.t ->
         (DescribeRobotApplicationResponse.t,
-          [ `AWS of DescribeRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRobotApplicationResponse.error) Result.t Lwt.t
 val describe_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSimulationApplicationRequest.t ->
         (DescribeSimulationApplicationResponse.t,
-          [ `AWS of DescribeSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSimulationApplicationResponse.error) Result.t Lwt.t
 val describe_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSimulationJobRequest.t ->
         (DescribeSimulationJobResponse.t,
-          [ `AWS of DescribeSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSimulationJobResponse.error) Result.t Lwt.t
 val describe_simulation_job_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSimulationJobBatchRequest.t ->
         (DescribeSimulationJobBatchResponse.t,
-          [ `AWS of DescribeSimulationJobBatchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSimulationJobBatchResponse.error) Result.t Lwt.t
 val describe_world :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldRequest.t ->
-        (DescribeWorldResponse.t,
-          [ `AWS of DescribeWorldResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeWorldResponse.t, DescribeWorldResponse.error) Result.t Lwt.t
 val describe_world_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldExportJobRequest.t ->
         (DescribeWorldExportJobResponse.t,
-          [ `AWS of DescribeWorldExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeWorldExportJobResponse.error) Result.t Lwt.t
 val describe_world_generation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldGenerationJobRequest.t ->
         (DescribeWorldGenerationJobResponse.t,
-          [ `AWS of DescribeWorldGenerationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeWorldGenerationJobResponse.error) Result.t Lwt.t
 val describe_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldTemplateRequest.t ->
         (DescribeWorldTemplateResponse.t,
-          [ `AWS of DescribeWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeWorldTemplateResponse.error) Result.t Lwt.t
 val get_world_template_body :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorldTemplateBodyRequest.t ->
-        (GetWorldTemplateBodyResponse.t,
-          [ `AWS of GetWorldTemplateBodyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWorldTemplateBodyResponse.t, GetWorldTemplateBodyResponse.error)
+          Result.t Lwt.t
 val list_deployment_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentJobsRequest.t ->
-        (ListDeploymentJobsResponse.t,
-          [ `AWS of ListDeploymentJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeploymentJobsResponse.t, ListDeploymentJobsResponse.error)
+          Result.t Lwt.t
 val list_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFleetsRequest.t ->
-        (ListFleetsResponse.t,
-          [ `AWS of ListFleetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFleetsResponse.t, ListFleetsResponse.error) Result.t Lwt.t
 val list_robot_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRobotApplicationsRequest.t ->
         (ListRobotApplicationsResponse.t,
-          [ `AWS of ListRobotApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRobotApplicationsResponse.error) Result.t Lwt.t
 val list_robots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRobotsRequest.t ->
-        (ListRobotsResponse.t,
-          [ `AWS of ListRobotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRobotsResponse.t, ListRobotsResponse.error) Result.t Lwt.t
 val list_simulation_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSimulationApplicationsRequest.t ->
         (ListSimulationApplicationsResponse.t,
-          [ `AWS of ListSimulationApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSimulationApplicationsResponse.error) Result.t Lwt.t
 val list_simulation_job_batches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSimulationJobBatchesRequest.t ->
         (ListSimulationJobBatchesResponse.t,
-          [ `AWS of ListSimulationJobBatchesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSimulationJobBatchesResponse.error) Result.t Lwt.t
 val list_simulation_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSimulationJobsRequest.t ->
-        (ListSimulationJobsResponse.t,
-          [ `AWS of ListSimulationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSimulationJobsResponse.t, ListSimulationJobsResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_world_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldExportJobsRequest.t ->
-        (ListWorldExportJobsResponse.t,
-          [ `AWS of ListWorldExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWorldExportJobsResponse.t, ListWorldExportJobsResponse.error)
+          Result.t Lwt.t
 val list_world_generation_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldGenerationJobsRequest.t ->
         (ListWorldGenerationJobsResponse.t,
-          [ `AWS of ListWorldGenerationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListWorldGenerationJobsResponse.error) Result.t Lwt.t
 val list_world_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldTemplatesRequest.t ->
-        (ListWorldTemplatesResponse.t,
-          [ `AWS of ListWorldTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWorldTemplatesResponse.t, ListWorldTemplatesResponse.error)
+          Result.t Lwt.t
 val list_worlds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldsRequest.t ->
-        (ListWorldsResponse.t,
-          [ `AWS of ListWorldsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWorldsResponse.t, ListWorldsResponse.error) Result.t Lwt.t
 val register_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterRobotRequest.t ->
-        (RegisterRobotResponse.t,
-          [ `AWS of RegisterRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterRobotResponse.t, RegisterRobotResponse.error) Result.t Lwt.t
 val restart_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestartSimulationJobRequest.t ->
-        (RestartSimulationJobResponse.t,
-          [ `AWS of RestartSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RestartSimulationJobResponse.t, RestartSimulationJobResponse.error)
+          Result.t Lwt.t
 val start_simulation_job_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSimulationJobBatchRequest.t ->
         (StartSimulationJobBatchResponse.t,
-          [ `AWS of StartSimulationJobBatchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartSimulationJobBatchResponse.error) Result.t Lwt.t
 val sync_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SyncDeploymentJobRequest.t ->
-        (SyncDeploymentJobResponse.t,
-          [ `AWS of SyncDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SyncDeploymentJobResponse.t, SyncDeploymentJobResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRobotApplicationRequest.t ->
         (UpdateRobotApplicationResponse.t,
-          [ `AWS of UpdateRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateRobotApplicationResponse.error) Result.t Lwt.t
 val update_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSimulationApplicationRequest.t ->
         (UpdateSimulationApplicationResponse.t,
-          [ `AWS of UpdateSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateSimulationApplicationResponse.error) Result.t Lwt.t
 val update_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorldTemplateRequest.t ->
-        (UpdateWorldTemplateResponse.t,
-          [ `AWS of UpdateWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateWorldTemplateResponse.t, UpdateWorldTemplateResponse.error)
+          Result.t Lwt.t

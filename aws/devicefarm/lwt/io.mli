@@ -4,538 +4,427 @@ val create_device_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDevicePoolRequest.t ->
-        (CreateDevicePoolResult.t,
-          [ `AWS of CreateDevicePoolResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDevicePoolResult.t, CreateDevicePoolResult.error) Result.t
+          Lwt.t
 val create_instance_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInstanceProfileRequest.t ->
-        (CreateInstanceProfileResult.t,
-          [ `AWS of CreateInstanceProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateInstanceProfileResult.t, CreateInstanceProfileResult.error)
+          Result.t Lwt.t
 val create_network_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkProfileRequest.t ->
-        (CreateNetworkProfileResult.t,
-          [ `AWS of CreateNetworkProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateNetworkProfileResult.t, CreateNetworkProfileResult.error)
+          Result.t Lwt.t
 val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectRequest.t ->
-        (CreateProjectResult.t,
-          [ `AWS of CreateProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectResult.t, CreateProjectResult.error) Result.t Lwt.t
 val create_remote_access_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRemoteAccessSessionRequest.t ->
         (CreateRemoteAccessSessionResult.t,
-          [ `AWS of CreateRemoteAccessSessionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateRemoteAccessSessionResult.error) Result.t Lwt.t
 val create_test_grid_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTestGridProjectRequest.t ->
-        (CreateTestGridProjectResult.t,
-          [ `AWS of CreateTestGridProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTestGridProjectResult.t, CreateTestGridProjectResult.error)
+          Result.t Lwt.t
 val create_test_grid_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTestGridUrlRequest.t ->
-        (CreateTestGridUrlResult.t,
-          [ `AWS of CreateTestGridUrlResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTestGridUrlResult.t, CreateTestGridUrlResult.error) Result.t
+          Lwt.t
 val create_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUploadRequest.t ->
-        (CreateUploadResult.t,
-          [ `AWS of CreateUploadResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUploadResult.t, CreateUploadResult.error) Result.t Lwt.t
 val create_v_p_c_e_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVPCEConfigurationRequest.t ->
         (CreateVPCEConfigurationResult.t,
-          [ `AWS of CreateVPCEConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateVPCEConfigurationResult.error) Result.t Lwt.t
 val delete_device_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDevicePoolRequest.t ->
-        (DeleteDevicePoolResult.t,
-          [ `AWS of DeleteDevicePoolResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDevicePoolResult.t, DeleteDevicePoolResult.error) Result.t
+          Lwt.t
 val delete_instance_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInstanceProfileRequest.t ->
-        (DeleteInstanceProfileResult.t,
-          [ `AWS of DeleteInstanceProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteInstanceProfileResult.t, DeleteInstanceProfileResult.error)
+          Result.t Lwt.t
 val delete_network_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkProfileRequest.t ->
-        (DeleteNetworkProfileResult.t,
-          [ `AWS of DeleteNetworkProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteNetworkProfileResult.t, DeleteNetworkProfileResult.error)
+          Result.t Lwt.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectRequest.t ->
-        (DeleteProjectResult.t,
-          [ `AWS of DeleteProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectResult.t, DeleteProjectResult.error) Result.t Lwt.t
 val delete_remote_access_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRemoteAccessSessionRequest.t ->
         (DeleteRemoteAccessSessionResult.t,
-          [ `AWS of DeleteRemoteAccessSessionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRemoteAccessSessionResult.error) Result.t Lwt.t
 val delete_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRunRequest.t ->
-        (DeleteRunResult.t,
-          [ `AWS of DeleteRunResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRunResult.t, DeleteRunResult.error) Result.t Lwt.t
 val delete_test_grid_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTestGridProjectRequest.t ->
-        (DeleteTestGridProjectResult.t,
-          [ `AWS of DeleteTestGridProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTestGridProjectResult.t, DeleteTestGridProjectResult.error)
+          Result.t Lwt.t
 val delete_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUploadRequest.t ->
-        (DeleteUploadResult.t,
-          [ `AWS of DeleteUploadResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteUploadResult.t, DeleteUploadResult.error) Result.t Lwt.t
 val delete_v_p_c_e_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVPCEConfigurationRequest.t ->
         (DeleteVPCEConfigurationResult.t,
-          [ `AWS of DeleteVPCEConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteVPCEConfigurationResult.error) Result.t Lwt.t
 val get_account_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccountSettingsRequest.t ->
-        (GetAccountSettingsResult.t,
-          [ `AWS of GetAccountSettingsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccountSettingsResult.t, GetAccountSettingsResult.error) Result.t
+          Lwt.t
 val get_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceRequest.t ->
-        (GetDeviceResult.t,
-          [ `AWS of GetDeviceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeviceResult.t, GetDeviceResult.error) Result.t Lwt.t
 val get_device_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceInstanceRequest.t ->
-        (GetDeviceInstanceResult.t,
-          [ `AWS of GetDeviceInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeviceInstanceResult.t, GetDeviceInstanceResult.error) Result.t
+          Lwt.t
 val get_device_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicePoolRequest.t ->
-        (GetDevicePoolResult.t,
-          [ `AWS of GetDevicePoolResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDevicePoolResult.t, GetDevicePoolResult.error) Result.t Lwt.t
 val get_device_pool_compatibility :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicePoolCompatibilityRequest.t ->
         (GetDevicePoolCompatibilityResult.t,
-          [ `AWS of GetDevicePoolCompatibilityResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDevicePoolCompatibilityResult.error) Result.t Lwt.t
 val get_instance_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInstanceProfileRequest.t ->
-        (GetInstanceProfileResult.t,
-          [ `AWS of GetInstanceProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetInstanceProfileResult.t, GetInstanceProfileResult.error) Result.t
+          Lwt.t
 val get_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      GetJobRequest.t ->
-        (GetJobResult.t,
-          [ `AWS of GetJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      GetJobRequest.t -> (GetJobResult.t, GetJobResult.error) Result.t Lwt.t
 val get_network_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkProfileRequest.t ->
-        (GetNetworkProfileResult.t,
-          [ `AWS of GetNetworkProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetNetworkProfileResult.t, GetNetworkProfileResult.error) Result.t
+          Lwt.t
 val get_offering_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOfferingStatusRequest.t ->
-        (GetOfferingStatusResult.t,
-          [ `AWS of GetOfferingStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetOfferingStatusResult.t, GetOfferingStatusResult.error) Result.t
+          Lwt.t
 val get_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProjectRequest.t ->
-        (GetProjectResult.t,
-          [ `AWS of GetProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetProjectResult.t, GetProjectResult.error) Result.t Lwt.t
 val get_remote_access_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRemoteAccessSessionRequest.t ->
-        (GetRemoteAccessSessionResult.t,
-          [ `AWS of GetRemoteAccessSessionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRemoteAccessSessionResult.t, GetRemoteAccessSessionResult.error)
+          Result.t Lwt.t
 val get_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      GetRunRequest.t ->
-        (GetRunResult.t,
-          [ `AWS of GetRunResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      GetRunRequest.t -> (GetRunResult.t, GetRunResult.error) Result.t Lwt.t
 val get_suite :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSuiteRequest.t ->
-        (GetSuiteResult.t,
-          [ `AWS of GetSuiteResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSuiteResult.t, GetSuiteResult.error) Result.t Lwt.t
 val get_test :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTestRequest.t ->
-        (GetTestResult.t,
-          [ `AWS of GetTestResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTestResult.t, GetTestResult.error) Result.t Lwt.t
 val get_test_grid_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTestGridProjectRequest.t ->
-        (GetTestGridProjectResult.t,
-          [ `AWS of GetTestGridProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTestGridProjectResult.t, GetTestGridProjectResult.error) Result.t
+          Lwt.t
 val get_test_grid_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTestGridSessionRequest.t ->
-        (GetTestGridSessionResult.t,
-          [ `AWS of GetTestGridSessionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTestGridSessionResult.t, GetTestGridSessionResult.error) Result.t
+          Lwt.t
 val get_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUploadRequest.t ->
-        (GetUploadResult.t,
-          [ `AWS of GetUploadResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUploadResult.t, GetUploadResult.error) Result.t Lwt.t
 val get_v_p_c_e_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVPCEConfigurationRequest.t ->
-        (GetVPCEConfigurationResult.t,
-          [ `AWS of GetVPCEConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVPCEConfigurationResult.t, GetVPCEConfigurationResult.error)
+          Result.t Lwt.t
 val install_to_remote_access_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InstallToRemoteAccessSessionRequest.t ->
         (InstallToRemoteAccessSessionResult.t,
-          [ `AWS of InstallToRemoteAccessSessionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          InstallToRemoteAccessSessionResult.error) Result.t Lwt.t
 val list_artifacts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListArtifactsRequest.t ->
-        (ListArtifactsResult.t,
-          [ `AWS of ListArtifactsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListArtifactsResult.t, ListArtifactsResult.error) Result.t Lwt.t
 val list_device_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeviceInstancesRequest.t ->
-        (ListDeviceInstancesResult.t,
-          [ `AWS of ListDeviceInstancesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeviceInstancesResult.t, ListDeviceInstancesResult.error)
+          Result.t Lwt.t
 val list_device_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicePoolsRequest.t ->
-        (ListDevicePoolsResult.t,
-          [ `AWS of ListDevicePoolsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDevicePoolsResult.t, ListDevicePoolsResult.error) Result.t Lwt.t
 val list_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicesRequest.t ->
-        (ListDevicesResult.t,
-          [ `AWS of ListDevicesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDevicesResult.t, ListDevicesResult.error) Result.t Lwt.t
 val list_instance_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstanceProfilesRequest.t ->
-        (ListInstanceProfilesResult.t,
-          [ `AWS of ListInstanceProfilesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListInstanceProfilesResult.t, ListInstanceProfilesResult.error)
+          Result.t Lwt.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsRequest.t ->
-        (ListJobsResult.t,
-          [ `AWS of ListJobsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsResult.t, ListJobsResult.error) Result.t Lwt.t
 val list_network_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNetworkProfilesRequest.t ->
-        (ListNetworkProfilesResult.t,
-          [ `AWS of ListNetworkProfilesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListNetworkProfilesResult.t, ListNetworkProfilesResult.error)
+          Result.t Lwt.t
 val list_offering_promotions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOfferingPromotionsRequest.t ->
-        (ListOfferingPromotionsResult.t,
-          [ `AWS of ListOfferingPromotionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListOfferingPromotionsResult.t, ListOfferingPromotionsResult.error)
+          Result.t Lwt.t
 val list_offering_transactions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOfferingTransactionsRequest.t ->
         (ListOfferingTransactionsResult.t,
-          [ `AWS of ListOfferingTransactionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListOfferingTransactionsResult.error) Result.t Lwt.t
 val list_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOfferingsRequest.t ->
-        (ListOfferingsResult.t,
-          [ `AWS of ListOfferingsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListOfferingsResult.t, ListOfferingsResult.error) Result.t Lwt.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectsRequest.t ->
-        (ListProjectsResult.t,
-          [ `AWS of ListProjectsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProjectsResult.t, ListProjectsResult.error) Result.t Lwt.t
 val list_remote_access_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRemoteAccessSessionsRequest.t ->
         (ListRemoteAccessSessionsResult.t,
-          [ `AWS of ListRemoteAccessSessionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRemoteAccessSessionsResult.error) Result.t Lwt.t
 val list_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRunsRequest.t ->
-        (ListRunsResult.t,
-          [ `AWS of ListRunsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRunsResult.t, ListRunsResult.error) Result.t Lwt.t
 val list_samples :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSamplesRequest.t ->
-        (ListSamplesResult.t,
-          [ `AWS of ListSamplesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSamplesResult.t, ListSamplesResult.error) Result.t Lwt.t
 val list_suites :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSuitesRequest.t ->
-        (ListSuitesResult.t,
-          [ `AWS of ListSuitesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSuitesResult.t, ListSuitesResult.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_test_grid_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTestGridProjectsRequest.t ->
-        (ListTestGridProjectsResult.t,
-          [ `AWS of ListTestGridProjectsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTestGridProjectsResult.t, ListTestGridProjectsResult.error)
+          Result.t Lwt.t
 val list_test_grid_session_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTestGridSessionActionsRequest.t ->
         (ListTestGridSessionActionsResult.t,
-          [ `AWS of ListTestGridSessionActionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTestGridSessionActionsResult.error) Result.t Lwt.t
 val list_test_grid_session_artifacts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTestGridSessionArtifactsRequest.t ->
         (ListTestGridSessionArtifactsResult.t,
-          [ `AWS of ListTestGridSessionArtifactsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTestGridSessionArtifactsResult.error) Result.t Lwt.t
 val list_test_grid_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTestGridSessionsRequest.t ->
-        (ListTestGridSessionsResult.t,
-          [ `AWS of ListTestGridSessionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTestGridSessionsResult.t, ListTestGridSessionsResult.error)
+          Result.t Lwt.t
 val list_tests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTestsRequest.t ->
-        (ListTestsResult.t,
-          [ `AWS of ListTestsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTestsResult.t, ListTestsResult.error) Result.t Lwt.t
 val list_unique_problems :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUniqueProblemsRequest.t ->
-        (ListUniqueProblemsResult.t,
-          [ `AWS of ListUniqueProblemsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUniqueProblemsResult.t, ListUniqueProblemsResult.error) Result.t
+          Lwt.t
 val list_uploads :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUploadsRequest.t ->
-        (ListUploadsResult.t,
-          [ `AWS of ListUploadsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUploadsResult.t, ListUploadsResult.error) Result.t Lwt.t
 val list_v_p_c_e_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVPCEConfigurationsRequest.t ->
-        (ListVPCEConfigurationsResult.t,
-          [ `AWS of ListVPCEConfigurationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVPCEConfigurationsResult.t, ListVPCEConfigurationsResult.error)
+          Result.t Lwt.t
 val purchase_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseOfferingRequest.t ->
-        (PurchaseOfferingResult.t,
-          [ `AWS of PurchaseOfferingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PurchaseOfferingResult.t, PurchaseOfferingResult.error) Result.t
+          Lwt.t
 val renew_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RenewOfferingRequest.t ->
-        (RenewOfferingResult.t,
-          [ `AWS of RenewOfferingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RenewOfferingResult.t, RenewOfferingResult.error) Result.t Lwt.t
 val schedule_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ScheduleRunRequest.t ->
-        (ScheduleRunResult.t,
-          [ `AWS of ScheduleRunResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ScheduleRunResult.t, ScheduleRunResult.error) Result.t Lwt.t
 val stop_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopJobRequest.t ->
-        (StopJobResult.t,
-          [ `AWS of StopJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopJobResult.t, StopJobResult.error) Result.t Lwt.t
 val stop_remote_access_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopRemoteAccessSessionRequest.t ->
         (StopRemoteAccessSessionResult.t,
-          [ `AWS of StopRemoteAccessSessionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopRemoteAccessSessionResult.error) Result.t Lwt.t
 val stop_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopRunRequest.t ->
-        (StopRunResult.t,
-          [ `AWS of StopRunResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopRunResult.t, StopRunResult.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_device_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDeviceInstanceRequest.t ->
-        (UpdateDeviceInstanceResult.t,
-          [ `AWS of UpdateDeviceInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDeviceInstanceResult.t, UpdateDeviceInstanceResult.error)
+          Result.t Lwt.t
 val update_device_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDevicePoolRequest.t ->
-        (UpdateDevicePoolResult.t,
-          [ `AWS of UpdateDevicePoolResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDevicePoolResult.t, UpdateDevicePoolResult.error) Result.t
+          Lwt.t
 val update_instance_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateInstanceProfileRequest.t ->
-        (UpdateInstanceProfileResult.t,
-          [ `AWS of UpdateInstanceProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateInstanceProfileResult.t, UpdateInstanceProfileResult.error)
+          Result.t Lwt.t
 val update_network_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNetworkProfileRequest.t ->
-        (UpdateNetworkProfileResult.t,
-          [ `AWS of UpdateNetworkProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateNetworkProfileResult.t, UpdateNetworkProfileResult.error)
+          Result.t Lwt.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectRequest.t ->
-        (UpdateProjectResult.t,
-          [ `AWS of UpdateProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProjectResult.t, UpdateProjectResult.error) Result.t Lwt.t
 val update_test_grid_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTestGridProjectRequest.t ->
-        (UpdateTestGridProjectResult.t,
-          [ `AWS of UpdateTestGridProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTestGridProjectResult.t, UpdateTestGridProjectResult.error)
+          Result.t Lwt.t
 val update_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUploadRequest.t ->
-        (UpdateUploadResult.t,
-          [ `AWS of UpdateUploadResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateUploadResult.t, UpdateUploadResult.error) Result.t Lwt.t
 val update_v_p_c_e_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVPCEConfigurationRequest.t ->
         (UpdateVPCEConfigurationResult.t,
-          [ `AWS of UpdateVPCEConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateVPCEConfigurationResult.error) Result.t Lwt.t

@@ -9519,31 +9519,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of Ec2_error.t  | `Transport of Awso.Http.Io.Error.call ])
-    result=
-  let response_of_error err =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        if (code >= 400) && (code <= 599)
-        then
-          let xml = Awso.Xml.parse_response body in
-          Error (`AWS (Ec2_error.of_xml xml))
-        else
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
+  (resp : Awso.Http.Response.t) : (o, Ec2_error.t) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error () =
+    if (code >= 400) && (code <= 599)
+    then
+      let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+      Ec2_error.of_xml xml
+    else
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           {
+             Awso.Http.Io.Error.code = code;
+             body = (Awso.Http.Response.body resp);
+             x_amzn_error_type = None
+           }) in
   let response_of_none () =
-    match resp with | Error err -> response_of_error err | Ok _ -> Ok () in
+    if is_success then Ok () else Error (parse_aws_error ()) in
   let response_of_some_xml of_xml =
-    match resp with
-    | Error err -> response_of_error err
-    | Ok resp ->
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (of_xml xml) in
+    if is_success
+    then
+      let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+      Ok (of_xml xml)
+    else Error (parse_aws_error ()) in
   match endpoint with
   | AcceptReservedInstancesExchangeQuote ->
       response_of_some_xml AcceptReservedInstancesExchangeQuoteResult.of_xml

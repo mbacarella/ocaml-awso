@@ -305,138 +305,144 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AddProfilePermission ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AddProfilePermissionResponse.error_of_json)
-       | Ok resp ->
-           Ok (AddProfilePermissionResponse.of_json (response_to_json resp)))
-  | CancelSigningProfile -> Ok ()
+      if is_success
+      then Ok (AddProfilePermissionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AddProfilePermissionResponse.error_of_json))
+  | CancelSigningProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeSigningJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSigningJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeSigningJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeSigningJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeSigningJobResponse.error_of_json))
   | GetSigningPlatform ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSigningPlatformResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetSigningPlatformResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSigningPlatformResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSigningPlatformResponse.error_of_json))
   | GetSigningProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSigningProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetSigningProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSigningProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSigningProfileResponse.error_of_json))
   | ListProfilePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListProfilePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListProfilePermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListProfilePermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListProfilePermissionsResponse.error_of_json))
   | ListSigningJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSigningJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSigningJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSigningJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListSigningJobsResponse.error_of_json))
   | ListSigningPlatforms ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSigningPlatformsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSigningPlatformsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSigningPlatformsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSigningPlatformsResponse.error_of_json))
   | ListSigningProfiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSigningProfilesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSigningProfilesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSigningProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSigningProfilesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutSigningProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutSigningProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutSigningProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutSigningProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutSigningProfileResponse.error_of_json))
   | RemoveProfilePermission ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RemoveProfilePermissionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RemoveProfilePermissionResponse.of_json (response_to_json resp)))
-  | RevokeSignature -> Ok ()
-  | RevokeSigningProfile -> Ok ()
+      if is_success
+      then
+        Ok (RemoveProfilePermissionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveProfilePermissionResponse.error_of_json))
+  | RevokeSignature ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RevokeSigningProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | StartSigningJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartSigningJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartSigningJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartSigningJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartSigningJobResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))

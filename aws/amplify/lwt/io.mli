@@ -4,258 +4,194 @@ val create_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppRequest.t ->
-        (CreateAppResult.t,
-          [ `AWS of CreateAppResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAppResult.t, CreateAppResult.error) Result.t Lwt.t
 val create_backend_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackendEnvironmentRequest.t ->
         (CreateBackendEnvironmentResult.t,
-          [ `AWS of CreateBackendEnvironmentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateBackendEnvironmentResult.error) Result.t Lwt.t
 val create_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBranchRequest.t ->
-        (CreateBranchResult.t,
-          [ `AWS of CreateBranchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBranchResult.t, CreateBranchResult.error) Result.t Lwt.t
 val create_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentRequest.t ->
-        (CreateDeploymentResult.t,
-          [ `AWS of CreateDeploymentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeploymentResult.t, CreateDeploymentResult.error) Result.t
+          Lwt.t
 val create_domain_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainAssociationRequest.t ->
         (CreateDomainAssociationResult.t,
-          [ `AWS of CreateDomainAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDomainAssociationResult.error) Result.t Lwt.t
 val create_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWebhookRequest.t ->
-        (CreateWebhookResult.t,
-          [ `AWS of CreateWebhookResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWebhookResult.t, CreateWebhookResult.error) Result.t Lwt.t
 val delete_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppRequest.t ->
-        (DeleteAppResult.t,
-          [ `AWS of DeleteAppResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAppResult.t, DeleteAppResult.error) Result.t Lwt.t
 val delete_backend_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackendEnvironmentRequest.t ->
         (DeleteBackendEnvironmentResult.t,
-          [ `AWS of DeleteBackendEnvironmentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteBackendEnvironmentResult.error) Result.t Lwt.t
 val delete_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBranchRequest.t ->
-        (DeleteBranchResult.t,
-          [ `AWS of DeleteBranchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBranchResult.t, DeleteBranchResult.error) Result.t Lwt.t
 val delete_domain_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainAssociationRequest.t ->
         (DeleteDomainAssociationResult.t,
-          [ `AWS of DeleteDomainAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDomainAssociationResult.error) Result.t Lwt.t
 val delete_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteJobRequest.t ->
-        (DeleteJobResult.t,
-          [ `AWS of DeleteJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteJobResult.t, DeleteJobResult.error) Result.t Lwt.t
 val delete_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWebhookRequest.t ->
-        (DeleteWebhookResult.t,
-          [ `AWS of DeleteWebhookResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWebhookResult.t, DeleteWebhookResult.error) Result.t Lwt.t
 val generate_access_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateAccessLogsRequest.t ->
-        (GenerateAccessLogsResult.t,
-          [ `AWS of GenerateAccessLogsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GenerateAccessLogsResult.t, GenerateAccessLogsResult.error) Result.t
+          Lwt.t
 val get_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      GetAppRequest.t ->
-        (GetAppResult.t,
-          [ `AWS of GetAppResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      GetAppRequest.t -> (GetAppResult.t, GetAppResult.error) Result.t Lwt.t
 val get_artifact_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetArtifactUrlRequest.t ->
-        (GetArtifactUrlResult.t,
-          [ `AWS of GetArtifactUrlResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetArtifactUrlResult.t, GetArtifactUrlResult.error) Result.t Lwt.t
 val get_backend_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBackendEnvironmentRequest.t ->
-        (GetBackendEnvironmentResult.t,
-          [ `AWS of GetBackendEnvironmentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBackendEnvironmentResult.t, GetBackendEnvironmentResult.error)
+          Result.t Lwt.t
 val get_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBranchRequest.t ->
-        (GetBranchResult.t,
-          [ `AWS of GetBranchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBranchResult.t, GetBranchResult.error) Result.t Lwt.t
 val get_domain_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainAssociationRequest.t ->
-        (GetDomainAssociationResult.t,
-          [ `AWS of GetDomainAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDomainAssociationResult.t, GetDomainAssociationResult.error)
+          Result.t Lwt.t
 val get_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      GetJobRequest.t ->
-        (GetJobResult.t,
-          [ `AWS of GetJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      GetJobRequest.t -> (GetJobResult.t, GetJobResult.error) Result.t Lwt.t
 val get_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWebhookRequest.t ->
-        (GetWebhookResult.t,
-          [ `AWS of GetWebhookResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWebhookResult.t, GetWebhookResult.error) Result.t Lwt.t
 val list_apps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppsRequest.t ->
-        (ListAppsResult.t,
-          [ `AWS of ListAppsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAppsResult.t, ListAppsResult.error) Result.t Lwt.t
 val list_artifacts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListArtifactsRequest.t ->
-        (ListArtifactsResult.t,
-          [ `AWS of ListArtifactsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListArtifactsResult.t, ListArtifactsResult.error) Result.t Lwt.t
 val list_backend_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBackendEnvironmentsRequest.t ->
         (ListBackendEnvironmentsResult.t,
-          [ `AWS of ListBackendEnvironmentsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBackendEnvironmentsResult.error) Result.t Lwt.t
 val list_branches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBranchesRequest.t ->
-        (ListBranchesResult.t,
-          [ `AWS of ListBranchesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBranchesResult.t, ListBranchesResult.error) Result.t Lwt.t
 val list_domain_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainAssociationsRequest.t ->
-        (ListDomainAssociationsResult.t,
-          [ `AWS of ListDomainAssociationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDomainAssociationsResult.t, ListDomainAssociationsResult.error)
+          Result.t Lwt.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsRequest.t ->
-        (ListJobsResult.t,
-          [ `AWS of ListJobsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsResult.t, ListJobsResult.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_webhooks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWebhooksRequest.t ->
-        (ListWebhooksResult.t,
-          [ `AWS of ListWebhooksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWebhooksResult.t, ListWebhooksResult.error) Result.t Lwt.t
 val start_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDeploymentRequest.t ->
-        (StartDeploymentResult.t,
-          [ `AWS of StartDeploymentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartDeploymentResult.t, StartDeploymentResult.error) Result.t Lwt.t
 val start_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartJobRequest.t ->
-        (StartJobResult.t,
-          [ `AWS of StartJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartJobResult.t, StartJobResult.error) Result.t Lwt.t
 val stop_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopJobRequest.t ->
-        (StopJobResult.t,
-          [ `AWS of StopJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopJobResult.t, StopJobResult.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAppRequest.t ->
-        (UpdateAppResult.t,
-          [ `AWS of UpdateAppResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAppResult.t, UpdateAppResult.error) Result.t Lwt.t
 val update_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBranchRequest.t ->
-        (UpdateBranchResult.t,
-          [ `AWS of UpdateBranchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateBranchResult.t, UpdateBranchResult.error) Result.t Lwt.t
 val update_domain_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainAssociationRequest.t ->
         (UpdateDomainAssociationResult.t,
-          [ `AWS of UpdateDomainAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDomainAssociationResult.error) Result.t Lwt.t
 val update_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWebhookRequest.t ->
-        (UpdateWebhookResult.t,
-          [ `AWS of UpdateWebhookResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateWebhookResult.t, UpdateWebhookResult.error) Result.t Lwt.t

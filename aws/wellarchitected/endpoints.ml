@@ -747,228 +747,221 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateWorkloadShare -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpgradeLensReview -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
-  | AssociateLenses -> Ok ()
+  | AssociateLenses ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateLensShare ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLensShareOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateLensShareOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateLensShareOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateLensShareOutput.error_of_json))
   | CreateLensVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLensVersionOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateLensVersionOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateLensVersionOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateLensVersionOutput.error_of_json))
   | CreateMilestone ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateMilestoneOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateMilestoneOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMilestoneOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateMilestoneOutput.error_of_json))
   | CreateWorkload ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateWorkloadOutput.error_of_json)
-       | Ok resp -> Ok (CreateWorkloadOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateWorkloadOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateWorkloadOutput.error_of_json))
   | CreateWorkloadShare ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateWorkloadShareOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateWorkloadShareOutput.of_json (response_to_json resp)))
-  | DeleteLens -> Ok ()
-  | DeleteLensShare -> Ok ()
-  | DeleteWorkload -> Ok ()
-  | DeleteWorkloadShare -> Ok ()
-  | DisassociateLenses -> Ok ()
+      if is_success
+      then Ok (CreateWorkloadShareOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateWorkloadShareOutput.error_of_json))
+  | DeleteLens -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLensShare ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWorkload ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWorkloadShare ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateLenses ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ExportLens ->
-      (match resp with
-       | Error err -> handle_error err (Some ExportLensOutput.error_of_json)
-       | Ok resp -> Ok (ExportLensOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExportLensOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExportLensOutput.error_of_json))
   | GetAnswer ->
-      (match resp with
-       | Error err -> handle_error err (Some GetAnswerOutput.error_of_json)
-       | Ok resp -> Ok (GetAnswerOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAnswerOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAnswerOutput.error_of_json))
   | GetLens ->
-      (match resp with
-       | Error err -> handle_error err (Some GetLensOutput.error_of_json)
-       | Ok resp -> Ok (GetLensOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLensOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetLensOutput.error_of_json))
   | GetLensReview ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLensReviewOutput.error_of_json)
-       | Ok resp -> Ok (GetLensReviewOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLensReviewOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetLensReviewOutput.error_of_json))
   | GetLensReviewReport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLensReviewReportOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetLensReviewReportOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLensReviewReportOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLensReviewReportOutput.error_of_json))
   | GetLensVersionDifference ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLensVersionDifferenceOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetLensVersionDifferenceOutput.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetLensVersionDifferenceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetLensVersionDifferenceOutput.error_of_json))
   | GetMilestone ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMilestoneOutput.error_of_json)
-       | Ok resp -> Ok (GetMilestoneOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMilestoneOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMilestoneOutput.error_of_json))
   | GetWorkload ->
-      (match resp with
-       | Error err -> handle_error err (Some GetWorkloadOutput.error_of_json)
-       | Ok resp -> Ok (GetWorkloadOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetWorkloadOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetWorkloadOutput.error_of_json))
   | ImportLens ->
-      (match resp with
-       | Error err -> handle_error err (Some ImportLensOutput.error_of_json)
-       | Ok resp -> Ok (ImportLensOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ImportLensOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ImportLensOutput.error_of_json))
   | ListAnswers ->
-      (match resp with
-       | Error err -> handle_error err (Some ListAnswersOutput.error_of_json)
-       | Ok resp -> Ok (ListAnswersOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAnswersOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAnswersOutput.error_of_json))
   | ListLensReviewImprovements ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListLensReviewImprovementsOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListLensReviewImprovementsOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListLensReviewImprovementsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListLensReviewImprovementsOutput.error_of_json))
   | ListLensReviews ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLensReviewsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListLensReviewsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListLensReviewsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListLensReviewsOutput.error_of_json))
   | ListLensShares ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLensSharesOutput.error_of_json)
-       | Ok resp -> Ok (ListLensSharesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListLensSharesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListLensSharesOutput.error_of_json))
   | ListLenses ->
-      (match resp with
-       | Error err -> handle_error err (Some ListLensesOutput.error_of_json)
-       | Ok resp -> Ok (ListLensesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListLensesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListLensesOutput.error_of_json))
   | ListMilestones ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMilestonesOutput.error_of_json)
-       | Ok resp -> Ok (ListMilestonesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMilestonesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMilestonesOutput.error_of_json))
   | ListNotifications ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListNotificationsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListNotificationsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNotificationsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListNotificationsOutput.error_of_json))
   | ListShareInvitations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListShareInvitationsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListShareInvitationsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListShareInvitationsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListShareInvitationsOutput.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
   | ListWorkloadShares ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWorkloadSharesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListWorkloadSharesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWorkloadSharesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListWorkloadSharesOutput.error_of_json))
   | ListWorkloads ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWorkloadsOutput.error_of_json)
-       | Ok resp -> Ok (ListWorkloadsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWorkloadsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListWorkloadsOutput.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err -> handle_error err (Some TagResourceOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceOutput.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceOutput.error_of_json))
   | UpdateAnswer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAnswerOutput.error_of_json)
-       | Ok resp -> Ok (UpdateAnswerOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAnswerOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateAnswerOutput.error_of_json))
   | UpdateLensReview ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateLensReviewOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateLensReviewOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateLensReviewOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateLensReviewOutput.error_of_json))
   | UpdateShareInvitation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateShareInvitationOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateShareInvitationOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateShareInvitationOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateShareInvitationOutput.error_of_json))
   | UpdateWorkload ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateWorkloadOutput.error_of_json)
-       | Ok resp -> Ok (UpdateWorkloadOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateWorkloadOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateWorkloadOutput.error_of_json))
   | UpdateWorkloadShare ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateWorkloadShareOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateWorkloadShareOutput.of_json (response_to_json resp)))
-  | UpgradeLensReview -> Ok ()
+      if is_success
+      then Ok (UpdateWorkloadShareOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateWorkloadShareOutput.error_of_json))
+  | UpgradeLensReview ->
+      if is_success then Ok () else Error (parse_aws_error None)

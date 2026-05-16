@@ -4,27 +4,20 @@ val describe_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStreamInput.t ->
-        (DescribeStreamOutput.t,
-          [ `AWS of DescribeStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeStreamOutput.t, DescribeStreamOutput.error) Result.t Lwt.t
 val get_records :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecordsInput.t ->
-        (GetRecordsOutput.t,
-          [ `AWS of GetRecordsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRecordsOutput.t, GetRecordsOutput.error) Result.t Lwt.t
 val get_shard_iterator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetShardIteratorInput.t ->
-        (GetShardIteratorOutput.t,
-          [ `AWS of GetShardIteratorOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetShardIteratorOutput.t, GetShardIteratorOutput.error) Result.t
+          Lwt.t
 val list_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamsInput.t ->
-        (ListStreamsOutput.t,
-          [ `AWS of ListStreamsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStreamsOutput.t, ListStreamsOutput.error) Result.t Lwt.t

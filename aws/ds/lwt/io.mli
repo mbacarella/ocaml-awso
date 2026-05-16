@@ -4,440 +4,352 @@ val accept_shared_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptSharedDirectoryRequest.t ->
-        (AcceptSharedDirectoryResult.t,
-          [ `AWS of AcceptSharedDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AcceptSharedDirectoryResult.t, AcceptSharedDirectoryResult.error)
+          Result.t Lwt.t
 val add_ip_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddIpRoutesRequest.t ->
-        (AddIpRoutesResult.t,
-          [ `AWS of AddIpRoutesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddIpRoutesResult.t, AddIpRoutesResult.error) Result.t Lwt.t
 val add_region :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddRegionRequest.t ->
-        (AddRegionResult.t,
-          [ `AWS of AddRegionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddRegionResult.t, AddRegionResult.error) Result.t Lwt.t
 val add_tags_to_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsToResourceRequest.t ->
-        (AddTagsToResourceResult.t,
-          [ `AWS of AddTagsToResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddTagsToResourceResult.t, AddTagsToResourceResult.error) Result.t
+          Lwt.t
 val cancel_schema_extension :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelSchemaExtensionRequest.t ->
-        (CancelSchemaExtensionResult.t,
-          [ `AWS of CancelSchemaExtensionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelSchemaExtensionResult.t, CancelSchemaExtensionResult.error)
+          Result.t Lwt.t
 val connect_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConnectDirectoryRequest.t ->
-        (ConnectDirectoryResult.t,
-          [ `AWS of ConnectDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ConnectDirectoryResult.t, ConnectDirectoryResult.error) Result.t
+          Lwt.t
 val create_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAliasRequest.t ->
-        (CreateAliasResult.t,
-          [ `AWS of CreateAliasResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAliasResult.t, CreateAliasResult.error) Result.t Lwt.t
 val create_computer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateComputerRequest.t ->
-        (CreateComputerResult.t,
-          [ `AWS of CreateComputerResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateComputerResult.t, CreateComputerResult.error) Result.t Lwt.t
 val create_conditional_forwarder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConditionalForwarderRequest.t ->
         (CreateConditionalForwarderResult.t,
-          [ `AWS of CreateConditionalForwarderResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateConditionalForwarderResult.error) Result.t Lwt.t
 val create_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDirectoryRequest.t ->
-        (CreateDirectoryResult.t,
-          [ `AWS of CreateDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDirectoryResult.t, CreateDirectoryResult.error) Result.t Lwt.t
 val create_log_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLogSubscriptionRequest.t ->
-        (CreateLogSubscriptionResult.t,
-          [ `AWS of CreateLogSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLogSubscriptionResult.t, CreateLogSubscriptionResult.error)
+          Result.t Lwt.t
 val create_microsoft_a_d :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMicrosoftADRequest.t ->
-        (CreateMicrosoftADResult.t,
-          [ `AWS of CreateMicrosoftADResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMicrosoftADResult.t, CreateMicrosoftADResult.error) Result.t
+          Lwt.t
 val create_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotRequest.t ->
-        (CreateSnapshotResult.t,
-          [ `AWS of CreateSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSnapshotResult.t, CreateSnapshotResult.error) Result.t Lwt.t
 val create_trust :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrustRequest.t ->
-        (CreateTrustResult.t,
-          [ `AWS of CreateTrustResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTrustResult.t, CreateTrustResult.error) Result.t Lwt.t
 val delete_conditional_forwarder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConditionalForwarderRequest.t ->
         (DeleteConditionalForwarderResult.t,
-          [ `AWS of DeleteConditionalForwarderResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteConditionalForwarderResult.error) Result.t Lwt.t
 val delete_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDirectoryRequest.t ->
-        (DeleteDirectoryResult.t,
-          [ `AWS of DeleteDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDirectoryResult.t, DeleteDirectoryResult.error) Result.t Lwt.t
 val delete_log_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLogSubscriptionRequest.t ->
-        (DeleteLogSubscriptionResult.t,
-          [ `AWS of DeleteLogSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLogSubscriptionResult.t, DeleteLogSubscriptionResult.error)
+          Result.t Lwt.t
 val delete_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSnapshotRequest.t ->
-        (DeleteSnapshotResult.t,
-          [ `AWS of DeleteSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSnapshotResult.t, DeleteSnapshotResult.error) Result.t Lwt.t
 val delete_trust :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrustRequest.t ->
-        (DeleteTrustResult.t,
-          [ `AWS of DeleteTrustResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTrustResult.t, DeleteTrustResult.error) Result.t Lwt.t
 val deregister_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterCertificateRequest.t ->
-        (DeregisterCertificateResult.t,
-          [ `AWS of DeregisterCertificateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeregisterCertificateResult.t, DeregisterCertificateResult.error)
+          Result.t Lwt.t
 val deregister_event_topic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterEventTopicRequest.t ->
-        (DeregisterEventTopicResult.t,
-          [ `AWS of DeregisterEventTopicResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeregisterEventTopicResult.t, DeregisterEventTopicResult.error)
+          Result.t Lwt.t
 val describe_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCertificateRequest.t ->
-        (DescribeCertificateResult.t,
-          [ `AWS of DescribeCertificateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCertificateResult.t, DescribeCertificateResult.error)
+          Result.t Lwt.t
 val describe_client_authentication_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientAuthenticationSettingsRequest.t ->
         (DescribeClientAuthenticationSettingsResult.t,
-          [ `AWS of DescribeClientAuthenticationSettingsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeClientAuthenticationSettingsResult.error) Result.t Lwt.t
 val describe_conditional_forwarders :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConditionalForwardersRequest.t ->
         (DescribeConditionalForwardersResult.t,
-          [ `AWS of DescribeConditionalForwardersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConditionalForwardersResult.error) Result.t Lwt.t
 val describe_directories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDirectoriesRequest.t ->
-        (DescribeDirectoriesResult.t,
-          [ `AWS of DescribeDirectoriesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDirectoriesResult.t, DescribeDirectoriesResult.error)
+          Result.t Lwt.t
 val describe_domain_controllers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainControllersRequest.t ->
         (DescribeDomainControllersResult.t,
-          [ `AWS of DescribeDomainControllersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDomainControllersResult.error) Result.t Lwt.t
 val describe_event_topics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventTopicsRequest.t ->
-        (DescribeEventTopicsResult.t,
-          [ `AWS of DescribeEventTopicsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEventTopicsResult.t, DescribeEventTopicsResult.error)
+          Result.t Lwt.t
 val describe_l_d_a_p_s_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLDAPSSettingsRequest.t ->
-        (DescribeLDAPSSettingsResult.t,
-          [ `AWS of DescribeLDAPSSettingsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLDAPSSettingsResult.t, DescribeLDAPSSettingsResult.error)
+          Result.t Lwt.t
 val describe_regions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRegionsRequest.t ->
-        (DescribeRegionsResult.t,
-          [ `AWS of DescribeRegionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRegionsResult.t, DescribeRegionsResult.error) Result.t Lwt.t
 val describe_shared_directories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSharedDirectoriesRequest.t ->
         (DescribeSharedDirectoriesResult.t,
-          [ `AWS of DescribeSharedDirectoriesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSharedDirectoriesResult.error) Result.t Lwt.t
 val describe_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotsRequest.t ->
-        (DescribeSnapshotsResult.t,
-          [ `AWS of DescribeSnapshotsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSnapshotsResult.t, DescribeSnapshotsResult.error) Result.t
+          Lwt.t
 val describe_trusts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrustsRequest.t ->
-        (DescribeTrustsResult.t,
-          [ `AWS of DescribeTrustsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTrustsResult.t, DescribeTrustsResult.error) Result.t Lwt.t
 val disable_client_authentication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableClientAuthenticationRequest.t ->
         (DisableClientAuthenticationResult.t,
-          [ `AWS of DisableClientAuthenticationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisableClientAuthenticationResult.error) Result.t Lwt.t
 val disable_l_d_a_p_s :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableLDAPSRequest.t ->
-        (DisableLDAPSResult.t,
-          [ `AWS of DisableLDAPSResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableLDAPSResult.t, DisableLDAPSResult.error) Result.t Lwt.t
 val disable_radius :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableRadiusRequest.t ->
-        (DisableRadiusResult.t,
-          [ `AWS of DisableRadiusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableRadiusResult.t, DisableRadiusResult.error) Result.t Lwt.t
 val disable_sso :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableSsoRequest.t ->
-        (DisableSsoResult.t,
-          [ `AWS of DisableSsoResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableSsoResult.t, DisableSsoResult.error) Result.t Lwt.t
 val enable_client_authentication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableClientAuthenticationRequest.t ->
         (EnableClientAuthenticationResult.t,
-          [ `AWS of EnableClientAuthenticationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableClientAuthenticationResult.error) Result.t Lwt.t
 val enable_l_d_a_p_s :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableLDAPSRequest.t ->
-        (EnableLDAPSResult.t,
-          [ `AWS of EnableLDAPSResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableLDAPSResult.t, EnableLDAPSResult.error) Result.t Lwt.t
 val enable_radius :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableRadiusRequest.t ->
-        (EnableRadiusResult.t,
-          [ `AWS of EnableRadiusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableRadiusResult.t, EnableRadiusResult.error) Result.t Lwt.t
 val enable_sso :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableSsoRequest.t ->
-        (EnableSsoResult.t,
-          [ `AWS of EnableSsoResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableSsoResult.t, EnableSsoResult.error) Result.t Lwt.t
 val get_directory_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDirectoryLimitsRequest.t ->
-        (GetDirectoryLimitsResult.t,
-          [ `AWS of GetDirectoryLimitsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDirectoryLimitsResult.t, GetDirectoryLimitsResult.error) Result.t
+          Lwt.t
 val get_snapshot_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSnapshotLimitsRequest.t ->
-        (GetSnapshotLimitsResult.t,
-          [ `AWS of GetSnapshotLimitsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSnapshotLimitsResult.t, GetSnapshotLimitsResult.error) Result.t
+          Lwt.t
 val list_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCertificatesRequest.t ->
-        (ListCertificatesResult.t,
-          [ `AWS of ListCertificatesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCertificatesResult.t, ListCertificatesResult.error) Result.t
+          Lwt.t
 val list_ip_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIpRoutesRequest.t ->
-        (ListIpRoutesResult.t,
-          [ `AWS of ListIpRoutesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListIpRoutesResult.t, ListIpRoutesResult.error) Result.t Lwt.t
 val list_log_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLogSubscriptionsRequest.t ->
-        (ListLogSubscriptionsResult.t,
-          [ `AWS of ListLogSubscriptionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLogSubscriptionsResult.t, ListLogSubscriptionsResult.error)
+          Result.t Lwt.t
 val list_schema_extensions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchemaExtensionsRequest.t ->
-        (ListSchemaExtensionsResult.t,
-          [ `AWS of ListSchemaExtensionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSchemaExtensionsResult.t, ListSchemaExtensionsResult.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Lwt.t
 val register_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterCertificateRequest.t ->
-        (RegisterCertificateResult.t,
-          [ `AWS of RegisterCertificateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterCertificateResult.t, RegisterCertificateResult.error)
+          Result.t Lwt.t
 val register_event_topic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterEventTopicRequest.t ->
-        (RegisterEventTopicResult.t,
-          [ `AWS of RegisterEventTopicResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterEventTopicResult.t, RegisterEventTopicResult.error) Result.t
+          Lwt.t
 val reject_shared_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectSharedDirectoryRequest.t ->
-        (RejectSharedDirectoryResult.t,
-          [ `AWS of RejectSharedDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RejectSharedDirectoryResult.t, RejectSharedDirectoryResult.error)
+          Result.t Lwt.t
 val remove_ip_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveIpRoutesRequest.t ->
-        (RemoveIpRoutesResult.t,
-          [ `AWS of RemoveIpRoutesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveIpRoutesResult.t, RemoveIpRoutesResult.error) Result.t Lwt.t
 val remove_region :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveRegionRequest.t ->
-        (RemoveRegionResult.t,
-          [ `AWS of RemoveRegionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveRegionResult.t, RemoveRegionResult.error) Result.t Lwt.t
 val remove_tags_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsFromResourceRequest.t ->
-        (RemoveTagsFromResourceResult.t,
-          [ `AWS of RemoveTagsFromResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveTagsFromResourceResult.t, RemoveTagsFromResourceResult.error)
+          Result.t Lwt.t
 val reset_user_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetUserPasswordRequest.t ->
-        (ResetUserPasswordResult.t,
-          [ `AWS of ResetUserPasswordResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResetUserPasswordResult.t, ResetUserPasswordResult.error) Result.t
+          Lwt.t
 val restore_from_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreFromSnapshotRequest.t ->
-        (RestoreFromSnapshotResult.t,
-          [ `AWS of RestoreFromSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RestoreFromSnapshotResult.t, RestoreFromSnapshotResult.error)
+          Result.t Lwt.t
 val share_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ShareDirectoryRequest.t ->
-        (ShareDirectoryResult.t,
-          [ `AWS of ShareDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ShareDirectoryResult.t, ShareDirectoryResult.error) Result.t Lwt.t
 val start_schema_extension :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSchemaExtensionRequest.t ->
-        (StartSchemaExtensionResult.t,
-          [ `AWS of StartSchemaExtensionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartSchemaExtensionResult.t, StartSchemaExtensionResult.error)
+          Result.t Lwt.t
 val unshare_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnshareDirectoryRequest.t ->
-        (UnshareDirectoryResult.t,
-          [ `AWS of UnshareDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UnshareDirectoryResult.t, UnshareDirectoryResult.error) Result.t
+          Lwt.t
 val update_conditional_forwarder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConditionalForwarderRequest.t ->
         (UpdateConditionalForwarderResult.t,
-          [ `AWS of UpdateConditionalForwarderResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateConditionalForwarderResult.error) Result.t Lwt.t
 val update_number_of_domain_controllers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNumberOfDomainControllersRequest.t ->
         (UpdateNumberOfDomainControllersResult.t,
-          [ `AWS of UpdateNumberOfDomainControllersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateNumberOfDomainControllersResult.error) Result.t Lwt.t
 val update_radius :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRadiusRequest.t ->
-        (UpdateRadiusResult.t,
-          [ `AWS of UpdateRadiusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRadiusResult.t, UpdateRadiusResult.error) Result.t Lwt.t
 val update_trust :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTrustRequest.t ->
-        (UpdateTrustResult.t,
-          [ `AWS of UpdateTrustResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTrustResult.t, UpdateTrustResult.error) Result.t Lwt.t
 val verify_trust :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifyTrustRequest.t ->
-        (VerifyTrustResult.t,
-          [ `AWS of VerifyTrustResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (VerifyTrustResult.t, VerifyTrustResult.error) Result.t Lwt.t

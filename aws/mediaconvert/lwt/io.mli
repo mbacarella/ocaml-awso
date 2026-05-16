@@ -4,195 +4,148 @@ val associate_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateCertificateRequest.t ->
-        (AssociateCertificateResponse.t,
-          [ `AWS of AssociateCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateCertificateResponse.t, AssociateCertificateResponse.error)
+          Result.t Lwt.t
 val cancel_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobRequest.t ->
-        (CancelJobResponse.t,
-          [ `AWS of CancelJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelJobResponse.t, CancelJobResponse.error) Result.t Lwt.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobRequest.t ->
-        (CreateJobResponse.t,
-          [ `AWS of CreateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateJobResponse.t, CreateJobResponse.error) Result.t Lwt.t
 val create_job_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobTemplateRequest.t ->
-        (CreateJobTemplateResponse.t,
-          [ `AWS of CreateJobTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateJobTemplateResponse.t, CreateJobTemplateResponse.error)
+          Result.t Lwt.t
 val create_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePresetRequest.t ->
-        (CreatePresetResponse.t,
-          [ `AWS of CreatePresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePresetResponse.t, CreatePresetResponse.error) Result.t Lwt.t
 val create_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateQueueRequest.t ->
-        (CreateQueueResponse.t,
-          [ `AWS of CreateQueueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateQueueResponse.t, CreateQueueResponse.error) Result.t Lwt.t
 val delete_job_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteJobTemplateRequest.t ->
-        (DeleteJobTemplateResponse.t,
-          [ `AWS of DeleteJobTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteJobTemplateResponse.t, DeleteJobTemplateResponse.error)
+          Result.t Lwt.t
 val delete_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePolicyRequest.t ->
-        (DeletePolicyResponse.t,
-          [ `AWS of DeletePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePolicyResponse.t, DeletePolicyResponse.error) Result.t Lwt.t
 val delete_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePresetRequest.t ->
-        (DeletePresetResponse.t,
-          [ `AWS of DeletePresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePresetResponse.t, DeletePresetResponse.error) Result.t Lwt.t
 val delete_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteQueueRequest.t ->
-        (DeleteQueueResponse.t,
-          [ `AWS of DeleteQueueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteQueueResponse.t, DeleteQueueResponse.error) Result.t Lwt.t
 val describe_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointsRequest.t ->
-        (DescribeEndpointsResponse.t,
-          [ `AWS of DescribeEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEndpointsResponse.t, DescribeEndpointsResponse.error)
+          Result.t Lwt.t
 val disassociate_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateCertificateRequest.t ->
         (DisassociateCertificateResponse.t,
-          [ `AWS of DisassociateCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateCertificateResponse.error) Result.t Lwt.t
 val get_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobRequest.t ->
-        (GetJobResponse.t,
-          [ `AWS of GetJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetJobResponse.t, GetJobResponse.error) Result.t Lwt.t
 val get_job_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobTemplateRequest.t ->
-        (GetJobTemplateResponse.t,
-          [ `AWS of GetJobTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetJobTemplateResponse.t, GetJobTemplateResponse.error) Result.t
+          Lwt.t
 val get_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPolicyRequest.t ->
-        (GetPolicyResponse.t,
-          [ `AWS of GetPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPolicyResponse.t, GetPolicyResponse.error) Result.t Lwt.t
 val get_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPresetRequest.t ->
-        (GetPresetResponse.t,
-          [ `AWS of GetPresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPresetResponse.t, GetPresetResponse.error) Result.t Lwt.t
 val get_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueueRequest.t ->
-        (GetQueueResponse.t,
-          [ `AWS of GetQueueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetQueueResponse.t, GetQueueResponse.error) Result.t Lwt.t
 val list_job_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobTemplatesRequest.t ->
-        (ListJobTemplatesResponse.t,
-          [ `AWS of ListJobTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobTemplatesResponse.t, ListJobTemplatesResponse.error) Result.t
+          Lwt.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsRequest.t ->
-        (ListJobsResponse.t,
-          [ `AWS of ListJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsResponse.t, ListJobsResponse.error) Result.t Lwt.t
 val list_presets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPresetsRequest.t ->
-        (ListPresetsResponse.t,
-          [ `AWS of ListPresetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPresetsResponse.t, ListPresetsResponse.error) Result.t Lwt.t
 val list_queues :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListQueuesRequest.t ->
-        (ListQueuesResponse.t,
-          [ `AWS of ListQueuesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListQueuesResponse.t, ListQueuesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPolicyRequest.t ->
-        (PutPolicyResponse.t,
-          [ `AWS of PutPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutPolicyResponse.t, PutPolicyResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_job_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobTemplateRequest.t ->
-        (UpdateJobTemplateResponse.t,
-          [ `AWS of UpdateJobTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateJobTemplateResponse.t, UpdateJobTemplateResponse.error)
+          Result.t Lwt.t
 val update_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePresetRequest.t ->
-        (UpdatePresetResponse.t,
-          [ `AWS of UpdatePresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePresetResponse.t, UpdatePresetResponse.error) Result.t Lwt.t
 val update_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateQueueRequest.t ->
-        (UpdateQueueResponse.t,
-          [ `AWS of UpdateQueueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateQueueResponse.t, UpdateQueueResponse.error) Result.t Lwt.t

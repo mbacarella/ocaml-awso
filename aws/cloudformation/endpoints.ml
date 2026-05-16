@@ -1088,447 +1088,455 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | ActivateType ->
-      (match resp with
-       | Error err -> handle_error err (Some ActivateTypeOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ActivateTypeOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ActivateTypeOutput.of_xml xml)
+      else Error (parse_aws_error (Some ActivateTypeOutput.error_of_xml))
   | BatchDescribeTypeConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDescribeTypeConfigurationsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (BatchDescribeTypeConfigurationsOutput.of_xml xml))
-  | CancelUpdateStack -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (BatchDescribeTypeConfigurationsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDescribeTypeConfigurationsOutput.error_of_xml))
+  | CancelUpdateStack ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ContinueUpdateRollback ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ContinueUpdateRollbackOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ContinueUpdateRollbackOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ContinueUpdateRollbackOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ContinueUpdateRollbackOutput.error_of_xml))
   | CreateChangeSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChangeSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateChangeSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateChangeSetOutput.of_xml xml)
+      else Error (parse_aws_error (Some CreateChangeSetOutput.error_of_xml))
   | CreateStack ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateStackOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateStackOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateStackOutput.of_xml xml)
+      else Error (parse_aws_error (Some CreateStackOutput.error_of_xml))
   | CreateStackInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateStackInstancesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateStackInstancesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateStackInstancesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateStackInstancesOutput.error_of_xml))
   | CreateStackSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateStackSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateStackSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateStackSetOutput.of_xml xml)
+      else Error (parse_aws_error (Some CreateStackSetOutput.error_of_xml))
   | DeactivateType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeactivateTypeOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeactivateTypeOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeactivateTypeOutput.of_xml xml)
+      else Error (parse_aws_error (Some DeactivateTypeOutput.error_of_xml))
   | DeleteChangeSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteChangeSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteChangeSetOutput.of_xml xml))
-  | DeleteStack -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteChangeSetOutput.of_xml xml)
+      else Error (parse_aws_error (Some DeleteChangeSetOutput.error_of_xml))
+  | DeleteStack -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStackInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteStackInstancesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteStackInstancesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteStackInstancesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteStackInstancesOutput.error_of_xml))
   | DeleteStackSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteStackSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteStackSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteStackSetOutput.of_xml xml)
+      else Error (parse_aws_error (Some DeleteStackSetOutput.error_of_xml))
   | DeregisterType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeregisterTypeOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeregisterTypeOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeregisterTypeOutput.of_xml xml)
+      else Error (parse_aws_error (Some DeregisterTypeOutput.error_of_xml))
   | DescribeAccountLimits ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAccountLimitsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountLimitsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeChangeSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChangeSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeChangeSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeChangeSetOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DescribeChangeSetOutput.error_of_xml))
   | DescribeChangeSetHooks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChangeSetHooksOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeChangeSetHooksOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeChangeSetHooksOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeChangeSetHooksOutput.error_of_xml))
   | DescribePublisher ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePublisherOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribePublisherOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribePublisherOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DescribePublisherOutput.error_of_xml))
   | DescribeStackDriftDetectionStatus ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackDriftDetectionStatusOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackDriftDetectionStatusOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeStackEvents ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackEventsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackEventsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeStackInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeStackInstanceOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackInstanceOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackInstanceOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeStackInstanceOutput.error_of_xml))
   | DescribeStackResource ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackResourceOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackResourceOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeStackResourceDrifts ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackResourceDriftsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackResourceDriftsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeStackResources ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackResourcesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackResourcesOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeStackSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeStackSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackSetOutput.of_xml xml)
+      else Error (parse_aws_error (Some DescribeStackSetOutput.error_of_xml))
   | DescribeStackSetOperation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeStackSetOperationOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStackSetOperationOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStackSetOperationOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeStackSetOperationOutput.error_of_xml))
   | DescribeStacks ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeStacksOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeStacksOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeType ->
-      (match resp with
-       | Error err -> handle_error err (Some DescribeTypeOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeTypeOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTypeOutput.of_xml xml)
+      else Error (parse_aws_error (Some DescribeTypeOutput.error_of_xml))
   | DescribeTypeRegistration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeTypeRegistrationOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeTypeRegistrationOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTypeRegistrationOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeTypeRegistrationOutput.error_of_xml))
   | DetectStackDrift ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DetectStackDriftOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetectStackDriftOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DetectStackResourceDrift ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DetectStackResourceDriftOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetectStackResourceDriftOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DetectStackSetDrift ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetectStackSetDriftOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DetectStackSetDriftOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetectStackSetDriftOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DetectStackSetDriftOutput.error_of_xml))
   | EstimateTemplateCost ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EstimateTemplateCostOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EstimateTemplateCostOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ExecuteChangeSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExecuteChangeSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ExecuteChangeSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ExecuteChangeSetOutput.of_xml xml)
+      else Error (parse_aws_error (Some ExecuteChangeSetOutput.error_of_xml))
   | GetStackPolicy ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetStackPolicyOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetStackPolicyOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | GetTemplate ->
-      (match resp with
-       | Error err -> handle_error err (Some GetTemplateOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetTemplateOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetTemplateOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetTemplateOutput.error_of_xml))
   | GetTemplateSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTemplateSummaryOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetTemplateSummaryOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetTemplateSummaryOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetTemplateSummaryOutput.error_of_xml))
   | ImportStacksToStackSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ImportStacksToStackSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ImportStacksToStackSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ImportStacksToStackSetOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ImportStacksToStackSetOutput.error_of_xml))
   | ListChangeSets ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListChangeSetsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListChangeSetsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListExports ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListExportsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListExportsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListImports ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListImportsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListImportsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListStackInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStackInstancesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListStackInstancesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackInstancesOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListStackInstancesOutput.error_of_xml))
   | ListStackResources ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListStackResourcesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackResourcesOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListStackSetOperationResults ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListStackSetOperationResultsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListStackSetOperationResultsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackSetOperationResultsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListStackSetOperationResultsOutput.error_of_xml))
   | ListStackSetOperations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStackSetOperationsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListStackSetOperationsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackSetOperationsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListStackSetOperationsOutput.error_of_xml))
   | ListStackSets ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListStackSetsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStackSetsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListStacks ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListStacksOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListStacksOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListTypeRegistrations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTypeRegistrationsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListTypeRegistrationsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListTypeRegistrationsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListTypeRegistrationsOutput.error_of_xml))
   | ListTypeVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTypeVersionsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListTypeVersionsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListTypeVersionsOutput.of_xml xml)
+      else Error (parse_aws_error (Some ListTypeVersionsOutput.error_of_xml))
   | ListTypes ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTypesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListTypesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListTypesOutput.of_xml xml)
+      else Error (parse_aws_error (Some ListTypesOutput.error_of_xml))
   | PublishType ->
-      (match resp with
-       | Error err -> handle_error err (Some PublishTypeOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PublishTypeOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PublishTypeOutput.of_xml xml)
+      else Error (parse_aws_error (Some PublishTypeOutput.error_of_xml))
   | RecordHandlerProgress ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RecordHandlerProgressOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RecordHandlerProgressOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RecordHandlerProgressOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RecordHandlerProgressOutput.error_of_xml))
   | RegisterPublisher ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterPublisherOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RegisterPublisherOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RegisterPublisherOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some RegisterPublisherOutput.error_of_xml))
   | RegisterType ->
-      (match resp with
-       | Error err -> handle_error err (Some RegisterTypeOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RegisterTypeOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RegisterTypeOutput.of_xml xml)
+      else Error (parse_aws_error (Some RegisterTypeOutput.error_of_xml))
   | RollbackStack ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RollbackStackOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RollbackStackOutput.of_xml xml))
-  | SetStackPolicy -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RollbackStackOutput.of_xml xml)
+      else Error (parse_aws_error (Some RollbackStackOutput.error_of_xml))
+  | SetStackPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | SetTypeConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SetTypeConfigurationOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetTypeConfigurationOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetTypeConfigurationOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SetTypeConfigurationOutput.error_of_xml))
   | SetTypeDefaultVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SetTypeDefaultVersionOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetTypeDefaultVersionOutput.of_xml xml))
-  | SignalResource -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetTypeDefaultVersionOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SetTypeDefaultVersionOutput.error_of_xml))
+  | SignalResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | StopStackSetOperation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopStackSetOperationOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StopStackSetOperationOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StopStackSetOperationOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some StopStackSetOperationOutput.error_of_xml))
   | TestType ->
-      (match resp with
-       | Error err -> handle_error err (Some TestTypeOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (TestTypeOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TestTypeOutput.of_xml xml)
+      else Error (parse_aws_error (Some TestTypeOutput.error_of_xml))
   | UpdateStack ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateStackOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateStackOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateStackOutput.of_xml xml)
+      else Error (parse_aws_error (Some UpdateStackOutput.error_of_xml))
   | UpdateStackInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateStackInstancesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateStackInstancesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateStackInstancesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some UpdateStackInstancesOutput.error_of_xml))
   | UpdateStackSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateStackSetOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateStackSetOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateStackSetOutput.of_xml xml)
+      else Error (parse_aws_error (Some UpdateStackSetOutput.error_of_xml))
   | UpdateTerminationProtection ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateTerminationProtectionOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateTerminationProtectionOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ValidateTemplate ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ValidateTemplateOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ValidateTemplateOutput.of_xml xml)
+      else Error (parse_aws_error None)

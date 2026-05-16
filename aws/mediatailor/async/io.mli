@@ -5,290 +5,218 @@ val configure_logs_for_playback_configuration :
     ?cfg:Awso.Cfg.t ->
       ConfigureLogsForPlaybackConfigurationRequest.t ->
         (ConfigureLogsForPlaybackConfigurationResponse.t,
-          [ `AWS of ConfigureLogsForPlaybackConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ConfigureLogsForPlaybackConfigurationResponse.error) Result.t
           Async.Deferred.t
 val create_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelRequest.t ->
-        (CreateChannelResponse.t,
-          [ `AWS of CreateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateChannelResponse.t, CreateChannelResponse.error) Result.t
           Async.Deferred.t
 val create_prefetch_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePrefetchScheduleRequest.t ->
         (CreatePrefetchScheduleResponse.t,
-          [ `AWS of CreatePrefetchScheduleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreatePrefetchScheduleResponse.error) Result.t Async.Deferred.t
 val create_program :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProgramRequest.t ->
-        (CreateProgramResponse.t,
-          [ `AWS of CreateProgramResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateProgramResponse.t, CreateProgramResponse.error) Result.t
           Async.Deferred.t
 val create_source_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSourceLocationRequest.t ->
-        (CreateSourceLocationResponse.t,
-          [ `AWS of CreateSourceLocationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateSourceLocationResponse.t, CreateSourceLocationResponse.error)
+          Result.t Async.Deferred.t
 val create_vod_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVodSourceRequest.t ->
-        (CreateVodSourceResponse.t,
-          [ `AWS of CreateVodSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateVodSourceResponse.t, CreateVodSourceResponse.error) Result.t
           Async.Deferred.t
 val delete_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteChannelRequest.t ->
-        (DeleteChannelResponse.t,
-          [ `AWS of DeleteChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteChannelResponse.t, DeleteChannelResponse.error) Result.t
           Async.Deferred.t
 val delete_channel_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteChannelPolicyRequest.t ->
-        (DeleteChannelPolicyResponse.t,
-          [ `AWS of DeleteChannelPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteChannelPolicyResponse.t, DeleteChannelPolicyResponse.error)
+          Result.t Async.Deferred.t
 val delete_playback_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePlaybackConfigurationRequest.t ->
         (DeletePlaybackConfigurationResponse.t,
-          [ `AWS of DeletePlaybackConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeletePlaybackConfigurationResponse.error) Result.t
           Async.Deferred.t
 val delete_prefetch_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePrefetchScheduleRequest.t ->
         (DeletePrefetchScheduleResponse.t,
-          [ `AWS of DeletePrefetchScheduleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeletePrefetchScheduleResponse.error) Result.t Async.Deferred.t
 val delete_program :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProgramRequest.t ->
-        (DeleteProgramResponse.t,
-          [ `AWS of DeleteProgramResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteProgramResponse.t, DeleteProgramResponse.error) Result.t
           Async.Deferred.t
 val delete_source_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSourceLocationRequest.t ->
-        (DeleteSourceLocationResponse.t,
-          [ `AWS of DeleteSourceLocationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteSourceLocationResponse.t, DeleteSourceLocationResponse.error)
+          Result.t Async.Deferred.t
 val delete_vod_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVodSourceRequest.t ->
-        (DeleteVodSourceResponse.t,
-          [ `AWS of DeleteVodSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteVodSourceResponse.t, DeleteVodSourceResponse.error) Result.t
           Async.Deferred.t
 val describe_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelRequest.t ->
-        (DescribeChannelResponse.t,
-          [ `AWS of DescribeChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeChannelResponse.t, DescribeChannelResponse.error) Result.t
           Async.Deferred.t
 val describe_program :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProgramRequest.t ->
-        (DescribeProgramResponse.t,
-          [ `AWS of DescribeProgramResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeProgramResponse.t, DescribeProgramResponse.error) Result.t
           Async.Deferred.t
 val describe_source_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSourceLocationRequest.t ->
         (DescribeSourceLocationResponse.t,
-          [ `AWS of DescribeSourceLocationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeSourceLocationResponse.error) Result.t Async.Deferred.t
 val describe_vod_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVodSourceRequest.t ->
-        (DescribeVodSourceResponse.t,
-          [ `AWS of DescribeVodSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeVodSourceResponse.t, DescribeVodSourceResponse.error)
+          Result.t Async.Deferred.t
 val get_channel_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChannelPolicyRequest.t ->
-        (GetChannelPolicyResponse.t,
-          [ `AWS of GetChannelPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetChannelPolicyResponse.t, GetChannelPolicyResponse.error) Result.t
           Async.Deferred.t
 val get_channel_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChannelScheduleRequest.t ->
-        (GetChannelScheduleResponse.t,
-          [ `AWS of GetChannelScheduleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetChannelScheduleResponse.t, GetChannelScheduleResponse.error)
+          Result.t Async.Deferred.t
 val get_playback_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPlaybackConfigurationRequest.t ->
         (GetPlaybackConfigurationResponse.t,
-          [ `AWS of GetPlaybackConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetPlaybackConfigurationResponse.error) Result.t Async.Deferred.t
 val get_prefetch_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPrefetchScheduleRequest.t ->
-        (GetPrefetchScheduleResponse.t,
-          [ `AWS of GetPrefetchScheduleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPrefetchScheduleResponse.t, GetPrefetchScheduleResponse.error)
+          Result.t Async.Deferred.t
 val list_alerts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAlertsRequest.t ->
-        (ListAlertsResponse.t,
-          [ `AWS of ListAlertsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAlertsResponse.t, ListAlertsResponse.error) Result.t
           Async.Deferred.t
 val list_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelsRequest.t ->
-        (ListChannelsResponse.t,
-          [ `AWS of ListChannelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListChannelsResponse.t, ListChannelsResponse.error) Result.t
           Async.Deferred.t
 val list_playback_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlaybackConfigurationsRequest.t ->
         (ListPlaybackConfigurationsResponse.t,
-          [ `AWS of ListPlaybackConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListPlaybackConfigurationsResponse.error) Result.t Async.Deferred.t
 val list_prefetch_schedules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPrefetchSchedulesRequest.t ->
         (ListPrefetchSchedulesResponse.t,
-          [ `AWS of ListPrefetchSchedulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListPrefetchSchedulesResponse.error) Result.t Async.Deferred.t
 val list_source_locations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSourceLocationsRequest.t ->
-        (ListSourceLocationsResponse.t,
-          [ `AWS of ListSourceLocationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSourceLocationsResponse.t, ListSourceLocationsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_vod_sources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVodSourcesRequest.t ->
-        (ListVodSourcesResponse.t,
-          [ `AWS of ListVodSourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListVodSourcesResponse.t, ListVodSourcesResponse.error) Result.t
           Async.Deferred.t
 val put_channel_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutChannelPolicyRequest.t ->
-        (PutChannelPolicyResponse.t,
-          [ `AWS of PutChannelPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutChannelPolicyResponse.t, PutChannelPolicyResponse.error) Result.t
           Async.Deferred.t
 val put_playback_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPlaybackConfigurationRequest.t ->
         (PutPlaybackConfigurationResponse.t,
-          [ `AWS of PutPlaybackConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutPlaybackConfigurationResponse.error) Result.t Async.Deferred.t
 val start_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartChannelRequest.t ->
-        (StartChannelResponse.t,
-          [ `AWS of StartChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartChannelResponse.t, StartChannelResponse.error) Result.t
           Async.Deferred.t
 val stop_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopChannelRequest.t ->
-        (StopChannelResponse.t,
-          [ `AWS of StopChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopChannelResponse.t, StopChannelResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChannelRequest.t ->
-        (UpdateChannelResponse.t,
-          [ `AWS of UpdateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateChannelResponse.t, UpdateChannelResponse.error) Result.t
           Async.Deferred.t
 val update_source_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSourceLocationRequest.t ->
-        (UpdateSourceLocationResponse.t,
-          [ `AWS of UpdateSourceLocationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateSourceLocationResponse.t, UpdateSourceLocationResponse.error)
+          Result.t Async.Deferred.t
 val update_vod_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVodSourceRequest.t ->
-        (UpdateVodSourceResponse.t,
-          [ `AWS of UpdateVodSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateVodSourceResponse.t, UpdateVodSourceResponse.error) Result.t
           Async.Deferred.t

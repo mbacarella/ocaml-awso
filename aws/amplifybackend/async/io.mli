@@ -4,247 +4,185 @@ val clone_backend :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CloneBackendRequest.t ->
-        (CloneBackendResponse.t,
-          [ `AWS of CloneBackendResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CloneBackendResponse.t, CloneBackendResponse.error) Result.t
           Async.Deferred.t
 val create_backend :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackendRequest.t ->
-        (CreateBackendResponse.t,
-          [ `AWS of CreateBackendResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateBackendResponse.t, CreateBackendResponse.error) Result.t
           Async.Deferred.t
 val create_backend_a_p_i :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackendAPIRequest.t ->
-        (CreateBackendAPIResponse.t,
-          [ `AWS of CreateBackendAPIResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateBackendAPIResponse.t, CreateBackendAPIResponse.error) Result.t
           Async.Deferred.t
 val create_backend_auth :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackendAuthRequest.t ->
-        (CreateBackendAuthResponse.t,
-          [ `AWS of CreateBackendAuthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateBackendAuthResponse.t, CreateBackendAuthResponse.error)
+          Result.t Async.Deferred.t
 val create_backend_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackendConfigRequest.t ->
-        (CreateBackendConfigResponse.t,
-          [ `AWS of CreateBackendConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateBackendConfigResponse.t, CreateBackendConfigResponse.error)
+          Result.t Async.Deferred.t
 val create_backend_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackendStorageRequest.t ->
-        (CreateBackendStorageResponse.t,
-          [ `AWS of CreateBackendStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateBackendStorageResponse.t, CreateBackendStorageResponse.error)
+          Result.t Async.Deferred.t
 val create_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTokenRequest.t ->
-        (CreateTokenResponse.t,
-          [ `AWS of CreateTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTokenResponse.t, CreateTokenResponse.error) Result.t
           Async.Deferred.t
 val delete_backend :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackendRequest.t ->
-        (DeleteBackendResponse.t,
-          [ `AWS of DeleteBackendResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteBackendResponse.t, DeleteBackendResponse.error) Result.t
           Async.Deferred.t
 val delete_backend_a_p_i :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackendAPIRequest.t ->
-        (DeleteBackendAPIResponse.t,
-          [ `AWS of DeleteBackendAPIResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteBackendAPIResponse.t, DeleteBackendAPIResponse.error) Result.t
           Async.Deferred.t
 val delete_backend_auth :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackendAuthRequest.t ->
-        (DeleteBackendAuthResponse.t,
-          [ `AWS of DeleteBackendAuthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteBackendAuthResponse.t, DeleteBackendAuthResponse.error)
+          Result.t Async.Deferred.t
 val delete_backend_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackendStorageRequest.t ->
-        (DeleteBackendStorageResponse.t,
-          [ `AWS of DeleteBackendStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteBackendStorageResponse.t, DeleteBackendStorageResponse.error)
+          Result.t Async.Deferred.t
 val delete_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTokenRequest.t ->
-        (DeleteTokenResponse.t,
-          [ `AWS of DeleteTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTokenResponse.t, DeleteTokenResponse.error) Result.t
           Async.Deferred.t
 val generate_backend_a_p_i_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateBackendAPIModelsRequest.t ->
         (GenerateBackendAPIModelsResponse.t,
-          [ `AWS of GenerateBackendAPIModelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GenerateBackendAPIModelsResponse.error) Result.t Async.Deferred.t
 val get_backend :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBackendRequest.t ->
-        (GetBackendResponse.t,
-          [ `AWS of GetBackendResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBackendResponse.t, GetBackendResponse.error) Result.t
           Async.Deferred.t
 val get_backend_a_p_i :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBackendAPIRequest.t ->
-        (GetBackendAPIResponse.t,
-          [ `AWS of GetBackendAPIResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBackendAPIResponse.t, GetBackendAPIResponse.error) Result.t
           Async.Deferred.t
 val get_backend_a_p_i_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBackendAPIModelsRequest.t ->
-        (GetBackendAPIModelsResponse.t,
-          [ `AWS of GetBackendAPIModelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBackendAPIModelsResponse.t, GetBackendAPIModelsResponse.error)
+          Result.t Async.Deferred.t
 val get_backend_auth :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBackendAuthRequest.t ->
-        (GetBackendAuthResponse.t,
-          [ `AWS of GetBackendAuthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBackendAuthResponse.t, GetBackendAuthResponse.error) Result.t
           Async.Deferred.t
 val get_backend_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBackendJobRequest.t ->
-        (GetBackendJobResponse.t,
-          [ `AWS of GetBackendJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBackendJobResponse.t, GetBackendJobResponse.error) Result.t
           Async.Deferred.t
 val get_backend_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBackendStorageRequest.t ->
-        (GetBackendStorageResponse.t,
-          [ `AWS of GetBackendStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBackendStorageResponse.t, GetBackendStorageResponse.error)
+          Result.t Async.Deferred.t
 val get_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTokenRequest.t ->
-        (GetTokenResponse.t,
-          [ `AWS of GetTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTokenResponse.t, GetTokenResponse.error) Result.t
           Async.Deferred.t
 val import_backend_auth :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportBackendAuthRequest.t ->
-        (ImportBackendAuthResponse.t,
-          [ `AWS of ImportBackendAuthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportBackendAuthResponse.t, ImportBackendAuthResponse.error)
+          Result.t Async.Deferred.t
 val import_backend_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportBackendStorageRequest.t ->
-        (ImportBackendStorageResponse.t,
-          [ `AWS of ImportBackendStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportBackendStorageResponse.t, ImportBackendStorageResponse.error)
+          Result.t Async.Deferred.t
 val list_backend_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBackendJobsRequest.t ->
-        (ListBackendJobsResponse.t,
-          [ `AWS of ListBackendJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListBackendJobsResponse.t, ListBackendJobsResponse.error) Result.t
           Async.Deferred.t
 val list_s3_buckets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListS3BucketsRequest.t ->
-        (ListS3BucketsResponse.t,
-          [ `AWS of ListS3BucketsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListS3BucketsResponse.t, ListS3BucketsResponse.error) Result.t
           Async.Deferred.t
 val remove_all_backends :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveAllBackendsRequest.t ->
-        (RemoveAllBackendsResponse.t,
-          [ `AWS of RemoveAllBackendsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RemoveAllBackendsResponse.t, RemoveAllBackendsResponse.error)
+          Result.t Async.Deferred.t
 val remove_backend_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveBackendConfigRequest.t ->
-        (RemoveBackendConfigResponse.t,
-          [ `AWS of RemoveBackendConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RemoveBackendConfigResponse.t, RemoveBackendConfigResponse.error)
+          Result.t Async.Deferred.t
 val update_backend_a_p_i :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBackendAPIRequest.t ->
-        (UpdateBackendAPIResponse.t,
-          [ `AWS of UpdateBackendAPIResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateBackendAPIResponse.t, UpdateBackendAPIResponse.error) Result.t
           Async.Deferred.t
 val update_backend_auth :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBackendAuthRequest.t ->
-        (UpdateBackendAuthResponse.t,
-          [ `AWS of UpdateBackendAuthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateBackendAuthResponse.t, UpdateBackendAuthResponse.error)
+          Result.t Async.Deferred.t
 val update_backend_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBackendConfigRequest.t ->
-        (UpdateBackendConfigResponse.t,
-          [ `AWS of UpdateBackendConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateBackendConfigResponse.t, UpdateBackendConfigResponse.error)
+          Result.t Async.Deferred.t
 val update_backend_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBackendJobRequest.t ->
-        (UpdateBackendJobResponse.t,
-          [ `AWS of UpdateBackendJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateBackendJobResponse.t, UpdateBackendJobResponse.error) Result.t
           Async.Deferred.t
 val update_backend_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBackendStorageRequest.t ->
-        (UpdateBackendStorageResponse.t,
-          [ `AWS of UpdateBackendStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateBackendStorageResponse.t, UpdateBackendStorageResponse.error)
+          Result.t Async.Deferred.t

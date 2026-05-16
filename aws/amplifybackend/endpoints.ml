@@ -840,226 +840,212 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CloneBackend ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CloneBackendResponse.error_of_json)
-       | Ok resp -> Ok (CloneBackendResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CloneBackendResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CloneBackendResponse.error_of_json))
   | CreateBackend ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackendResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackendResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackendResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateBackendResponse.error_of_json))
   | CreateBackendAPI ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackendAPIResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackendAPIResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackendAPIResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBackendAPIResponse.error_of_json))
   | CreateBackendAuth ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackendAuthResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackendAuthResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackendAuthResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateBackendAuthResponse.error_of_json))
   | CreateBackendConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackendConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackendConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackendConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateBackendConfigResponse.error_of_json))
   | CreateBackendStorage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackendStorageResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackendStorageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackendStorageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateBackendStorageResponse.error_of_json))
   | CreateToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTokenResponse.error_of_json)
-       | Ok resp -> Ok (CreateTokenResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateTokenResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateTokenResponse.error_of_json))
   | DeleteBackend ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBackendResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBackendResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBackendResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteBackendResponse.error_of_json))
   | DeleteBackendAPI ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBackendAPIResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBackendAPIResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBackendAPIResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteBackendAPIResponse.error_of_json))
   | DeleteBackendAuth ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBackendAuthResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBackendAuthResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBackendAuthResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteBackendAuthResponse.error_of_json))
   | DeleteBackendStorage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBackendStorageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBackendStorageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBackendStorageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteBackendStorageResponse.error_of_json))
   | DeleteToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTokenResponse.error_of_json)
-       | Ok resp -> Ok (DeleteTokenResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteTokenResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteTokenResponse.error_of_json))
   | GenerateBackendAPIModels ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateBackendAPIModelsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GenerateBackendAPIModelsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GenerateBackendAPIModelsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateBackendAPIModelsResponse.error_of_json))
   | GetBackend ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackendResponse.error_of_json)
-       | Ok resp -> Ok (GetBackendResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackendResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBackendResponse.error_of_json))
   | GetBackendAPI ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackendAPIResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBackendAPIResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackendAPIResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBackendAPIResponse.error_of_json))
   | GetBackendAPIModels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackendAPIModelsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBackendAPIModelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackendAPIModelsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBackendAPIModelsResponse.error_of_json))
   | GetBackendAuth ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackendAuthResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBackendAuthResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackendAuthResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetBackendAuthResponse.error_of_json))
   | GetBackendJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackendJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBackendJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackendJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBackendJobResponse.error_of_json))
   | GetBackendStorage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackendStorageResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBackendStorageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackendStorageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBackendStorageResponse.error_of_json))
   | GetToken ->
-      (match resp with
-       | Error err -> handle_error err (Some GetTokenResponse.error_of_json)
-       | Ok resp -> Ok (GetTokenResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetTokenResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetTokenResponse.error_of_json))
   | ImportBackendAuth ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ImportBackendAuthResponse.error_of_json)
-       | Ok resp ->
-           Ok (ImportBackendAuthResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ImportBackendAuthResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ImportBackendAuthResponse.error_of_json))
   | ImportBackendStorage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ImportBackendStorageResponse.error_of_json)
-       | Ok resp ->
-           Ok (ImportBackendStorageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ImportBackendStorageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ImportBackendStorageResponse.error_of_json))
   | ListBackendJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBackendJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListBackendJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackendJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListBackendJobsResponse.error_of_json))
   | ListS3Buckets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListS3BucketsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListS3BucketsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListS3BucketsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListS3BucketsResponse.error_of_json))
   | RemoveAllBackends ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RemoveAllBackendsResponse.error_of_json)
-       | Ok resp ->
-           Ok (RemoveAllBackendsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RemoveAllBackendsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RemoveAllBackendsResponse.error_of_json))
   | RemoveBackendConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RemoveBackendConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (RemoveBackendConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RemoveBackendConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RemoveBackendConfigResponse.error_of_json))
   | UpdateBackendAPI ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBackendAPIResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBackendAPIResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBackendAPIResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateBackendAPIResponse.error_of_json))
   | UpdateBackendAuth ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBackendAuthResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBackendAuthResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBackendAuthResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateBackendAuthResponse.error_of_json))
   | UpdateBackendConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBackendConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBackendConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBackendConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateBackendConfigResponse.error_of_json))
   | UpdateBackendJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBackendJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBackendJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBackendJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateBackendJobResponse.error_of_json))
   | UpdateBackendStorage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBackendStorageResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBackendStorageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBackendStorageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateBackendStorageResponse.error_of_json))

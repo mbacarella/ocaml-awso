@@ -280,169 +280,188 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "ComputeOptimizerService.UpdateEnrollmentStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | DeleteRecommendationPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRecommendationPreferencesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRecommendationPreferencesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRecommendationPreferencesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRecommendationPreferencesResponse.error_of_json))
   | DescribeRecommendationExportJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRecommendationExportJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRecommendationExportJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRecommendationExportJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRecommendationExportJobsResponse.error_of_json))
   | ExportAutoScalingGroupRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportAutoScalingGroupRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ExportAutoScalingGroupRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ExportAutoScalingGroupRecommendationsResponse.of_json json))
+                ExportAutoScalingGroupRecommendationsResponse.error_of_json))
   | ExportEBSVolumeRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ExportEBSVolumeRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ExportEBSVolumeRecommendationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportEBSVolumeRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportEBSVolumeRecommendationsResponse.error_of_json))
   | ExportEC2InstanceRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ExportEC2InstanceRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ExportEC2InstanceRecommendationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportEC2InstanceRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportEC2InstanceRecommendationsResponse.error_of_json))
   | ExportLambdaFunctionRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ExportLambdaFunctionRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ExportLambdaFunctionRecommendationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportLambdaFunctionRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportLambdaFunctionRecommendationsResponse.error_of_json))
   | GetAutoScalingGroupRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAutoScalingGroupRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAutoScalingGroupRecommendationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAutoScalingGroupRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAutoScalingGroupRecommendationsResponse.error_of_json))
   | GetEBSVolumeRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEBSVolumeRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetEBSVolumeRecommendationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEBSVolumeRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetEBSVolumeRecommendationsResponse.error_of_json))
   | GetEC2InstanceRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEC2InstanceRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetEC2InstanceRecommendationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEC2InstanceRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetEC2InstanceRecommendationsResponse.error_of_json))
   | GetEC2RecommendationProjectedMetrics ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEC2RecommendationProjectedMetricsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetEC2RecommendationProjectedMetricsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEC2RecommendationProjectedMetricsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetEC2RecommendationProjectedMetricsResponse.error_of_json))
   | GetEffectiveRecommendationPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEffectiveRecommendationPreferencesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetEffectiveRecommendationPreferencesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetEffectiveRecommendationPreferencesResponse.of_json json))
+                GetEffectiveRecommendationPreferencesResponse.error_of_json))
   | GetEnrollmentStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetEnrollmentStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetEnrollmentStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEnrollmentStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetEnrollmentStatusResponse.error_of_json))
   | GetEnrollmentStatusesForOrganization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEnrollmentStatusesForOrganizationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetEnrollmentStatusesForOrganizationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEnrollmentStatusesForOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetEnrollmentStatusesForOrganizationResponse.error_of_json))
   | GetLambdaFunctionRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLambdaFunctionRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLambdaFunctionRecommendationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLambdaFunctionRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLambdaFunctionRecommendationsResponse.error_of_json))
   | GetRecommendationPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRecommendationPreferencesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRecommendationPreferencesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRecommendationPreferencesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetRecommendationPreferencesResponse.error_of_json))
   | GetRecommendationSummaries ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRecommendationSummariesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRecommendationSummariesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRecommendationSummariesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetRecommendationSummariesResponse.error_of_json))
   | PutRecommendationPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutRecommendationPreferencesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutRecommendationPreferencesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRecommendationPreferencesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutRecommendationPreferencesResponse.error_of_json))
   | UpdateEnrollmentStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateEnrollmentStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateEnrollmentStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateEnrollmentStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateEnrollmentStatusResponse.error_of_json))

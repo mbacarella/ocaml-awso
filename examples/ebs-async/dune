@@ -1,5 +1,4 @@
 (executable
  (name awso_ebs)
  (libraries awso-async.ebs core_unix.command_unix core_unix.time_unix)
- (flags
-  (:standard)))
+ (flags (:standard)))

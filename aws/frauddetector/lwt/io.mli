@@ -4,475 +4,376 @@ val batch_create_variable :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreateVariableRequest.t ->
-        (BatchCreateVariableResult.t,
-          [ `AWS of BatchCreateVariableResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchCreateVariableResult.t, BatchCreateVariableResult.error)
+          Result.t Lwt.t
 val batch_get_variable :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetVariableRequest.t ->
-        (BatchGetVariableResult.t,
-          [ `AWS of BatchGetVariableResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetVariableResult.t, BatchGetVariableResult.error) Result.t
+          Lwt.t
 val cancel_batch_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelBatchImportJobRequest.t ->
-        (CancelBatchImportJobResult.t,
-          [ `AWS of CancelBatchImportJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelBatchImportJobResult.t, CancelBatchImportJobResult.error)
+          Result.t Lwt.t
 val cancel_batch_prediction_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelBatchPredictionJobRequest.t ->
         (CancelBatchPredictionJobResult.t,
-          [ `AWS of CancelBatchPredictionJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelBatchPredictionJobResult.error) Result.t Lwt.t
 val create_batch_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBatchImportJobRequest.t ->
-        (CreateBatchImportJobResult.t,
-          [ `AWS of CreateBatchImportJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBatchImportJobResult.t, CreateBatchImportJobResult.error)
+          Result.t Lwt.t
 val create_batch_prediction_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBatchPredictionJobRequest.t ->
         (CreateBatchPredictionJobResult.t,
-          [ `AWS of CreateBatchPredictionJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateBatchPredictionJobResult.error) Result.t Lwt.t
 val create_detector_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDetectorVersionRequest.t ->
-        (CreateDetectorVersionResult.t,
-          [ `AWS of CreateDetectorVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDetectorVersionResult.t, CreateDetectorVersionResult.error)
+          Result.t Lwt.t
 val create_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateModelRequest.t ->
-        (CreateModelResult.t,
-          [ `AWS of CreateModelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateModelResult.t, CreateModelResult.error) Result.t Lwt.t
 val create_model_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateModelVersionRequest.t ->
-        (CreateModelVersionResult.t,
-          [ `AWS of CreateModelVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateModelVersionResult.t, CreateModelVersionResult.error) Result.t
+          Lwt.t
 val create_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleRequest.t ->
-        (CreateRuleResult.t,
-          [ `AWS of CreateRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRuleResult.t, CreateRuleResult.error) Result.t Lwt.t
 val create_variable :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVariableRequest.t ->
-        (CreateVariableResult.t,
-          [ `AWS of CreateVariableResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVariableResult.t, CreateVariableResult.error) Result.t Lwt.t
 val delete_batch_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBatchImportJobRequest.t ->
-        (DeleteBatchImportJobResult.t,
-          [ `AWS of DeleteBatchImportJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBatchImportJobResult.t, DeleteBatchImportJobResult.error)
+          Result.t Lwt.t
 val delete_batch_prediction_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBatchPredictionJobRequest.t ->
         (DeleteBatchPredictionJobResult.t,
-          [ `AWS of DeleteBatchPredictionJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteBatchPredictionJobResult.error) Result.t Lwt.t
 val delete_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDetectorRequest.t ->
-        (DeleteDetectorResult.t,
-          [ `AWS of DeleteDetectorResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDetectorResult.t, DeleteDetectorResult.error) Result.t Lwt.t
 val delete_detector_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDetectorVersionRequest.t ->
-        (DeleteDetectorVersionResult.t,
-          [ `AWS of DeleteDetectorVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDetectorVersionResult.t, DeleteDetectorVersionResult.error)
+          Result.t Lwt.t
 val delete_entity_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEntityTypeRequest.t ->
-        (DeleteEntityTypeResult.t,
-          [ `AWS of DeleteEntityTypeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEntityTypeResult.t, DeleteEntityTypeResult.error) Result.t
+          Lwt.t
 val delete_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventRequest.t ->
-        (DeleteEventResult.t,
-          [ `AWS of DeleteEventResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEventResult.t, DeleteEventResult.error) Result.t Lwt.t
 val delete_event_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventTypeRequest.t ->
-        (DeleteEventTypeResult.t,
-          [ `AWS of DeleteEventTypeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEventTypeResult.t, DeleteEventTypeResult.error) Result.t Lwt.t
 val delete_events_by_event_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventsByEventTypeRequest.t ->
         (DeleteEventsByEventTypeResult.t,
-          [ `AWS of DeleteEventsByEventTypeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEventsByEventTypeResult.error) Result.t Lwt.t
 val delete_external_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteExternalModelRequest.t ->
-        (DeleteExternalModelResult.t,
-          [ `AWS of DeleteExternalModelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteExternalModelResult.t, DeleteExternalModelResult.error)
+          Result.t Lwt.t
 val delete_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLabelRequest.t ->
-        (DeleteLabelResult.t,
-          [ `AWS of DeleteLabelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLabelResult.t, DeleteLabelResult.error) Result.t Lwt.t
 val delete_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteModelRequest.t ->
-        (DeleteModelResult.t,
-          [ `AWS of DeleteModelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteModelResult.t, DeleteModelResult.error) Result.t Lwt.t
 val delete_model_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteModelVersionRequest.t ->
-        (DeleteModelVersionResult.t,
-          [ `AWS of DeleteModelVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteModelVersionResult.t, DeleteModelVersionResult.error) Result.t
+          Lwt.t
 val delete_outcome :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOutcomeRequest.t ->
-        (DeleteOutcomeResult.t,
-          [ `AWS of DeleteOutcomeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteOutcomeResult.t, DeleteOutcomeResult.error) Result.t Lwt.t
 val delete_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleRequest.t ->
-        (DeleteRuleResult.t,
-          [ `AWS of DeleteRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRuleResult.t, DeleteRuleResult.error) Result.t Lwt.t
 val delete_variable :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVariableRequest.t ->
-        (DeleteVariableResult.t,
-          [ `AWS of DeleteVariableResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteVariableResult.t, DeleteVariableResult.error) Result.t Lwt.t
 val describe_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDetectorRequest.t ->
-        (DescribeDetectorResult.t,
-          [ `AWS of DescribeDetectorResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDetectorResult.t, DescribeDetectorResult.error) Result.t
+          Lwt.t
 val describe_model_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeModelVersionsRequest.t ->
-        (DescribeModelVersionsResult.t,
-          [ `AWS of DescribeModelVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeModelVersionsResult.t, DescribeModelVersionsResult.error)
+          Result.t Lwt.t
 val get_batch_import_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBatchImportJobsRequest.t ->
-        (GetBatchImportJobsResult.t,
-          [ `AWS of GetBatchImportJobsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBatchImportJobsResult.t, GetBatchImportJobsResult.error) Result.t
+          Lwt.t
 val get_batch_prediction_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBatchPredictionJobsRequest.t ->
-        (GetBatchPredictionJobsResult.t,
-          [ `AWS of GetBatchPredictionJobsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBatchPredictionJobsResult.t, GetBatchPredictionJobsResult.error)
+          Result.t Lwt.t
 val get_delete_events_by_event_type_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeleteEventsByEventTypeStatusRequest.t ->
         (GetDeleteEventsByEventTypeStatusResult.t,
-          [ `AWS of GetDeleteEventsByEventTypeStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDeleteEventsByEventTypeStatusResult.error) Result.t Lwt.t
 val get_detector_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDetectorVersionRequest.t ->
-        (GetDetectorVersionResult.t,
-          [ `AWS of GetDetectorVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDetectorVersionResult.t, GetDetectorVersionResult.error) Result.t
+          Lwt.t
 val get_detectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDetectorsRequest.t ->
-        (GetDetectorsResult.t,
-          [ `AWS of GetDetectorsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDetectorsResult.t, GetDetectorsResult.error) Result.t Lwt.t
 val get_entity_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEntityTypesRequest.t ->
-        (GetEntityTypesResult.t,
-          [ `AWS of GetEntityTypesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEntityTypesResult.t, GetEntityTypesResult.error) Result.t Lwt.t
 val get_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventRequest.t ->
-        (GetEventResult.t,
-          [ `AWS of GetEventResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEventResult.t, GetEventResult.error) Result.t Lwt.t
 val get_event_prediction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventPredictionRequest.t ->
-        (GetEventPredictionResult.t,
-          [ `AWS of GetEventPredictionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEventPredictionResult.t, GetEventPredictionResult.error) Result.t
+          Lwt.t
 val get_event_prediction_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventPredictionMetadataRequest.t ->
         (GetEventPredictionMetadataResult.t,
-          [ `AWS of GetEventPredictionMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetEventPredictionMetadataResult.error) Result.t Lwt.t
 val get_event_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventTypesRequest.t ->
-        (GetEventTypesResult.t,
-          [ `AWS of GetEventTypesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEventTypesResult.t, GetEventTypesResult.error) Result.t Lwt.t
 val get_external_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExternalModelsRequest.t ->
-        (GetExternalModelsResult.t,
-          [ `AWS of GetExternalModelsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetExternalModelsResult.t, GetExternalModelsResult.error) Result.t
+          Lwt.t
 val get_k_m_s_encryption_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (GetKMSEncryptionKeyResult.t,
-          [ `AWS of GetKMSEncryptionKeyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetKMSEncryptionKeyResult.t, GetKMSEncryptionKeyResult.error)
+          Result.t Lwt.t
 val get_labels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLabelsRequest.t ->
-        (GetLabelsResult.t,
-          [ `AWS of GetLabelsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLabelsResult.t, GetLabelsResult.error) Result.t Lwt.t
 val get_model_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetModelVersionRequest.t ->
-        (GetModelVersionResult.t,
-          [ `AWS of GetModelVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetModelVersionResult.t, GetModelVersionResult.error) Result.t Lwt.t
 val get_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetModelsRequest.t ->
-        (GetModelsResult.t,
-          [ `AWS of GetModelsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetModelsResult.t, GetModelsResult.error) Result.t Lwt.t
 val get_outcomes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOutcomesRequest.t ->
-        (GetOutcomesResult.t,
-          [ `AWS of GetOutcomesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetOutcomesResult.t, GetOutcomesResult.error) Result.t Lwt.t
 val get_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRulesRequest.t ->
-        (GetRulesResult.t,
-          [ `AWS of GetRulesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRulesResult.t, GetRulesResult.error) Result.t Lwt.t
 val get_variables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVariablesRequest.t ->
-        (GetVariablesResult.t,
-          [ `AWS of GetVariablesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVariablesResult.t, GetVariablesResult.error) Result.t Lwt.t
 val list_event_predictions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventPredictionsRequest.t ->
-        (ListEventPredictionsResult.t,
-          [ `AWS of ListEventPredictionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEventPredictionsResult.t, ListEventPredictionsResult.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Lwt.t
 val put_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDetectorRequest.t ->
-        (PutDetectorResult.t,
-          [ `AWS of PutDetectorResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutDetectorResult.t, PutDetectorResult.error) Result.t Lwt.t
 val put_entity_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEntityTypeRequest.t ->
-        (PutEntityTypeResult.t,
-          [ `AWS of PutEntityTypeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutEntityTypeResult.t, PutEntityTypeResult.error) Result.t Lwt.t
 val put_event_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEventTypeRequest.t ->
-        (PutEventTypeResult.t,
-          [ `AWS of PutEventTypeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutEventTypeResult.t, PutEventTypeResult.error) Result.t Lwt.t
 val put_external_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutExternalModelRequest.t ->
-        (PutExternalModelResult.t,
-          [ `AWS of PutExternalModelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutExternalModelResult.t, PutExternalModelResult.error) Result.t
+          Lwt.t
 val put_k_m_s_encryption_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutKMSEncryptionKeyRequest.t ->
-        (PutKMSEncryptionKeyResult.t,
-          [ `AWS of PutKMSEncryptionKeyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutKMSEncryptionKeyResult.t, PutKMSEncryptionKeyResult.error)
+          Result.t Lwt.t
 val put_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLabelRequest.t ->
-        (PutLabelResult.t,
-          [ `AWS of PutLabelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutLabelResult.t, PutLabelResult.error) Result.t Lwt.t
 val put_outcome :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutOutcomeRequest.t ->
-        (PutOutcomeResult.t,
-          [ `AWS of PutOutcomeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutOutcomeResult.t, PutOutcomeResult.error) Result.t Lwt.t
 val send_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendEventRequest.t ->
-        (SendEventResult.t,
-          [ `AWS of SendEventResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendEventResult.t, SendEventResult.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t Lwt.t
 val update_detector_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDetectorVersionRequest.t ->
-        (UpdateDetectorVersionResult.t,
-          [ `AWS of UpdateDetectorVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDetectorVersionResult.t, UpdateDetectorVersionResult.error)
+          Result.t Lwt.t
 val update_detector_version_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDetectorVersionMetadataRequest.t ->
         (UpdateDetectorVersionMetadataResult.t,
-          [ `AWS of UpdateDetectorVersionMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDetectorVersionMetadataResult.error) Result.t Lwt.t
 val update_detector_version_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDetectorVersionStatusRequest.t ->
         (UpdateDetectorVersionStatusResult.t,
-          [ `AWS of UpdateDetectorVersionStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDetectorVersionStatusResult.error) Result.t Lwt.t
 val update_event_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEventLabelRequest.t ->
-        (UpdateEventLabelResult.t,
-          [ `AWS of UpdateEventLabelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEventLabelResult.t, UpdateEventLabelResult.error) Result.t
+          Lwt.t
 val update_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateModelRequest.t ->
-        (UpdateModelResult.t,
-          [ `AWS of UpdateModelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateModelResult.t, UpdateModelResult.error) Result.t Lwt.t
 val update_model_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateModelVersionRequest.t ->
-        (UpdateModelVersionResult.t,
-          [ `AWS of UpdateModelVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateModelVersionResult.t, UpdateModelVersionResult.error) Result.t
+          Lwt.t
 val update_model_version_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateModelVersionStatusRequest.t ->
         (UpdateModelVersionStatusResult.t,
-          [ `AWS of UpdateModelVersionStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateModelVersionStatusResult.error) Result.t Lwt.t
 val update_rule_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRuleMetadataRequest.t ->
-        (UpdateRuleMetadataResult.t,
-          [ `AWS of UpdateRuleMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRuleMetadataResult.t, UpdateRuleMetadataResult.error) Result.t
+          Lwt.t
 val update_rule_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRuleVersionRequest.t ->
-        (UpdateRuleVersionResult.t,
-          [ `AWS of UpdateRuleVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRuleVersionResult.t, UpdateRuleVersionResult.error) Result.t
+          Lwt.t
 val update_variable :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVariableRequest.t ->
-        (UpdateVariableResult.t,
-          [ `AWS of UpdateVariableResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVariableResult.t, UpdateVariableResult.error) Result.t Lwt.t

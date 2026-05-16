@@ -5,918 +5,685 @@ val accept_reserved_node_exchange :
     ?cfg:Awso.Cfg.t ->
       AcceptReservedNodeExchangeInputMessage.t ->
         (AcceptReservedNodeExchangeOutputMessage.t,
-          [ `AWS of AcceptReservedNodeExchangeOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AcceptReservedNodeExchangeOutputMessage.error) Result.t
           Async.Deferred.t
 val add_partner :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PartnerIntegrationInputMessage.t ->
         (PartnerIntegrationOutputMessage.t,
-          [ `AWS of PartnerIntegrationOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PartnerIntegrationOutputMessage.error) Result.t Async.Deferred.t
 val associate_data_share_consumer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateDataShareConsumerMessage.t ->
-        (DataShare.t,
-          [ `AWS of DataShare.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DataShare.t, DataShare.error) Result.t Async.Deferred.t
 val authorize_cluster_security_group_ingress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeClusterSecurityGroupIngressMessage.t ->
         (AuthorizeClusterSecurityGroupIngressResult.t,
-          [ `AWS of AuthorizeClusterSecurityGroupIngressResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AuthorizeClusterSecurityGroupIngressResult.error) Result.t
           Async.Deferred.t
 val authorize_data_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeDataShareMessage.t ->
-        (DataShare.t,
-          [ `AWS of DataShare.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DataShare.t, DataShare.error) Result.t Async.Deferred.t
 val authorize_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeEndpointAccessMessage.t ->
-        (EndpointAuthorization.t,
-          [ `AWS of EndpointAuthorization.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EndpointAuthorization.t, EndpointAuthorization.error) Result.t
           Async.Deferred.t
 val authorize_snapshot_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeSnapshotAccessMessage.t ->
         (AuthorizeSnapshotAccessResult.t,
-          [ `AWS of AuthorizeSnapshotAccessResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AuthorizeSnapshotAccessResult.error) Result.t Async.Deferred.t
 val batch_delete_cluster_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteClusterSnapshotsRequest.t ->
         (BatchDeleteClusterSnapshotsResult.t,
-          [ `AWS of BatchDeleteClusterSnapshotsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchDeleteClusterSnapshotsResult.error) Result.t Async.Deferred.t
 val batch_modify_cluster_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchModifyClusterSnapshotsMessage.t ->
         (BatchModifyClusterSnapshotsOutputMessage.t,
-          [ `AWS of BatchModifyClusterSnapshotsOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchModifyClusterSnapshotsOutputMessage.error) Result.t
           Async.Deferred.t
 val cancel_resize :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelResizeMessage.t ->
-        (ResizeProgressMessage.t,
-          [ `AWS of ResizeProgressMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResizeProgressMessage.t, ResizeProgressMessage.error) Result.t
           Async.Deferred.t
 val copy_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyClusterSnapshotMessage.t ->
-        (CopyClusterSnapshotResult.t,
-          [ `AWS of CopyClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CopyClusterSnapshotResult.t, CopyClusterSnapshotResult.error)
+          Result.t Async.Deferred.t
 val create_authentication_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAuthenticationProfileMessage.t ->
         (CreateAuthenticationProfileResult.t,
-          [ `AWS of CreateAuthenticationProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateAuthenticationProfileResult.error) Result.t Async.Deferred.t
 val create_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterMessage.t ->
-        (CreateClusterResult.t,
-          [ `AWS of CreateClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateClusterResult.t, CreateClusterResult.error) Result.t
           Async.Deferred.t
 val create_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterParameterGroupMessage.t ->
         (CreateClusterParameterGroupResult.t,
-          [ `AWS of CreateClusterParameterGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateClusterParameterGroupResult.error) Result.t Async.Deferred.t
 val create_cluster_security_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterSecurityGroupMessage.t ->
         (CreateClusterSecurityGroupResult.t,
-          [ `AWS of CreateClusterSecurityGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateClusterSecurityGroupResult.error) Result.t Async.Deferred.t
 val create_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterSnapshotMessage.t ->
-        (CreateClusterSnapshotResult.t,
-          [ `AWS of CreateClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateClusterSnapshotResult.t, CreateClusterSnapshotResult.error)
+          Result.t Async.Deferred.t
 val create_cluster_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterSubnetGroupMessage.t ->
         (CreateClusterSubnetGroupResult.t,
-          [ `AWS of CreateClusterSubnetGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateClusterSubnetGroupResult.error) Result.t Async.Deferred.t
 val create_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEndpointAccessMessage.t ->
-        (EndpointAccess.t,
-          [ `AWS of EndpointAccess.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EndpointAccess.t, EndpointAccess.error) Result.t Async.Deferred.t
 val create_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEventSubscriptionMessage.t ->
         (CreateEventSubscriptionResult.t,
-          [ `AWS of CreateEventSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateEventSubscriptionResult.error) Result.t Async.Deferred.t
 val create_hsm_client_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateHsmClientCertificateMessage.t ->
         (CreateHsmClientCertificateResult.t,
-          [ `AWS of CreateHsmClientCertificateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateHsmClientCertificateResult.error) Result.t Async.Deferred.t
 val create_hsm_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateHsmConfigurationMessage.t ->
-        (CreateHsmConfigurationResult.t,
-          [ `AWS of CreateHsmConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateHsmConfigurationResult.t, CreateHsmConfigurationResult.error)
+          Result.t Async.Deferred.t
 val create_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateScheduledActionMessage.t ->
-        (ScheduledAction.t,
-          [ `AWS of ScheduledAction.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ScheduledAction.t, ScheduledAction.error) Result.t Async.Deferred.t
 val create_snapshot_copy_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotCopyGrantMessage.t ->
         (CreateSnapshotCopyGrantResult.t,
-          [ `AWS of CreateSnapshotCopyGrantResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateSnapshotCopyGrantResult.error) Result.t Async.Deferred.t
 val create_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotScheduleMessage.t ->
-        (SnapshotSchedule.t,
-          [ `AWS of SnapshotSchedule.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SnapshotSchedule.t, SnapshotSchedule.error) Result.t
           Async.Deferred.t
 val create_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateTagsMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      CreateTagsMessage.t -> (unit, unit) Result.t Async.Deferred.t
 val create_usage_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUsageLimitMessage.t ->
-        (UsageLimit.t,
-          [ `AWS of UsageLimit.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UsageLimit.t, UsageLimit.error) Result.t Async.Deferred.t
 val deauthorize_data_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeauthorizeDataShareMessage.t ->
-        (DataShare.t,
-          [ `AWS of DataShare.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DataShare.t, DataShare.error) Result.t Async.Deferred.t
 val delete_authentication_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAuthenticationProfileMessage.t ->
         (DeleteAuthenticationProfileResult.t,
-          [ `AWS of DeleteAuthenticationProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteAuthenticationProfileResult.error) Result.t Async.Deferred.t
 val delete_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterMessage.t ->
-        (DeleteClusterResult.t,
-          [ `AWS of DeleteClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteClusterResult.t, DeleteClusterResult.error) Result.t
           Async.Deferred.t
 val delete_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterParameterGroupMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_cluster_security_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterSecurityGroupMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterSnapshotMessage.t ->
-        (DeleteClusterSnapshotResult.t,
-          [ `AWS of DeleteClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteClusterSnapshotResult.t, DeleteClusterSnapshotResult.error)
+          Result.t Async.Deferred.t
 val delete_cluster_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterSubnetGroupMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEndpointAccessMessage.t ->
-        (EndpointAccess.t,
-          [ `AWS of EndpointAccess.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EndpointAccess.t, EndpointAccess.error) Result.t Async.Deferred.t
 val delete_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventSubscriptionMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_hsm_client_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHsmClientCertificateMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_hsm_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHsmConfigurationMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_partner :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PartnerIntegrationInputMessage.t ->
         (PartnerIntegrationOutputMessage.t,
-          [ `AWS of PartnerIntegrationOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PartnerIntegrationOutputMessage.error) Result.t Async.Deferred.t
 val delete_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScheduledActionMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_snapshot_copy_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSnapshotCopyGrantMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSnapshotScheduleMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteTagsMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteTagsMessage.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_usage_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteUsageLimitMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteUsageLimitMessage.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_account_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountAttributesMessage.t ->
-        (AccountAttributeList.t,
-          [ `AWS of AccountAttributeList.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AccountAttributeList.t, AccountAttributeList.error) Result.t
           Async.Deferred.t
 val describe_authentication_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAuthenticationProfilesMessage.t ->
         (DescribeAuthenticationProfilesResult.t,
-          [ `AWS of DescribeAuthenticationProfilesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAuthenticationProfilesResult.error) Result.t
           Async.Deferred.t
 val describe_cluster_db_revisions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterDbRevisionsMessage.t ->
-        (ClusterDbRevisionsMessage.t,
-          [ `AWS of ClusterDbRevisionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ClusterDbRevisionsMessage.t, ClusterDbRevisionsMessage.error)
+          Result.t Async.Deferred.t
 val describe_cluster_parameter_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterParameterGroupsMessage.t ->
         (ClusterParameterGroupsMessage.t,
-          [ `AWS of ClusterParameterGroupsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ClusterParameterGroupsMessage.error) Result.t Async.Deferred.t
 val describe_cluster_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterParametersMessage.t ->
-        (ClusterParameterGroupDetails.t,
-          [ `AWS of ClusterParameterGroupDetails.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ClusterParameterGroupDetails.t, ClusterParameterGroupDetails.error)
+          Result.t Async.Deferred.t
 val describe_cluster_security_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterSecurityGroupsMessage.t ->
-        (ClusterSecurityGroupMessage.t,
-          [ `AWS of ClusterSecurityGroupMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ClusterSecurityGroupMessage.t, ClusterSecurityGroupMessage.error)
+          Result.t Async.Deferred.t
 val describe_cluster_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterSnapshotsMessage.t ->
-        (SnapshotMessage.t,
-          [ `AWS of SnapshotMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SnapshotMessage.t, SnapshotMessage.error) Result.t Async.Deferred.t
 val describe_cluster_subnet_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterSubnetGroupsMessage.t ->
-        (ClusterSubnetGroupMessage.t,
-          [ `AWS of ClusterSubnetGroupMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ClusterSubnetGroupMessage.t, ClusterSubnetGroupMessage.error)
+          Result.t Async.Deferred.t
 val describe_cluster_tracks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterTracksMessage.t ->
-        (TrackListMessage.t,
-          [ `AWS of TrackListMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TrackListMessage.t, TrackListMessage.error) Result.t
           Async.Deferred.t
 val describe_cluster_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterVersionsMessage.t ->
-        (ClusterVersionsMessage.t,
-          [ `AWS of ClusterVersionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ClusterVersionsMessage.t, ClusterVersionsMessage.error) Result.t
           Async.Deferred.t
 val describe_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClustersMessage.t ->
-        (ClustersMessage.t,
-          [ `AWS of ClustersMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ClustersMessage.t, ClustersMessage.error) Result.t Async.Deferred.t
 val describe_data_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDataSharesMessage.t ->
-        (DescribeDataSharesResult.t,
-          [ `AWS of DescribeDataSharesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDataSharesResult.t, DescribeDataSharesResult.error) Result.t
           Async.Deferred.t
 val describe_data_shares_for_consumer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDataSharesForConsumerMessage.t ->
         (DescribeDataSharesForConsumerResult.t,
-          [ `AWS of DescribeDataSharesForConsumerResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDataSharesForConsumerResult.error) Result.t
           Async.Deferred.t
 val describe_data_shares_for_producer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDataSharesForProducerMessage.t ->
         (DescribeDataSharesForProducerResult.t,
-          [ `AWS of DescribeDataSharesForProducerResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDataSharesForProducerResult.error) Result.t
           Async.Deferred.t
 val describe_default_cluster_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDefaultClusterParametersMessage.t ->
         (DescribeDefaultClusterParametersResult.t,
-          [ `AWS of DescribeDefaultClusterParametersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDefaultClusterParametersResult.error) Result.t
           Async.Deferred.t
 val describe_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointAccessMessage.t ->
-        (EndpointAccessList.t,
-          [ `AWS of EndpointAccessList.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EndpointAccessList.t, EndpointAccessList.error) Result.t
           Async.Deferred.t
 val describe_endpoint_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointAuthorizationMessage.t ->
-        (EndpointAuthorizationList.t,
-          [ `AWS of EndpointAuthorizationList.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EndpointAuthorizationList.t, EndpointAuthorizationList.error)
+          Result.t Async.Deferred.t
 val describe_event_categories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventCategoriesMessage.t ->
-        (EventCategoriesMessage.t,
-          [ `AWS of EventCategoriesMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EventCategoriesMessage.t, EventCategoriesMessage.error) Result.t
           Async.Deferred.t
 val describe_event_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventSubscriptionsMessage.t ->
-        (EventSubscriptionsMessage.t,
-          [ `AWS of EventSubscriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EventSubscriptionsMessage.t, EventSubscriptionsMessage.error)
+          Result.t Async.Deferred.t
 val describe_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventsMessage.t ->
-        (EventsMessage.t,
-          [ `AWS of EventsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EventsMessage.t, EventsMessage.error) Result.t Async.Deferred.t
 val describe_hsm_client_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHsmClientCertificatesMessage.t ->
-        (HsmClientCertificateMessage.t,
-          [ `AWS of HsmClientCertificateMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (HsmClientCertificateMessage.t, HsmClientCertificateMessage.error)
+          Result.t Async.Deferred.t
 val describe_hsm_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHsmConfigurationsMessage.t ->
-        (HsmConfigurationMessage.t,
-          [ `AWS of HsmConfigurationMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (HsmConfigurationMessage.t, HsmConfigurationMessage.error) Result.t
           Async.Deferred.t
 val describe_logging_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoggingStatusMessage.t ->
-        (LoggingStatus.t,
-          [ `AWS of LoggingStatus.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (LoggingStatus.t, LoggingStatus.error) Result.t Async.Deferred.t
 val describe_node_configuration_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNodeConfigurationOptionsMessage.t ->
         (NodeConfigurationOptionsMessage.t,
-          [ `AWS of NodeConfigurationOptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          NodeConfigurationOptionsMessage.error) Result.t Async.Deferred.t
 val describe_orderable_cluster_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrderableClusterOptionsMessage.t ->
         (OrderableClusterOptionsMessage.t,
-          [ `AWS of OrderableClusterOptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          OrderableClusterOptionsMessage.error) Result.t Async.Deferred.t
 val describe_partners :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePartnersInputMessage.t ->
         (DescribePartnersOutputMessage.t,
-          [ `AWS of DescribePartnersOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribePartnersOutputMessage.error) Result.t Async.Deferred.t
 val describe_reserved_node_exchange_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedNodeExchangeStatusInputMessage.t ->
         (DescribeReservedNodeExchangeStatusOutputMessage.t,
-          [ `AWS of DescribeReservedNodeExchangeStatusOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeReservedNodeExchangeStatusOutputMessage.error) Result.t
           Async.Deferred.t
 val describe_reserved_node_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedNodeOfferingsMessage.t ->
-        (ReservedNodeOfferingsMessage.t,
-          [ `AWS of ReservedNodeOfferingsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ReservedNodeOfferingsMessage.t, ReservedNodeOfferingsMessage.error)
+          Result.t Async.Deferred.t
 val describe_reserved_nodes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedNodesMessage.t ->
-        (ReservedNodesMessage.t,
-          [ `AWS of ReservedNodesMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ReservedNodesMessage.t, ReservedNodesMessage.error) Result.t
           Async.Deferred.t
 val describe_resize :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResizeMessage.t ->
-        (ResizeProgressMessage.t,
-          [ `AWS of ResizeProgressMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResizeProgressMessage.t, ResizeProgressMessage.error) Result.t
           Async.Deferred.t
 val describe_scheduled_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScheduledActionsMessage.t ->
-        (ScheduledActionsMessage.t,
-          [ `AWS of ScheduledActionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ScheduledActionsMessage.t, ScheduledActionsMessage.error) Result.t
           Async.Deferred.t
 val describe_snapshot_copy_grants :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotCopyGrantsMessage.t ->
-        (SnapshotCopyGrantMessage.t,
-          [ `AWS of SnapshotCopyGrantMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SnapshotCopyGrantMessage.t, SnapshotCopyGrantMessage.error) Result.t
           Async.Deferred.t
 val describe_snapshot_schedules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotSchedulesMessage.t ->
         (DescribeSnapshotSchedulesOutputMessage.t,
-          [ `AWS of DescribeSnapshotSchedulesOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeSnapshotSchedulesOutputMessage.error) Result.t
           Async.Deferred.t
 val describe_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (CustomerStorageMessage.t,
-          [ `AWS of CustomerStorageMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CustomerStorageMessage.t, CustomerStorageMessage.error) Result.t
           Async.Deferred.t
 val describe_table_restore_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTableRestoreStatusMessage.t ->
-        (TableRestoreStatusMessage.t,
-          [ `AWS of TableRestoreStatusMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (TableRestoreStatusMessage.t, TableRestoreStatusMessage.error)
+          Result.t Async.Deferred.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsMessage.t ->
-        (TaggedResourceListMessage.t,
-          [ `AWS of TaggedResourceListMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (TaggedResourceListMessage.t, TaggedResourceListMessage.error)
+          Result.t Async.Deferred.t
 val describe_usage_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUsageLimitsMessage.t ->
-        (UsageLimitList.t,
-          [ `AWS of UsageLimitList.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UsageLimitList.t, UsageLimitList.error) Result.t Async.Deferred.t
 val disable_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableLoggingMessage.t ->
-        (LoggingStatus.t,
-          [ `AWS of LoggingStatus.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (LoggingStatus.t, LoggingStatus.error) Result.t Async.Deferred.t
 val disable_snapshot_copy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableSnapshotCopyMessage.t ->
-        (DisableSnapshotCopyResult.t,
-          [ `AWS of DisableSnapshotCopyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisableSnapshotCopyResult.t, DisableSnapshotCopyResult.error)
+          Result.t Async.Deferred.t
 val disassociate_data_share_consumer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateDataShareConsumerMessage.t ->
-        (DataShare.t,
-          [ `AWS of DataShare.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DataShare.t, DataShare.error) Result.t Async.Deferred.t
 val enable_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableLoggingMessage.t ->
-        (LoggingStatus.t,
-          [ `AWS of LoggingStatus.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (LoggingStatus.t, LoggingStatus.error) Result.t Async.Deferred.t
 val enable_snapshot_copy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableSnapshotCopyMessage.t ->
-        (EnableSnapshotCopyResult.t,
-          [ `AWS of EnableSnapshotCopyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableSnapshotCopyResult.t, EnableSnapshotCopyResult.error) Result.t
           Async.Deferred.t
 val get_cluster_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetClusterCredentialsMessage.t ->
-        (ClusterCredentials.t,
-          [ `AWS of ClusterCredentials.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ClusterCredentials.t, ClusterCredentials.error) Result.t
           Async.Deferred.t
 val get_reserved_node_exchange_configuration_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReservedNodeExchangeConfigurationOptionsInputMessage.t ->
         (GetReservedNodeExchangeConfigurationOptionsOutputMessage.t,
-          [
-            `AWS of
-              GetReservedNodeExchangeConfigurationOptionsOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetReservedNodeExchangeConfigurationOptionsOutputMessage.error)
+          Result.t Async.Deferred.t
 val get_reserved_node_exchange_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReservedNodeExchangeOfferingsInputMessage.t ->
         (GetReservedNodeExchangeOfferingsOutputMessage.t,
-          [ `AWS of GetReservedNodeExchangeOfferingsOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetReservedNodeExchangeOfferingsOutputMessage.error) Result.t
           Async.Deferred.t
 val modify_aqua_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyAquaInputMessage.t ->
-        (ModifyAquaOutputMessage.t,
-          [ `AWS of ModifyAquaOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyAquaOutputMessage.t, ModifyAquaOutputMessage.error) Result.t
           Async.Deferred.t
 val modify_authentication_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyAuthenticationProfileMessage.t ->
         (ModifyAuthenticationProfileResult.t,
-          [ `AWS of ModifyAuthenticationProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyAuthenticationProfileResult.error) Result.t Async.Deferred.t
 val modify_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterMessage.t ->
-        (ModifyClusterResult.t,
-          [ `AWS of ModifyClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyClusterResult.t, ModifyClusterResult.error) Result.t
           Async.Deferred.t
 val modify_cluster_db_revision :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterDbRevisionMessage.t ->
         (ModifyClusterDbRevisionResult.t,
-          [ `AWS of ModifyClusterDbRevisionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyClusterDbRevisionResult.error) Result.t Async.Deferred.t
 val modify_cluster_iam_roles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterIamRolesMessage.t ->
-        (ModifyClusterIamRolesResult.t,
-          [ `AWS of ModifyClusterIamRolesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyClusterIamRolesResult.t, ModifyClusterIamRolesResult.error)
+          Result.t Async.Deferred.t
 val modify_cluster_maintenance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterMaintenanceMessage.t ->
         (ModifyClusterMaintenanceResult.t,
-          [ `AWS of ModifyClusterMaintenanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyClusterMaintenanceResult.error) Result.t Async.Deferred.t
 val modify_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterParameterGroupMessage.t ->
         (ClusterParameterGroupNameMessage.t,
-          [ `AWS of ClusterParameterGroupNameMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ClusterParameterGroupNameMessage.error) Result.t Async.Deferred.t
 val modify_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterSnapshotMessage.t ->
-        (ModifyClusterSnapshotResult.t,
-          [ `AWS of ModifyClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyClusterSnapshotResult.t, ModifyClusterSnapshotResult.error)
+          Result.t Async.Deferred.t
 val modify_cluster_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterSnapshotScheduleMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val modify_cluster_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterSubnetGroupMessage.t ->
         (ModifyClusterSubnetGroupResult.t,
-          [ `AWS of ModifyClusterSubnetGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyClusterSubnetGroupResult.error) Result.t Async.Deferred.t
 val modify_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyEndpointAccessMessage.t ->
-        (EndpointAccess.t,
-          [ `AWS of EndpointAccess.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EndpointAccess.t, EndpointAccess.error) Result.t Async.Deferred.t
 val modify_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyEventSubscriptionMessage.t ->
         (ModifyEventSubscriptionResult.t,
-          [ `AWS of ModifyEventSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyEventSubscriptionResult.error) Result.t Async.Deferred.t
 val modify_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyScheduledActionMessage.t ->
-        (ScheduledAction.t,
-          [ `AWS of ScheduledAction.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ScheduledAction.t, ScheduledAction.error) Result.t Async.Deferred.t
 val modify_snapshot_copy_retention_period :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySnapshotCopyRetentionPeriodMessage.t ->
         (ModifySnapshotCopyRetentionPeriodResult.t,
-          [ `AWS of ModifySnapshotCopyRetentionPeriodResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ModifySnapshotCopyRetentionPeriodResult.error) Result.t
           Async.Deferred.t
 val modify_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySnapshotScheduleMessage.t ->
-        (SnapshotSchedule.t,
-          [ `AWS of SnapshotSchedule.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SnapshotSchedule.t, SnapshotSchedule.error) Result.t
           Async.Deferred.t
 val modify_usage_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyUsageLimitMessage.t ->
-        (UsageLimit.t,
-          [ `AWS of UsageLimit.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UsageLimit.t, UsageLimit.error) Result.t Async.Deferred.t
 val pause_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PauseClusterMessage.t ->
-        (PauseClusterResult.t,
-          [ `AWS of PauseClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PauseClusterResult.t, PauseClusterResult.error) Result.t
           Async.Deferred.t
 val purchase_reserved_node_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseReservedNodeOfferingMessage.t ->
         (PurchaseReservedNodeOfferingResult.t,
-          [ `AWS of PurchaseReservedNodeOfferingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PurchaseReservedNodeOfferingResult.error) Result.t Async.Deferred.t
 val reboot_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootClusterMessage.t ->
-        (RebootClusterResult.t,
-          [ `AWS of RebootClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RebootClusterResult.t, RebootClusterResult.error) Result.t
           Async.Deferred.t
 val reject_data_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectDataShareMessage.t ->
-        (DataShare.t,
-          [ `AWS of DataShare.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DataShare.t, DataShare.error) Result.t Async.Deferred.t
 val reset_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetClusterParameterGroupMessage.t ->
         (ClusterParameterGroupNameMessage.t,
-          [ `AWS of ClusterParameterGroupNameMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ClusterParameterGroupNameMessage.error) Result.t Async.Deferred.t
 val resize_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResizeClusterMessage.t ->
-        (ResizeClusterResult.t,
-          [ `AWS of ResizeClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResizeClusterResult.t, ResizeClusterResult.error) Result.t
           Async.Deferred.t
 val restore_from_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreFromClusterSnapshotMessage.t ->
         (RestoreFromClusterSnapshotResult.t,
-          [ `AWS of RestoreFromClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RestoreFromClusterSnapshotResult.error) Result.t Async.Deferred.t
 val restore_table_from_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreTableFromClusterSnapshotMessage.t ->
         (RestoreTableFromClusterSnapshotResult.t,
-          [ `AWS of RestoreTableFromClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RestoreTableFromClusterSnapshotResult.error) Result.t
           Async.Deferred.t
 val resume_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResumeClusterMessage.t ->
-        (ResumeClusterResult.t,
-          [ `AWS of ResumeClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResumeClusterResult.t, ResumeClusterResult.error) Result.t
           Async.Deferred.t
 val revoke_cluster_security_group_ingress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeClusterSecurityGroupIngressMessage.t ->
         (RevokeClusterSecurityGroupIngressResult.t,
-          [ `AWS of RevokeClusterSecurityGroupIngressResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RevokeClusterSecurityGroupIngressResult.error) Result.t
           Async.Deferred.t
 val revoke_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeEndpointAccessMessage.t ->
-        (EndpointAuthorization.t,
-          [ `AWS of EndpointAuthorization.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EndpointAuthorization.t, EndpointAuthorization.error) Result.t
           Async.Deferred.t
 val revoke_snapshot_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeSnapshotAccessMessage.t ->
-        (RevokeSnapshotAccessResult.t,
-          [ `AWS of RevokeSnapshotAccessResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RevokeSnapshotAccessResult.t, RevokeSnapshotAccessResult.error)
+          Result.t Async.Deferred.t
 val rotate_encryption_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RotateEncryptionKeyMessage.t ->
-        (RotateEncryptionKeyResult.t,
-          [ `AWS of RotateEncryptionKeyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RotateEncryptionKeyResult.t, RotateEncryptionKeyResult.error)
+          Result.t Async.Deferred.t
 val update_partner_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePartnerStatusInputMessage.t ->
         (PartnerIntegrationOutputMessage.t,
-          [ `AWS of PartnerIntegrationOutputMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PartnerIntegrationOutputMessage.error) Result.t Async.Deferred.t

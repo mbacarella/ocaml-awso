@@ -4,27 +4,23 @@ val describe_job_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobExecutionRequest.t ->
-        (DescribeJobExecutionResponse.t,
-          [ `AWS of DescribeJobExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeJobExecutionResponse.t, DescribeJobExecutionResponse.error)
+          Result.t Lwt.t
 val get_pending_job_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPendingJobExecutionsRequest.t ->
         (GetPendingJobExecutionsResponse.t,
-          [ `AWS of GetPendingJobExecutionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPendingJobExecutionsResponse.error) Result.t Lwt.t
 val start_next_pending_job_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartNextPendingJobExecutionRequest.t ->
         (StartNextPendingJobExecutionResponse.t,
-          [ `AWS of StartNextPendingJobExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartNextPendingJobExecutionResponse.error) Result.t Lwt.t
 val update_job_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobExecutionRequest.t ->
-        (UpdateJobExecutionResponse.t,
-          [ `AWS of UpdateJobExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateJobExecutionResponse.t, UpdateJobExecutionResponse.error)
+          Result.t Lwt.t

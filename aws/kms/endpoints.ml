@@ -578,269 +578,282 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "TrentService.Verify")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CancelKeyDeletion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelKeyDeletionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CancelKeyDeletionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelKeyDeletionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CancelKeyDeletionResponse.error_of_json))
   | ConnectCustomKeyStore ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ConnectCustomKeyStoreResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ConnectCustomKeyStoreResponse.of_json json))
-  | CreateAlias -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ConnectCustomKeyStoreResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ConnectCustomKeyStoreResponse.error_of_json))
+  | CreateAlias -> if is_success then Ok () else Error (parse_aws_error None)
   | CreateCustomKeyStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCustomKeyStoreResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateCustomKeyStoreResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCustomKeyStoreResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateCustomKeyStoreResponse.error_of_json))
   | CreateGrant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGrantResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateGrantResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGrantResponse.of_json json)
+      else Error (parse_aws_error (Some CreateGrantResponse.error_of_json))
   | CreateKey ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateKeyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateKeyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateKeyResponse.of_json json)
+      else Error (parse_aws_error (Some CreateKeyResponse.error_of_json))
   | Decrypt ->
-      (match resp with
-       | Error err -> handle_error err (Some DecryptResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DecryptResponse.of_json json))
-  | DeleteAlias -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DecryptResponse.of_json json)
+      else Error (parse_aws_error (Some DecryptResponse.error_of_json))
+  | DeleteAlias -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCustomKeyStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteCustomKeyStoreResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteCustomKeyStoreResponse.of_json json))
-  | DeleteImportedKeyMaterial -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteCustomKeyStoreResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteCustomKeyStoreResponse.error_of_json))
+  | DeleteImportedKeyMaterial ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeCustomKeyStores ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeCustomKeyStoresResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeCustomKeyStoresResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCustomKeyStoresResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCustomKeyStoresResponse.error_of_json))
   | DescribeKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeKeyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeKeyResponse.of_json json))
-  | DisableKey -> Ok ()
-  | DisableKeyRotation -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeKeyResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeKeyResponse.error_of_json))
+  | DisableKey -> if is_success then Ok () else Error (parse_aws_error None)
+  | DisableKeyRotation ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DisconnectCustomKeyStore ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisconnectCustomKeyStoreResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DisconnectCustomKeyStoreResponse.of_json json))
-  | EnableKey -> Ok ()
-  | EnableKeyRotation -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisconnectCustomKeyStoreResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisconnectCustomKeyStoreResponse.error_of_json))
+  | EnableKey -> if is_success then Ok () else Error (parse_aws_error None)
+  | EnableKeyRotation ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | Encrypt ->
-      (match resp with
-       | Error err -> handle_error err (Some EncryptResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (EncryptResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EncryptResponse.of_json json)
+      else Error (parse_aws_error (Some EncryptResponse.error_of_json))
   | GenerateDataKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GenerateDataKeyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GenerateDataKeyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GenerateDataKeyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GenerateDataKeyResponse.error_of_json))
   | GenerateDataKeyPair ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GenerateDataKeyPairResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GenerateDataKeyPairResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GenerateDataKeyPairResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GenerateDataKeyPairResponse.error_of_json))
   | GenerateDataKeyPairWithoutPlaintext ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateDataKeyPairWithoutPlaintextResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GenerateDataKeyPairWithoutPlaintextResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GenerateDataKeyPairWithoutPlaintextResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateDataKeyPairWithoutPlaintextResponse.error_of_json))
   | GenerateDataKeyWithoutPlaintext ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateDataKeyWithoutPlaintextResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GenerateDataKeyWithoutPlaintextResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GenerateDataKeyWithoutPlaintextResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateDataKeyWithoutPlaintextResponse.error_of_json))
   | GenerateRandom ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GenerateRandomResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GenerateRandomResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GenerateRandomResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GenerateRandomResponse.error_of_json))
   | GetKeyPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetKeyPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetKeyPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetKeyPolicyResponse.of_json json)
+      else Error (parse_aws_error (Some GetKeyPolicyResponse.error_of_json))
   | GetKeyRotationStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetKeyRotationStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetKeyRotationStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetKeyRotationStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetKeyRotationStatusResponse.error_of_json))
   | GetParametersForImport ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetParametersForImportResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetParametersForImportResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetParametersForImportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetParametersForImportResponse.error_of_json))
   | GetPublicKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPublicKeyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetPublicKeyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPublicKeyResponse.of_json json)
+      else Error (parse_aws_error (Some GetPublicKeyResponse.error_of_json))
   | ImportKeyMaterial ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ImportKeyMaterialResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ImportKeyMaterialResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportKeyMaterialResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ImportKeyMaterialResponse.error_of_json))
   | ListAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAliasesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAliasesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAliasesResponse.of_json json)
+      else Error (parse_aws_error (Some ListAliasesResponse.error_of_json))
   | ListGrants ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGrantsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListGrantsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGrantsResponse.of_json json)
+      else Error (parse_aws_error (Some ListGrantsResponse.error_of_json))
   | ListKeyPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListKeyPoliciesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListKeyPoliciesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListKeyPoliciesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListKeyPoliciesResponse.error_of_json))
   | ListKeys ->
-      (match resp with
-       | Error err -> handle_error err (Some ListKeysResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListKeysResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListKeysResponse.of_json json)
+      else Error (parse_aws_error (Some ListKeysResponse.error_of_json))
   | ListResourceTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListResourceTagsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListResourceTagsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourceTagsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListResourceTagsResponse.error_of_json))
   | ListRetirableGrants ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGrantsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListGrantsResponse.of_json json))
-  | PutKeyPolicy -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGrantsResponse.of_json json)
+      else Error (parse_aws_error (Some ListGrantsResponse.error_of_json))
+  | PutKeyPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ReEncrypt ->
-      (match resp with
-       | Error err -> handle_error err (Some ReEncryptResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ReEncryptResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReEncryptResponse.of_json json)
+      else Error (parse_aws_error (Some ReEncryptResponse.error_of_json))
   | ReplicateKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ReplicateKeyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ReplicateKeyResponse.of_json json))
-  | RetireGrant -> Ok ()
-  | RevokeGrant -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReplicateKeyResponse.of_json json)
+      else Error (parse_aws_error (Some ReplicateKeyResponse.error_of_json))
+  | RetireGrant -> if is_success then Ok () else Error (parse_aws_error None)
+  | RevokeGrant -> if is_success then Ok () else Error (parse_aws_error None)
   | ScheduleKeyDeletion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ScheduleKeyDeletionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ScheduleKeyDeletionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ScheduleKeyDeletionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ScheduleKeyDeletionResponse.error_of_json))
   | Sign ->
-      (match resp with
-       | Error err -> handle_error err (Some SignResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (SignResponse.of_json json))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
-  | UpdateAlias -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SignResponse.of_json json)
+      else Error (parse_aws_error (Some SignResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAlias -> if is_success then Ok () else Error (parse_aws_error None)
   | UpdateCustomKeyStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateCustomKeyStoreResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateCustomKeyStoreResponse.of_json json))
-  | UpdateKeyDescription -> Ok ()
-  | UpdatePrimaryRegion -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCustomKeyStoreResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateCustomKeyStoreResponse.error_of_json))
+  | UpdateKeyDescription ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdatePrimaryRegion ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | Verify ->
-      (match resp with
-       | Error err -> handle_error err (Some VerifyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (VerifyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (VerifyResponse.of_json json)
+      else Error (parse_aws_error (Some VerifyResponse.error_of_json))

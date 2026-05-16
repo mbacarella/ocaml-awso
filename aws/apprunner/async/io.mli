@@ -5,238 +5,186 @@ val associate_custom_domain :
     ?cfg:Awso.Cfg.t ->
       AssociateCustomDomainRequest.t ->
         (AssociateCustomDomainResponse.t,
-          [ `AWS of AssociateCustomDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateCustomDomainResponse.error) Result.t Async.Deferred.t
 val create_auto_scaling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAutoScalingConfigurationRequest.t ->
         (CreateAutoScalingConfigurationResponse.t,
-          [ `AWS of CreateAutoScalingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateAutoScalingConfigurationResponse.error) Result.t
           Async.Deferred.t
 val create_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectionRequest.t ->
-        (CreateConnectionResponse.t,
-          [ `AWS of CreateConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateConnectionResponse.t, CreateConnectionResponse.error) Result.t
           Async.Deferred.t
 val create_observability_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateObservabilityConfigurationRequest.t ->
         (CreateObservabilityConfigurationResponse.t,
-          [ `AWS of CreateObservabilityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateObservabilityConfigurationResponse.error) Result.t
           Async.Deferred.t
 val create_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceRequest.t ->
-        (CreateServiceResponse.t,
-          [ `AWS of CreateServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateServiceResponse.t, CreateServiceResponse.error) Result.t
           Async.Deferred.t
 val create_vpc_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcConnectorRequest.t ->
-        (CreateVpcConnectorResponse.t,
-          [ `AWS of CreateVpcConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateVpcConnectorResponse.t, CreateVpcConnectorResponse.error)
+          Result.t Async.Deferred.t
 val delete_auto_scaling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAutoScalingConfigurationRequest.t ->
         (DeleteAutoScalingConfigurationResponse.t,
-          [ `AWS of DeleteAutoScalingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteAutoScalingConfigurationResponse.error) Result.t
           Async.Deferred.t
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectionRequest.t ->
-        (DeleteConnectionResponse.t,
-          [ `AWS of DeleteConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteConnectionResponse.t, DeleteConnectionResponse.error) Result.t
           Async.Deferred.t
 val delete_observability_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteObservabilityConfigurationRequest.t ->
         (DeleteObservabilityConfigurationResponse.t,
-          [ `AWS of DeleteObservabilityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteObservabilityConfigurationResponse.error) Result.t
           Async.Deferred.t
 val delete_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceRequest.t ->
-        (DeleteServiceResponse.t,
-          [ `AWS of DeleteServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteServiceResponse.t, DeleteServiceResponse.error) Result.t
           Async.Deferred.t
 val delete_vpc_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcConnectorRequest.t ->
-        (DeleteVpcConnectorResponse.t,
-          [ `AWS of DeleteVpcConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteVpcConnectorResponse.t, DeleteVpcConnectorResponse.error)
+          Result.t Async.Deferred.t
 val describe_auto_scaling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAutoScalingConfigurationRequest.t ->
         (DescribeAutoScalingConfigurationResponse.t,
-          [ `AWS of DescribeAutoScalingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAutoScalingConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_custom_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomDomainsRequest.t ->
         (DescribeCustomDomainsResponse.t,
-          [ `AWS of DescribeCustomDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeCustomDomainsResponse.error) Result.t Async.Deferred.t
 val describe_observability_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeObservabilityConfigurationRequest.t ->
         (DescribeObservabilityConfigurationResponse.t,
-          [ `AWS of DescribeObservabilityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeObservabilityConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServiceRequest.t ->
-        (DescribeServiceResponse.t,
-          [ `AWS of DescribeServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeServiceResponse.t, DescribeServiceResponse.error) Result.t
           Async.Deferred.t
 val describe_vpc_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcConnectorRequest.t ->
-        (DescribeVpcConnectorResponse.t,
-          [ `AWS of DescribeVpcConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeVpcConnectorResponse.t, DescribeVpcConnectorResponse.error)
+          Result.t Async.Deferred.t
 val disassociate_custom_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateCustomDomainRequest.t ->
         (DisassociateCustomDomainResponse.t,
-          [ `AWS of DisassociateCustomDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DisassociateCustomDomainResponse.error) Result.t Async.Deferred.t
 val list_auto_scaling_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAutoScalingConfigurationsRequest.t ->
         (ListAutoScalingConfigurationsResponse.t,
-          [ `AWS of ListAutoScalingConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAutoScalingConfigurationsResponse.error) Result.t
           Async.Deferred.t
 val list_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectionsRequest.t ->
-        (ListConnectionsResponse.t,
-          [ `AWS of ListConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListConnectionsResponse.t, ListConnectionsResponse.error) Result.t
           Async.Deferred.t
 val list_observability_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObservabilityConfigurationsRequest.t ->
         (ListObservabilityConfigurationsResponse.t,
-          [ `AWS of ListObservabilityConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListObservabilityConfigurationsResponse.error) Result.t
           Async.Deferred.t
 val list_operations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOperationsRequest.t ->
-        (ListOperationsResponse.t,
-          [ `AWS of ListOperationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListOperationsResponse.t, ListOperationsResponse.error) Result.t
           Async.Deferred.t
 val list_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicesRequest.t ->
-        (ListServicesResponse.t,
-          [ `AWS of ListServicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListServicesResponse.t, ListServicesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_vpc_connectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVpcConnectorsRequest.t ->
-        (ListVpcConnectorsResponse.t,
-          [ `AWS of ListVpcConnectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListVpcConnectorsResponse.t, ListVpcConnectorsResponse.error)
+          Result.t Async.Deferred.t
 val pause_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PauseServiceRequest.t ->
-        (PauseServiceResponse.t,
-          [ `AWS of PauseServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PauseServiceResponse.t, PauseServiceResponse.error) Result.t
           Async.Deferred.t
 val resume_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResumeServiceRequest.t ->
-        (ResumeServiceResponse.t,
-          [ `AWS of ResumeServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResumeServiceResponse.t, ResumeServiceResponse.error) Result.t
           Async.Deferred.t
 val start_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDeploymentRequest.t ->
-        (StartDeploymentResponse.t,
-          [ `AWS of StartDeploymentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartDeploymentResponse.t, StartDeploymentResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceRequest.t ->
-        (UpdateServiceResponse.t,
-          [ `AWS of UpdateServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateServiceResponse.t, UpdateServiceResponse.error) Result.t
           Async.Deferred.t

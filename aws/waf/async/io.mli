@@ -4,615 +4,462 @@ val create_byte_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateByteMatchSetRequest.t ->
-        (CreateByteMatchSetResponse.t,
-          [ `AWS of CreateByteMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateByteMatchSetResponse.t, CreateByteMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val create_geo_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGeoMatchSetRequest.t ->
-        (CreateGeoMatchSetResponse.t,
-          [ `AWS of CreateGeoMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateGeoMatchSetResponse.t, CreateGeoMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val create_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIPSetRequest.t ->
-        (CreateIPSetResponse.t,
-          [ `AWS of CreateIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateIPSetResponse.t, CreateIPSetResponse.error) Result.t
           Async.Deferred.t
 val create_rate_based_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRateBasedRuleRequest.t ->
-        (CreateRateBasedRuleResponse.t,
-          [ `AWS of CreateRateBasedRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateRateBasedRuleResponse.t, CreateRateBasedRuleResponse.error)
+          Result.t Async.Deferred.t
 val create_regex_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRegexMatchSetRequest.t ->
-        (CreateRegexMatchSetResponse.t,
-          [ `AWS of CreateRegexMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateRegexMatchSetResponse.t, CreateRegexMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val create_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRegexPatternSetRequest.t ->
         (CreateRegexPatternSetResponse.t,
-          [ `AWS of CreateRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateRegexPatternSetResponse.error) Result.t Async.Deferred.t
 val create_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleRequest.t ->
-        (CreateRuleResponse.t,
-          [ `AWS of CreateRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRuleResponse.t, CreateRuleResponse.error) Result.t
           Async.Deferred.t
 val create_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleGroupRequest.t ->
-        (CreateRuleGroupResponse.t,
-          [ `AWS of CreateRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRuleGroupResponse.t, CreateRuleGroupResponse.error) Result.t
           Async.Deferred.t
 val create_size_constraint_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSizeConstraintSetRequest.t ->
         (CreateSizeConstraintSetResponse.t,
-          [ `AWS of CreateSizeConstraintSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateSizeConstraintSetResponse.error) Result.t Async.Deferred.t
 val create_sql_injection_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSqlInjectionMatchSetRequest.t ->
         (CreateSqlInjectionMatchSetResponse.t,
-          [ `AWS of CreateSqlInjectionMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateSqlInjectionMatchSetResponse.error) Result.t Async.Deferred.t
 val create_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWebACLRequest.t ->
-        (CreateWebACLResponse.t,
-          [ `AWS of CreateWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateWebACLResponse.t, CreateWebACLResponse.error) Result.t
           Async.Deferred.t
 val create_web_a_c_l_migration_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWebACLMigrationStackRequest.t ->
         (CreateWebACLMigrationStackResponse.t,
-          [ `AWS of CreateWebACLMigrationStackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateWebACLMigrationStackResponse.error) Result.t Async.Deferred.t
 val create_xss_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateXssMatchSetRequest.t ->
-        (CreateXssMatchSetResponse.t,
-          [ `AWS of CreateXssMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateXssMatchSetResponse.t, CreateXssMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val delete_byte_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteByteMatchSetRequest.t ->
-        (DeleteByteMatchSetResponse.t,
-          [ `AWS of DeleteByteMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteByteMatchSetResponse.t, DeleteByteMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val delete_geo_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGeoMatchSetRequest.t ->
-        (DeleteGeoMatchSetResponse.t,
-          [ `AWS of DeleteGeoMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteGeoMatchSetResponse.t, DeleteGeoMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val delete_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIPSetRequest.t ->
-        (DeleteIPSetResponse.t,
-          [ `AWS of DeleteIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteIPSetResponse.t, DeleteIPSetResponse.error) Result.t
           Async.Deferred.t
 val delete_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLoggingConfigurationRequest.t ->
         (DeleteLoggingConfigurationResponse.t,
-          [ `AWS of DeleteLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteLoggingConfigurationResponse.error) Result.t Async.Deferred.t
 val delete_permission_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePermissionPolicyRequest.t ->
         (DeletePermissionPolicyResponse.t,
-          [ `AWS of DeletePermissionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeletePermissionPolicyResponse.error) Result.t Async.Deferred.t
 val delete_rate_based_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRateBasedRuleRequest.t ->
-        (DeleteRateBasedRuleResponse.t,
-          [ `AWS of DeleteRateBasedRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteRateBasedRuleResponse.t, DeleteRateBasedRuleResponse.error)
+          Result.t Async.Deferred.t
 val delete_regex_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRegexMatchSetRequest.t ->
-        (DeleteRegexMatchSetResponse.t,
-          [ `AWS of DeleteRegexMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteRegexMatchSetResponse.t, DeleteRegexMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val delete_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRegexPatternSetRequest.t ->
         (DeleteRegexPatternSetResponse.t,
-          [ `AWS of DeleteRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteRegexPatternSetResponse.error) Result.t Async.Deferred.t
 val delete_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleRequest.t ->
-        (DeleteRuleResponse.t,
-          [ `AWS of DeleteRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteRuleResponse.t, DeleteRuleResponse.error) Result.t
           Async.Deferred.t
 val delete_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleGroupRequest.t ->
-        (DeleteRuleGroupResponse.t,
-          [ `AWS of DeleteRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteRuleGroupResponse.t, DeleteRuleGroupResponse.error) Result.t
           Async.Deferred.t
 val delete_size_constraint_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSizeConstraintSetRequest.t ->
         (DeleteSizeConstraintSetResponse.t,
-          [ `AWS of DeleteSizeConstraintSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteSizeConstraintSetResponse.error) Result.t Async.Deferred.t
 val delete_sql_injection_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSqlInjectionMatchSetRequest.t ->
         (DeleteSqlInjectionMatchSetResponse.t,
-          [ `AWS of DeleteSqlInjectionMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteSqlInjectionMatchSetResponse.error) Result.t Async.Deferred.t
 val delete_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWebACLRequest.t ->
-        (DeleteWebACLResponse.t,
-          [ `AWS of DeleteWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteWebACLResponse.t, DeleteWebACLResponse.error) Result.t
           Async.Deferred.t
 val delete_xss_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteXssMatchSetRequest.t ->
-        (DeleteXssMatchSetResponse.t,
-          [ `AWS of DeleteXssMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteXssMatchSetResponse.t, DeleteXssMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val get_byte_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetByteMatchSetRequest.t ->
-        (GetByteMatchSetResponse.t,
-          [ `AWS of GetByteMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetByteMatchSetResponse.t, GetByteMatchSetResponse.error) Result.t
           Async.Deferred.t
 val get_change_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChangeTokenRequest.t ->
-        (GetChangeTokenResponse.t,
-          [ `AWS of GetChangeTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetChangeTokenResponse.t, GetChangeTokenResponse.error) Result.t
           Async.Deferred.t
 val get_change_token_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChangeTokenStatusRequest.t ->
-        (GetChangeTokenStatusResponse.t,
-          [ `AWS of GetChangeTokenStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetChangeTokenStatusResponse.t, GetChangeTokenStatusResponse.error)
+          Result.t Async.Deferred.t
 val get_geo_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGeoMatchSetRequest.t ->
-        (GetGeoMatchSetResponse.t,
-          [ `AWS of GetGeoMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetGeoMatchSetResponse.t, GetGeoMatchSetResponse.error) Result.t
           Async.Deferred.t
 val get_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIPSetRequest.t ->
-        (GetIPSetResponse.t,
-          [ `AWS of GetIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIPSetResponse.t, GetIPSetResponse.error) Result.t
           Async.Deferred.t
 val get_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLoggingConfigurationRequest.t ->
         (GetLoggingConfigurationResponse.t,
-          [ `AWS of GetLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetLoggingConfigurationResponse.error) Result.t Async.Deferred.t
 val get_permission_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPermissionPolicyRequest.t ->
-        (GetPermissionPolicyResponse.t,
-          [ `AWS of GetPermissionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPermissionPolicyResponse.t, GetPermissionPolicyResponse.error)
+          Result.t Async.Deferred.t
 val get_rate_based_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRateBasedRuleRequest.t ->
-        (GetRateBasedRuleResponse.t,
-          [ `AWS of GetRateBasedRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetRateBasedRuleResponse.t, GetRateBasedRuleResponse.error) Result.t
           Async.Deferred.t
 val get_rate_based_rule_managed_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRateBasedRuleManagedKeysRequest.t ->
         (GetRateBasedRuleManagedKeysResponse.t,
-          [ `AWS of GetRateBasedRuleManagedKeysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetRateBasedRuleManagedKeysResponse.error) Result.t
           Async.Deferred.t
 val get_regex_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRegexMatchSetRequest.t ->
-        (GetRegexMatchSetResponse.t,
-          [ `AWS of GetRegexMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetRegexMatchSetResponse.t, GetRegexMatchSetResponse.error) Result.t
           Async.Deferred.t
 val get_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRegexPatternSetRequest.t ->
-        (GetRegexPatternSetResponse.t,
-          [ `AWS of GetRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRegexPatternSetResponse.t, GetRegexPatternSetResponse.error)
+          Result.t Async.Deferred.t
 val get_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRuleRequest.t ->
-        (GetRuleResponse.t,
-          [ `AWS of GetRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRuleResponse.t, GetRuleResponse.error) Result.t Async.Deferred.t
 val get_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRuleGroupRequest.t ->
-        (GetRuleGroupResponse.t,
-          [ `AWS of GetRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetRuleGroupResponse.t, GetRuleGroupResponse.error) Result.t
           Async.Deferred.t
 val get_sampled_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSampledRequestsRequest.t ->
-        (GetSampledRequestsResponse.t,
-          [ `AWS of GetSampledRequestsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetSampledRequestsResponse.t, GetSampledRequestsResponse.error)
+          Result.t Async.Deferred.t
 val get_size_constraint_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSizeConstraintSetRequest.t ->
-        (GetSizeConstraintSetResponse.t,
-          [ `AWS of GetSizeConstraintSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetSizeConstraintSetResponse.t, GetSizeConstraintSetResponse.error)
+          Result.t Async.Deferred.t
 val get_sql_injection_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSqlInjectionMatchSetRequest.t ->
         (GetSqlInjectionMatchSetResponse.t,
-          [ `AWS of GetSqlInjectionMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetSqlInjectionMatchSetResponse.error) Result.t Async.Deferred.t
 val get_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWebACLRequest.t ->
-        (GetWebACLResponse.t,
-          [ `AWS of GetWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWebACLResponse.t, GetWebACLResponse.error) Result.t
           Async.Deferred.t
 val get_xss_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetXssMatchSetRequest.t ->
-        (GetXssMatchSetResponse.t,
-          [ `AWS of GetXssMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetXssMatchSetResponse.t, GetXssMatchSetResponse.error) Result.t
           Async.Deferred.t
 val list_activated_rules_in_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListActivatedRulesInRuleGroupRequest.t ->
         (ListActivatedRulesInRuleGroupResponse.t,
-          [ `AWS of ListActivatedRulesInRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListActivatedRulesInRuleGroupResponse.error) Result.t
           Async.Deferred.t
 val list_byte_match_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListByteMatchSetsRequest.t ->
-        (ListByteMatchSetsResponse.t,
-          [ `AWS of ListByteMatchSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListByteMatchSetsResponse.t, ListByteMatchSetsResponse.error)
+          Result.t Async.Deferred.t
 val list_geo_match_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGeoMatchSetsRequest.t ->
-        (ListGeoMatchSetsResponse.t,
-          [ `AWS of ListGeoMatchSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListGeoMatchSetsResponse.t, ListGeoMatchSetsResponse.error) Result.t
           Async.Deferred.t
 val list_i_p_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIPSetsRequest.t ->
-        (ListIPSetsResponse.t,
-          [ `AWS of ListIPSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListIPSetsResponse.t, ListIPSetsResponse.error) Result.t
           Async.Deferred.t
 val list_logging_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLoggingConfigurationsRequest.t ->
         (ListLoggingConfigurationsResponse.t,
-          [ `AWS of ListLoggingConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListLoggingConfigurationsResponse.error) Result.t Async.Deferred.t
 val list_rate_based_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRateBasedRulesRequest.t ->
-        (ListRateBasedRulesResponse.t,
-          [ `AWS of ListRateBasedRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRateBasedRulesResponse.t, ListRateBasedRulesResponse.error)
+          Result.t Async.Deferred.t
 val list_regex_match_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRegexMatchSetsRequest.t ->
-        (ListRegexMatchSetsResponse.t,
-          [ `AWS of ListRegexMatchSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRegexMatchSetsResponse.t, ListRegexMatchSetsResponse.error)
+          Result.t Async.Deferred.t
 val list_regex_pattern_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRegexPatternSetsRequest.t ->
-        (ListRegexPatternSetsResponse.t,
-          [ `AWS of ListRegexPatternSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRegexPatternSetsResponse.t, ListRegexPatternSetsResponse.error)
+          Result.t Async.Deferred.t
 val list_rule_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRuleGroupsRequest.t ->
-        (ListRuleGroupsResponse.t,
-          [ `AWS of ListRuleGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRuleGroupsResponse.t, ListRuleGroupsResponse.error) Result.t
           Async.Deferred.t
 val list_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRulesRequest.t ->
-        (ListRulesResponse.t,
-          [ `AWS of ListRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRulesResponse.t, ListRulesResponse.error) Result.t
           Async.Deferred.t
 val list_size_constraint_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSizeConstraintSetsRequest.t ->
         (ListSizeConstraintSetsResponse.t,
-          [ `AWS of ListSizeConstraintSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSizeConstraintSetsResponse.error) Result.t Async.Deferred.t
 val list_sql_injection_match_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSqlInjectionMatchSetsRequest.t ->
         (ListSqlInjectionMatchSetsResponse.t,
-          [ `AWS of ListSqlInjectionMatchSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSqlInjectionMatchSetsResponse.error) Result.t Async.Deferred.t
 val list_subscribed_rule_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSubscribedRuleGroupsRequest.t ->
         (ListSubscribedRuleGroupsResponse.t,
-          [ `AWS of ListSubscribedRuleGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSubscribedRuleGroupsResponse.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_web_a_c_ls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWebACLsRequest.t ->
-        (ListWebACLsResponse.t,
-          [ `AWS of ListWebACLsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWebACLsResponse.t, ListWebACLsResponse.error) Result.t
           Async.Deferred.t
 val list_xss_match_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListXssMatchSetsRequest.t ->
-        (ListXssMatchSetsResponse.t,
-          [ `AWS of ListXssMatchSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListXssMatchSetsResponse.t, ListXssMatchSetsResponse.error) Result.t
           Async.Deferred.t
 val put_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLoggingConfigurationRequest.t ->
         (PutLoggingConfigurationResponse.t,
-          [ `AWS of PutLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutLoggingConfigurationResponse.error) Result.t Async.Deferred.t
 val put_permission_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPermissionPolicyRequest.t ->
-        (PutPermissionPolicyResponse.t,
-          [ `AWS of PutPermissionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutPermissionPolicyResponse.t, PutPermissionPolicyResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_byte_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateByteMatchSetRequest.t ->
-        (UpdateByteMatchSetResponse.t,
-          [ `AWS of UpdateByteMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateByteMatchSetResponse.t, UpdateByteMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val update_geo_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGeoMatchSetRequest.t ->
-        (UpdateGeoMatchSetResponse.t,
-          [ `AWS of UpdateGeoMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateGeoMatchSetResponse.t, UpdateGeoMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val update_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIPSetRequest.t ->
-        (UpdateIPSetResponse.t,
-          [ `AWS of UpdateIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateIPSetResponse.t, UpdateIPSetResponse.error) Result.t
           Async.Deferred.t
 val update_rate_based_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRateBasedRuleRequest.t ->
-        (UpdateRateBasedRuleResponse.t,
-          [ `AWS of UpdateRateBasedRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateRateBasedRuleResponse.t, UpdateRateBasedRuleResponse.error)
+          Result.t Async.Deferred.t
 val update_regex_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRegexMatchSetRequest.t ->
-        (UpdateRegexMatchSetResponse.t,
-          [ `AWS of UpdateRegexMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateRegexMatchSetResponse.t, UpdateRegexMatchSetResponse.error)
+          Result.t Async.Deferred.t
 val update_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRegexPatternSetRequest.t ->
         (UpdateRegexPatternSetResponse.t,
-          [ `AWS of UpdateRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateRegexPatternSetResponse.error) Result.t Async.Deferred.t
 val update_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRuleRequest.t ->
-        (UpdateRuleResponse.t,
-          [ `AWS of UpdateRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateRuleResponse.t, UpdateRuleResponse.error) Result.t
           Async.Deferred.t
 val update_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRuleGroupRequest.t ->
-        (UpdateRuleGroupResponse.t,
-          [ `AWS of UpdateRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateRuleGroupResponse.t, UpdateRuleGroupResponse.error) Result.t
           Async.Deferred.t
 val update_size_constraint_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSizeConstraintSetRequest.t ->
         (UpdateSizeConstraintSetResponse.t,
-          [ `AWS of UpdateSizeConstraintSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateSizeConstraintSetResponse.error) Result.t Async.Deferred.t
 val update_sql_injection_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSqlInjectionMatchSetRequest.t ->
         (UpdateSqlInjectionMatchSetResponse.t,
-          [ `AWS of UpdateSqlInjectionMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateSqlInjectionMatchSetResponse.error) Result.t Async.Deferred.t
 val update_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWebACLRequest.t ->
-        (UpdateWebACLResponse.t,
-          [ `AWS of UpdateWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateWebACLResponse.t, UpdateWebACLResponse.error) Result.t
           Async.Deferred.t
 val update_xss_match_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateXssMatchSetRequest.t ->
-        (UpdateXssMatchSetResponse.t,
-          [ `AWS of UpdateXssMatchSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateXssMatchSetResponse.t, UpdateXssMatchSetResponse.error)
+          Result.t Async.Deferred.t

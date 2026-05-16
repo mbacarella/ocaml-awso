@@ -4,488 +4,412 @@ val clone_receipt_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CloneReceiptRuleSetRequest.t ->
-        (CloneReceiptRuleSetResponse.t,
-          [ `AWS of CloneReceiptRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CloneReceiptRuleSetResponse.t, CloneReceiptRuleSetResponse.error)
+          Result.t Lwt.t
 val create_configuration_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationSetRequest.t ->
         (CreateConfigurationSetResponse.t,
-          [ `AWS of CreateConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateConfigurationSetResponse.error) Result.t Lwt.t
 val create_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationSetEventDestinationRequest.t ->
         (CreateConfigurationSetEventDestinationResponse.t,
-          [ `AWS of CreateConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateConfigurationSetEventDestinationResponse.error) Result.t
+          Lwt.t
 val create_configuration_set_tracking_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationSetTrackingOptionsRequest.t ->
         (CreateConfigurationSetTrackingOptionsResponse.t,
-          [ `AWS of CreateConfigurationSetTrackingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateConfigurationSetTrackingOptionsResponse.error) Result.t Lwt.t
 val create_custom_verification_email_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomVerificationEmailTemplateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val create_receipt_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReceiptFilterRequest.t ->
-        (CreateReceiptFilterResponse.t,
-          [ `AWS of CreateReceiptFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateReceiptFilterResponse.t, CreateReceiptFilterResponse.error)
+          Result.t Lwt.t
 val create_receipt_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReceiptRuleRequest.t ->
-        (CreateReceiptRuleResponse.t,
-          [ `AWS of CreateReceiptRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateReceiptRuleResponse.t, CreateReceiptRuleResponse.error)
+          Result.t Lwt.t
 val create_receipt_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReceiptRuleSetRequest.t ->
-        (CreateReceiptRuleSetResponse.t,
-          [ `AWS of CreateReceiptRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateReceiptRuleSetResponse.t, CreateReceiptRuleSetResponse.error)
+          Result.t Lwt.t
 val create_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTemplateRequest.t ->
-        (CreateTemplateResponse.t,
-          [ `AWS of CreateTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTemplateResponse.t, CreateTemplateResponse.error) Result.t
+          Lwt.t
 val delete_configuration_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationSetRequest.t ->
         (DeleteConfigurationSetResponse.t,
-          [ `AWS of DeleteConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteConfigurationSetResponse.error) Result.t Lwt.t
 val delete_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationSetEventDestinationRequest.t ->
         (DeleteConfigurationSetEventDestinationResponse.t,
-          [ `AWS of DeleteConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteConfigurationSetEventDestinationResponse.error) Result.t
+          Lwt.t
 val delete_configuration_set_tracking_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationSetTrackingOptionsRequest.t ->
         (DeleteConfigurationSetTrackingOptionsResponse.t,
-          [ `AWS of DeleteConfigurationSetTrackingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteConfigurationSetTrackingOptionsResponse.error) Result.t Lwt.t
 val delete_custom_verification_email_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCustomVerificationEmailTemplateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIdentityRequest.t ->
-        (DeleteIdentityResponse.t,
-          [ `AWS of DeleteIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteIdentityResponse.t, DeleteIdentityResponse.error) Result.t
+          Lwt.t
 val delete_identity_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIdentityPolicyRequest.t ->
-        (DeleteIdentityPolicyResponse.t,
-          [ `AWS of DeleteIdentityPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteIdentityPolicyResponse.t, DeleteIdentityPolicyResponse.error)
+          Result.t Lwt.t
 val delete_receipt_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReceiptFilterRequest.t ->
-        (DeleteReceiptFilterResponse.t,
-          [ `AWS of DeleteReceiptFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteReceiptFilterResponse.t, DeleteReceiptFilterResponse.error)
+          Result.t Lwt.t
 val delete_receipt_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReceiptRuleRequest.t ->
-        (DeleteReceiptRuleResponse.t,
-          [ `AWS of DeleteReceiptRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteReceiptRuleResponse.t, DeleteReceiptRuleResponse.error)
+          Result.t Lwt.t
 val delete_receipt_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReceiptRuleSetRequest.t ->
-        (DeleteReceiptRuleSetResponse.t,
-          [ `AWS of DeleteReceiptRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteReceiptRuleSetResponse.t, DeleteReceiptRuleSetResponse.error)
+          Result.t Lwt.t
 val delete_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTemplateRequest.t ->
-        (DeleteTemplateResponse.t,
-          [ `AWS of DeleteTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTemplateResponse.t, DeleteTemplateResponse.error) Result.t
+          Lwt.t
 val delete_verified_email_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVerifiedEmailAddressRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVerifiedEmailAddressRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_active_receipt_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeActiveReceiptRuleSetRequest.t ->
         (DescribeActiveReceiptRuleSetResponse.t,
-          [ `AWS of DescribeActiveReceiptRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeActiveReceiptRuleSetResponse.error) Result.t Lwt.t
 val describe_configuration_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationSetRequest.t ->
         (DescribeConfigurationSetResponse.t,
-          [ `AWS of DescribeConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConfigurationSetResponse.error) Result.t Lwt.t
 val describe_receipt_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReceiptRuleRequest.t ->
-        (DescribeReceiptRuleResponse.t,
-          [ `AWS of DescribeReceiptRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeReceiptRuleResponse.t, DescribeReceiptRuleResponse.error)
+          Result.t Lwt.t
 val describe_receipt_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReceiptRuleSetRequest.t ->
         (DescribeReceiptRuleSetResponse.t,
-          [ `AWS of DescribeReceiptRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReceiptRuleSetResponse.error) Result.t Lwt.t
 val get_account_sending_enabled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (GetAccountSendingEnabledResponse.t,
-          [ `AWS of GetAccountSendingEnabledResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAccountSendingEnabledResponse.error) Result.t Lwt.t
 val get_custom_verification_email_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCustomVerificationEmailTemplateRequest.t ->
         (GetCustomVerificationEmailTemplateResponse.t,
-          [ `AWS of GetCustomVerificationEmailTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCustomVerificationEmailTemplateResponse.error) Result.t Lwt.t
 val get_identity_dkim_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityDkimAttributesRequest.t ->
         (GetIdentityDkimAttributesResponse.t,
-          [ `AWS of GetIdentityDkimAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetIdentityDkimAttributesResponse.error) Result.t Lwt.t
 val get_identity_mail_from_domain_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityMailFromDomainAttributesRequest.t ->
         (GetIdentityMailFromDomainAttributesResponse.t,
-          [ `AWS of GetIdentityMailFromDomainAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetIdentityMailFromDomainAttributesResponse.error) Result.t Lwt.t
 val get_identity_notification_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityNotificationAttributesRequest.t ->
         (GetIdentityNotificationAttributesResponse.t,
-          [ `AWS of GetIdentityNotificationAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetIdentityNotificationAttributesResponse.error) Result.t Lwt.t
 val get_identity_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityPoliciesRequest.t ->
-        (GetIdentityPoliciesResponse.t,
-          [ `AWS of GetIdentityPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetIdentityPoliciesResponse.t, GetIdentityPoliciesResponse.error)
+          Result.t Lwt.t
 val get_identity_verification_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityVerificationAttributesRequest.t ->
         (GetIdentityVerificationAttributesResponse.t,
-          [ `AWS of GetIdentityVerificationAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetIdentityVerificationAttributesResponse.error) Result.t Lwt.t
 val get_send_quota :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (GetSendQuotaResponse.t,
-          [ `AWS of GetSendQuotaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSendQuotaResponse.t, GetSendQuotaResponse.error) Result.t Lwt.t
 val get_send_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (GetSendStatisticsResponse.t,
-          [ `AWS of GetSendStatisticsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSendStatisticsResponse.t, GetSendStatisticsResponse.error)
+          Result.t Lwt.t
 val get_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTemplateRequest.t ->
-        (GetTemplateResponse.t,
-          [ `AWS of GetTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTemplateResponse.t, GetTemplateResponse.error) Result.t Lwt.t
 val list_configuration_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConfigurationSetsRequest.t ->
         (ListConfigurationSetsResponse.t,
-          [ `AWS of ListConfigurationSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListConfigurationSetsResponse.error) Result.t Lwt.t
 val list_custom_verification_email_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomVerificationEmailTemplatesRequest.t ->
         (ListCustomVerificationEmailTemplatesResponse.t,
-          [ `AWS of ListCustomVerificationEmailTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCustomVerificationEmailTemplatesResponse.error) Result.t Lwt.t
 val list_identities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentitiesRequest.t ->
-        (ListIdentitiesResponse.t,
-          [ `AWS of ListIdentitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListIdentitiesResponse.t, ListIdentitiesResponse.error) Result.t
+          Lwt.t
 val list_identity_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentityPoliciesRequest.t ->
-        (ListIdentityPoliciesResponse.t,
-          [ `AWS of ListIdentityPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListIdentityPoliciesResponse.t, ListIdentityPoliciesResponse.error)
+          Result.t Lwt.t
 val list_receipt_filters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReceiptFiltersRequest.t ->
-        (ListReceiptFiltersResponse.t,
-          [ `AWS of ListReceiptFiltersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListReceiptFiltersResponse.t, ListReceiptFiltersResponse.error)
+          Result.t Lwt.t
 val list_receipt_rule_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReceiptRuleSetsRequest.t ->
-        (ListReceiptRuleSetsResponse.t,
-          [ `AWS of ListReceiptRuleSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListReceiptRuleSetsResponse.t, ListReceiptRuleSetsResponse.error)
+          Result.t Lwt.t
 val list_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTemplatesRequest.t ->
-        (ListTemplatesResponse.t,
-          [ `AWS of ListTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTemplatesResponse.t, ListTemplatesResponse.error) Result.t Lwt.t
 val list_verified_email_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (ListVerifiedEmailAddressesResponse.t,
-          [ `AWS of ListVerifiedEmailAddressesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListVerifiedEmailAddressesResponse.error) Result.t Lwt.t
 val put_configuration_set_delivery_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutConfigurationSetDeliveryOptionsRequest.t ->
         (PutConfigurationSetDeliveryOptionsResponse.t,
-          [ `AWS of PutConfigurationSetDeliveryOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutConfigurationSetDeliveryOptionsResponse.error) Result.t Lwt.t
 val put_identity_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutIdentityPolicyRequest.t ->
-        (PutIdentityPolicyResponse.t,
-          [ `AWS of PutIdentityPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutIdentityPolicyResponse.t, PutIdentityPolicyResponse.error)
+          Result.t Lwt.t
 val reorder_receipt_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReorderReceiptRuleSetRequest.t ->
         (ReorderReceiptRuleSetResponse.t,
-          [ `AWS of ReorderReceiptRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ReorderReceiptRuleSetResponse.error) Result.t Lwt.t
 val send_bounce :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendBounceRequest.t ->
-        (SendBounceResponse.t,
-          [ `AWS of SendBounceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendBounceResponse.t, SendBounceResponse.error) Result.t Lwt.t
 val send_bulk_templated_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendBulkTemplatedEmailRequest.t ->
         (SendBulkTemplatedEmailResponse.t,
-          [ `AWS of SendBulkTemplatedEmailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SendBulkTemplatedEmailResponse.error) Result.t Lwt.t
 val send_custom_verification_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendCustomVerificationEmailRequest.t ->
         (SendCustomVerificationEmailResponse.t,
-          [ `AWS of SendCustomVerificationEmailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SendCustomVerificationEmailResponse.error) Result.t Lwt.t
 val send_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendEmailRequest.t ->
-        (SendEmailResponse.t,
-          [ `AWS of SendEmailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendEmailResponse.t, SendEmailResponse.error) Result.t Lwt.t
 val send_raw_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendRawEmailRequest.t ->
-        (SendRawEmailResponse.t,
-          [ `AWS of SendRawEmailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendRawEmailResponse.t, SendRawEmailResponse.error) Result.t Lwt.t
 val send_templated_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendTemplatedEmailRequest.t ->
-        (SendTemplatedEmailResponse.t,
-          [ `AWS of SendTemplatedEmailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendTemplatedEmailResponse.t, SendTemplatedEmailResponse.error)
+          Result.t Lwt.t
 val set_active_receipt_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetActiveReceiptRuleSetRequest.t ->
         (SetActiveReceiptRuleSetResponse.t,
-          [ `AWS of SetActiveReceiptRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetActiveReceiptRuleSetResponse.error) Result.t Lwt.t
 val set_identity_dkim_enabled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetIdentityDkimEnabledRequest.t ->
         (SetIdentityDkimEnabledResponse.t,
-          [ `AWS of SetIdentityDkimEnabledResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetIdentityDkimEnabledResponse.error) Result.t Lwt.t
 val set_identity_feedback_forwarding_enabled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetIdentityFeedbackForwardingEnabledRequest.t ->
         (SetIdentityFeedbackForwardingEnabledResponse.t,
-          [ `AWS of SetIdentityFeedbackForwardingEnabledResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetIdentityFeedbackForwardingEnabledResponse.error) Result.t Lwt.t
 val set_identity_headers_in_notifications_enabled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetIdentityHeadersInNotificationsEnabledRequest.t ->
         (SetIdentityHeadersInNotificationsEnabledResponse.t,
-          [ `AWS of SetIdentityHeadersInNotificationsEnabledResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetIdentityHeadersInNotificationsEnabledResponse.error) Result.t
+          Lwt.t
 val set_identity_mail_from_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetIdentityMailFromDomainRequest.t ->
         (SetIdentityMailFromDomainResponse.t,
-          [ `AWS of SetIdentityMailFromDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetIdentityMailFromDomainResponse.error) Result.t Lwt.t
 val set_identity_notification_topic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetIdentityNotificationTopicRequest.t ->
         (SetIdentityNotificationTopicResponse.t,
-          [ `AWS of SetIdentityNotificationTopicResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetIdentityNotificationTopicResponse.error) Result.t Lwt.t
 val set_receipt_rule_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetReceiptRulePositionRequest.t ->
         (SetReceiptRulePositionResponse.t,
-          [ `AWS of SetReceiptRulePositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetReceiptRulePositionResponse.error) Result.t Lwt.t
 val test_render_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestRenderTemplateRequest.t ->
-        (TestRenderTemplateResponse.t,
-          [ `AWS of TestRenderTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TestRenderTemplateResponse.t, TestRenderTemplateResponse.error)
+          Result.t Lwt.t
 val update_account_sending_enabled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateAccountSendingEnabledRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateAccountSendingEnabledRequest.t -> (unit, unit) Result.t Lwt.t
 val update_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationSetEventDestinationRequest.t ->
         (UpdateConfigurationSetEventDestinationResponse.t,
-          [ `AWS of UpdateConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateConfigurationSetEventDestinationResponse.error) Result.t
+          Lwt.t
 val update_configuration_set_reputation_metrics_enabled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationSetReputationMetricsEnabledRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val update_configuration_set_sending_enabled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationSetSendingEnabledRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val update_configuration_set_tracking_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationSetTrackingOptionsRequest.t ->
         (UpdateConfigurationSetTrackingOptionsResponse.t,
-          [ `AWS of UpdateConfigurationSetTrackingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateConfigurationSetTrackingOptionsResponse.error) Result.t Lwt.t
 val update_custom_verification_email_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCustomVerificationEmailTemplateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val update_receipt_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReceiptRuleRequest.t ->
-        (UpdateReceiptRuleResponse.t,
-          [ `AWS of UpdateReceiptRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateReceiptRuleResponse.t, UpdateReceiptRuleResponse.error)
+          Result.t Lwt.t
 val update_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTemplateRequest.t ->
-        (UpdateTemplateResponse.t,
-          [ `AWS of UpdateTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTemplateResponse.t, UpdateTemplateResponse.error) Result.t
+          Lwt.t
 val verify_domain_dkim :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifyDomainDkimRequest.t ->
-        (VerifyDomainDkimResponse.t,
-          [ `AWS of VerifyDomainDkimResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (VerifyDomainDkimResponse.t, VerifyDomainDkimResponse.error) Result.t
+          Lwt.t
 val verify_domain_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifyDomainIdentityRequest.t ->
-        (VerifyDomainIdentityResponse.t,
-          [ `AWS of VerifyDomainIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (VerifyDomainIdentityResponse.t, VerifyDomainIdentityResponse.error)
+          Result.t Lwt.t
 val verify_email_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      VerifyEmailAddressRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      VerifyEmailAddressRequest.t -> (unit, unit) Result.t Lwt.t
 val verify_email_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifyEmailIdentityRequest.t ->
-        (VerifyEmailIdentityResponse.t,
-          [ `AWS of VerifyEmailIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (VerifyEmailIdentityResponse.t, VerifyEmailIdentityResponse.error)
+          Result.t Lwt.t

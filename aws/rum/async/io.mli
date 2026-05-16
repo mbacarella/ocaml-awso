@@ -4,79 +4,59 @@ val create_app_monitor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppMonitorRequest.t ->
-        (CreateAppMonitorResponse.t,
-          [ `AWS of CreateAppMonitorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateAppMonitorResponse.t, CreateAppMonitorResponse.error) Result.t
           Async.Deferred.t
 val delete_app_monitor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppMonitorRequest.t ->
-        (DeleteAppMonitorResponse.t,
-          [ `AWS of DeleteAppMonitorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteAppMonitorResponse.t, DeleteAppMonitorResponse.error) Result.t
           Async.Deferred.t
 val get_app_monitor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppMonitorRequest.t ->
-        (GetAppMonitorResponse.t,
-          [ `AWS of GetAppMonitorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAppMonitorResponse.t, GetAppMonitorResponse.error) Result.t
           Async.Deferred.t
 val get_app_monitor_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppMonitorDataRequest.t ->
-        (GetAppMonitorDataResponse.t,
-          [ `AWS of GetAppMonitorDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetAppMonitorDataResponse.t, GetAppMonitorDataResponse.error)
+          Result.t Async.Deferred.t
 val list_app_monitors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppMonitorsRequest.t ->
-        (ListAppMonitorsResponse.t,
-          [ `AWS of ListAppMonitorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAppMonitorsResponse.t, ListAppMonitorsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_rum_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRumEventsRequest.t ->
-        (PutRumEventsResponse.t,
-          [ `AWS of PutRumEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutRumEventsResponse.t, PutRumEventsResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_app_monitor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAppMonitorRequest.t ->
-        (UpdateAppMonitorResponse.t,
-          [ `AWS of UpdateAppMonitorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateAppMonitorResponse.t, UpdateAppMonitorResponse.error) Result.t
           Async.Deferred.t

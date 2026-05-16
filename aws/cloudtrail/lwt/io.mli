@@ -4,202 +4,158 @@ val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsRequest.t ->
-        (AddTagsResponse.t,
-          [ `AWS of AddTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddTagsResponse.t, AddTagsResponse.error) Result.t Lwt.t
 val cancel_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelQueryRequest.t ->
-        (CancelQueryResponse.t,
-          [ `AWS of CancelQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelQueryResponse.t, CancelQueryResponse.error) Result.t Lwt.t
 val create_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEventDataStoreRequest.t ->
-        (CreateEventDataStoreResponse.t,
-          [ `AWS of CreateEventDataStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEventDataStoreResponse.t, CreateEventDataStoreResponse.error)
+          Result.t Lwt.t
 val create_trail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrailRequest.t ->
-        (CreateTrailResponse.t,
-          [ `AWS of CreateTrailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTrailResponse.t, CreateTrailResponse.error) Result.t Lwt.t
 val delete_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventDataStoreRequest.t ->
-        (DeleteEventDataStoreResponse.t,
-          [ `AWS of DeleteEventDataStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEventDataStoreResponse.t, DeleteEventDataStoreResponse.error)
+          Result.t Lwt.t
 val delete_trail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrailRequest.t ->
-        (DeleteTrailResponse.t,
-          [ `AWS of DeleteTrailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTrailResponse.t, DeleteTrailResponse.error) Result.t Lwt.t
 val describe_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeQueryRequest.t ->
-        (DescribeQueryResponse.t,
-          [ `AWS of DescribeQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeQueryResponse.t, DescribeQueryResponse.error) Result.t Lwt.t
 val describe_trails :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrailsRequest.t ->
-        (DescribeTrailsResponse.t,
-          [ `AWS of DescribeTrailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTrailsResponse.t, DescribeTrailsResponse.error) Result.t
+          Lwt.t
 val get_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventDataStoreRequest.t ->
-        (GetEventDataStoreResponse.t,
-          [ `AWS of GetEventDataStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEventDataStoreResponse.t, GetEventDataStoreResponse.error)
+          Result.t Lwt.t
 val get_event_selectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventSelectorsRequest.t ->
-        (GetEventSelectorsResponse.t,
-          [ `AWS of GetEventSelectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEventSelectorsResponse.t, GetEventSelectorsResponse.error)
+          Result.t Lwt.t
 val get_insight_selectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightSelectorsRequest.t ->
-        (GetInsightSelectorsResponse.t,
-          [ `AWS of GetInsightSelectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetInsightSelectorsResponse.t, GetInsightSelectorsResponse.error)
+          Result.t Lwt.t
 val get_query_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueryResultsRequest.t ->
-        (GetQueryResultsResponse.t,
-          [ `AWS of GetQueryResultsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetQueryResultsResponse.t, GetQueryResultsResponse.error) Result.t
+          Lwt.t
 val get_trail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTrailRequest.t ->
-        (GetTrailResponse.t,
-          [ `AWS of GetTrailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTrailResponse.t, GetTrailResponse.error) Result.t Lwt.t
 val get_trail_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTrailStatusRequest.t ->
-        (GetTrailStatusResponse.t,
-          [ `AWS of GetTrailStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTrailStatusResponse.t, GetTrailStatusResponse.error) Result.t
+          Lwt.t
 val list_event_data_stores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventDataStoresRequest.t ->
-        (ListEventDataStoresResponse.t,
-          [ `AWS of ListEventDataStoresResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEventDataStoresResponse.t, ListEventDataStoresResponse.error)
+          Result.t Lwt.t
 val list_public_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPublicKeysRequest.t ->
-        (ListPublicKeysResponse.t,
-          [ `AWS of ListPublicKeysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPublicKeysResponse.t, ListPublicKeysResponse.error) Result.t
+          Lwt.t
 val list_queries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListQueriesRequest.t ->
-        (ListQueriesResponse.t,
-          [ `AWS of ListQueriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListQueriesResponse.t, ListQueriesResponse.error) Result.t Lwt.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResponse.t,
-          [ `AWS of ListTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsResponse.t, ListTagsResponse.error) Result.t Lwt.t
 val list_trails :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTrailsRequest.t ->
-        (ListTrailsResponse.t,
-          [ `AWS of ListTrailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTrailsResponse.t, ListTrailsResponse.error) Result.t Lwt.t
 val lookup_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LookupEventsRequest.t ->
-        (LookupEventsResponse.t,
-          [ `AWS of LookupEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LookupEventsResponse.t, LookupEventsResponse.error) Result.t Lwt.t
 val put_event_selectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEventSelectorsRequest.t ->
-        (PutEventSelectorsResponse.t,
-          [ `AWS of PutEventSelectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutEventSelectorsResponse.t, PutEventSelectorsResponse.error)
+          Result.t Lwt.t
 val put_insight_selectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutInsightSelectorsRequest.t ->
-        (PutInsightSelectorsResponse.t,
-          [ `AWS of PutInsightSelectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutInsightSelectorsResponse.t, PutInsightSelectorsResponse.error)
+          Result.t Lwt.t
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsRequest.t ->
-        (RemoveTagsResponse.t,
-          [ `AWS of RemoveTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveTagsResponse.t, RemoveTagsResponse.error) Result.t Lwt.t
 val restore_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreEventDataStoreRequest.t ->
         (RestoreEventDataStoreResponse.t,
-          [ `AWS of RestoreEventDataStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RestoreEventDataStoreResponse.error) Result.t Lwt.t
 val start_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartLoggingRequest.t ->
-        (StartLoggingResponse.t,
-          [ `AWS of StartLoggingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartLoggingResponse.t, StartLoggingResponse.error) Result.t Lwt.t
 val start_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartQueryRequest.t ->
-        (StartQueryResponse.t,
-          [ `AWS of StartQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartQueryResponse.t, StartQueryResponse.error) Result.t Lwt.t
 val stop_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopLoggingRequest.t ->
-        (StopLoggingResponse.t,
-          [ `AWS of StopLoggingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopLoggingResponse.t, StopLoggingResponse.error) Result.t Lwt.t
 val update_event_data_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEventDataStoreRequest.t ->
-        (UpdateEventDataStoreResponse.t,
-          [ `AWS of UpdateEventDataStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEventDataStoreResponse.t, UpdateEventDataStoreResponse.error)
+          Result.t Lwt.t
 val update_trail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTrailRequest.t ->
-        (UpdateTrailResponse.t,
-          [ `AWS of UpdateTrailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTrailResponse.t, UpdateTrailResponse.error) Result.t Lwt.t

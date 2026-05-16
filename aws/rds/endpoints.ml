@@ -2517,967 +2517,1011 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
-  | AddRoleToDBCluster -> Ok ()
-  | AddRoleToDBInstance -> Ok ()
+  | AddRoleToDBCluster ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AddRoleToDBInstance ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | AddSourceIdentifierToSubscription ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AddSourceIdentifierToSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AddSourceIdentifierToSubscriptionResult.of_xml xml))
-  | AddTagsToResource -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AddSourceIdentifierToSubscriptionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some AddSourceIdentifierToSubscriptionResult.error_of_xml))
+  | AddTagsToResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ApplyPendingMaintenanceAction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ApplyPendingMaintenanceActionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplyPendingMaintenanceActionResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplyPendingMaintenanceActionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ApplyPendingMaintenanceActionResult.error_of_xml))
   | AuthorizeDBSecurityGroupIngress ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AuthorizeDBSecurityGroupIngressResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AuthorizeDBSecurityGroupIngressResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AuthorizeDBSecurityGroupIngressResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some AuthorizeDBSecurityGroupIngressResult.error_of_xml))
   | BacktrackDBCluster ->
-      (match resp with
-       | Error err -> handle_error err (Some DBClusterBacktrack.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterBacktrack.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterBacktrack.of_xml xml)
+      else Error (parse_aws_error (Some DBClusterBacktrack.error_of_xml))
   | CancelExportTask ->
-      (match resp with
-       | Error err -> handle_error err (Some ExportTask.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ExportTask.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ExportTask.of_xml xml)
+      else Error (parse_aws_error (Some ExportTask.error_of_xml))
   | CopyDBClusterParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CopyDBClusterParameterGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CopyDBClusterParameterGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CopyDBClusterParameterGroupResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CopyDBClusterParameterGroupResult.error_of_xml))
   | CopyDBClusterSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CopyDBClusterSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CopyDBClusterSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CopyDBClusterSnapshotResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CopyDBClusterSnapshotResult.error_of_xml))
   | CopyDBParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CopyDBParameterGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CopyDBParameterGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CopyDBParameterGroupResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CopyDBParameterGroupResult.error_of_xml))
   | CopyDBSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CopyDBSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CopyDBSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CopyDBSnapshotResult.of_xml xml)
+      else Error (parse_aws_error (Some CopyDBSnapshotResult.error_of_xml))
   | CopyOptionGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CopyOptionGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CopyOptionGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CopyOptionGroupResult.of_xml xml)
+      else Error (parse_aws_error (Some CopyOptionGroupResult.error_of_xml))
   | CreateCustomAvailabilityZone ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCustomAvailabilityZoneResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateCustomAvailabilityZoneResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateCustomAvailabilityZoneResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCustomAvailabilityZoneResult.error_of_xml))
   | CreateCustomDBEngineVersion ->
-      (match resp with
-       | Error err -> handle_error err (Some DBEngineVersion.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBEngineVersion.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBEngineVersion.of_xml xml)
+      else Error (parse_aws_error (Some DBEngineVersion.error_of_xml))
   | CreateDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBClusterResult.of_xml xml)
+      else Error (parse_aws_error (Some CreateDBClusterResult.error_of_xml))
   | CreateDBClusterEndpoint ->
-      (match resp with
-       | Error err -> handle_error err (Some DBClusterEndpoint.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterEndpoint.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterEndpoint.of_xml xml)
+      else Error (parse_aws_error (Some DBClusterEndpoint.error_of_xml))
   | CreateDBClusterParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateDBClusterParameterGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBClusterParameterGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBClusterParameterGroupResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDBClusterParameterGroupResult.error_of_xml))
   | CreateDBClusterSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBClusterSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBClusterSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBClusterSnapshotResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateDBClusterSnapshotResult.error_of_xml))
   | CreateDBInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBInstanceResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBInstanceResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBInstanceResult.of_xml xml)
+      else Error (parse_aws_error (Some CreateDBInstanceResult.error_of_xml))
   | CreateDBInstanceReadReplica ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateDBInstanceReadReplicaResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBInstanceReadReplicaResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBInstanceReadReplicaResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDBInstanceReadReplicaResult.error_of_xml))
   | CreateDBParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBParameterGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBParameterGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBParameterGroupResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateDBParameterGroupResult.error_of_xml))
   | CreateDBProxy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBProxyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBProxyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBProxyResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateDBProxyResponse.error_of_xml))
   | CreateDBProxyEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBProxyEndpointResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBProxyEndpointResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBProxyEndpointResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateDBProxyEndpointResponse.error_of_xml))
   | CreateDBSecurityGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBSecurityGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBSecurityGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBSecurityGroupResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateDBSecurityGroupResult.error_of_xml))
   | CreateDBSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBSnapshotResult.of_xml xml)
+      else Error (parse_aws_error (Some CreateDBSnapshotResult.error_of_xml))
   | CreateDBSubnetGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDBSubnetGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDBSubnetGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDBSubnetGroupResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some CreateDBSubnetGroupResult.error_of_xml))
   | CreateEventSubscription ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateEventSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateEventSubscriptionResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateEventSubscriptionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateEventSubscriptionResult.error_of_xml))
   | CreateGlobalCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGlobalClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateGlobalClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateGlobalClusterResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some CreateGlobalClusterResult.error_of_xml))
   | CreateOptionGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateOptionGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateOptionGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateOptionGroupResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some CreateOptionGroupResult.error_of_xml))
   | DeleteCustomAvailabilityZone ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteCustomAvailabilityZoneResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteCustomAvailabilityZoneResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteCustomAvailabilityZoneResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCustomAvailabilityZoneResult.error_of_xml))
   | DeleteCustomDBEngineVersion ->
-      (match resp with
-       | Error err -> handle_error err (Some DBEngineVersion.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBEngineVersion.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBEngineVersion.of_xml xml)
+      else Error (parse_aws_error (Some DBEngineVersion.error_of_xml))
   | DeleteDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBClusterResult.of_xml xml)
+      else Error (parse_aws_error (Some DeleteDBClusterResult.error_of_xml))
   | DeleteDBClusterEndpoint ->
-      (match resp with
-       | Error err -> handle_error err (Some DBClusterEndpoint.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterEndpoint.of_xml xml))
-  | DeleteDBClusterParameterGroup -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterEndpoint.of_xml xml)
+      else Error (parse_aws_error (Some DBClusterEndpoint.error_of_xml))
+  | DeleteDBClusterParameterGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDBClusterSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDBClusterSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDBClusterSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBClusterSnapshotResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteDBClusterSnapshotResult.error_of_xml))
   | DeleteDBInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDBInstanceResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDBInstanceResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBInstanceResult.of_xml xml)
+      else Error (parse_aws_error (Some DeleteDBInstanceResult.error_of_xml))
   | DeleteDBInstanceAutomatedBackup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteDBInstanceAutomatedBackupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDBInstanceAutomatedBackupResult.of_xml xml))
-  | DeleteDBParameterGroup -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBInstanceAutomatedBackupResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDBInstanceAutomatedBackupResult.error_of_xml))
+  | DeleteDBParameterGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDBProxy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDBProxyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDBProxyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBProxyResponse.of_xml xml)
+      else Error (parse_aws_error (Some DeleteDBProxyResponse.error_of_xml))
   | DeleteDBProxyEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDBProxyEndpointResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDBProxyEndpointResponse.of_xml xml))
-  | DeleteDBSecurityGroup -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBProxyEndpointResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteDBProxyEndpointResponse.error_of_xml))
+  | DeleteDBSecurityGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDBSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDBSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDBSnapshotResult.of_xml xml))
-  | DeleteDBSubnetGroup -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBSnapshotResult.of_xml xml)
+      else Error (parse_aws_error (Some DeleteDBSnapshotResult.error_of_xml))
+  | DeleteDBSubnetGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteEventSubscription ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteEventSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteEventSubscriptionResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteEventSubscriptionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteEventSubscriptionResult.error_of_xml))
   | DeleteGlobalCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteGlobalClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteGlobalClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteGlobalClusterResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteGlobalClusterResult.error_of_xml))
   | DeleteInstallationMedia ->
-      (match resp with
-       | Error err -> handle_error err (Some InstallationMedia.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (InstallationMedia.of_xml xml))
-  | DeleteOptionGroup -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (InstallationMedia.of_xml xml)
+      else Error (parse_aws_error (Some InstallationMedia.error_of_xml))
+  | DeleteOptionGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeregisterDBProxyTargets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeregisterDBProxyTargetsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeregisterDBProxyTargetsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeregisterDBProxyTargetsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterDBProxyTargetsResponse.error_of_xml))
   | DescribeAccountAttributes ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AccountAttributesMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AccountAttributesMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeCertificates ->
-      (match resp with
-       | Error err -> handle_error err (Some CertificateMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CertificateMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CertificateMessage.of_xml xml)
+      else Error (parse_aws_error (Some CertificateMessage.error_of_xml))
   | DescribeCustomAvailabilityZones ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CustomAvailabilityZoneMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CustomAvailabilityZoneMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CustomAvailabilityZoneMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CustomAvailabilityZoneMessage.error_of_xml))
   | DescribeDBClusterBacktracks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBClusterBacktrackMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterBacktrackMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterBacktrackMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some DBClusterBacktrackMessage.error_of_xml))
   | DescribeDBClusterEndpoints ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBClusterEndpointMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterEndpointMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterEndpointMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some DBClusterEndpointMessage.error_of_xml))
   | DescribeDBClusterParameterGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DBClusterParameterGroupsMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterParameterGroupsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterParameterGroupsMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DBClusterParameterGroupsMessage.error_of_xml))
   | DescribeDBClusterParameters ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DBClusterParameterGroupDetails.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterParameterGroupDetails.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterParameterGroupDetails.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DBClusterParameterGroupDetails.error_of_xml))
   | DescribeDBClusterSnapshotAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDBClusterSnapshotAttributesResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDBClusterSnapshotAttributesResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBClusterSnapshotAttributesResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDBClusterSnapshotAttributesResult.error_of_xml))
   | DescribeDBClusterSnapshots ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBClusterSnapshotMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterSnapshotMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterSnapshotMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some DBClusterSnapshotMessage.error_of_xml))
   | DescribeDBClusters ->
-      (match resp with
-       | Error err -> handle_error err (Some DBClusterMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterMessage.of_xml xml)
+      else Error (parse_aws_error (Some DBClusterMessage.error_of_xml))
   | DescribeDBEngineVersions ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBEngineVersionMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBEngineVersionMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeDBInstanceAutomatedBackups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DBInstanceAutomatedBackupMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBInstanceAutomatedBackupMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBInstanceAutomatedBackupMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DBInstanceAutomatedBackupMessage.error_of_xml))
   | DescribeDBInstances ->
-      (match resp with
-       | Error err -> handle_error err (Some DBInstanceMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBInstanceMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBInstanceMessage.of_xml xml)
+      else Error (parse_aws_error (Some DBInstanceMessage.error_of_xml))
   | DescribeDBLogFiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDBLogFilesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDBLogFilesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBLogFilesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeDBLogFilesResponse.error_of_xml))
   | DescribeDBParameterGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBParameterGroupsMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBParameterGroupsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBParameterGroupsMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some DBParameterGroupsMessage.error_of_xml))
   | DescribeDBParameters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBParameterGroupDetails.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBParameterGroupDetails.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBParameterGroupDetails.of_xml xml)
+      else
+        Error (parse_aws_error (Some DBParameterGroupDetails.error_of_xml))
   | DescribeDBProxies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDBProxiesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDBProxiesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBProxiesResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DescribeDBProxiesResponse.error_of_xml))
   | DescribeDBProxyEndpoints ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDBProxyEndpointsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDBProxyEndpointsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBProxyEndpointsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDBProxyEndpointsResponse.error_of_xml))
   | DescribeDBProxyTargetGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDBProxyTargetGroupsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDBProxyTargetGroupsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBProxyTargetGroupsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDBProxyTargetGroupsResponse.error_of_xml))
   | DescribeDBProxyTargets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDBProxyTargetsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDBProxyTargetsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBProxyTargetsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeDBProxyTargetsResponse.error_of_xml))
   | DescribeDBSecurityGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBSecurityGroupMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBSecurityGroupMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBSecurityGroupMessage.of_xml xml)
+      else Error (parse_aws_error (Some DBSecurityGroupMessage.error_of_xml))
   | DescribeDBSnapshotAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDBSnapshotAttributesResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDBSnapshotAttributesResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBSnapshotAttributesResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDBSnapshotAttributesResult.error_of_xml))
   | DescribeDBSnapshots ->
-      (match resp with
-       | Error err -> handle_error err (Some DBSnapshotMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBSnapshotMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBSnapshotMessage.of_xml xml)
+      else Error (parse_aws_error (Some DBSnapshotMessage.error_of_xml))
   | DescribeDBSubnetGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBSubnetGroupMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBSubnetGroupMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBSubnetGroupMessage.of_xml xml)
+      else Error (parse_aws_error (Some DBSubnetGroupMessage.error_of_xml))
   | DescribeEngineDefaultClusterParameters ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeEngineDefaultClusterParametersResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeEngineDefaultClusterParametersResult.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeEngineDefaultParameters ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeEngineDefaultParametersResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeEngineDefaultParametersResult.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeEventCategories ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EventCategoriesMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EventCategoriesMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeEventSubscriptions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EventSubscriptionsMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EventSubscriptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EventSubscriptionsMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some EventSubscriptionsMessage.error_of_xml))
   | DescribeEvents ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EventsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EventsMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeExportTasks ->
-      (match resp with
-       | Error err -> handle_error err (Some ExportTasksMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ExportTasksMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ExportTasksMessage.of_xml xml)
+      else Error (parse_aws_error (Some ExportTasksMessage.error_of_xml))
   | DescribeGlobalClusters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GlobalClustersMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GlobalClustersMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GlobalClustersMessage.of_xml xml)
+      else Error (parse_aws_error (Some GlobalClustersMessage.error_of_xml))
   | DescribeInstallationMedia ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InstallationMediaMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (InstallationMediaMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (InstallationMediaMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some InstallationMediaMessage.error_of_xml))
   | DescribeOptionGroupOptions ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (OptionGroupOptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (OptionGroupOptionsMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeOptionGroups ->
-      (match resp with
-       | Error err -> handle_error err (Some OptionGroups.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (OptionGroups.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (OptionGroups.of_xml xml)
+      else Error (parse_aws_error (Some OptionGroups.error_of_xml))
   | DescribeOrderableDBInstanceOptions ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (OrderableDBInstanceOptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (OrderableDBInstanceOptionsMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribePendingMaintenanceActions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PendingMaintenanceActionsMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PendingMaintenanceActionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PendingMaintenanceActionsMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some PendingMaintenanceActionsMessage.error_of_xml))
   | DescribeReservedDBInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ReservedDBInstanceMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ReservedDBInstanceMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ReservedDBInstanceMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some ReservedDBInstanceMessage.error_of_xml))
   | DescribeReservedDBInstancesOfferings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ReservedDBInstancesOfferingMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ReservedDBInstancesOfferingMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ReservedDBInstancesOfferingMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ReservedDBInstancesOfferingMessage.error_of_xml))
   | DescribeSourceRegions ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SourceRegionMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SourceRegionMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeValidDBInstanceModifications ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeValidDBInstanceModificationsResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeValidDBInstanceModificationsResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeValidDBInstanceModificationsResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeValidDBInstanceModificationsResult.error_of_xml))
   | DownloadDBLogFilePortion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DownloadDBLogFilePortionDetails.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DownloadDBLogFilePortionDetails.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DownloadDBLogFilePortionDetails.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DownloadDBLogFilePortionDetails.error_of_xml))
   | FailoverDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FailoverDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (FailoverDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (FailoverDBClusterResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some FailoverDBClusterResult.error_of_xml))
   | FailoverGlobalCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FailoverGlobalClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (FailoverGlobalClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (FailoverGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some FailoverGlobalClusterResult.error_of_xml))
   | ImportInstallationMedia ->
-      (match resp with
-       | Error err -> handle_error err (Some InstallationMedia.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (InstallationMedia.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (InstallationMedia.of_xml xml)
+      else Error (parse_aws_error (Some InstallationMedia.error_of_xml))
   | ListTagsForResource ->
-      (match resp with
-       | Error err -> handle_error err (Some TagListMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (TagListMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TagListMessage.of_xml xml)
+      else Error (parse_aws_error (Some TagListMessage.error_of_xml))
   | ModifyCertificates ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyCertificatesResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyCertificatesResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyCertificatesResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some ModifyCertificatesResult.error_of_xml))
   | ModifyCurrentDBClusterCapacity ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBClusterCapacityInfo.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterCapacityInfo.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterCapacityInfo.of_xml xml)
+      else Error (parse_aws_error (Some DBClusterCapacityInfo.error_of_xml))
   | ModifyCustomDBEngineVersion ->
-      (match resp with
-       | Error err -> handle_error err (Some DBEngineVersion.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBEngineVersion.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBEngineVersion.of_xml xml)
+      else Error (parse_aws_error (Some DBEngineVersion.error_of_xml))
   | ModifyDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBClusterResult.of_xml xml)
+      else Error (parse_aws_error (Some ModifyDBClusterResult.error_of_xml))
   | ModifyDBClusterEndpoint ->
-      (match resp with
-       | Error err -> handle_error err (Some DBClusterEndpoint.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterEndpoint.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterEndpoint.of_xml xml)
+      else Error (parse_aws_error (Some DBClusterEndpoint.error_of_xml))
   | ModifyDBClusterParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DBClusterParameterGroupNameMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterParameterGroupNameMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterParameterGroupNameMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DBClusterParameterGroupNameMessage.error_of_xml))
   | ModifyDBClusterSnapshotAttribute ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ModifyDBClusterSnapshotAttributeResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBClusterSnapshotAttributeResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBClusterSnapshotAttributeResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyDBClusterSnapshotAttributeResult.error_of_xml))
   | ModifyDBInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyDBInstanceResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBInstanceResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBInstanceResult.of_xml xml)
+      else Error (parse_aws_error (Some ModifyDBInstanceResult.error_of_xml))
   | ModifyDBParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBParameterGroupNameMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBParameterGroupNameMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBParameterGroupNameMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DBParameterGroupNameMessage.error_of_xml))
   | ModifyDBProxy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyDBProxyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBProxyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBProxyResponse.of_xml xml)
+      else Error (parse_aws_error (Some ModifyDBProxyResponse.error_of_xml))
   | ModifyDBProxyEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyDBProxyEndpointResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBProxyEndpointResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBProxyEndpointResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ModifyDBProxyEndpointResponse.error_of_xml))
   | ModifyDBProxyTargetGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ModifyDBProxyTargetGroupResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBProxyTargetGroupResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBProxyTargetGroupResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyDBProxyTargetGroupResponse.error_of_xml))
   | ModifyDBSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyDBSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBSnapshotResult.of_xml xml)
+      else Error (parse_aws_error (Some ModifyDBSnapshotResult.error_of_xml))
   | ModifyDBSnapshotAttribute ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ModifyDBSnapshotAttributeResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBSnapshotAttributeResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBSnapshotAttributeResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyDBSnapshotAttributeResult.error_of_xml))
   | ModifyDBSubnetGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyDBSubnetGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyDBSubnetGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyDBSubnetGroupResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some ModifyDBSubnetGroupResult.error_of_xml))
   | ModifyEventSubscription ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyEventSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyEventSubscriptionResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyEventSubscriptionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ModifyEventSubscriptionResult.error_of_xml))
   | ModifyGlobalCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyGlobalClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyGlobalClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyGlobalClusterResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some ModifyGlobalClusterResult.error_of_xml))
   | ModifyOptionGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ModifyOptionGroupResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyOptionGroupResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyOptionGroupResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some ModifyOptionGroupResult.error_of_xml))
   | PromoteReadReplica ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PromoteReadReplicaResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PromoteReadReplicaResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PromoteReadReplicaResult.of_xml xml)
+      else
+        Error (parse_aws_error (Some PromoteReadReplicaResult.error_of_xml))
   | PromoteReadReplicaDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PromoteReadReplicaDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PromoteReadReplicaDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PromoteReadReplicaDBClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some PromoteReadReplicaDBClusterResult.error_of_xml))
   | PurchaseReservedDBInstancesOffering ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PurchaseReservedDBInstancesOfferingResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PurchaseReservedDBInstancesOfferingResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PurchaseReservedDBInstancesOfferingResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some PurchaseReservedDBInstancesOfferingResult.error_of_xml))
   | RebootDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RebootDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RebootDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RebootDBClusterResult.of_xml xml)
+      else Error (parse_aws_error (Some RebootDBClusterResult.error_of_xml))
   | RebootDBInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RebootDBInstanceResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RebootDBInstanceResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RebootDBInstanceResult.of_xml xml)
+      else Error (parse_aws_error (Some RebootDBInstanceResult.error_of_xml))
   | RegisterDBProxyTargets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegisterDBProxyTargetsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RegisterDBProxyTargetsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RegisterDBProxyTargetsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RegisterDBProxyTargetsResponse.error_of_xml))
   | RemoveFromGlobalCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RemoveFromGlobalClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RemoveFromGlobalClusterResult.of_xml xml))
-  | RemoveRoleFromDBCluster -> Ok ()
-  | RemoveRoleFromDBInstance -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RemoveFromGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RemoveFromGlobalClusterResult.error_of_xml))
+  | RemoveRoleFromDBCluster ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RemoveRoleFromDBInstance ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RemoveSourceIdentifierFromSubscription ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RemoveSourceIdentifierFromSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RemoveSourceIdentifierFromSubscriptionResult.of_xml xml))
-  | RemoveTagsFromResource -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RemoveSourceIdentifierFromSubscriptionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveSourceIdentifierFromSubscriptionResult.error_of_xml))
+  | RemoveTagsFromResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ResetDBClusterParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DBClusterParameterGroupNameMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBClusterParameterGroupNameMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBClusterParameterGroupNameMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DBClusterParameterGroupNameMessage.error_of_xml))
   | ResetDBParameterGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DBParameterGroupNameMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DBParameterGroupNameMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBParameterGroupNameMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DBParameterGroupNameMessage.error_of_xml))
   | RestoreDBClusterFromS3 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestoreDBClusterFromS3Result.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RestoreDBClusterFromS3Result.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RestoreDBClusterFromS3Result.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RestoreDBClusterFromS3Result.error_of_xml))
   | RestoreDBClusterFromSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RestoreDBClusterFromSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RestoreDBClusterFromSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RestoreDBClusterFromSnapshotResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RestoreDBClusterFromSnapshotResult.error_of_xml))
   | RestoreDBClusterToPointInTime ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RestoreDBClusterToPointInTimeResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RestoreDBClusterToPointInTimeResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RestoreDBClusterToPointInTimeResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RestoreDBClusterToPointInTimeResult.error_of_xml))
   | RestoreDBInstanceFromDBSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RestoreDBInstanceFromDBSnapshotResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RestoreDBInstanceFromDBSnapshotResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RestoreDBInstanceFromDBSnapshotResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RestoreDBInstanceFromDBSnapshotResult.error_of_xml))
   | RestoreDBInstanceFromS3 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestoreDBInstanceFromS3Result.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RestoreDBInstanceFromS3Result.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RestoreDBInstanceFromS3Result.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RestoreDBInstanceFromS3Result.error_of_xml))
   | RestoreDBInstanceToPointInTime ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RestoreDBInstanceToPointInTimeResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RestoreDBInstanceToPointInTimeResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RestoreDBInstanceToPointInTimeResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RestoreDBInstanceToPointInTimeResult.error_of_xml))
   | RevokeDBSecurityGroupIngress ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RevokeDBSecurityGroupIngressResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RevokeDBSecurityGroupIngressResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RevokeDBSecurityGroupIngressResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RevokeDBSecurityGroupIngressResult.error_of_xml))
   | StartActivityStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartActivityStreamResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StartActivityStreamResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartActivityStreamResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some StartActivityStreamResponse.error_of_xml))
   | StartDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StartDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartDBClusterResult.of_xml xml)
+      else Error (parse_aws_error (Some StartDBClusterResult.error_of_xml))
   | StartDBInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartDBInstanceResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StartDBInstanceResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartDBInstanceResult.of_xml xml)
+      else Error (parse_aws_error (Some StartDBInstanceResult.error_of_xml))
   | StartDBInstanceAutomatedBackupsReplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartDBInstanceAutomatedBackupsReplicationResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
              (Some
-                StartDBInstanceAutomatedBackupsReplicationResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StartDBInstanceAutomatedBackupsReplicationResult.of_xml xml))
+                StartDBInstanceAutomatedBackupsReplicationResult.error_of_xml))
   | StartExportTask ->
-      (match resp with
-       | Error err -> handle_error err (Some ExportTask.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ExportTask.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ExportTask.of_xml xml)
+      else Error (parse_aws_error (Some ExportTask.error_of_xml))
   | StopActivityStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopActivityStreamResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StopActivityStreamResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StopActivityStreamResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some StopActivityStreamResponse.error_of_xml))
   | StopDBCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopDBClusterResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StopDBClusterResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StopDBClusterResult.of_xml xml)
+      else Error (parse_aws_error (Some StopDBClusterResult.error_of_xml))
   | StopDBInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopDBInstanceResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StopDBInstanceResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StopDBInstanceResult.of_xml xml)
+      else Error (parse_aws_error (Some StopDBInstanceResult.error_of_xml))
   | StopDBInstanceAutomatedBackupsReplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StopDBInstanceAutomatedBackupsReplicationResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
              (Some
-                StopDBInstanceAutomatedBackupsReplicationResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StopDBInstanceAutomatedBackupsReplicationResult.of_xml xml))
+                StopDBInstanceAutomatedBackupsReplicationResult.error_of_xml))

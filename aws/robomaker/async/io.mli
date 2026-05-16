@@ -4,455 +4,347 @@ val batch_delete_worlds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteWorldsRequest.t ->
-        (BatchDeleteWorldsResponse.t,
-          [ `AWS of BatchDeleteWorldsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchDeleteWorldsResponse.t, BatchDeleteWorldsResponse.error)
+          Result.t Async.Deferred.t
 val batch_describe_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDescribeSimulationJobRequest.t ->
         (BatchDescribeSimulationJobResponse.t,
-          [ `AWS of BatchDescribeSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchDescribeSimulationJobResponse.error) Result.t Async.Deferred.t
 val cancel_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelDeploymentJobRequest.t ->
-        (CancelDeploymentJobResponse.t,
-          [ `AWS of CancelDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CancelDeploymentJobResponse.t, CancelDeploymentJobResponse.error)
+          Result.t Async.Deferred.t
 val cancel_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelSimulationJobRequest.t ->
-        (CancelSimulationJobResponse.t,
-          [ `AWS of CancelSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CancelSimulationJobResponse.t, CancelSimulationJobResponse.error)
+          Result.t Async.Deferred.t
 val cancel_simulation_job_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelSimulationJobBatchRequest.t ->
         (CancelSimulationJobBatchResponse.t,
-          [ `AWS of CancelSimulationJobBatchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CancelSimulationJobBatchResponse.error) Result.t Async.Deferred.t
 val cancel_world_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelWorldExportJobRequest.t ->
-        (CancelWorldExportJobResponse.t,
-          [ `AWS of CancelWorldExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CancelWorldExportJobResponse.t, CancelWorldExportJobResponse.error)
+          Result.t Async.Deferred.t
 val cancel_world_generation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelWorldGenerationJobRequest.t ->
         (CancelWorldGenerationJobResponse.t,
-          [ `AWS of CancelWorldGenerationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CancelWorldGenerationJobResponse.error) Result.t Async.Deferred.t
 val create_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentJobRequest.t ->
-        (CreateDeploymentJobResponse.t,
-          [ `AWS of CreateDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateDeploymentJobResponse.t, CreateDeploymentJobResponse.error)
+          Result.t Async.Deferred.t
 val create_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFleetRequest.t ->
-        (CreateFleetResponse.t,
-          [ `AWS of CreateFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFleetResponse.t, CreateFleetResponse.error) Result.t
           Async.Deferred.t
 val create_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRobotRequest.t ->
-        (CreateRobotResponse.t,
-          [ `AWS of CreateRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRobotResponse.t, CreateRobotResponse.error) Result.t
           Async.Deferred.t
 val create_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRobotApplicationRequest.t ->
         (CreateRobotApplicationResponse.t,
-          [ `AWS of CreateRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateRobotApplicationResponse.error) Result.t Async.Deferred.t
 val create_robot_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRobotApplicationVersionRequest.t ->
         (CreateRobotApplicationVersionResponse.t,
-          [ `AWS of CreateRobotApplicationVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateRobotApplicationVersionResponse.error) Result.t
           Async.Deferred.t
 val create_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSimulationApplicationRequest.t ->
         (CreateSimulationApplicationResponse.t,
-          [ `AWS of CreateSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateSimulationApplicationResponse.error) Result.t
           Async.Deferred.t
 val create_simulation_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSimulationApplicationVersionRequest.t ->
         (CreateSimulationApplicationVersionResponse.t,
-          [ `AWS of CreateSimulationApplicationVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateSimulationApplicationVersionResponse.error) Result.t
           Async.Deferred.t
 val create_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSimulationJobRequest.t ->
-        (CreateSimulationJobResponse.t,
-          [ `AWS of CreateSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateSimulationJobResponse.t, CreateSimulationJobResponse.error)
+          Result.t Async.Deferred.t
 val create_world_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorldExportJobRequest.t ->
-        (CreateWorldExportJobResponse.t,
-          [ `AWS of CreateWorldExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateWorldExportJobResponse.t, CreateWorldExportJobResponse.error)
+          Result.t Async.Deferred.t
 val create_world_generation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorldGenerationJobRequest.t ->
         (CreateWorldGenerationJobResponse.t,
-          [ `AWS of CreateWorldGenerationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateWorldGenerationJobResponse.error) Result.t Async.Deferred.t
 val create_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorldTemplateRequest.t ->
-        (CreateWorldTemplateResponse.t,
-          [ `AWS of CreateWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateWorldTemplateResponse.t, CreateWorldTemplateResponse.error)
+          Result.t Async.Deferred.t
 val delete_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFleetRequest.t ->
-        (DeleteFleetResponse.t,
-          [ `AWS of DeleteFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFleetResponse.t, DeleteFleetResponse.error) Result.t
           Async.Deferred.t
 val delete_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRobotRequest.t ->
-        (DeleteRobotResponse.t,
-          [ `AWS of DeleteRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteRobotResponse.t, DeleteRobotResponse.error) Result.t
           Async.Deferred.t
 val delete_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRobotApplicationRequest.t ->
         (DeleteRobotApplicationResponse.t,
-          [ `AWS of DeleteRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteRobotApplicationResponse.error) Result.t Async.Deferred.t
 val delete_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSimulationApplicationRequest.t ->
         (DeleteSimulationApplicationResponse.t,
-          [ `AWS of DeleteSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteSimulationApplicationResponse.error) Result.t
           Async.Deferred.t
 val delete_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorldTemplateRequest.t ->
-        (DeleteWorldTemplateResponse.t,
-          [ `AWS of DeleteWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteWorldTemplateResponse.t, DeleteWorldTemplateResponse.error)
+          Result.t Async.Deferred.t
 val deregister_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterRobotRequest.t ->
-        (DeregisterRobotResponse.t,
-          [ `AWS of DeregisterRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeregisterRobotResponse.t, DeregisterRobotResponse.error) Result.t
           Async.Deferred.t
 val describe_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeploymentJobRequest.t ->
         (DescribeDeploymentJobResponse.t,
-          [ `AWS of DescribeDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeDeploymentJobResponse.error) Result.t Async.Deferred.t
 val describe_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetRequest.t ->
-        (DescribeFleetResponse.t,
-          [ `AWS of DescribeFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFleetResponse.t, DescribeFleetResponse.error) Result.t
           Async.Deferred.t
 val describe_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRobotRequest.t ->
-        (DescribeRobotResponse.t,
-          [ `AWS of DescribeRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeRobotResponse.t, DescribeRobotResponse.error) Result.t
           Async.Deferred.t
 val describe_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRobotApplicationRequest.t ->
         (DescribeRobotApplicationResponse.t,
-          [ `AWS of DescribeRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeRobotApplicationResponse.error) Result.t Async.Deferred.t
 val describe_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSimulationApplicationRequest.t ->
         (DescribeSimulationApplicationResponse.t,
-          [ `AWS of DescribeSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeSimulationApplicationResponse.error) Result.t
           Async.Deferred.t
 val describe_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSimulationJobRequest.t ->
         (DescribeSimulationJobResponse.t,
-          [ `AWS of DescribeSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeSimulationJobResponse.error) Result.t Async.Deferred.t
 val describe_simulation_job_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSimulationJobBatchRequest.t ->
         (DescribeSimulationJobBatchResponse.t,
-          [ `AWS of DescribeSimulationJobBatchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeSimulationJobBatchResponse.error) Result.t Async.Deferred.t
 val describe_world :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldRequest.t ->
-        (DescribeWorldResponse.t,
-          [ `AWS of DescribeWorldResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeWorldResponse.t, DescribeWorldResponse.error) Result.t
           Async.Deferred.t
 val describe_world_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldExportJobRequest.t ->
         (DescribeWorldExportJobResponse.t,
-          [ `AWS of DescribeWorldExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeWorldExportJobResponse.error) Result.t Async.Deferred.t
 val describe_world_generation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldGenerationJobRequest.t ->
         (DescribeWorldGenerationJobResponse.t,
-          [ `AWS of DescribeWorldGenerationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeWorldGenerationJobResponse.error) Result.t Async.Deferred.t
 val describe_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorldTemplateRequest.t ->
         (DescribeWorldTemplateResponse.t,
-          [ `AWS of DescribeWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeWorldTemplateResponse.error) Result.t Async.Deferred.t
 val get_world_template_body :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorldTemplateBodyRequest.t ->
-        (GetWorldTemplateBodyResponse.t,
-          [ `AWS of GetWorldTemplateBodyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetWorldTemplateBodyResponse.t, GetWorldTemplateBodyResponse.error)
+          Result.t Async.Deferred.t
 val list_deployment_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentJobsRequest.t ->
-        (ListDeploymentJobsResponse.t,
-          [ `AWS of ListDeploymentJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListDeploymentJobsResponse.t, ListDeploymentJobsResponse.error)
+          Result.t Async.Deferred.t
 val list_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFleetsRequest.t ->
-        (ListFleetsResponse.t,
-          [ `AWS of ListFleetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListFleetsResponse.t, ListFleetsResponse.error) Result.t
           Async.Deferred.t
 val list_robot_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRobotApplicationsRequest.t ->
         (ListRobotApplicationsResponse.t,
-          [ `AWS of ListRobotApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListRobotApplicationsResponse.error) Result.t Async.Deferred.t
 val list_robots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRobotsRequest.t ->
-        (ListRobotsResponse.t,
-          [ `AWS of ListRobotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRobotsResponse.t, ListRobotsResponse.error) Result.t
           Async.Deferred.t
 val list_simulation_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSimulationApplicationsRequest.t ->
         (ListSimulationApplicationsResponse.t,
-          [ `AWS of ListSimulationApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSimulationApplicationsResponse.error) Result.t Async.Deferred.t
 val list_simulation_job_batches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSimulationJobBatchesRequest.t ->
         (ListSimulationJobBatchesResponse.t,
-          [ `AWS of ListSimulationJobBatchesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSimulationJobBatchesResponse.error) Result.t Async.Deferred.t
 val list_simulation_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSimulationJobsRequest.t ->
-        (ListSimulationJobsResponse.t,
-          [ `AWS of ListSimulationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSimulationJobsResponse.t, ListSimulationJobsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_world_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldExportJobsRequest.t ->
-        (ListWorldExportJobsResponse.t,
-          [ `AWS of ListWorldExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListWorldExportJobsResponse.t, ListWorldExportJobsResponse.error)
+          Result.t Async.Deferred.t
 val list_world_generation_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldGenerationJobsRequest.t ->
         (ListWorldGenerationJobsResponse.t,
-          [ `AWS of ListWorldGenerationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListWorldGenerationJobsResponse.error) Result.t Async.Deferred.t
 val list_world_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldTemplatesRequest.t ->
-        (ListWorldTemplatesResponse.t,
-          [ `AWS of ListWorldTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListWorldTemplatesResponse.t, ListWorldTemplatesResponse.error)
+          Result.t Async.Deferred.t
 val list_worlds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorldsRequest.t ->
-        (ListWorldsResponse.t,
-          [ `AWS of ListWorldsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWorldsResponse.t, ListWorldsResponse.error) Result.t
           Async.Deferred.t
 val register_robot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterRobotRequest.t ->
-        (RegisterRobotResponse.t,
-          [ `AWS of RegisterRobotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterRobotResponse.t, RegisterRobotResponse.error) Result.t
           Async.Deferred.t
 val restart_simulation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestartSimulationJobRequest.t ->
-        (RestartSimulationJobResponse.t,
-          [ `AWS of RestartSimulationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RestartSimulationJobResponse.t, RestartSimulationJobResponse.error)
+          Result.t Async.Deferred.t
 val start_simulation_job_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSimulationJobBatchRequest.t ->
         (StartSimulationJobBatchResponse.t,
-          [ `AWS of StartSimulationJobBatchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartSimulationJobBatchResponse.error) Result.t Async.Deferred.t
 val sync_deployment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SyncDeploymentJobRequest.t ->
-        (SyncDeploymentJobResponse.t,
-          [ `AWS of SyncDeploymentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SyncDeploymentJobResponse.t, SyncDeploymentJobResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_robot_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRobotApplicationRequest.t ->
         (UpdateRobotApplicationResponse.t,
-          [ `AWS of UpdateRobotApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateRobotApplicationResponse.error) Result.t Async.Deferred.t
 val update_simulation_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSimulationApplicationRequest.t ->
         (UpdateSimulationApplicationResponse.t,
-          [ `AWS of UpdateSimulationApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateSimulationApplicationResponse.error) Result.t
           Async.Deferred.t
 val update_world_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorldTemplateRequest.t ->
-        (UpdateWorldTemplateResponse.t,
-          [ `AWS of UpdateWorldTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateWorldTemplateResponse.t, UpdateWorldTemplateResponse.error)
+          Result.t Async.Deferred.t

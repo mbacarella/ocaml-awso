@@ -4,458 +4,364 @@ val build_bot_locale :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BuildBotLocaleRequest.t ->
-        (BuildBotLocaleResponse.t,
-          [ `AWS of BuildBotLocaleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BuildBotLocaleResponse.t, BuildBotLocaleResponse.error) Result.t
+          Lwt.t
 val create_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBotRequest.t ->
-        (CreateBotResponse.t,
-          [ `AWS of CreateBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBotResponse.t, CreateBotResponse.error) Result.t Lwt.t
 val create_bot_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBotAliasRequest.t ->
-        (CreateBotAliasResponse.t,
-          [ `AWS of CreateBotAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBotAliasResponse.t, CreateBotAliasResponse.error) Result.t
+          Lwt.t
 val create_bot_locale :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBotLocaleRequest.t ->
-        (CreateBotLocaleResponse.t,
-          [ `AWS of CreateBotLocaleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBotLocaleResponse.t, CreateBotLocaleResponse.error) Result.t
+          Lwt.t
 val create_bot_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBotVersionRequest.t ->
-        (CreateBotVersionResponse.t,
-          [ `AWS of CreateBotVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBotVersionResponse.t, CreateBotVersionResponse.error) Result.t
+          Lwt.t
 val create_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateExportRequest.t ->
-        (CreateExportResponse.t,
-          [ `AWS of CreateExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateExportResponse.t, CreateExportResponse.error) Result.t Lwt.t
 val create_intent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIntentRequest.t ->
-        (CreateIntentResponse.t,
-          [ `AWS of CreateIntentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateIntentResponse.t, CreateIntentResponse.error) Result.t Lwt.t
 val create_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourcePolicyRequest.t ->
-        (CreateResourcePolicyResponse.t,
-          [ `AWS of CreateResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateResourcePolicyResponse.t, CreateResourcePolicyResponse.error)
+          Result.t Lwt.t
 val create_resource_policy_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourcePolicyStatementRequest.t ->
         (CreateResourcePolicyStatementResponse.t,
-          [ `AWS of CreateResourcePolicyStatementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateResourcePolicyStatementResponse.error) Result.t Lwt.t
 val create_slot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSlotRequest.t ->
-        (CreateSlotResponse.t,
-          [ `AWS of CreateSlotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSlotResponse.t, CreateSlotResponse.error) Result.t Lwt.t
 val create_slot_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSlotTypeRequest.t ->
-        (CreateSlotTypeResponse.t,
-          [ `AWS of CreateSlotTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSlotTypeResponse.t, CreateSlotTypeResponse.error) Result.t
+          Lwt.t
 val create_upload_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUploadUrlRequest.t ->
-        (CreateUploadUrlResponse.t,
-          [ `AWS of CreateUploadUrlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUploadUrlResponse.t, CreateUploadUrlResponse.error) Result.t
+          Lwt.t
 val delete_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBotRequest.t ->
-        (DeleteBotResponse.t,
-          [ `AWS of DeleteBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBotResponse.t, DeleteBotResponse.error) Result.t Lwt.t
 val delete_bot_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBotAliasRequest.t ->
-        (DeleteBotAliasResponse.t,
-          [ `AWS of DeleteBotAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBotAliasResponse.t, DeleteBotAliasResponse.error) Result.t
+          Lwt.t
 val delete_bot_locale :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBotLocaleRequest.t ->
-        (DeleteBotLocaleResponse.t,
-          [ `AWS of DeleteBotLocaleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBotLocaleResponse.t, DeleteBotLocaleResponse.error) Result.t
+          Lwt.t
 val delete_bot_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBotVersionRequest.t ->
-        (DeleteBotVersionResponse.t,
-          [ `AWS of DeleteBotVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBotVersionResponse.t, DeleteBotVersionResponse.error) Result.t
+          Lwt.t
 val delete_custom_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCustomVocabularyRequest.t ->
         (DeleteCustomVocabularyResponse.t,
-          [ `AWS of DeleteCustomVocabularyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteCustomVocabularyResponse.error) Result.t Lwt.t
 val delete_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteExportRequest.t ->
-        (DeleteExportResponse.t,
-          [ `AWS of DeleteExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteExportResponse.t, DeleteExportResponse.error) Result.t Lwt.t
 val delete_import :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteImportRequest.t ->
-        (DeleteImportResponse.t,
-          [ `AWS of DeleteImportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteImportResponse.t, DeleteImportResponse.error) Result.t Lwt.t
 val delete_intent :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteIntentRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteIntentRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyRequest.t ->
-        (DeleteResourcePolicyResponse.t,
-          [ `AWS of DeleteResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Lwt.t
 val delete_resource_policy_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyStatementRequest.t ->
         (DeleteResourcePolicyStatementResponse.t,
-          [ `AWS of DeleteResourcePolicyStatementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteResourcePolicyStatementResponse.error) Result.t Lwt.t
 val delete_slot :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteSlotRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteSlotRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_slot_type :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteSlotTypeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteSlotTypeRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_utterances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUtterancesRequest.t ->
-        (DeleteUtterancesResponse.t,
-          [ `AWS of DeleteUtterancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteUtterancesResponse.t, DeleteUtterancesResponse.error) Result.t
+          Lwt.t
 val describe_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBotRequest.t ->
-        (DescribeBotResponse.t,
-          [ `AWS of DescribeBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeBotResponse.t, DescribeBotResponse.error) Result.t Lwt.t
 val describe_bot_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBotAliasRequest.t ->
-        (DescribeBotAliasResponse.t,
-          [ `AWS of DescribeBotAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeBotAliasResponse.t, DescribeBotAliasResponse.error) Result.t
+          Lwt.t
 val describe_bot_locale :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBotLocaleRequest.t ->
-        (DescribeBotLocaleResponse.t,
-          [ `AWS of DescribeBotLocaleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeBotLocaleResponse.t, DescribeBotLocaleResponse.error)
+          Result.t Lwt.t
 val describe_bot_recommendation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBotRecommendationRequest.t ->
         (DescribeBotRecommendationResponse.t,
-          [ `AWS of DescribeBotRecommendationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeBotRecommendationResponse.error) Result.t Lwt.t
 val describe_bot_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBotVersionRequest.t ->
-        (DescribeBotVersionResponse.t,
-          [ `AWS of DescribeBotVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeBotVersionResponse.t, DescribeBotVersionResponse.error)
+          Result.t Lwt.t
 val describe_custom_vocabulary_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomVocabularyMetadataRequest.t ->
         (DescribeCustomVocabularyMetadataResponse.t,
-          [ `AWS of DescribeCustomVocabularyMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCustomVocabularyMetadataResponse.error) Result.t Lwt.t
 val describe_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExportRequest.t ->
-        (DescribeExportResponse.t,
-          [ `AWS of DescribeExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeExportResponse.t, DescribeExportResponse.error) Result.t
+          Lwt.t
 val describe_import :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImportRequest.t ->
-        (DescribeImportResponse.t,
-          [ `AWS of DescribeImportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeImportResponse.t, DescribeImportResponse.error) Result.t
+          Lwt.t
 val describe_intent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIntentRequest.t ->
-        (DescribeIntentResponse.t,
-          [ `AWS of DescribeIntentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeIntentResponse.t, DescribeIntentResponse.error) Result.t
+          Lwt.t
 val describe_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResourcePolicyRequest.t ->
         (DescribeResourcePolicyResponse.t,
-          [ `AWS of DescribeResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeResourcePolicyResponse.error) Result.t Lwt.t
 val describe_slot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSlotRequest.t ->
-        (DescribeSlotResponse.t,
-          [ `AWS of DescribeSlotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSlotResponse.t, DescribeSlotResponse.error) Result.t Lwt.t
 val describe_slot_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSlotTypeRequest.t ->
-        (DescribeSlotTypeResponse.t,
-          [ `AWS of DescribeSlotTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSlotTypeResponse.t, DescribeSlotTypeResponse.error) Result.t
+          Lwt.t
 val list_aggregated_utterances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAggregatedUtterancesRequest.t ->
         (ListAggregatedUtterancesResponse.t,
-          [ `AWS of ListAggregatedUtterancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAggregatedUtterancesResponse.error) Result.t Lwt.t
 val list_bot_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBotAliasesRequest.t ->
-        (ListBotAliasesResponse.t,
-          [ `AWS of ListBotAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBotAliasesResponse.t, ListBotAliasesResponse.error) Result.t
+          Lwt.t
 val list_bot_locales :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBotLocalesRequest.t ->
-        (ListBotLocalesResponse.t,
-          [ `AWS of ListBotLocalesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBotLocalesResponse.t, ListBotLocalesResponse.error) Result.t
+          Lwt.t
 val list_bot_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBotRecommendationsRequest.t ->
         (ListBotRecommendationsResponse.t,
-          [ `AWS of ListBotRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBotRecommendationsResponse.error) Result.t Lwt.t
 val list_bot_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBotVersionsRequest.t ->
-        (ListBotVersionsResponse.t,
-          [ `AWS of ListBotVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBotVersionsResponse.t, ListBotVersionsResponse.error) Result.t
+          Lwt.t
 val list_bots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBotsRequest.t ->
-        (ListBotsResponse.t,
-          [ `AWS of ListBotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBotsResponse.t, ListBotsResponse.error) Result.t Lwt.t
 val list_built_in_intents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBuiltInIntentsRequest.t ->
-        (ListBuiltInIntentsResponse.t,
-          [ `AWS of ListBuiltInIntentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBuiltInIntentsResponse.t, ListBuiltInIntentsResponse.error)
+          Result.t Lwt.t
 val list_built_in_slot_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBuiltInSlotTypesRequest.t ->
-        (ListBuiltInSlotTypesResponse.t,
-          [ `AWS of ListBuiltInSlotTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBuiltInSlotTypesResponse.t, ListBuiltInSlotTypesResponse.error)
+          Result.t Lwt.t
 val list_exports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExportsRequest.t ->
-        (ListExportsResponse.t,
-          [ `AWS of ListExportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListExportsResponse.t, ListExportsResponse.error) Result.t Lwt.t
 val list_imports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImportsRequest.t ->
-        (ListImportsResponse.t,
-          [ `AWS of ListImportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListImportsResponse.t, ListImportsResponse.error) Result.t Lwt.t
 val list_intents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIntentsRequest.t ->
-        (ListIntentsResponse.t,
-          [ `AWS of ListIntentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListIntentsResponse.t, ListIntentsResponse.error) Result.t Lwt.t
 val list_recommended_intents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecommendedIntentsRequest.t ->
         (ListRecommendedIntentsResponse.t,
-          [ `AWS of ListRecommendedIntentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRecommendedIntentsResponse.error) Result.t Lwt.t
 val list_slot_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSlotTypesRequest.t ->
-        (ListSlotTypesResponse.t,
-          [ `AWS of ListSlotTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSlotTypesResponse.t, ListSlotTypesResponse.error) Result.t Lwt.t
 val list_slots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSlotsRequest.t ->
-        (ListSlotsResponse.t,
-          [ `AWS of ListSlotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSlotsResponse.t, ListSlotsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val search_associated_transcripts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchAssociatedTranscriptsRequest.t ->
         (SearchAssociatedTranscriptsResponse.t,
-          [ `AWS of SearchAssociatedTranscriptsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchAssociatedTranscriptsResponse.error) Result.t Lwt.t
 val start_bot_recommendation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartBotRecommendationRequest.t ->
         (StartBotRecommendationResponse.t,
-          [ `AWS of StartBotRecommendationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartBotRecommendationResponse.error) Result.t Lwt.t
 val start_import :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImportRequest.t ->
-        (StartImportResponse.t,
-          [ `AWS of StartImportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartImportResponse.t, StartImportResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBotRequest.t ->
-        (UpdateBotResponse.t,
-          [ `AWS of UpdateBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateBotResponse.t, UpdateBotResponse.error) Result.t Lwt.t
 val update_bot_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBotAliasRequest.t ->
-        (UpdateBotAliasResponse.t,
-          [ `AWS of UpdateBotAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateBotAliasResponse.t, UpdateBotAliasResponse.error) Result.t
+          Lwt.t
 val update_bot_locale :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBotLocaleRequest.t ->
-        (UpdateBotLocaleResponse.t,
-          [ `AWS of UpdateBotLocaleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateBotLocaleResponse.t, UpdateBotLocaleResponse.error) Result.t
+          Lwt.t
 val update_bot_recommendation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBotRecommendationRequest.t ->
         (UpdateBotRecommendationResponse.t,
-          [ `AWS of UpdateBotRecommendationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateBotRecommendationResponse.error) Result.t Lwt.t
 val update_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateExportRequest.t ->
-        (UpdateExportResponse.t,
-          [ `AWS of UpdateExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateExportResponse.t, UpdateExportResponse.error) Result.t Lwt.t
 val update_intent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIntentRequest.t ->
-        (UpdateIntentResponse.t,
-          [ `AWS of UpdateIntentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateIntentResponse.t, UpdateIntentResponse.error) Result.t Lwt.t
 val update_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourcePolicyRequest.t ->
-        (UpdateResourcePolicyResponse.t,
-          [ `AWS of UpdateResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResourcePolicyResponse.t, UpdateResourcePolicyResponse.error)
+          Result.t Lwt.t
 val update_slot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSlotRequest.t ->
-        (UpdateSlotResponse.t,
-          [ `AWS of UpdateSlotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSlotResponse.t, UpdateSlotResponse.error) Result.t Lwt.t
 val update_slot_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSlotTypeRequest.t ->
-        (UpdateSlotTypeResponse.t,
-          [ `AWS of UpdateSlotTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSlotTypeResponse.t, UpdateSlotTypeResponse.error) Result.t
+          Lwt.t

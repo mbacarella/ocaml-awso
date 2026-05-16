@@ -5,467 +5,391 @@ val accept_environment_account_connection :
     ?cfg:Awso.Cfg.t ->
       AcceptEnvironmentAccountConnectionInput.t ->
         (AcceptEnvironmentAccountConnectionOutput.t,
-          [ `AWS of AcceptEnvironmentAccountConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AcceptEnvironmentAccountConnectionOutput.error) Result.t Lwt.t
 val cancel_environment_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelEnvironmentDeploymentInput.t ->
         (CancelEnvironmentDeploymentOutput.t,
-          [ `AWS of CancelEnvironmentDeploymentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelEnvironmentDeploymentOutput.error) Result.t Lwt.t
 val cancel_service_instance_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelServiceInstanceDeploymentInput.t ->
         (CancelServiceInstanceDeploymentOutput.t,
-          [ `AWS of CancelServiceInstanceDeploymentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelServiceInstanceDeploymentOutput.error) Result.t Lwt.t
 val cancel_service_pipeline_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelServicePipelineDeploymentInput.t ->
         (CancelServicePipelineDeploymentOutput.t,
-          [ `AWS of CancelServicePipelineDeploymentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelServicePipelineDeploymentOutput.error) Result.t Lwt.t
 val create_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentInput.t ->
-        (CreateEnvironmentOutput.t,
-          [ `AWS of CreateEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEnvironmentOutput.t, CreateEnvironmentOutput.error) Result.t
+          Lwt.t
 val create_environment_account_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentAccountConnectionInput.t ->
         (CreateEnvironmentAccountConnectionOutput.t,
-          [ `AWS of CreateEnvironmentAccountConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateEnvironmentAccountConnectionOutput.error) Result.t Lwt.t
 val create_environment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentTemplateInput.t ->
         (CreateEnvironmentTemplateOutput.t,
-          [ `AWS of CreateEnvironmentTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateEnvironmentTemplateOutput.error) Result.t Lwt.t
 val create_environment_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentTemplateVersionInput.t ->
         (CreateEnvironmentTemplateVersionOutput.t,
-          [ `AWS of CreateEnvironmentTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateEnvironmentTemplateVersionOutput.error) Result.t Lwt.t
 val create_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRepositoryInput.t ->
-        (CreateRepositoryOutput.t,
-          [ `AWS of CreateRepositoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRepositoryOutput.t, CreateRepositoryOutput.error) Result.t
+          Lwt.t
 val create_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceInput.t ->
-        (CreateServiceOutput.t,
-          [ `AWS of CreateServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateServiceOutput.t, CreateServiceOutput.error) Result.t Lwt.t
 val create_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceTemplateInput.t ->
-        (CreateServiceTemplateOutput.t,
-          [ `AWS of CreateServiceTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateServiceTemplateOutput.t, CreateServiceTemplateOutput.error)
+          Result.t Lwt.t
 val create_service_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceTemplateVersionInput.t ->
         (CreateServiceTemplateVersionOutput.t,
-          [ `AWS of CreateServiceTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateServiceTemplateVersionOutput.error) Result.t Lwt.t
 val create_template_sync_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTemplateSyncConfigInput.t ->
         (CreateTemplateSyncConfigOutput.t,
-          [ `AWS of CreateTemplateSyncConfigOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateTemplateSyncConfigOutput.error) Result.t Lwt.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentInput.t ->
-        (DeleteEnvironmentOutput.t,
-          [ `AWS of DeleteEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEnvironmentOutput.t, DeleteEnvironmentOutput.error) Result.t
+          Lwt.t
 val delete_environment_account_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentAccountConnectionInput.t ->
         (DeleteEnvironmentAccountConnectionOutput.t,
-          [ `AWS of DeleteEnvironmentAccountConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEnvironmentAccountConnectionOutput.error) Result.t Lwt.t
 val delete_environment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentTemplateInput.t ->
         (DeleteEnvironmentTemplateOutput.t,
-          [ `AWS of DeleteEnvironmentTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEnvironmentTemplateOutput.error) Result.t Lwt.t
 val delete_environment_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentTemplateVersionInput.t ->
         (DeleteEnvironmentTemplateVersionOutput.t,
-          [ `AWS of DeleteEnvironmentTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEnvironmentTemplateVersionOutput.error) Result.t Lwt.t
 val delete_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryInput.t ->
-        (DeleteRepositoryOutput.t,
-          [ `AWS of DeleteRepositoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRepositoryOutput.t, DeleteRepositoryOutput.error) Result.t
+          Lwt.t
 val delete_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceInput.t ->
-        (DeleteServiceOutput.t,
-          [ `AWS of DeleteServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteServiceOutput.t, DeleteServiceOutput.error) Result.t Lwt.t
 val delete_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceTemplateInput.t ->
-        (DeleteServiceTemplateOutput.t,
-          [ `AWS of DeleteServiceTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteServiceTemplateOutput.t, DeleteServiceTemplateOutput.error)
+          Result.t Lwt.t
 val delete_service_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceTemplateVersionInput.t ->
         (DeleteServiceTemplateVersionOutput.t,
-          [ `AWS of DeleteServiceTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteServiceTemplateVersionOutput.error) Result.t Lwt.t
 val delete_template_sync_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTemplateSyncConfigInput.t ->
         (DeleteTemplateSyncConfigOutput.t,
-          [ `AWS of DeleteTemplateSyncConfigOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteTemplateSyncConfigOutput.error) Result.t Lwt.t
 val get_account_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccountSettingsInput.t ->
-        (GetAccountSettingsOutput.t,
-          [ `AWS of GetAccountSettingsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccountSettingsOutput.t, GetAccountSettingsOutput.error) Result.t
+          Lwt.t
 val get_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentInput.t ->
-        (GetEnvironmentOutput.t,
-          [ `AWS of GetEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEnvironmentOutput.t, GetEnvironmentOutput.error) Result.t Lwt.t
 val get_environment_account_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentAccountConnectionInput.t ->
         (GetEnvironmentAccountConnectionOutput.t,
-          [ `AWS of GetEnvironmentAccountConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetEnvironmentAccountConnectionOutput.error) Result.t Lwt.t
 val get_environment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentTemplateInput.t ->
-        (GetEnvironmentTemplateOutput.t,
-          [ `AWS of GetEnvironmentTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEnvironmentTemplateOutput.t, GetEnvironmentTemplateOutput.error)
+          Result.t Lwt.t
 val get_environment_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentTemplateVersionInput.t ->
         (GetEnvironmentTemplateVersionOutput.t,
-          [ `AWS of GetEnvironmentTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetEnvironmentTemplateVersionOutput.error) Result.t Lwt.t
 val get_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryInput.t ->
-        (GetRepositoryOutput.t,
-          [ `AWS of GetRepositoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRepositoryOutput.t, GetRepositoryOutput.error) Result.t Lwt.t
 val get_repository_sync_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositorySyncStatusInput.t ->
         (GetRepositorySyncStatusOutput.t,
-          [ `AWS of GetRepositorySyncStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetRepositorySyncStatusOutput.error) Result.t Lwt.t
 val get_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceInput.t ->
-        (GetServiceOutput.t,
-          [ `AWS of GetServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServiceOutput.t, GetServiceOutput.error) Result.t Lwt.t
 val get_service_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceInstanceInput.t ->
-        (GetServiceInstanceOutput.t,
-          [ `AWS of GetServiceInstanceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServiceInstanceOutput.t, GetServiceInstanceOutput.error) Result.t
+          Lwt.t
 val get_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceTemplateInput.t ->
-        (GetServiceTemplateOutput.t,
-          [ `AWS of GetServiceTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServiceTemplateOutput.t, GetServiceTemplateOutput.error) Result.t
+          Lwt.t
 val get_service_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceTemplateVersionInput.t ->
         (GetServiceTemplateVersionOutput.t,
-          [ `AWS of GetServiceTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetServiceTemplateVersionOutput.error) Result.t Lwt.t
 val get_template_sync_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTemplateSyncConfigInput.t ->
-        (GetTemplateSyncConfigOutput.t,
-          [ `AWS of GetTemplateSyncConfigOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTemplateSyncConfigOutput.t, GetTemplateSyncConfigOutput.error)
+          Result.t Lwt.t
 val get_template_sync_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTemplateSyncStatusInput.t ->
-        (GetTemplateSyncStatusOutput.t,
-          [ `AWS of GetTemplateSyncStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTemplateSyncStatusOutput.t, GetTemplateSyncStatusOutput.error)
+          Result.t Lwt.t
 val list_environment_account_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentAccountConnectionsInput.t ->
         (ListEnvironmentAccountConnectionsOutput.t,
-          [ `AWS of ListEnvironmentAccountConnectionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEnvironmentAccountConnectionsOutput.error) Result.t Lwt.t
 val list_environment_outputs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentOutputsInput.t ->
-        (ListEnvironmentOutputsOutput.t,
-          [ `AWS of ListEnvironmentOutputsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEnvironmentOutputsOutput.t, ListEnvironmentOutputsOutput.error)
+          Result.t Lwt.t
 val list_environment_provisioned_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentProvisionedResourcesInput.t ->
         (ListEnvironmentProvisionedResourcesOutput.t,
-          [ `AWS of ListEnvironmentProvisionedResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEnvironmentProvisionedResourcesOutput.error) Result.t Lwt.t
 val list_environment_template_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentTemplateVersionsInput.t ->
         (ListEnvironmentTemplateVersionsOutput.t,
-          [ `AWS of ListEnvironmentTemplateVersionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEnvironmentTemplateVersionsOutput.error) Result.t Lwt.t
 val list_environment_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentTemplatesInput.t ->
         (ListEnvironmentTemplatesOutput.t,
-          [ `AWS of ListEnvironmentTemplatesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEnvironmentTemplatesOutput.error) Result.t Lwt.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentsInput.t ->
-        (ListEnvironmentsOutput.t,
-          [ `AWS of ListEnvironmentsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEnvironmentsOutput.t, ListEnvironmentsOutput.error) Result.t
+          Lwt.t
 val list_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoriesInput.t ->
-        (ListRepositoriesOutput.t,
-          [ `AWS of ListRepositoriesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRepositoriesOutput.t, ListRepositoriesOutput.error) Result.t
+          Lwt.t
 val list_repository_sync_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositorySyncDefinitionsInput.t ->
         (ListRepositorySyncDefinitionsOutput.t,
-          [ `AWS of ListRepositorySyncDefinitionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRepositorySyncDefinitionsOutput.error) Result.t Lwt.t
 val list_service_instance_outputs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceInstanceOutputsInput.t ->
         (ListServiceInstanceOutputsOutput.t,
-          [ `AWS of ListServiceInstanceOutputsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListServiceInstanceOutputsOutput.error) Result.t Lwt.t
 val list_service_instance_provisioned_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceInstanceProvisionedResourcesInput.t ->
         (ListServiceInstanceProvisionedResourcesOutput.t,
-          [ `AWS of ListServiceInstanceProvisionedResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListServiceInstanceProvisionedResourcesOutput.error) Result.t Lwt.t
 val list_service_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceInstancesInput.t ->
-        (ListServiceInstancesOutput.t,
-          [ `AWS of ListServiceInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListServiceInstancesOutput.t, ListServiceInstancesOutput.error)
+          Result.t Lwt.t
 val list_service_pipeline_outputs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicePipelineOutputsInput.t ->
         (ListServicePipelineOutputsOutput.t,
-          [ `AWS of ListServicePipelineOutputsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListServicePipelineOutputsOutput.error) Result.t Lwt.t
 val list_service_pipeline_provisioned_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicePipelineProvisionedResourcesInput.t ->
         (ListServicePipelineProvisionedResourcesOutput.t,
-          [ `AWS of ListServicePipelineProvisionedResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListServicePipelineProvisionedResourcesOutput.error) Result.t Lwt.t
 val list_service_template_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceTemplateVersionsInput.t ->
         (ListServiceTemplateVersionsOutput.t,
-          [ `AWS of ListServiceTemplateVersionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListServiceTemplateVersionsOutput.error) Result.t Lwt.t
 val list_service_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceTemplatesInput.t ->
-        (ListServiceTemplatesOutput.t,
-          [ `AWS of ListServiceTemplatesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListServiceTemplatesOutput.t, ListServiceTemplatesOutput.error)
+          Result.t Lwt.t
 val list_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicesInput.t ->
-        (ListServicesOutput.t,
-          [ `AWS of ListServicesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListServicesOutput.t, ListServicesOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val notify_resource_deployment_status_change :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       NotifyResourceDeploymentStatusChangeInput.t ->
         (NotifyResourceDeploymentStatusChangeOutput.t,
-          [ `AWS of NotifyResourceDeploymentStatusChangeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          NotifyResourceDeploymentStatusChangeOutput.error) Result.t Lwt.t
 val reject_environment_account_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectEnvironmentAccountConnectionInput.t ->
         (RejectEnvironmentAccountConnectionOutput.t,
-          [ `AWS of RejectEnvironmentAccountConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RejectEnvironmentAccountConnectionOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
 val update_account_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAccountSettingsInput.t ->
-        (UpdateAccountSettingsOutput.t,
-          [ `AWS of UpdateAccountSettingsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAccountSettingsOutput.t, UpdateAccountSettingsOutput.error)
+          Result.t Lwt.t
 val update_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentInput.t ->
-        (UpdateEnvironmentOutput.t,
-          [ `AWS of UpdateEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEnvironmentOutput.t, UpdateEnvironmentOutput.error) Result.t
+          Lwt.t
 val update_environment_account_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentAccountConnectionInput.t ->
         (UpdateEnvironmentAccountConnectionOutput.t,
-          [ `AWS of UpdateEnvironmentAccountConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateEnvironmentAccountConnectionOutput.error) Result.t Lwt.t
 val update_environment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentTemplateInput.t ->
         (UpdateEnvironmentTemplateOutput.t,
-          [ `AWS of UpdateEnvironmentTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateEnvironmentTemplateOutput.error) Result.t Lwt.t
 val update_environment_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentTemplateVersionInput.t ->
         (UpdateEnvironmentTemplateVersionOutput.t,
-          [ `AWS of UpdateEnvironmentTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateEnvironmentTemplateVersionOutput.error) Result.t Lwt.t
 val update_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceInput.t ->
-        (UpdateServiceOutput.t,
-          [ `AWS of UpdateServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateServiceOutput.t, UpdateServiceOutput.error) Result.t Lwt.t
 val update_service_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceInstanceInput.t ->
-        (UpdateServiceInstanceOutput.t,
-          [ `AWS of UpdateServiceInstanceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateServiceInstanceOutput.t, UpdateServiceInstanceOutput.error)
+          Result.t Lwt.t
 val update_service_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServicePipelineInput.t ->
-        (UpdateServicePipelineOutput.t,
-          [ `AWS of UpdateServicePipelineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateServicePipelineOutput.t, UpdateServicePipelineOutput.error)
+          Result.t Lwt.t
 val update_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceTemplateInput.t ->
-        (UpdateServiceTemplateOutput.t,
-          [ `AWS of UpdateServiceTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateServiceTemplateOutput.t, UpdateServiceTemplateOutput.error)
+          Result.t Lwt.t
 val update_service_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceTemplateVersionInput.t ->
         (UpdateServiceTemplateVersionOutput.t,
-          [ `AWS of UpdateServiceTemplateVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateServiceTemplateVersionOutput.error) Result.t Lwt.t
 val update_template_sync_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTemplateSyncConfigInput.t ->
         (UpdateTemplateSyncConfigOutput.t,
-          [ `AWS of UpdateTemplateSyncConfigOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateTemplateSyncConfigOutput.error) Result.t Lwt.t

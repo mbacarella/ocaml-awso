@@ -4,15 +4,11 @@ val get_ice_server_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIceServerConfigRequest.t ->
-        (GetIceServerConfigResponse.t,
-          [ `AWS of GetIceServerConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetIceServerConfigResponse.t, GetIceServerConfigResponse.error)
+          Result.t Async.Deferred.t
 val send_alexa_offer_to_master :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendAlexaOfferToMasterRequest.t ->
         (SendAlexaOfferToMasterResponse.t,
-          [ `AWS of SendAlexaOfferToMasterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          SendAlexaOfferToMasterResponse.error) Result.t Async.Deferred.t

@@ -5,98 +5,72 @@ val claim_devices_by_claim_code :
     ?cfg:Awso.Cfg.t ->
       ClaimDevicesByClaimCodeRequest.t ->
         (ClaimDevicesByClaimCodeResponse.t,
-          [ `AWS of ClaimDevicesByClaimCodeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ClaimDevicesByClaimCodeResponse.error) Result.t Async.Deferred.t
 val describe_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeviceRequest.t ->
-        (DescribeDeviceResponse.t,
-          [ `AWS of DescribeDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDeviceResponse.t, DescribeDeviceResponse.error) Result.t
           Async.Deferred.t
 val finalize_device_claim :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       FinalizeDeviceClaimRequest.t ->
-        (FinalizeDeviceClaimResponse.t,
-          [ `AWS of FinalizeDeviceClaimResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (FinalizeDeviceClaimResponse.t, FinalizeDeviceClaimResponse.error)
+          Result.t Async.Deferred.t
 val get_device_methods :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceMethodsRequest.t ->
-        (GetDeviceMethodsResponse.t,
-          [ `AWS of GetDeviceMethodsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDeviceMethodsResponse.t, GetDeviceMethodsResponse.error) Result.t
           Async.Deferred.t
 val initiate_device_claim :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateDeviceClaimRequest.t ->
-        (InitiateDeviceClaimResponse.t,
-          [ `AWS of InitiateDeviceClaimResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (InitiateDeviceClaimResponse.t, InitiateDeviceClaimResponse.error)
+          Result.t Async.Deferred.t
 val invoke_device_method :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InvokeDeviceMethodRequest.t ->
-        (InvokeDeviceMethodResponse.t,
-          [ `AWS of InvokeDeviceMethodResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (InvokeDeviceMethodResponse.t, InvokeDeviceMethodResponse.error)
+          Result.t Async.Deferred.t
 val list_device_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeviceEventsRequest.t ->
-        (ListDeviceEventsResponse.t,
-          [ `AWS of ListDeviceEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDeviceEventsResponse.t, ListDeviceEventsResponse.error) Result.t
           Async.Deferred.t
 val list_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicesRequest.t ->
-        (ListDevicesResponse.t,
-          [ `AWS of ListDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDevicesResponse.t, ListDevicesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val unclaim_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnclaimDeviceRequest.t ->
-        (UnclaimDeviceResponse.t,
-          [ `AWS of UnclaimDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UnclaimDeviceResponse.t, UnclaimDeviceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_device_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDeviceStateRequest.t ->
-        (UpdateDeviceStateResponse.t,
-          [ `AWS of UpdateDeviceStateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateDeviceStateResponse.t, UpdateDeviceStateResponse.error)
+          Result.t Async.Deferred.t

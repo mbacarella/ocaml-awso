@@ -5,206 +5,159 @@ val describe_entities_detection_v2_job :
     ?cfg:Awso.Cfg.t ->
       DescribeEntitiesDetectionV2JobRequest.t ->
         (DescribeEntitiesDetectionV2JobResponse.t,
-          [ `AWS of DescribeEntitiesDetectionV2JobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeEntitiesDetectionV2JobResponse.error) Result.t
           Async.Deferred.t
 val describe_i_c_d10_c_m_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeICD10CMInferenceJobRequest.t ->
         (DescribeICD10CMInferenceJobResponse.t,
-          [ `AWS of DescribeICD10CMInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeICD10CMInferenceJobResponse.error) Result.t
           Async.Deferred.t
 val describe_p_h_i_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePHIDetectionJobRequest.t ->
         (DescribePHIDetectionJobResponse.t,
-          [ `AWS of DescribePHIDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribePHIDetectionJobResponse.error) Result.t Async.Deferred.t
 val describe_rx_norm_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRxNormInferenceJobRequest.t ->
         (DescribeRxNormInferenceJobResponse.t,
-          [ `AWS of DescribeRxNormInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeRxNormInferenceJobResponse.error) Result.t Async.Deferred.t
 val describe_s_n_o_m_e_d_c_t_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSNOMEDCTInferenceJobRequest.t ->
         (DescribeSNOMEDCTInferenceJobResponse.t,
-          [ `AWS of DescribeSNOMEDCTInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeSNOMEDCTInferenceJobResponse.error) Result.t
           Async.Deferred.t
 val detect_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectEntitiesRequest.t ->
-        (DetectEntitiesResponse.t,
-          [ `AWS of DetectEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DetectEntitiesResponse.t, DetectEntitiesResponse.error) Result.t
           Async.Deferred.t
 val detect_entities_v2 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectEntitiesV2Request.t ->
-        (DetectEntitiesV2Response.t,
-          [ `AWS of DetectEntitiesV2Response.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DetectEntitiesV2Response.t, DetectEntitiesV2Response.error) Result.t
           Async.Deferred.t
 val detect_p_h_i :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectPHIRequest.t ->
-        (DetectPHIResponse.t,
-          [ `AWS of DetectPHIResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DetectPHIResponse.t, DetectPHIResponse.error) Result.t
           Async.Deferred.t
 val infer_i_c_d10_c_m :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InferICD10CMRequest.t ->
-        (InferICD10CMResponse.t,
-          [ `AWS of InferICD10CMResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (InferICD10CMResponse.t, InferICD10CMResponse.error) Result.t
           Async.Deferred.t
 val infer_rx_norm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InferRxNormRequest.t ->
-        (InferRxNormResponse.t,
-          [ `AWS of InferRxNormResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (InferRxNormResponse.t, InferRxNormResponse.error) Result.t
           Async.Deferred.t
 val infer_s_n_o_m_e_d_c_t :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InferSNOMEDCTRequest.t ->
-        (InferSNOMEDCTResponse.t,
-          [ `AWS of InferSNOMEDCTResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (InferSNOMEDCTResponse.t, InferSNOMEDCTResponse.error) Result.t
           Async.Deferred.t
 val list_entities_detection_v2_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEntitiesDetectionV2JobsRequest.t ->
         (ListEntitiesDetectionV2JobsResponse.t,
-          [ `AWS of ListEntitiesDetectionV2JobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListEntitiesDetectionV2JobsResponse.error) Result.t
           Async.Deferred.t
 val list_i_c_d10_c_m_inference_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListICD10CMInferenceJobsRequest.t ->
         (ListICD10CMInferenceJobsResponse.t,
-          [ `AWS of ListICD10CMInferenceJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListICD10CMInferenceJobsResponse.error) Result.t Async.Deferred.t
 val list_p_h_i_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPHIDetectionJobsRequest.t ->
-        (ListPHIDetectionJobsResponse.t,
-          [ `AWS of ListPHIDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPHIDetectionJobsResponse.t, ListPHIDetectionJobsResponse.error)
+          Result.t Async.Deferred.t
 val list_rx_norm_inference_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRxNormInferenceJobsRequest.t ->
         (ListRxNormInferenceJobsResponse.t,
-          [ `AWS of ListRxNormInferenceJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListRxNormInferenceJobsResponse.error) Result.t Async.Deferred.t
 val list_s_n_o_m_e_d_c_t_inference_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSNOMEDCTInferenceJobsRequest.t ->
         (ListSNOMEDCTInferenceJobsResponse.t,
-          [ `AWS of ListSNOMEDCTInferenceJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSNOMEDCTInferenceJobsResponse.error) Result.t Async.Deferred.t
 val start_entities_detection_v2_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartEntitiesDetectionV2JobRequest.t ->
         (StartEntitiesDetectionV2JobResponse.t,
-          [ `AWS of StartEntitiesDetectionV2JobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          StartEntitiesDetectionV2JobResponse.error) Result.t
           Async.Deferred.t
 val start_i_c_d10_c_m_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartICD10CMInferenceJobRequest.t ->
         (StartICD10CMInferenceJobResponse.t,
-          [ `AWS of StartICD10CMInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartICD10CMInferenceJobResponse.error) Result.t Async.Deferred.t
 val start_p_h_i_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartPHIDetectionJobRequest.t ->
-        (StartPHIDetectionJobResponse.t,
-          [ `AWS of StartPHIDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartPHIDetectionJobResponse.t, StartPHIDetectionJobResponse.error)
+          Result.t Async.Deferred.t
 val start_rx_norm_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartRxNormInferenceJobRequest.t ->
         (StartRxNormInferenceJobResponse.t,
-          [ `AWS of StartRxNormInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartRxNormInferenceJobResponse.error) Result.t Async.Deferred.t
 val start_s_n_o_m_e_d_c_t_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSNOMEDCTInferenceJobRequest.t ->
         (StartSNOMEDCTInferenceJobResponse.t,
-          [ `AWS of StartSNOMEDCTInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartSNOMEDCTInferenceJobResponse.error) Result.t Async.Deferred.t
 val stop_entities_detection_v2_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopEntitiesDetectionV2JobRequest.t ->
         (StopEntitiesDetectionV2JobResponse.t,
-          [ `AWS of StopEntitiesDetectionV2JobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopEntitiesDetectionV2JobResponse.error) Result.t Async.Deferred.t
 val stop_i_c_d10_c_m_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopICD10CMInferenceJobRequest.t ->
         (StopICD10CMInferenceJobResponse.t,
-          [ `AWS of StopICD10CMInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopICD10CMInferenceJobResponse.error) Result.t Async.Deferred.t
 val stop_p_h_i_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopPHIDetectionJobRequest.t ->
-        (StopPHIDetectionJobResponse.t,
-          [ `AWS of StopPHIDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StopPHIDetectionJobResponse.t, StopPHIDetectionJobResponse.error)
+          Result.t Async.Deferred.t
 val stop_rx_norm_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopRxNormInferenceJobRequest.t ->
         (StopRxNormInferenceJobResponse.t,
-          [ `AWS of StopRxNormInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopRxNormInferenceJobResponse.error) Result.t Async.Deferred.t
 val stop_s_n_o_m_e_d_c_t_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopSNOMEDCTInferenceJobRequest.t ->
         (StopSNOMEDCTInferenceJobResponse.t,
-          [ `AWS of StopSNOMEDCTInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopSNOMEDCTInferenceJobResponse.error) Result.t Async.Deferred.t

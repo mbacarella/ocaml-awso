@@ -843,283 +843,283 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateRepository -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateExternalConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateExternalConnectionResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateExternalConnectionResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AssociateExternalConnectionResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateExternalConnectionResult.error_of_json))
   | CopyPackageVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CopyPackageVersionsResult.error_of_json)
-       | Ok resp ->
-           Ok (CopyPackageVersionsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CopyPackageVersionsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CopyPackageVersionsResult.error_of_json))
   | CreateDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDomainResult.error_of_json)
-       | Ok resp -> Ok (CreateDomainResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDomainResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDomainResult.error_of_json))
   | CreateRepository ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRepositoryResult.error_of_json)
-       | Ok resp ->
-           Ok (CreateRepositoryResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRepositoryResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateRepositoryResult.error_of_json))
   | DeleteDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDomainResult.error_of_json)
-       | Ok resp -> Ok (DeleteDomainResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDomainResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDomainResult.error_of_json))
   | DeleteDomainPermissionsPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteDomainPermissionsPolicyResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteDomainPermissionsPolicyResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteDomainPermissionsPolicyResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDomainPermissionsPolicyResult.error_of_json))
   | DeletePackageVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePackageVersionsResult.error_of_json)
-       | Ok resp ->
-           Ok (DeletePackageVersionsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeletePackageVersionsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeletePackageVersionsResult.error_of_json))
   | DeleteRepository ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRepositoryResult.error_of_json)
-       | Ok resp ->
-           Ok (DeleteRepositoryResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteRepositoryResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteRepositoryResult.error_of_json))
   | DeleteRepositoryPermissionsPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRepositoryPermissionsPolicyResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteRepositoryPermissionsPolicyResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteRepositoryPermissionsPolicyResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRepositoryPermissionsPolicyResult.error_of_json))
   | DescribeDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDomainResult.error_of_json)
-       | Ok resp -> Ok (DescribeDomainResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDomainResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeDomainResult.error_of_json))
   | DescribePackageVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePackageVersionResult.error_of_json)
-       | Ok resp ->
-           Ok (DescribePackageVersionResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribePackageVersionResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribePackageVersionResult.error_of_json))
   | DescribeRepository ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRepositoryResult.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRepositoryResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRepositoryResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeRepositoryResult.error_of_json))
   | DisassociateExternalConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateExternalConnectionResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateExternalConnectionResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DisassociateExternalConnectionResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateExternalConnectionResult.error_of_json))
   | DisposePackageVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisposePackageVersionsResult.error_of_json)
-       | Ok resp ->
-           Ok (DisposePackageVersionsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisposePackageVersionsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DisposePackageVersionsResult.error_of_json))
   | GetAuthorizationToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAuthorizationTokenResult.error_of_json)
-       | Ok resp ->
-           Ok (GetAuthorizationTokenResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAuthorizationTokenResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAuthorizationTokenResult.error_of_json))
   | GetDomainPermissionsPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDomainPermissionsPolicyResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetDomainPermissionsPolicyResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetDomainPermissionsPolicyResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDomainPermissionsPolicyResult.error_of_json))
   | GetPackageVersionAsset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPackageVersionAssetResult.error_of_json)
-       | Ok resp ->
-           let body = Asset.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (GetPackageVersionAssetResult.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = Asset.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetPackageVersionAssetResult.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetPackageVersionAssetResult.error_of_json))
   | GetPackageVersionReadme ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPackageVersionReadmeResult.error_of_json)
-       | Ok resp ->
-           Ok (GetPackageVersionReadmeResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPackageVersionReadmeResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetPackageVersionReadmeResult.error_of_json))
   | GetRepositoryEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRepositoryEndpointResult.error_of_json)
-       | Ok resp ->
-           Ok (GetRepositoryEndpointResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetRepositoryEndpointResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRepositoryEndpointResult.error_of_json))
   | GetRepositoryPermissionsPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRepositoryPermissionsPolicyResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetRepositoryPermissionsPolicyResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetRepositoryPermissionsPolicyResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRepositoryPermissionsPolicyResult.error_of_json))
   | ListDomains ->
-      (match resp with
-       | Error err -> handle_error err (Some ListDomainsResult.error_of_json)
-       | Ok resp -> Ok (ListDomainsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDomainsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDomainsResult.error_of_json))
   | ListPackageVersionAssets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPackageVersionAssetsResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPackageVersionAssetsResult.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListPackageVersionAssetsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPackageVersionAssetsResult.error_of_json))
   | ListPackageVersionDependencies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPackageVersionDependenciesResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPackageVersionDependenciesResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListPackageVersionDependenciesResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPackageVersionDependenciesResult.error_of_json))
   | ListPackageVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPackageVersionsResult.error_of_json)
-       | Ok resp ->
-           Ok (ListPackageVersionsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPackageVersionsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPackageVersionsResult.error_of_json))
   | ListPackages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPackagesResult.error_of_json)
-       | Ok resp -> Ok (ListPackagesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPackagesResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPackagesResult.error_of_json))
   | ListRepositories ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRepositoriesResult.error_of_json)
-       | Ok resp ->
-           Ok (ListRepositoriesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRepositoriesResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListRepositoriesResult.error_of_json))
   | ListRepositoriesInDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListRepositoriesInDomainResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListRepositoriesInDomainResult.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListRepositoriesInDomainResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRepositoriesInDomainResult.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResult.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResult.error_of_json))
   | PutDomainPermissionsPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutDomainPermissionsPolicyResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutDomainPermissionsPolicyResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (PutDomainPermissionsPolicyResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutDomainPermissionsPolicyResult.error_of_json))
   | PutRepositoryPermissionsPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutRepositoryPermissionsPolicyResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutRepositoryPermissionsPolicyResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutRepositoryPermissionsPolicyResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutRepositoryPermissionsPolicyResult.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err -> handle_error err (Some TagResourceResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResult.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResult.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResult.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResult.error_of_json))
   | UpdatePackageVersionsStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdatePackageVersionsStatusResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdatePackageVersionsStatusResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdatePackageVersionsStatusResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePackageVersionsStatusResult.error_of_json))
   | UpdateRepository ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRepositoryResult.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRepositoryResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRepositoryResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateRepositoryResult.error_of_json))

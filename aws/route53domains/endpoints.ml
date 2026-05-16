@@ -404,254 +404,268 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "Route53Domains_v20140515.ViewBilling")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AcceptDomainTransferFromAnotherAwsAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AcceptDomainTransferFromAnotherAwsAccountResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                AcceptDomainTransferFromAnotherAwsAccountResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (AcceptDomainTransferFromAnotherAwsAccountResponse.of_json json))
+                AcceptDomainTransferFromAnotherAwsAccountResponse.error_of_json))
   | CancelDomainTransferToAnotherAwsAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelDomainTransferToAnotherAwsAccountResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                CancelDomainTransferToAnotherAwsAccountResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CancelDomainTransferToAnotherAwsAccountResponse.of_json json))
+                CancelDomainTransferToAnotherAwsAccountResponse.error_of_json))
   | CheckDomainAvailability ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CheckDomainAvailabilityResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CheckDomainAvailabilityResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CheckDomainAvailabilityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CheckDomainAvailabilityResponse.error_of_json))
   | CheckDomainTransferability ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CheckDomainTransferabilityResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CheckDomainTransferabilityResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CheckDomainTransferabilityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CheckDomainTransferabilityResponse.error_of_json))
   | DeleteDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDomainResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteDomainResponse.error_of_json))
   | DeleteTagsForDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTagsForDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteTagsForDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteTagsForDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteTagsForDomainResponse.error_of_json))
   | DisableDomainAutoRenew ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisableDomainAutoRenewResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DisableDomainAutoRenewResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisableDomainAutoRenewResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisableDomainAutoRenewResponse.error_of_json))
   | DisableDomainTransferLock ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisableDomainTransferLockResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DisableDomainTransferLockResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisableDomainTransferLockResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisableDomainTransferLockResponse.error_of_json))
   | EnableDomainAutoRenew ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EnableDomainAutoRenewResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (EnableDomainAutoRenewResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EnableDomainAutoRenewResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some EnableDomainAutoRenewResponse.error_of_json))
   | EnableDomainTransferLock ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EnableDomainTransferLockResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (EnableDomainTransferLockResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EnableDomainTransferLockResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some EnableDomainTransferLockResponse.error_of_json))
   | GetContactReachabilityStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetContactReachabilityStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetContactReachabilityStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetContactReachabilityStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetContactReachabilityStatusResponse.error_of_json))
   | GetDomainDetail ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDomainDetailResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDomainDetailResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDomainDetailResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetDomainDetailResponse.error_of_json))
   | GetDomainSuggestions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDomainSuggestionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDomainSuggestionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDomainSuggestionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetDomainSuggestionsResponse.error_of_json))
   | GetOperationDetail ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetOperationDetailResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetOperationDetailResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetOperationDetailResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetOperationDetailResponse.error_of_json))
   | ListDomains ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDomainsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListDomainsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDomainsResponse.of_json json)
+      else Error (parse_aws_error (Some ListDomainsResponse.error_of_json))
   | ListOperations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListOperationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListOperationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListOperationsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListOperationsResponse.error_of_json))
   | ListPrices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPricesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListPricesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPricesResponse.of_json json)
+      else Error (parse_aws_error (Some ListPricesResponse.error_of_json))
   | ListTagsForDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForDomainResponse.error_of_json))
   | RegisterDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RegisterDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterDomainResponse.of_json json)
+      else
+        Error (parse_aws_error (Some RegisterDomainResponse.error_of_json))
   | RejectDomainTransferFromAnotherAwsAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RejectDomainTransferFromAnotherAwsAccountResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                RejectDomainTransferFromAnotherAwsAccountResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (RejectDomainTransferFromAnotherAwsAccountResponse.of_json json))
+                RejectDomainTransferFromAnotherAwsAccountResponse.error_of_json))
   | RenewDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RenewDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RenewDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RenewDomainResponse.of_json json)
+      else Error (parse_aws_error (Some RenewDomainResponse.error_of_json))
   | ResendContactReachabilityEmail ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ResendContactReachabilityEmailResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ResendContactReachabilityEmailResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ResendContactReachabilityEmailResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ResendContactReachabilityEmailResponse.error_of_json))
   | RetrieveDomainAuthCode ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RetrieveDomainAuthCodeResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RetrieveDomainAuthCodeResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RetrieveDomainAuthCodeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RetrieveDomainAuthCodeResponse.error_of_json))
   | TransferDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TransferDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TransferDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TransferDomainResponse.of_json json)
+      else
+        Error (parse_aws_error (Some TransferDomainResponse.error_of_json))
   | TransferDomainToAnotherAwsAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some TransferDomainToAnotherAwsAccountResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TransferDomainToAnotherAwsAccountResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TransferDomainToAnotherAwsAccountResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some TransferDomainToAnotherAwsAccountResponse.error_of_json))
   | UpdateDomainContact ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDomainContactResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateDomainContactResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDomainContactResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateDomainContactResponse.error_of_json))
   | UpdateDomainContactPrivacy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDomainContactPrivacyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateDomainContactPrivacyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDomainContactPrivacyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDomainContactPrivacyResponse.error_of_json))
   | UpdateDomainNameservers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDomainNameserversResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateDomainNameserversResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDomainNameserversResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDomainNameserversResponse.error_of_json))
   | UpdateTagsForDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTagsForDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateTagsForDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateTagsForDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateTagsForDomainResponse.error_of_json))
   | ViewBilling ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ViewBillingResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ViewBillingResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ViewBillingResponse.of_json json)
+      else Error (parse_aws_error (Some ViewBillingResponse.error_of_json))

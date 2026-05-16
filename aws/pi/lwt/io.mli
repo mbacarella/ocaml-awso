@@ -5,40 +5,34 @@ val describe_dimension_keys :
     ?cfg:Awso.Cfg.t ->
       DescribeDimensionKeysRequest.t ->
         (DescribeDimensionKeysResponse.t,
-          [ `AWS of DescribeDimensionKeysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDimensionKeysResponse.error) Result.t Lwt.t
 val get_dimension_key_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDimensionKeyDetailsRequest.t ->
         (GetDimensionKeyDetailsResponse.t,
-          [ `AWS of GetDimensionKeyDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDimensionKeyDetailsResponse.error) Result.t Lwt.t
 val get_resource_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceMetadataRequest.t ->
-        (GetResourceMetadataResponse.t,
-          [ `AWS of GetResourceMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourceMetadataResponse.t, GetResourceMetadataResponse.error)
+          Result.t Lwt.t
 val get_resource_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceMetricsRequest.t ->
-        (GetResourceMetricsResponse.t,
-          [ `AWS of GetResourceMetricsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourceMetricsResponse.t, GetResourceMetricsResponse.error)
+          Result.t Lwt.t
 val list_available_resource_dimensions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAvailableResourceDimensionsRequest.t ->
         (ListAvailableResourceDimensionsResponse.t,
-          [ `AWS of ListAvailableResourceDimensionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAvailableResourceDimensionsResponse.error) Result.t Lwt.t
 val list_available_resource_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAvailableResourceMetricsRequest.t ->
         (ListAvailableResourceMetricsResponse.t,
-          [ `AWS of ListAvailableResourceMetricsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAvailableResourceMetricsResponse.error) Result.t Lwt.t

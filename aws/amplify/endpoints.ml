@@ -929,243 +929,230 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateApp ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateAppResult.error_of_json)
-       | Ok resp -> Ok (CreateAppResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAppResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateAppResult.error_of_json))
   | CreateBackendEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateBackendEnvironmentResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateBackendEnvironmentResult.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateBackendEnvironmentResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateBackendEnvironmentResult.error_of_json))
   | CreateBranch ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBranchResult.error_of_json)
-       | Ok resp -> Ok (CreateBranchResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBranchResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateBranchResult.error_of_json))
   | CreateDeployment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDeploymentResult.error_of_json)
-       | Ok resp ->
-           Ok (CreateDeploymentResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDeploymentResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDeploymentResult.error_of_json))
   | CreateDomainAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateDomainAssociationResult.error_of_json)
-       | Ok resp ->
-           Ok (CreateDomainAssociationResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDomainAssociationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateDomainAssociationResult.error_of_json))
   | CreateWebhook ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateWebhookResult.error_of_json)
-       | Ok resp -> Ok (CreateWebhookResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateWebhookResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateWebhookResult.error_of_json))
   | DeleteApp ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteAppResult.error_of_json)
-       | Ok resp -> Ok (DeleteAppResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAppResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteAppResult.error_of_json))
   | DeleteBackendEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteBackendEnvironmentResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteBackendEnvironmentResult.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteBackendEnvironmentResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteBackendEnvironmentResult.error_of_json))
   | DeleteBranch ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBranchResult.error_of_json)
-       | Ok resp -> Ok (DeleteBranchResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBranchResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteBranchResult.error_of_json))
   | DeleteDomainAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteDomainAssociationResult.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDomainAssociationResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDomainAssociationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteDomainAssociationResult.error_of_json))
   | DeleteJob ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteJobResult.error_of_json)
-       | Ok resp -> Ok (DeleteJobResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteJobResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteJobResult.error_of_json))
   | DeleteWebhook ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteWebhookResult.error_of_json)
-       | Ok resp -> Ok (DeleteWebhookResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteWebhookResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteWebhookResult.error_of_json))
   | GenerateAccessLogs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GenerateAccessLogsResult.error_of_json)
-       | Ok resp ->
-           Ok (GenerateAccessLogsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GenerateAccessLogsResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GenerateAccessLogsResult.error_of_json))
   | GetApp ->
-      (match resp with
-       | Error err -> handle_error err (Some GetAppResult.error_of_json)
-       | Ok resp -> Ok (GetAppResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAppResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAppResult.error_of_json))
   | GetArtifactUrl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetArtifactUrlResult.error_of_json)
-       | Ok resp -> Ok (GetArtifactUrlResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetArtifactUrlResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetArtifactUrlResult.error_of_json))
   | GetBackendEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackendEnvironmentResult.error_of_json)
-       | Ok resp ->
-           Ok (GetBackendEnvironmentResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackendEnvironmentResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBackendEnvironmentResult.error_of_json))
   | GetBranch ->
-      (match resp with
-       | Error err -> handle_error err (Some GetBranchResult.error_of_json)
-       | Ok resp -> Ok (GetBranchResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBranchResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBranchResult.error_of_json))
   | GetDomainAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDomainAssociationResult.error_of_json)
-       | Ok resp ->
-           Ok (GetDomainAssociationResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDomainAssociationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDomainAssociationResult.error_of_json))
   | GetJob ->
-      (match resp with
-       | Error err -> handle_error err (Some GetJobResult.error_of_json)
-       | Ok resp -> Ok (GetJobResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetJobResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetJobResult.error_of_json))
   | GetWebhook ->
-      (match resp with
-       | Error err -> handle_error err (Some GetWebhookResult.error_of_json)
-       | Ok resp -> Ok (GetWebhookResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetWebhookResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetWebhookResult.error_of_json))
   | ListApps ->
-      (match resp with
-       | Error err -> handle_error err (Some ListAppsResult.error_of_json)
-       | Ok resp -> Ok (ListAppsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAppsResult.error_of_json))
   | ListArtifacts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListArtifactsResult.error_of_json)
-       | Ok resp -> Ok (ListArtifactsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListArtifactsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListArtifactsResult.error_of_json))
   | ListBackendEnvironments ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListBackendEnvironmentsResult.error_of_json)
-       | Ok resp ->
-           Ok (ListBackendEnvironmentsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackendEnvironmentsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBackendEnvironmentsResult.error_of_json))
   | ListBranches ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBranchesResult.error_of_json)
-       | Ok resp -> Ok (ListBranchesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBranchesResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListBranchesResult.error_of_json))
   | ListDomainAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDomainAssociationsResult.error_of_json)
-       | Ok resp ->
-           Ok (ListDomainAssociationsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDomainAssociationsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDomainAssociationsResult.error_of_json))
   | ListJobs ->
-      (match resp with
-       | Error err -> handle_error err (Some ListJobsResult.error_of_json)
-       | Ok resp -> Ok (ListJobsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListJobsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListJobsResult.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListWebhooks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWebhooksResult.error_of_json)
-       | Ok resp -> Ok (ListWebhooksResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWebhooksResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListWebhooksResult.error_of_json))
   | StartDeployment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartDeploymentResult.error_of_json)
-       | Ok resp ->
-           Ok (StartDeploymentResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartDeploymentResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartDeploymentResult.error_of_json))
   | StartJob ->
-      (match resp with
-       | Error err -> handle_error err (Some StartJobResult.error_of_json)
-       | Ok resp -> Ok (StartJobResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartJobResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartJobResult.error_of_json))
   | StopJob ->
-      (match resp with
-       | Error err -> handle_error err (Some StopJobResult.error_of_json)
-       | Ok resp -> Ok (StopJobResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StopJobResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StopJobResult.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateApp ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateAppResult.error_of_json)
-       | Ok resp -> Ok (UpdateAppResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAppResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateAppResult.error_of_json))
   | UpdateBranch ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBranchResult.error_of_json)
-       | Ok resp -> Ok (UpdateBranchResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBranchResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateBranchResult.error_of_json))
   | UpdateDomainAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDomainAssociationResult.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDomainAssociationResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDomainAssociationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateDomainAssociationResult.error_of_json))
   | UpdateWebhook ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateWebhookResult.error_of_json)
-       | Ok resp -> Ok (UpdateWebhookResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateWebhookResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateWebhookResult.error_of_json))

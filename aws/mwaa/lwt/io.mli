@@ -4,76 +4,61 @@ val create_cli_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCliTokenRequest.t ->
-        (CreateCliTokenResponse.t,
-          [ `AWS of CreateCliTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCliTokenResponse.t, CreateCliTokenResponse.error) Result.t
+          Lwt.t
 val create_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentInput.t ->
-        (CreateEnvironmentOutput.t,
-          [ `AWS of CreateEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEnvironmentOutput.t, CreateEnvironmentOutput.error) Result.t
+          Lwt.t
 val create_web_login_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWebLoginTokenRequest.t ->
-        (CreateWebLoginTokenResponse.t,
-          [ `AWS of CreateWebLoginTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWebLoginTokenResponse.t, CreateWebLoginTokenResponse.error)
+          Result.t Lwt.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentInput.t ->
-        (DeleteEnvironmentOutput.t,
-          [ `AWS of DeleteEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEnvironmentOutput.t, DeleteEnvironmentOutput.error) Result.t
+          Lwt.t
 val get_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentInput.t ->
-        (GetEnvironmentOutput.t,
-          [ `AWS of GetEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEnvironmentOutput.t, GetEnvironmentOutput.error) Result.t Lwt.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentsInput.t ->
-        (ListEnvironmentsOutput.t,
-          [ `AWS of ListEnvironmentsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEnvironmentsOutput.t, ListEnvironmentsOutput.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val publish_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishMetricsInput.t ->
-        (PublishMetricsOutput.t,
-          [ `AWS of PublishMetricsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PublishMetricsOutput.t, PublishMetricsOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
 val update_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentInput.t ->
-        (UpdateEnvironmentOutput.t,
-          [ `AWS of UpdateEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEnvironmentOutput.t, UpdateEnvironmentOutput.error) Result.t
+          Lwt.t

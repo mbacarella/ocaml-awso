@@ -13,8 +13,7 @@ type inet_addr = string
 
 val yojson_of_inet_addr : inet_addr -> Yojson.Safe.t
 
-type request_parameters_entity = { source_ip_address : inet_addr }
-[@@deriving yojson_of]
+type request_parameters_entity = { source_ip_address : inet_addr } [@@deriving yojson_of]
 
 type response_elements_entity =
   { x_amz_id_2 : string

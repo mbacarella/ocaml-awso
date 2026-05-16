@@ -18,10 +18,10 @@ let generate =
     |> String.strip
     |> String.split ~on:'\n'
     |> List.filter_map ~f:(fun line ->
-         match String.lsplit2 line ~on:' ' with
-         | Some (name, description) ->
-           Some { name = String.strip name; description = String.strip description }
-         | None -> None)
+      match String.lsplit2 line ~on:' ' with
+      | Some (name, description) ->
+        Some { name = String.strip name; description = String.strip description }
+      | None -> None)
     |> List.sort ~compare:(fun a b -> String.compare a.name b.name))
 ;;
 

@@ -4,25 +4,16 @@ val batch_get_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetRecordRequest.t ->
-        (BatchGetRecordResponse.t,
-          [ `AWS of BatchGetRecordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetRecordResponse.t, BatchGetRecordResponse.error) Result.t
+          Lwt.t
 val delete_record :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteRecordRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteRecordRequest.t -> (unit, unit) Result.t Lwt.t
 val get_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecordRequest.t ->
-        (GetRecordResponse.t,
-          [ `AWS of GetRecordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRecordResponse.t, GetRecordResponse.error) Result.t Lwt.t
 val put_record :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutRecordRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutRecordRequest.t -> (unit, unit) Result.t Lwt.t

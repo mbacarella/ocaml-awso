@@ -3,447 +3,359 @@ open Awso_iotsitewise.Values
 val associate_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssociateAssetsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AssociateAssetsRequest.t -> (unit, unit) Result.t Lwt.t
 val associate_time_series_to_asset_property :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTimeSeriesToAssetPropertyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val batch_associate_project_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchAssociateProjectAssetsRequest.t ->
         (BatchAssociateProjectAssetsResponse.t,
-          [ `AWS of BatchAssociateProjectAssetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchAssociateProjectAssetsResponse.error) Result.t Lwt.t
 val batch_disassociate_project_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateProjectAssetsRequest.t ->
         (BatchDisassociateProjectAssetsResponse.t,
-          [ `AWS of BatchDisassociateProjectAssetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDisassociateProjectAssetsResponse.error) Result.t Lwt.t
 val batch_put_asset_property_value :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchPutAssetPropertyValueRequest.t ->
         (BatchPutAssetPropertyValueResponse.t,
-          [ `AWS of BatchPutAssetPropertyValueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchPutAssetPropertyValueResponse.error) Result.t Lwt.t
 val create_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAccessPolicyRequest.t ->
-        (CreateAccessPolicyResponse.t,
-          [ `AWS of CreateAccessPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAccessPolicyResponse.t, CreateAccessPolicyResponse.error)
+          Result.t Lwt.t
 val create_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssetRequest.t ->
-        (CreateAssetResponse.t,
-          [ `AWS of CreateAssetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAssetResponse.t, CreateAssetResponse.error) Result.t Lwt.t
 val create_asset_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssetModelRequest.t ->
-        (CreateAssetModelResponse.t,
-          [ `AWS of CreateAssetModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAssetModelResponse.t, CreateAssetModelResponse.error) Result.t
+          Lwt.t
 val create_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDashboardRequest.t ->
-        (CreateDashboardResponse.t,
-          [ `AWS of CreateDashboardResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDashboardResponse.t, CreateDashboardResponse.error) Result.t
+          Lwt.t
 val create_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGatewayRequest.t ->
-        (CreateGatewayResponse.t,
-          [ `AWS of CreateGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGatewayResponse.t, CreateGatewayResponse.error) Result.t Lwt.t
 val create_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePortalRequest.t ->
-        (CreatePortalResponse.t,
-          [ `AWS of CreatePortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePortalResponse.t, CreatePortalResponse.error) Result.t Lwt.t
 val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectRequest.t ->
-        (CreateProjectResponse.t,
-          [ `AWS of CreateProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectResponse.t, CreateProjectResponse.error) Result.t Lwt.t
 val delete_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAccessPolicyRequest.t ->
-        (DeleteAccessPolicyResponse.t,
-          [ `AWS of DeleteAccessPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAccessPolicyResponse.t, DeleteAccessPolicyResponse.error)
+          Result.t Lwt.t
 val delete_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssetRequest.t ->
-        (DeleteAssetResponse.t,
-          [ `AWS of DeleteAssetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAssetResponse.t, DeleteAssetResponse.error) Result.t Lwt.t
 val delete_asset_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssetModelRequest.t ->
-        (DeleteAssetModelResponse.t,
-          [ `AWS of DeleteAssetModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAssetModelResponse.t, DeleteAssetModelResponse.error) Result.t
+          Lwt.t
 val delete_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDashboardRequest.t ->
-        (DeleteDashboardResponse.t,
-          [ `AWS of DeleteDashboardResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDashboardResponse.t, DeleteDashboardResponse.error) Result.t
+          Lwt.t
 val delete_gateway :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteGatewayRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteGatewayRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePortalRequest.t ->
-        (DeletePortalResponse.t,
-          [ `AWS of DeletePortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePortalResponse.t, DeletePortalResponse.error) Result.t Lwt.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectRequest.t ->
-        (DeleteProjectResponse.t,
-          [ `AWS of DeleteProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectResponse.t, DeleteProjectResponse.error) Result.t Lwt.t
 val delete_time_series :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteTimeSeriesRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteTimeSeriesRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccessPolicyRequest.t ->
-        (DescribeAccessPolicyResponse.t,
-          [ `AWS of DescribeAccessPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAccessPolicyResponse.t, DescribeAccessPolicyResponse.error)
+          Result.t Lwt.t
 val describe_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssetRequest.t ->
-        (DescribeAssetResponse.t,
-          [ `AWS of DescribeAssetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAssetResponse.t, DescribeAssetResponse.error) Result.t Lwt.t
 val describe_asset_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssetModelRequest.t ->
-        (DescribeAssetModelResponse.t,
-          [ `AWS of DescribeAssetModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAssetModelResponse.t, DescribeAssetModelResponse.error)
+          Result.t Lwt.t
 val describe_asset_property :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssetPropertyRequest.t ->
         (DescribeAssetPropertyResponse.t,
-          [ `AWS of DescribeAssetPropertyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAssetPropertyResponse.error) Result.t Lwt.t
 val describe_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDashboardRequest.t ->
-        (DescribeDashboardResponse.t,
-          [ `AWS of DescribeDashboardResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDashboardResponse.t, DescribeDashboardResponse.error)
+          Result.t Lwt.t
 val describe_default_encryption_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDefaultEncryptionConfigurationRequest.t ->
         (DescribeDefaultEncryptionConfigurationResponse.t,
-          [ `AWS of DescribeDefaultEncryptionConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDefaultEncryptionConfigurationResponse.error) Result.t
+          Lwt.t
 val describe_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGatewayRequest.t ->
-        (DescribeGatewayResponse.t,
-          [ `AWS of DescribeGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeGatewayResponse.t, DescribeGatewayResponse.error) Result.t
+          Lwt.t
 val describe_gateway_capability_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGatewayCapabilityConfigurationRequest.t ->
         (DescribeGatewayCapabilityConfigurationResponse.t,
-          [ `AWS of DescribeGatewayCapabilityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeGatewayCapabilityConfigurationResponse.error) Result.t
+          Lwt.t
 val describe_logging_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoggingOptionsRequest.t ->
         (DescribeLoggingOptionsResponse.t,
-          [ `AWS of DescribeLoggingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoggingOptionsResponse.error) Result.t Lwt.t
 val describe_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePortalRequest.t ->
-        (DescribePortalResponse.t,
-          [ `AWS of DescribePortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePortalResponse.t, DescribePortalResponse.error) Result.t
+          Lwt.t
 val describe_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProjectRequest.t ->
-        (DescribeProjectResponse.t,
-          [ `AWS of DescribeProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProjectResponse.t, DescribeProjectResponse.error) Result.t
+          Lwt.t
 val describe_storage_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStorageConfigurationRequest.t ->
         (DescribeStorageConfigurationResponse.t,
-          [ `AWS of DescribeStorageConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeStorageConfigurationResponse.error) Result.t Lwt.t
 val describe_time_series :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTimeSeriesRequest.t ->
-        (DescribeTimeSeriesResponse.t,
-          [ `AWS of DescribeTimeSeriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTimeSeriesResponse.t, DescribeTimeSeriesResponse.error)
+          Result.t Lwt.t
 val disassociate_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisassociateAssetsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisassociateAssetsRequest.t -> (unit, unit) Result.t Lwt.t
 val disassociate_time_series_from_asset_property :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTimeSeriesFromAssetPropertyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val get_asset_property_aggregates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssetPropertyAggregatesRequest.t ->
         (GetAssetPropertyAggregatesResponse.t,
-          [ `AWS of GetAssetPropertyAggregatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAssetPropertyAggregatesResponse.error) Result.t Lwt.t
 val get_asset_property_value :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssetPropertyValueRequest.t ->
         (GetAssetPropertyValueResponse.t,
-          [ `AWS of GetAssetPropertyValueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAssetPropertyValueResponse.error) Result.t Lwt.t
 val get_asset_property_value_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssetPropertyValueHistoryRequest.t ->
         (GetAssetPropertyValueHistoryResponse.t,
-          [ `AWS of GetAssetPropertyValueHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAssetPropertyValueHistoryResponse.error) Result.t Lwt.t
 val get_interpolated_asset_property_values :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInterpolatedAssetPropertyValuesRequest.t ->
         (GetInterpolatedAssetPropertyValuesResponse.t,
-          [ `AWS of GetInterpolatedAssetPropertyValuesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetInterpolatedAssetPropertyValuesResponse.error) Result.t Lwt.t
 val list_access_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccessPoliciesRequest.t ->
-        (ListAccessPoliciesResponse.t,
-          [ `AWS of ListAccessPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAccessPoliciesResponse.t, ListAccessPoliciesResponse.error)
+          Result.t Lwt.t
 val list_asset_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssetModelsRequest.t ->
-        (ListAssetModelsResponse.t,
-          [ `AWS of ListAssetModelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssetModelsResponse.t, ListAssetModelsResponse.error) Result.t
+          Lwt.t
 val list_asset_relationships :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssetRelationshipsRequest.t ->
         (ListAssetRelationshipsResponse.t,
-          [ `AWS of ListAssetRelationshipsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssetRelationshipsResponse.error) Result.t Lwt.t
 val list_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssetsRequest.t ->
-        (ListAssetsResponse.t,
-          [ `AWS of ListAssetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssetsResponse.t, ListAssetsResponse.error) Result.t Lwt.t
 val list_associated_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociatedAssetsRequest.t ->
-        (ListAssociatedAssetsResponse.t,
-          [ `AWS of ListAssociatedAssetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssociatedAssetsResponse.t, ListAssociatedAssetsResponse.error)
+          Result.t Lwt.t
 val list_dashboards :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDashboardsRequest.t ->
-        (ListDashboardsResponse.t,
-          [ `AWS of ListDashboardsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDashboardsResponse.t, ListDashboardsResponse.error) Result.t
+          Lwt.t
 val list_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGatewaysRequest.t ->
-        (ListGatewaysResponse.t,
-          [ `AWS of ListGatewaysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGatewaysResponse.t, ListGatewaysResponse.error) Result.t Lwt.t
 val list_portals :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPortalsRequest.t ->
-        (ListPortalsResponse.t,
-          [ `AWS of ListPortalsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPortalsResponse.t, ListPortalsResponse.error) Result.t Lwt.t
 val list_project_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectAssetsRequest.t ->
-        (ListProjectAssetsResponse.t,
-          [ `AWS of ListProjectAssetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProjectAssetsResponse.t, ListProjectAssetsResponse.error)
+          Result.t Lwt.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectsRequest.t ->
-        (ListProjectsResponse.t,
-          [ `AWS of ListProjectsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProjectsResponse.t, ListProjectsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_time_series :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTimeSeriesRequest.t ->
-        (ListTimeSeriesResponse.t,
-          [ `AWS of ListTimeSeriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTimeSeriesResponse.t, ListTimeSeriesResponse.error) Result.t
+          Lwt.t
 val put_default_encryption_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDefaultEncryptionConfigurationRequest.t ->
         (PutDefaultEncryptionConfigurationResponse.t,
-          [ `AWS of PutDefaultEncryptionConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutDefaultEncryptionConfigurationResponse.error) Result.t Lwt.t
 val put_logging_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLoggingOptionsRequest.t ->
-        (PutLoggingOptionsResponse.t,
-          [ `AWS of PutLoggingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutLoggingOptionsResponse.t, PutLoggingOptionsResponse.error)
+          Result.t Lwt.t
 val put_storage_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutStorageConfigurationRequest.t ->
         (PutStorageConfigurationResponse.t,
-          [ `AWS of PutStorageConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutStorageConfigurationResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAccessPolicyRequest.t ->
-        (UpdateAccessPolicyResponse.t,
-          [ `AWS of UpdateAccessPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAccessPolicyResponse.t, UpdateAccessPolicyResponse.error)
+          Result.t Lwt.t
 val update_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssetRequest.t ->
-        (UpdateAssetResponse.t,
-          [ `AWS of UpdateAssetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAssetResponse.t, UpdateAssetResponse.error) Result.t Lwt.t
 val update_asset_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssetModelRequest.t ->
-        (UpdateAssetModelResponse.t,
-          [ `AWS of UpdateAssetModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAssetModelResponse.t, UpdateAssetModelResponse.error) Result.t
+          Lwt.t
 val update_asset_property :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateAssetPropertyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateAssetPropertyRequest.t -> (unit, unit) Result.t Lwt.t
 val update_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDashboardRequest.t ->
-        (UpdateDashboardResponse.t,
-          [ `AWS of UpdateDashboardResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDashboardResponse.t, UpdateDashboardResponse.error) Result.t
+          Lwt.t
 val update_gateway :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateGatewayRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UpdateGatewayRequest.t -> (unit, unit) Result.t Lwt.t
 val update_gateway_capability_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGatewayCapabilityConfigurationRequest.t ->
         (UpdateGatewayCapabilityConfigurationResponse.t,
-          [ `AWS of UpdateGatewayCapabilityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateGatewayCapabilityConfigurationResponse.error) Result.t Lwt.t
 val update_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePortalRequest.t ->
-        (UpdatePortalResponse.t,
-          [ `AWS of UpdatePortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePortalResponse.t, UpdatePortalResponse.error) Result.t Lwt.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectRequest.t ->
-        (UpdateProjectResponse.t,
-          [ `AWS of UpdateProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProjectResponse.t, UpdateProjectResponse.error) Result.t Lwt.t

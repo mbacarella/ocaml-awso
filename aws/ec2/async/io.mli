@@ -4,1953 +4,1417 @@ val accept_reserved_instances_exchange_quote :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptReservedInstancesExchangeQuoteRequest.t ->
-        (AcceptReservedInstancesExchangeQuoteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AcceptReservedInstancesExchangeQuoteResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val accept_transit_gateway_multicast_domain_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptTransitGatewayMulticastDomainAssociationsRequest.t ->
         (AcceptTransitGatewayMulticastDomainAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val accept_transit_gateway_peering_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptTransitGatewayPeeringAttachmentRequest.t ->
-        (AcceptTransitGatewayPeeringAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AcceptTransitGatewayPeeringAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val accept_transit_gateway_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptTransitGatewayVpcAttachmentRequest.t ->
-        (AcceptTransitGatewayVpcAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AcceptTransitGatewayVpcAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val accept_vpc_endpoint_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptVpcEndpointConnectionsRequest.t ->
-        (AcceptVpcEndpointConnectionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AcceptVpcEndpointConnectionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val accept_vpc_peering_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptVpcPeeringConnectionRequest.t ->
-        (AcceptVpcPeeringConnectionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AcceptVpcPeeringConnectionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val advertise_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdvertiseByoipCidrRequest.t ->
-        (AdvertiseByoipCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AdvertiseByoipCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val allocate_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AllocateAddressRequest.t ->
-        (AllocateAddressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AllocateAddressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val allocate_hosts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AllocateHostsRequest.t ->
-        (AllocateHostsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AllocateHostsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val allocate_ipam_pool_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AllocateIpamPoolCidrRequest.t ->
-        (AllocateIpamPoolCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AllocateIpamPoolCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val apply_security_groups_to_client_vpn_target_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ApplySecurityGroupsToClientVpnTargetNetworkRequest.t ->
         (ApplySecurityGroupsToClientVpnTargetNetworkResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val assign_ipv6_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssignIpv6AddressesRequest.t ->
-        (AssignIpv6AddressesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssignIpv6AddressesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val assign_private_ip_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssignPrivateIpAddressesRequest.t ->
-        (AssignPrivateIpAddressesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssignPrivateIpAddressesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val associate_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateAddressRequest.t ->
-        (AssociateAddressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateAddressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val associate_client_vpn_target_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateClientVpnTargetNetworkRequest.t ->
-        (AssociateClientVpnTargetNetworkResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AssociateClientVpnTargetNetworkResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val associate_dhcp_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateDhcpOptionsRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val associate_enclave_certificate_iam_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateEnclaveCertificateIamRoleRequest.t ->
-        (AssociateEnclaveCertificateIamRoleResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AssociateEnclaveCertificateIamRoleResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val associate_iam_instance_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateIamInstanceProfileRequest.t ->
-        (AssociateIamInstanceProfileResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateIamInstanceProfileResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val associate_instance_event_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateInstanceEventWindowRequest.t ->
-        (AssociateInstanceEventWindowResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateInstanceEventWindowResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val associate_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateRouteTableRequest.t ->
-        (AssociateRouteTableResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateRouteTableResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val associate_subnet_cidr_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateSubnetCidrBlockRequest.t ->
-        (AssociateSubnetCidrBlockResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateSubnetCidrBlockResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val associate_transit_gateway_multicast_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTransitGatewayMulticastDomainRequest.t ->
-        (AssociateTransitGatewayMulticastDomainResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AssociateTransitGatewayMulticastDomainResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val associate_transit_gateway_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTransitGatewayRouteTableRequest.t ->
-        (AssociateTransitGatewayRouteTableResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AssociateTransitGatewayRouteTableResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val associate_trunk_interface :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTrunkInterfaceRequest.t ->
-        (AssociateTrunkInterfaceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateTrunkInterfaceResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val associate_vpc_cidr_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateVpcCidrBlockRequest.t ->
-        (AssociateVpcCidrBlockResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateVpcCidrBlockResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val attach_classic_link_vpc :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachClassicLinkVpcRequest.t ->
-        (AttachClassicLinkVpcResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AttachClassicLinkVpcResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val attach_internet_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachInternetGatewayRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val attach_network_interface :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachNetworkInterfaceRequest.t ->
-        (AttachNetworkInterfaceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AttachNetworkInterfaceResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val attach_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachVolumeRequest.t ->
-        (VolumeAttachment.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (VolumeAttachment.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val attach_vpn_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachVpnGatewayRequest.t ->
-        (AttachVpnGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AttachVpnGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val authorize_client_vpn_ingress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeClientVpnIngressRequest.t ->
-        (AuthorizeClientVpnIngressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AuthorizeClientVpnIngressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val authorize_security_group_egress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeSecurityGroupEgressRequest.t ->
-        (AuthorizeSecurityGroupEgressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AuthorizeSecurityGroupEgressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val authorize_security_group_ingress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeSecurityGroupIngressRequest.t ->
-        (AuthorizeSecurityGroupIngressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AuthorizeSecurityGroupIngressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val bundle_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BundleInstanceRequest.t ->
-        (BundleInstanceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BundleInstanceResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val cancel_bundle_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelBundleTaskRequest.t ->
-        (CancelBundleTaskResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelBundleTaskResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val cancel_capacity_reservation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelCapacityReservationRequest.t ->
-        (CancelCapacityReservationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelCapacityReservationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val cancel_capacity_reservation_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelCapacityReservationFleetsRequest.t ->
-        (CancelCapacityReservationFleetsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CancelCapacityReservationFleetsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val cancel_conversion_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelConversionRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val cancel_export_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelExportTaskRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val cancel_import_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelImportTaskRequest.t ->
-        (CancelImportTaskResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelImportTaskResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val cancel_reserved_instances_listing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelReservedInstancesListingRequest.t ->
-        (CancelReservedInstancesListingResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelReservedInstancesListingResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val cancel_spot_fleet_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelSpotFleetRequestsRequest.t ->
-        (CancelSpotFleetRequestsResponse.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelSpotFleetRequestsResponse.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val cancel_spot_instance_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelSpotInstanceRequestsRequest.t ->
-        (CancelSpotInstanceRequestsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelSpotInstanceRequestsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val confirm_product_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfirmProductInstanceRequest.t ->
-        (ConfirmProductInstanceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ConfirmProductInstanceResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val copy_fpga_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyFpgaImageRequest.t ->
-        (CopyFpgaImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CopyFpgaImageResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val copy_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyImageRequest.t ->
-        (CopyImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CopyImageResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val copy_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopySnapshotRequest.t ->
-        (CopySnapshotResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CopySnapshotResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_capacity_reservation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCapacityReservationRequest.t ->
-        (CreateCapacityReservationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCapacityReservationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_capacity_reservation_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCapacityReservationFleetRequest.t ->
-        (CreateCapacityReservationFleetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCapacityReservationFleetResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_carrier_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCarrierGatewayRequest.t ->
-        (CreateCarrierGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCarrierGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_client_vpn_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClientVpnEndpointRequest.t ->
-        (CreateClientVpnEndpointResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateClientVpnEndpointResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_client_vpn_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClientVpnRouteRequest.t ->
-        (CreateClientVpnRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateClientVpnRouteResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_customer_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomerGatewayRequest.t ->
-        (CreateCustomerGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCustomerGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_default_subnet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDefaultSubnetRequest.t ->
-        (CreateDefaultSubnetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDefaultSubnetResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_default_vpc :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDefaultVpcRequest.t ->
-        (CreateDefaultVpcResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDefaultVpcResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_dhcp_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDhcpOptionsRequest.t ->
-        (CreateDhcpOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDhcpOptionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_egress_only_internet_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEgressOnlyInternetGatewayRequest.t ->
-        (CreateEgressOnlyInternetGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateEgressOnlyInternetGatewayResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFleetRequest.t ->
-        (CreateFleetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateFleetResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_flow_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFlowLogsRequest.t ->
-        (CreateFlowLogsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFlowLogsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_fpga_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFpgaImageRequest.t ->
-        (CreateFpgaImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFpgaImageResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateImageRequest.t ->
-        (CreateImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateImageResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_instance_event_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInstanceEventWindowRequest.t ->
-        (CreateInstanceEventWindowResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateInstanceEventWindowResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_instance_export_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInstanceExportTaskRequest.t ->
-        (CreateInstanceExportTaskResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateInstanceExportTaskResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_internet_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInternetGatewayRequest.t ->
-        (CreateInternetGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateInternetGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_ipam :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIpamRequest.t ->
-        (CreateIpamResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateIpamResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_ipam_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIpamPoolRequest.t ->
-        (CreateIpamPoolResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateIpamPoolResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_ipam_scope :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIpamScopeRequest.t ->
-        (CreateIpamScopeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateIpamScopeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_key_pair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateKeyPairRequest.t ->
-        (KeyPair.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (KeyPair.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_launch_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLaunchTemplateRequest.t ->
-        (CreateLaunchTemplateResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLaunchTemplateResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_launch_template_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLaunchTemplateVersionRequest.t ->
-        (CreateLaunchTemplateVersionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLaunchTemplateVersionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_local_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocalGatewayRouteRequest.t ->
-        (CreateLocalGatewayRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLocalGatewayRouteResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_local_gateway_route_table_vpc_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocalGatewayRouteTableVpcAssociationRequest.t ->
         (CreateLocalGatewayRouteTableVpcAssociationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_managed_prefix_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateManagedPrefixListRequest.t ->
-        (CreateManagedPrefixListResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateManagedPrefixListResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_nat_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNatGatewayRequest.t ->
-        (CreateNatGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateNatGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_network_acl :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkAclRequest.t ->
-        (CreateNetworkAclResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateNetworkAclResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_network_acl_entry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkAclEntryRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_network_insights_access_scope :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkInsightsAccessScopeRequest.t ->
-        (CreateNetworkInsightsAccessScopeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateNetworkInsightsAccessScopeResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_network_insights_path :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkInsightsPathRequest.t ->
-        (CreateNetworkInsightsPathResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateNetworkInsightsPathResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_network_interface :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkInterfaceRequest.t ->
-        (CreateNetworkInterfaceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateNetworkInterfaceResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_network_interface_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkInterfacePermissionRequest.t ->
-        (CreateNetworkInterfacePermissionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateNetworkInterfacePermissionResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_placement_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlacementGroupRequest.t ->
-        (CreatePlacementGroupResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePlacementGroupResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_public_ipv4_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePublicIpv4PoolRequest.t ->
-        (CreatePublicIpv4PoolResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePublicIpv4PoolResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_replace_root_volume_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReplaceRootVolumeTaskRequest.t ->
-        (CreateReplaceRootVolumeTaskResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateReplaceRootVolumeTaskResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_reserved_instances_listing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReservedInstancesListingRequest.t ->
-        (CreateReservedInstancesListingResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateReservedInstancesListingResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_restore_image_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRestoreImageTaskRequest.t ->
-        (CreateRestoreImageTaskResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRestoreImageTaskResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRouteRequest.t ->
-        (CreateRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateRouteResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRouteTableRequest.t ->
-        (CreateRouteTableResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRouteTableResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_security_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSecurityGroupRequest.t ->
-        (CreateSecurityGroupResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSecurityGroupResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotRequest.t ->
-        (Snapshot.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (Snapshot.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotsRequest.t ->
-        (CreateSnapshotsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSnapshotsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_spot_datafeed_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSpotDatafeedSubscriptionRequest.t ->
-        (CreateSpotDatafeedSubscriptionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSpotDatafeedSubscriptionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_store_image_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStoreImageTaskRequest.t ->
-        (CreateStoreImageTaskResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateStoreImageTaskResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_subnet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSubnetRequest.t ->
-        (CreateSubnetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateSubnetResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_subnet_cidr_reservation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSubnetCidrReservationRequest.t ->
-        (CreateSubnetCidrReservationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSubnetCidrReservationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTagsRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_traffic_mirror_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrafficMirrorFilterRequest.t ->
-        (CreateTrafficMirrorFilterResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTrafficMirrorFilterResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_traffic_mirror_filter_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrafficMirrorFilterRuleRequest.t ->
-        (CreateTrafficMirrorFilterRuleResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTrafficMirrorFilterRuleResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_traffic_mirror_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrafficMirrorSessionRequest.t ->
-        (CreateTrafficMirrorSessionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTrafficMirrorSessionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_traffic_mirror_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrafficMirrorTargetRequest.t ->
-        (CreateTrafficMirrorTargetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTrafficMirrorTargetResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_transit_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayRequest.t ->
-        (CreateTransitGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTransitGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_transit_gateway_connect :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayConnectRequest.t ->
-        (CreateTransitGatewayConnectResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTransitGatewayConnectResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_transit_gateway_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayConnectPeerRequest.t ->
-        (CreateTransitGatewayConnectPeerResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateTransitGatewayConnectPeerResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_transit_gateway_multicast_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayMulticastDomainRequest.t ->
-        (CreateTransitGatewayMulticastDomainResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateTransitGatewayMulticastDomainResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_transit_gateway_peering_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayPeeringAttachmentRequest.t ->
-        (CreateTransitGatewayPeeringAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateTransitGatewayPeeringAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_transit_gateway_prefix_list_reference :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayPrefixListReferenceRequest.t ->
-        (CreateTransitGatewayPrefixListReferenceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateTransitGatewayPrefixListReferenceResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_transit_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayRouteRequest.t ->
-        (CreateTransitGatewayRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTransitGatewayRouteResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_transit_gateway_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayRouteTableRequest.t ->
-        (CreateTransitGatewayRouteTableResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTransitGatewayRouteTableResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_transit_gateway_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTransitGatewayVpcAttachmentRequest.t ->
-        (CreateTransitGatewayVpcAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateTransitGatewayVpcAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVolumeRequest.t ->
-        (Volume.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (Volume.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_vpc :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcRequest.t ->
-        (CreateVpcResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateVpcResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_vpc_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcEndpointRequest.t ->
-        (CreateVpcEndpointResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateVpcEndpointResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_vpc_endpoint_connection_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcEndpointConnectionNotificationRequest.t ->
-        (CreateVpcEndpointConnectionNotificationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateVpcEndpointConnectionNotificationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_vpc_endpoint_service_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcEndpointServiceConfigurationRequest.t ->
-        (CreateVpcEndpointServiceConfigurationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateVpcEndpointServiceConfigurationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val create_vpc_peering_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcPeeringConnectionRequest.t ->
-        (CreateVpcPeeringConnectionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateVpcPeeringConnectionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_vpn_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpnConnectionRequest.t ->
-        (CreateVpnConnectionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateVpnConnectionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val create_vpn_connection_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpnConnectionRouteRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val create_vpn_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpnGatewayRequest.t ->
-        (CreateVpnGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateVpnGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_carrier_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCarrierGatewayRequest.t ->
-        (DeleteCarrierGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteCarrierGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_client_vpn_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClientVpnEndpointRequest.t ->
-        (DeleteClientVpnEndpointResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteClientVpnEndpointResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_client_vpn_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClientVpnRouteRequest.t ->
-        (DeleteClientVpnRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteClientVpnRouteResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_customer_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCustomerGatewayRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_dhcp_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDhcpOptionsRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_egress_only_internet_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEgressOnlyInternetGatewayRequest.t ->
-        (DeleteEgressOnlyInternetGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteEgressOnlyInternetGatewayResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFleetsRequest.t ->
-        (DeleteFleetsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteFleetsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_flow_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFlowLogsRequest.t ->
-        (DeleteFlowLogsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFlowLogsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_fpga_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFpgaImageRequest.t ->
-        (DeleteFpgaImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFpgaImageResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_instance_event_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInstanceEventWindowRequest.t ->
-        (DeleteInstanceEventWindowResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteInstanceEventWindowResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_internet_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInternetGatewayRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_ipam :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIpamRequest.t ->
-        (DeleteIpamResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteIpamResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_ipam_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIpamPoolRequest.t ->
-        (DeleteIpamPoolResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteIpamPoolResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_ipam_scope :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIpamScopeRequest.t ->
-        (DeleteIpamScopeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteIpamScopeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_key_pair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteKeyPairRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_launch_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLaunchTemplateRequest.t ->
-        (DeleteLaunchTemplateResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLaunchTemplateResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_launch_template_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLaunchTemplateVersionsRequest.t ->
-        (DeleteLaunchTemplateVersionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLaunchTemplateVersionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_local_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLocalGatewayRouteRequest.t ->
-        (DeleteLocalGatewayRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLocalGatewayRouteResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_local_gateway_route_table_vpc_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLocalGatewayRouteTableVpcAssociationRequest.t ->
         (DeleteLocalGatewayRouteTableVpcAssociationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_managed_prefix_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteManagedPrefixListRequest.t ->
-        (DeleteManagedPrefixListResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteManagedPrefixListResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_nat_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNatGatewayRequest.t ->
-        (DeleteNatGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteNatGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_network_acl :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkAclRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_network_acl_entry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkAclEntryRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_network_insights_access_scope :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkInsightsAccessScopeRequest.t ->
-        (DeleteNetworkInsightsAccessScopeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteNetworkInsightsAccessScopeResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_network_insights_access_scope_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkInsightsAccessScopeAnalysisRequest.t ->
         (DeleteNetworkInsightsAccessScopeAnalysisResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_network_insights_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkInsightsAnalysisRequest.t ->
-        (DeleteNetworkInsightsAnalysisResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteNetworkInsightsAnalysisResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_network_insights_path :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkInsightsPathRequest.t ->
-        (DeleteNetworkInsightsPathResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteNetworkInsightsPathResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_network_interface :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkInterfaceRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_network_interface_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkInterfacePermissionRequest.t ->
-        (DeleteNetworkInterfacePermissionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteNetworkInterfacePermissionResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_placement_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePlacementGroupRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_public_ipv4_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePublicIpv4PoolRequest.t ->
-        (DeletePublicIpv4PoolResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeletePublicIpv4PoolResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_queued_reserved_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteQueuedReservedInstancesRequest.t ->
-        (DeleteQueuedReservedInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteQueuedReservedInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRouteRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRouteTableRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_security_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSecurityGroupRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSnapshotRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_spot_datafeed_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSpotDatafeedSubscriptionRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_subnet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSubnetRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_subnet_cidr_reservation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSubnetCidrReservationRequest.t ->
-        (DeleteSubnetCidrReservationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSubnetCidrReservationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTagsRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_traffic_mirror_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrafficMirrorFilterRequest.t ->
-        (DeleteTrafficMirrorFilterResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTrafficMirrorFilterResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_traffic_mirror_filter_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrafficMirrorFilterRuleRequest.t ->
-        (DeleteTrafficMirrorFilterRuleResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTrafficMirrorFilterRuleResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_traffic_mirror_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrafficMirrorSessionRequest.t ->
-        (DeleteTrafficMirrorSessionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTrafficMirrorSessionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_traffic_mirror_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrafficMirrorTargetRequest.t ->
-        (DeleteTrafficMirrorTargetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTrafficMirrorTargetResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_transit_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayRequest.t ->
-        (DeleteTransitGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTransitGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_transit_gateway_connect :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayConnectRequest.t ->
-        (DeleteTransitGatewayConnectResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTransitGatewayConnectResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_transit_gateway_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayConnectPeerRequest.t ->
-        (DeleteTransitGatewayConnectPeerResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteTransitGatewayConnectPeerResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_transit_gateway_multicast_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayMulticastDomainRequest.t ->
-        (DeleteTransitGatewayMulticastDomainResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteTransitGatewayMulticastDomainResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_transit_gateway_peering_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayPeeringAttachmentRequest.t ->
-        (DeleteTransitGatewayPeeringAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteTransitGatewayPeeringAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_transit_gateway_prefix_list_reference :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayPrefixListReferenceRequest.t ->
-        (DeleteTransitGatewayPrefixListReferenceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteTransitGatewayPrefixListReferenceResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_transit_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayRouteRequest.t ->
-        (DeleteTransitGatewayRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTransitGatewayRouteResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_transit_gateway_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayRouteTableRequest.t ->
-        (DeleteTransitGatewayRouteTableResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTransitGatewayRouteTableResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_transit_gateway_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTransitGatewayVpcAttachmentRequest.t ->
-        (DeleteTransitGatewayVpcAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteTransitGatewayVpcAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVolumeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_vpc :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_vpc_endpoint_connection_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcEndpointConnectionNotificationsRequest.t ->
         (DeleteVpcEndpointConnectionNotificationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_vpc_endpoint_service_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcEndpointServiceConfigurationsRequest.t ->
-        (DeleteVpcEndpointServiceConfigurationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteVpcEndpointServiceConfigurationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val delete_vpc_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcEndpointsRequest.t ->
-        (DeleteVpcEndpointsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteVpcEndpointsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_vpc_peering_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcPeeringConnectionRequest.t ->
-        (DeleteVpcPeeringConnectionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteVpcPeeringConnectionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val delete_vpn_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpnConnectionRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_vpn_connection_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpnConnectionRouteRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val delete_vpn_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpnGatewayRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val deprovision_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeprovisionByoipCidrRequest.t ->
-        (DeprovisionByoipCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeprovisionByoipCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val deprovision_ipam_pool_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeprovisionIpamPoolCidrRequest.t ->
-        (DeprovisionIpamPoolCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeprovisionIpamPoolCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val deprovision_public_ipv4_pool_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeprovisionPublicIpv4PoolCidrRequest.t ->
-        (DeprovisionPublicIpv4PoolCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeprovisionPublicIpv4PoolCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val deregister_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterImageRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val deregister_instance_event_notification_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterInstanceEventNotificationAttributesRequest.t ->
         (DeregisterInstanceEventNotificationAttributesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val deregister_transit_gateway_multicast_group_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterTransitGatewayMulticastGroupMembersRequest.t ->
         (DeregisterTransitGatewayMulticastGroupMembersResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val deregister_transit_gateway_multicast_group_sources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterTransitGatewayMulticastGroupSourcesRequest.t ->
         (DeregisterTransitGatewayMulticastGroupSourcesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_account_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountAttributesRequest.t ->
-        (DescribeAccountAttributesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAccountAttributesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAddressesRequest.t ->
-        (DescribeAddressesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAddressesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_addresses_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAddressesAttributeRequest.t ->
-        (DescribeAddressesAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAddressesAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_aggregate_id_format :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAggregateIdFormatRequest.t ->
-        (DescribeAggregateIdFormatResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAggregateIdFormatResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_availability_zones :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAvailabilityZonesRequest.t ->
-        (DescribeAvailabilityZonesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAvailabilityZonesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_bundle_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBundleTasksRequest.t ->
-        (DescribeBundleTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeBundleTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_byoip_cidrs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeByoipCidrsRequest.t ->
-        (DescribeByoipCidrsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeByoipCidrsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_capacity_reservation_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCapacityReservationFleetsRequest.t ->
-        (DescribeCapacityReservationFleetsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeCapacityReservationFleetsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_capacity_reservations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCapacityReservationsRequest.t ->
-        (DescribeCapacityReservationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeCapacityReservationsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_carrier_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCarrierGatewaysRequest.t ->
-        (DescribeCarrierGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeCarrierGatewaysResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_classic_link_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClassicLinkInstancesRequest.t ->
-        (DescribeClassicLinkInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeClassicLinkInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_client_vpn_authorization_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientVpnAuthorizationRulesRequest.t ->
-        (DescribeClientVpnAuthorizationRulesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeClientVpnAuthorizationRulesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_client_vpn_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientVpnConnectionsRequest.t ->
-        (DescribeClientVpnConnectionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeClientVpnConnectionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_client_vpn_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientVpnEndpointsRequest.t ->
-        (DescribeClientVpnEndpointsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeClientVpnEndpointsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_client_vpn_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientVpnRoutesRequest.t ->
-        (DescribeClientVpnRoutesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeClientVpnRoutesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_client_vpn_target_networks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientVpnTargetNetworksRequest.t ->
-        (DescribeClientVpnTargetNetworksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeClientVpnTargetNetworksResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_coip_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCoipPoolsRequest.t ->
-        (DescribeCoipPoolsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeCoipPoolsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_conversion_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConversionTasksRequest.t ->
-        (DescribeConversionTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeConversionTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_customer_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomerGatewaysRequest.t ->
-        (DescribeCustomerGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeCustomerGatewaysResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_dhcp_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDhcpOptionsRequest.t ->
-        (DescribeDhcpOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDhcpOptionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_egress_only_internet_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEgressOnlyInternetGatewaysRequest.t ->
-        (DescribeEgressOnlyInternetGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeEgressOnlyInternetGatewaysResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_elastic_gpus :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeElasticGpusRequest.t ->
-        (DescribeElasticGpusResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeElasticGpusResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_export_image_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExportImageTasksRequest.t ->
-        (DescribeExportImageTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeExportImageTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_export_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExportTasksRequest.t ->
-        (DescribeExportTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeExportTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_fast_launch_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFastLaunchImagesRequest.t ->
-        (DescribeFastLaunchImagesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFastLaunchImagesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_fast_snapshot_restores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFastSnapshotRestoresRequest.t ->
-        (DescribeFastSnapshotRestoresResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFastSnapshotRestoresResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_fleet_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetHistoryRequest.t ->
-        (DescribeFleetHistoryResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFleetHistoryResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_fleet_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetInstancesRequest.t ->
-        (DescribeFleetInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFleetInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetsRequest.t ->
-        (DescribeFleetsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFleetsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_flow_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFlowLogsRequest.t ->
-        (DescribeFlowLogsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFlowLogsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_fpga_image_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFpgaImageAttributeRequest.t ->
-        (DescribeFpgaImageAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFpgaImageAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_fpga_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFpgaImagesRequest.t ->
-        (DescribeFpgaImagesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFpgaImagesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_host_reservation_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHostReservationOfferingsRequest.t ->
-        (DescribeHostReservationOfferingsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeHostReservationOfferingsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_host_reservations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHostReservationsRequest.t ->
-        (DescribeHostReservationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeHostReservationsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_hosts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHostsRequest.t ->
-        (DescribeHostsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeHostsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_iam_instance_profile_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIamInstanceProfileAssociationsRequest.t ->
-        (DescribeIamInstanceProfileAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeIamInstanceProfileAssociationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_id_format :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdFormatRequest.t ->
-        (DescribeIdFormatResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeIdFormatResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_identity_id_format :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityIdFormatRequest.t ->
-        (DescribeIdentityIdFormatResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeIdentityIdFormatResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_image_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImageAttributeRequest.t ->
-        (ImageAttribute.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImageAttribute.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImagesRequest.t ->
-        (DescribeImagesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeImagesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_import_image_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImportImageTasksRequest.t ->
-        (DescribeImportImageTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeImportImageTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_import_snapshot_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImportSnapshotTasksRequest.t ->
-        (DescribeImportSnapshotTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeImportSnapshotTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_instance_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceAttributeRequest.t ->
-        (InstanceAttribute.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (InstanceAttribute.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_instance_credit_specifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceCreditSpecificationsRequest.t ->
-        (DescribeInstanceCreditSpecificationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeInstanceCreditSpecificationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_instance_event_notification_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceEventNotificationAttributesRequest.t ->
         (DescribeInstanceEventNotificationAttributesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_instance_event_windows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceEventWindowsRequest.t ->
-        (DescribeInstanceEventWindowsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInstanceEventWindowsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_instance_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceStatusRequest.t ->
-        (DescribeInstanceStatusResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInstanceStatusResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_instance_type_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceTypeOfferingsRequest.t ->
-        (DescribeInstanceTypeOfferingsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInstanceTypeOfferingsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_instance_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceTypesRequest.t ->
-        (DescribeInstanceTypesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInstanceTypesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstancesRequest.t ->
-        (DescribeInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_internet_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInternetGatewaysRequest.t ->
-        (DescribeInternetGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInternetGatewaysResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_ipam_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIpamPoolsRequest.t ->
-        (DescribeIpamPoolsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeIpamPoolsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_ipam_scopes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIpamScopesRequest.t ->
-        (DescribeIpamScopesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeIpamScopesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_ipams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIpamsRequest.t ->
-        (DescribeIpamsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeIpamsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_ipv6_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIpv6PoolsRequest.t ->
-        (DescribeIpv6PoolsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeIpv6PoolsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_key_pairs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeKeyPairsRequest.t ->
-        (DescribeKeyPairsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeKeyPairsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_launch_template_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLaunchTemplateVersionsRequest.t ->
-        (DescribeLaunchTemplateVersionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeLaunchTemplateVersionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_launch_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLaunchTemplatesRequest.t ->
-        (DescribeLaunchTemplatesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeLaunchTemplatesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_local_gateway_route_table_virtual_interface_group_associations :
   ?endpoint_url:string ->
@@ -1958,2222 +1422,1623 @@ val describe_local_gateway_route_table_virtual_interface_group_associations :
       DescribeLocalGatewayRouteTableVirtualInterfaceGroupAssociationsRequest.t
         ->
         (DescribeLocalGatewayRouteTableVirtualInterfaceGroupAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_local_gateway_route_table_vpc_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocalGatewayRouteTableVpcAssociationsRequest.t ->
         (DescribeLocalGatewayRouteTableVpcAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_local_gateway_route_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocalGatewayRouteTablesRequest.t ->
-        (DescribeLocalGatewayRouteTablesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeLocalGatewayRouteTablesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_local_gateway_virtual_interface_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocalGatewayVirtualInterfaceGroupsRequest.t ->
         (DescribeLocalGatewayVirtualInterfaceGroupsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_local_gateway_virtual_interfaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocalGatewayVirtualInterfacesRequest.t ->
-        (DescribeLocalGatewayVirtualInterfacesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeLocalGatewayVirtualInterfacesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_local_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocalGatewaysRequest.t ->
-        (DescribeLocalGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeLocalGatewaysResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_managed_prefix_lists :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeManagedPrefixListsRequest.t ->
-        (DescribeManagedPrefixListsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeManagedPrefixListsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_moving_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMovingAddressesRequest.t ->
-        (DescribeMovingAddressesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeMovingAddressesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_nat_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNatGatewaysRequest.t ->
-        (DescribeNatGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeNatGatewaysResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_network_acls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkAclsRequest.t ->
-        (DescribeNetworkAclsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeNetworkAclsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_network_insights_access_scope_analyses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkInsightsAccessScopeAnalysesRequest.t ->
         (DescribeNetworkInsightsAccessScopeAnalysesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_network_insights_access_scopes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkInsightsAccessScopesRequest.t ->
-        (DescribeNetworkInsightsAccessScopesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeNetworkInsightsAccessScopesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_network_insights_analyses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkInsightsAnalysesRequest.t ->
-        (DescribeNetworkInsightsAnalysesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeNetworkInsightsAnalysesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_network_insights_paths :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkInsightsPathsRequest.t ->
-        (DescribeNetworkInsightsPathsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeNetworkInsightsPathsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_network_interface_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkInterfaceAttributeRequest.t ->
-        (DescribeNetworkInterfaceAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeNetworkInterfaceAttributeResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_network_interface_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkInterfacePermissionsRequest.t ->
-        (DescribeNetworkInterfacePermissionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeNetworkInterfacePermissionsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_network_interfaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNetworkInterfacesRequest.t ->
-        (DescribeNetworkInterfacesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeNetworkInterfacesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_placement_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePlacementGroupsRequest.t ->
-        (DescribePlacementGroupsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribePlacementGroupsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_prefix_lists :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePrefixListsRequest.t ->
-        (DescribePrefixListsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribePrefixListsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_principal_id_format :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePrincipalIdFormatRequest.t ->
-        (DescribePrincipalIdFormatResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribePrincipalIdFormatResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_public_ipv4_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePublicIpv4PoolsRequest.t ->
-        (DescribePublicIpv4PoolsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribePublicIpv4PoolsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_regions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRegionsRequest.t ->
-        (DescribeRegionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeRegionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_replace_root_volume_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplaceRootVolumeTasksRequest.t ->
-        (DescribeReplaceRootVolumeTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeReplaceRootVolumeTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_reserved_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedInstancesRequest.t ->
-        (DescribeReservedInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeReservedInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_reserved_instances_listings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedInstancesListingsRequest.t ->
-        (DescribeReservedInstancesListingsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeReservedInstancesListingsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_reserved_instances_modifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedInstancesModificationsRequest.t ->
-        (DescribeReservedInstancesModificationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeReservedInstancesModificationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_reserved_instances_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedInstancesOfferingsRequest.t ->
-        (DescribeReservedInstancesOfferingsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeReservedInstancesOfferingsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_route_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRouteTablesRequest.t ->
-        (DescribeRouteTablesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeRouteTablesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_scheduled_instance_availability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScheduledInstanceAvailabilityRequest.t ->
-        (DescribeScheduledInstanceAvailabilityResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeScheduledInstanceAvailabilityResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_scheduled_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScheduledInstancesRequest.t ->
-        (DescribeScheduledInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeScheduledInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_security_group_references :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSecurityGroupReferencesRequest.t ->
-        (DescribeSecurityGroupReferencesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSecurityGroupReferencesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_security_group_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSecurityGroupRulesRequest.t ->
-        (DescribeSecurityGroupRulesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSecurityGroupRulesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_security_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSecurityGroupsRequest.t ->
-        (DescribeSecurityGroupsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSecurityGroupsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_snapshot_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotAttributeRequest.t ->
-        (DescribeSnapshotAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSnapshotAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_snapshot_tier_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotTierStatusRequest.t ->
-        (DescribeSnapshotTierStatusResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSnapshotTierStatusResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotsRequest.t ->
-        (DescribeSnapshotsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSnapshotsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_spot_datafeed_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpotDatafeedSubscriptionRequest.t ->
-        (DescribeSpotDatafeedSubscriptionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSpotDatafeedSubscriptionResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_spot_fleet_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpotFleetInstancesRequest.t ->
-        (DescribeSpotFleetInstancesResponse.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSpotFleetInstancesResponse.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_spot_fleet_request_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpotFleetRequestHistoryRequest.t ->
-        (DescribeSpotFleetRequestHistoryResponse.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSpotFleetRequestHistoryResponse.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_spot_fleet_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpotFleetRequestsRequest.t ->
-        (DescribeSpotFleetRequestsResponse.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSpotFleetRequestsResponse.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_spot_instance_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpotInstanceRequestsRequest.t ->
-        (DescribeSpotInstanceRequestsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSpotInstanceRequestsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_spot_price_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpotPriceHistoryRequest.t ->
-        (DescribeSpotPriceHistoryResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSpotPriceHistoryResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_stale_security_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStaleSecurityGroupsRequest.t ->
-        (DescribeStaleSecurityGroupsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeStaleSecurityGroupsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_store_image_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStoreImageTasksRequest.t ->
-        (DescribeStoreImageTasksResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeStoreImageTasksResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_subnets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSubnetsRequest.t ->
-        (DescribeSubnetsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSubnetsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsRequest.t ->
-        (DescribeTagsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTagsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_traffic_mirror_filters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrafficMirrorFiltersRequest.t ->
-        (DescribeTrafficMirrorFiltersResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTrafficMirrorFiltersResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_traffic_mirror_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrafficMirrorSessionsRequest.t ->
-        (DescribeTrafficMirrorSessionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTrafficMirrorSessionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_traffic_mirror_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrafficMirrorTargetsRequest.t ->
-        (DescribeTrafficMirrorTargetsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTrafficMirrorTargetsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_transit_gateway_attachments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewayAttachmentsRequest.t ->
-        (DescribeTransitGatewayAttachmentsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTransitGatewayAttachmentsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_transit_gateway_connect_peers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewayConnectPeersRequest.t ->
-        (DescribeTransitGatewayConnectPeersResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTransitGatewayConnectPeersResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_transit_gateway_connects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewayConnectsRequest.t ->
-        (DescribeTransitGatewayConnectsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTransitGatewayConnectsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_transit_gateway_multicast_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewayMulticastDomainsRequest.t ->
-        (DescribeTransitGatewayMulticastDomainsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTransitGatewayMulticastDomainsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_transit_gateway_peering_attachments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewayPeeringAttachmentsRequest.t ->
         (DescribeTransitGatewayPeeringAttachmentsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_transit_gateway_route_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewayRouteTablesRequest.t ->
-        (DescribeTransitGatewayRouteTablesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTransitGatewayRouteTablesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_transit_gateway_vpc_attachments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewayVpcAttachmentsRequest.t ->
-        (DescribeTransitGatewayVpcAttachmentsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTransitGatewayVpcAttachmentsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_transit_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransitGatewaysRequest.t ->
-        (DescribeTransitGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTransitGatewaysResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_trunk_interface_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrunkInterfaceAssociationsRequest.t ->
-        (DescribeTrunkInterfaceAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTrunkInterfaceAssociationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_volume_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVolumeAttributeRequest.t ->
-        (DescribeVolumeAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVolumeAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_volume_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVolumeStatusRequest.t ->
-        (DescribeVolumeStatusResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVolumeStatusResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVolumesRequest.t ->
-        (DescribeVolumesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVolumesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_volumes_modifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVolumesModificationsRequest.t ->
-        (DescribeVolumesModificationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVolumesModificationsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpc_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcAttributeRequest.t ->
-        (DescribeVpcAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpcAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpc_classic_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcClassicLinkRequest.t ->
-        (DescribeVpcClassicLinkResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpcClassicLinkResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpc_classic_link_dns_support :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcClassicLinkDnsSupportRequest.t ->
-        (DescribeVpcClassicLinkDnsSupportResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeVpcClassicLinkDnsSupportResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_vpc_endpoint_connection_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcEndpointConnectionNotificationsRequest.t ->
         (DescribeVpcEndpointConnectionNotificationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_vpc_endpoint_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcEndpointConnectionsRequest.t ->
-        (DescribeVpcEndpointConnectionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpcEndpointConnectionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpc_endpoint_service_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcEndpointServiceConfigurationsRequest.t ->
         (DescribeVpcEndpointServiceConfigurationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_vpc_endpoint_service_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcEndpointServicePermissionsRequest.t ->
-        (DescribeVpcEndpointServicePermissionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeVpcEndpointServicePermissionsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val describe_vpc_endpoint_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcEndpointServicesRequest.t ->
-        (DescribeVpcEndpointServicesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpcEndpointServicesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpc_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcEndpointsRequest.t ->
-        (DescribeVpcEndpointsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpcEndpointsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpc_peering_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcPeeringConnectionsRequest.t ->
-        (DescribeVpcPeeringConnectionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpcPeeringConnectionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpcs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcsRequest.t ->
-        (DescribeVpcsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeVpcsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val describe_vpn_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpnConnectionsRequest.t ->
-        (DescribeVpnConnectionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpnConnectionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val describe_vpn_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpnGatewaysRequest.t ->
-        (DescribeVpnGatewaysResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVpnGatewaysResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val detach_classic_link_vpc :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachClassicLinkVpcRequest.t ->
-        (DetachClassicLinkVpcResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DetachClassicLinkVpcResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val detach_internet_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachInternetGatewayRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val detach_network_interface :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachNetworkInterfaceRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val detach_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachVolumeRequest.t ->
-        (VolumeAttachment.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (VolumeAttachment.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val detach_vpn_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachVpnGatewayRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val disable_ebs_encryption_by_default :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableEbsEncryptionByDefaultRequest.t ->
-        (DisableEbsEncryptionByDefaultResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisableEbsEncryptionByDefaultResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disable_fast_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableFastLaunchRequest.t ->
-        (DisableFastLaunchResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisableFastLaunchResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disable_fast_snapshot_restores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableFastSnapshotRestoresRequest.t ->
-        (DisableFastSnapshotRestoresResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisableFastSnapshotRestoresResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disable_image_deprecation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableImageDeprecationRequest.t ->
-        (DisableImageDeprecationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisableImageDeprecationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disable_ipam_organization_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableIpamOrganizationAdminAccountRequest.t ->
-        (DisableIpamOrganizationAdminAccountResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisableIpamOrganizationAdminAccountResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val disable_serial_console_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableSerialConsoleAccessRequest.t ->
-        (DisableSerialConsoleAccessResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisableSerialConsoleAccessResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disable_transit_gateway_route_table_propagation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableTransitGatewayRouteTablePropagationRequest.t ->
         (DisableTransitGatewayRouteTablePropagationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val disable_vgw_route_propagation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableVgwRoutePropagationRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val disable_vpc_classic_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableVpcClassicLinkRequest.t ->
-        (DisableVpcClassicLinkResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisableVpcClassicLinkResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disable_vpc_classic_link_dns_support :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableVpcClassicLinkDnsSupportRequest.t ->
-        (DisableVpcClassicLinkDnsSupportResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisableVpcClassicLinkDnsSupportResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val disassociate_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateAddressRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val disassociate_client_vpn_target_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateClientVpnTargetNetworkRequest.t ->
-        (DisassociateClientVpnTargetNetworkResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisassociateClientVpnTargetNetworkResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val disassociate_enclave_certificate_iam_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateEnclaveCertificateIamRoleRequest.t ->
-        (DisassociateEnclaveCertificateIamRoleResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisassociateEnclaveCertificateIamRoleResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val disassociate_iam_instance_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateIamInstanceProfileRequest.t ->
-        (DisassociateIamInstanceProfileResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisassociateIamInstanceProfileResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disassociate_instance_event_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateInstanceEventWindowRequest.t ->
-        (DisassociateInstanceEventWindowResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisassociateInstanceEventWindowResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val disassociate_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateRouteTableRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val disassociate_subnet_cidr_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateSubnetCidrBlockRequest.t ->
-        (DisassociateSubnetCidrBlockResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisassociateSubnetCidrBlockResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disassociate_transit_gateway_multicast_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTransitGatewayMulticastDomainRequest.t ->
         (DisassociateTransitGatewayMulticastDomainResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val disassociate_transit_gateway_route_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTransitGatewayRouteTableRequest.t ->
-        (DisassociateTransitGatewayRouteTableResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisassociateTransitGatewayRouteTableResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val disassociate_trunk_interface :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTrunkInterfaceRequest.t ->
-        (DisassociateTrunkInterfaceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisassociateTrunkInterfaceResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val disassociate_vpc_cidr_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateVpcCidrBlockRequest.t ->
-        (DisassociateVpcCidrBlockResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisassociateVpcCidrBlockResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val enable_ebs_encryption_by_default :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableEbsEncryptionByDefaultRequest.t ->
-        (EnableEbsEncryptionByDefaultResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableEbsEncryptionByDefaultResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val enable_fast_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableFastLaunchRequest.t ->
-        (EnableFastLaunchResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableFastLaunchResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val enable_fast_snapshot_restores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableFastSnapshotRestoresRequest.t ->
-        (EnableFastSnapshotRestoresResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableFastSnapshotRestoresResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val enable_image_deprecation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableImageDeprecationRequest.t ->
-        (EnableImageDeprecationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableImageDeprecationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val enable_ipam_organization_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableIpamOrganizationAdminAccountRequest.t ->
-        (EnableIpamOrganizationAdminAccountResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EnableIpamOrganizationAdminAccountResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val enable_serial_console_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableSerialConsoleAccessRequest.t ->
-        (EnableSerialConsoleAccessResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableSerialConsoleAccessResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val enable_transit_gateway_route_table_propagation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableTransitGatewayRouteTablePropagationRequest.t ->
         (EnableTransitGatewayRouteTablePropagationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val enable_vgw_route_propagation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableVgwRoutePropagationRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val enable_volume_i_o :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableVolumeIORequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val enable_vpc_classic_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableVpcClassicLinkRequest.t ->
-        (EnableVpcClassicLinkResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableVpcClassicLinkResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val enable_vpc_classic_link_dns_support :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableVpcClassicLinkDnsSupportRequest.t ->
-        (EnableVpcClassicLinkDnsSupportResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnableVpcClassicLinkDnsSupportResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val export_client_vpn_client_certificate_revocation_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportClientVpnClientCertificateRevocationListRequest.t ->
         (ExportClientVpnClientCertificateRevocationListResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val export_client_vpn_client_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportClientVpnClientConfigurationRequest.t ->
-        (ExportClientVpnClientConfigurationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ExportClientVpnClientConfigurationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val export_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportImageRequest.t ->
-        (ExportImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ExportImageResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val export_transit_gateway_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportTransitGatewayRoutesRequest.t ->
-        (ExportTransitGatewayRoutesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ExportTransitGatewayRoutesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_associated_enclave_certificate_iam_roles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssociatedEnclaveCertificateIamRolesRequest.t ->
-        (GetAssociatedEnclaveCertificateIamRolesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetAssociatedEnclaveCertificateIamRolesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_associated_ipv6_pool_cidrs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssociatedIpv6PoolCidrsRequest.t ->
-        (GetAssociatedIpv6PoolCidrsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAssociatedIpv6PoolCidrsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_capacity_reservation_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCapacityReservationUsageRequest.t ->
-        (GetCapacityReservationUsageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCapacityReservationUsageResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_coip_pool_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCoipPoolUsageRequest.t ->
-        (GetCoipPoolUsageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCoipPoolUsageResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_console_output :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConsoleOutputRequest.t ->
-        (GetConsoleOutputResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetConsoleOutputResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_console_screenshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConsoleScreenshotRequest.t ->
-        (GetConsoleScreenshotResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetConsoleScreenshotResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_default_credit_specification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDefaultCreditSpecificationRequest.t ->
-        (GetDefaultCreditSpecificationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDefaultCreditSpecificationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_ebs_default_kms_key_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEbsDefaultKmsKeyIdRequest.t ->
-        (GetEbsDefaultKmsKeyIdResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetEbsDefaultKmsKeyIdResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_ebs_encryption_by_default :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEbsEncryptionByDefaultRequest.t ->
-        (GetEbsEncryptionByDefaultResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetEbsEncryptionByDefaultResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_flow_logs_integration_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFlowLogsIntegrationTemplateRequest.t ->
-        (GetFlowLogsIntegrationTemplateResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetFlowLogsIntegrationTemplateResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_groups_for_capacity_reservation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupsForCapacityReservationRequest.t ->
-        (GetGroupsForCapacityReservationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetGroupsForCapacityReservationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_host_reservation_purchase_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetHostReservationPurchasePreviewRequest.t ->
-        (GetHostReservationPurchasePreviewResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetHostReservationPurchasePreviewResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_instance_types_from_instance_requirements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInstanceTypesFromInstanceRequirementsRequest.t ->
         (GetInstanceTypesFromInstanceRequirementsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val get_ipam_address_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIpamAddressHistoryRequest.t ->
-        (GetIpamAddressHistoryResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIpamAddressHistoryResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_ipam_pool_allocations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIpamPoolAllocationsRequest.t ->
-        (GetIpamPoolAllocationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIpamPoolAllocationsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_ipam_pool_cidrs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIpamPoolCidrsRequest.t ->
-        (GetIpamPoolCidrsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIpamPoolCidrsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_ipam_resource_cidrs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIpamResourceCidrsRequest.t ->
-        (GetIpamResourceCidrsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIpamResourceCidrsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_launch_template_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLaunchTemplateDataRequest.t ->
-        (GetLaunchTemplateDataResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetLaunchTemplateDataResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_managed_prefix_list_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetManagedPrefixListAssociationsRequest.t ->
-        (GetManagedPrefixListAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetManagedPrefixListAssociationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_managed_prefix_list_entries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetManagedPrefixListEntriesRequest.t ->
-        (GetManagedPrefixListEntriesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetManagedPrefixListEntriesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_network_insights_access_scope_analysis_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkInsightsAccessScopeAnalysisFindingsRequest.t ->
         (GetNetworkInsightsAccessScopeAnalysisFindingsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val get_network_insights_access_scope_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkInsightsAccessScopeContentRequest.t ->
-        (GetNetworkInsightsAccessScopeContentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetNetworkInsightsAccessScopeContentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_password_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPasswordDataRequest.t ->
-        (GetPasswordDataResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPasswordDataResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_reserved_instances_exchange_quote :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReservedInstancesExchangeQuoteRequest.t ->
-        (GetReservedInstancesExchangeQuoteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetReservedInstancesExchangeQuoteResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_serial_console_access_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSerialConsoleAccessStatusRequest.t ->
-        (GetSerialConsoleAccessStatusResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSerialConsoleAccessStatusResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_spot_placement_scores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSpotPlacementScoresRequest.t ->
-        (GetSpotPlacementScoresResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSpotPlacementScoresResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_subnet_cidr_reservations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSubnetCidrReservationsRequest.t ->
-        (GetSubnetCidrReservationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSubnetCidrReservationsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val get_transit_gateway_attachment_propagations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayAttachmentPropagationsRequest.t ->
-        (GetTransitGatewayAttachmentPropagationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetTransitGatewayAttachmentPropagationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_transit_gateway_multicast_domain_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayMulticastDomainAssociationsRequest.t ->
         (GetTransitGatewayMulticastDomainAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val get_transit_gateway_prefix_list_references :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayPrefixListReferencesRequest.t ->
-        (GetTransitGatewayPrefixListReferencesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetTransitGatewayPrefixListReferencesResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_transit_gateway_route_table_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayRouteTableAssociationsRequest.t ->
-        (GetTransitGatewayRouteTableAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetTransitGatewayRouteTableAssociationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_transit_gateway_route_table_propagations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayRouteTablePropagationsRequest.t ->
-        (GetTransitGatewayRouteTablePropagationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetTransitGatewayRouteTablePropagationsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val get_vpn_connection_device_sample_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVpnConnectionDeviceSampleConfigurationRequest.t ->
         (GetVpnConnectionDeviceSampleConfigurationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val get_vpn_connection_device_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVpnConnectionDeviceTypesRequest.t ->
-        (GetVpnConnectionDeviceTypesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetVpnConnectionDeviceTypesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val import_client_vpn_client_certificate_revocation_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportClientVpnClientCertificateRevocationListRequest.t ->
         (ImportClientVpnClientCertificateRevocationListResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val import_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportImageRequest.t ->
-        (ImportImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportImageResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val import_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportInstanceRequest.t ->
-        (ImportInstanceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ImportInstanceResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val import_key_pair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportKeyPairRequest.t ->
-        (ImportKeyPairResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportKeyPairResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val import_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportSnapshotRequest.t ->
-        (ImportSnapshotResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ImportSnapshotResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val import_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportVolumeRequest.t ->
-        (ImportVolumeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportVolumeResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val list_images_in_recycle_bin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImagesInRecycleBinRequest.t ->
-        (ListImagesInRecycleBinResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListImagesInRecycleBinResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val list_snapshots_in_recycle_bin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSnapshotsInRecycleBinRequest.t ->
-        (ListSnapshotsInRecycleBinResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListSnapshotsInRecycleBinResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_address_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyAddressAttributeRequest.t ->
-        (ModifyAddressAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyAddressAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_availability_zone_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyAvailabilityZoneGroupRequest.t ->
-        (ModifyAvailabilityZoneGroupResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyAvailabilityZoneGroupResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_capacity_reservation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyCapacityReservationRequest.t ->
-        (ModifyCapacityReservationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyCapacityReservationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_capacity_reservation_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyCapacityReservationFleetRequest.t ->
-        (ModifyCapacityReservationFleetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyCapacityReservationFleetResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_client_vpn_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClientVpnEndpointRequest.t ->
-        (ModifyClientVpnEndpointResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyClientVpnEndpointResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_default_credit_specification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDefaultCreditSpecificationRequest.t ->
-        (ModifyDefaultCreditSpecificationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyDefaultCreditSpecificationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_ebs_default_kms_key_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyEbsDefaultKmsKeyIdRequest.t ->
-        (ModifyEbsDefaultKmsKeyIdResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyEbsDefaultKmsKeyIdResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyFleetRequest.t ->
-        (ModifyFleetResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyFleetResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_fpga_image_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyFpgaImageAttributeRequest.t ->
-        (ModifyFpgaImageAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyFpgaImageAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_hosts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyHostsRequest.t ->
-        (ModifyHostsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyHostsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_id_format :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyIdFormatRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_identity_id_format :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyIdentityIdFormatRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_image_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyImageAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_instance_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstanceAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_instance_capacity_reservation_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstanceCapacityReservationAttributesRequest.t ->
         (ModifyInstanceCapacityReservationAttributesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_instance_credit_specification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstanceCreditSpecificationRequest.t ->
-        (ModifyInstanceCreditSpecificationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyInstanceCreditSpecificationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_instance_event_start_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstanceEventStartTimeRequest.t ->
-        (ModifyInstanceEventStartTimeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyInstanceEventStartTimeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_instance_event_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstanceEventWindowRequest.t ->
-        (ModifyInstanceEventWindowResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyInstanceEventWindowResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_instance_maintenance_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstanceMaintenanceOptionsRequest.t ->
-        (ModifyInstanceMaintenanceOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyInstanceMaintenanceOptionsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_instance_metadata_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstanceMetadataOptionsRequest.t ->
-        (ModifyInstanceMetadataOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyInstanceMetadataOptionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_instance_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyInstancePlacementRequest.t ->
-        (ModifyInstancePlacementResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyInstancePlacementResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_ipam :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyIpamRequest.t ->
-        (ModifyIpamResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyIpamResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_ipam_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyIpamPoolRequest.t ->
-        (ModifyIpamPoolResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyIpamPoolResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_ipam_resource_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyIpamResourceCidrRequest.t ->
-        (ModifyIpamResourceCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyIpamResourceCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_ipam_scope :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyIpamScopeRequest.t ->
-        (ModifyIpamScopeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyIpamScopeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_launch_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyLaunchTemplateRequest.t ->
-        (ModifyLaunchTemplateResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyLaunchTemplateResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_managed_prefix_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyManagedPrefixListRequest.t ->
-        (ModifyManagedPrefixListResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyManagedPrefixListResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_network_interface_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyNetworkInterfaceAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_private_dns_name_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyPrivateDnsNameOptionsRequest.t ->
-        (ModifyPrivateDnsNameOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyPrivateDnsNameOptionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_reserved_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyReservedInstancesRequest.t ->
-        (ModifyReservedInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyReservedInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_security_group_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySecurityGroupRulesRequest.t ->
-        (ModifySecurityGroupRulesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifySecurityGroupRulesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_snapshot_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySnapshotAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_snapshot_tier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySnapshotTierRequest.t ->
-        (ModifySnapshotTierResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifySnapshotTierResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_spot_fleet_request :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySpotFleetRequestRequest.t ->
-        (ModifySpotFleetRequestResponse.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifySpotFleetRequestResponse.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_subnet_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySubnetAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_traffic_mirror_filter_network_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTrafficMirrorFilterNetworkServicesRequest.t ->
         (ModifyTrafficMirrorFilterNetworkServicesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_traffic_mirror_filter_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTrafficMirrorFilterRuleRequest.t ->
-        (ModifyTrafficMirrorFilterRuleResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyTrafficMirrorFilterRuleResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_traffic_mirror_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTrafficMirrorSessionRequest.t ->
-        (ModifyTrafficMirrorSessionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyTrafficMirrorSessionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_transit_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTransitGatewayRequest.t ->
-        (ModifyTransitGatewayResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyTransitGatewayResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_transit_gateway_prefix_list_reference :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTransitGatewayPrefixListReferenceRequest.t ->
-        (ModifyTransitGatewayPrefixListReferenceResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyTransitGatewayPrefixListReferenceResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_transit_gateway_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTransitGatewayVpcAttachmentRequest.t ->
-        (ModifyTransitGatewayVpcAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyTransitGatewayVpcAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVolumeRequest.t ->
-        (ModifyVolumeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyVolumeResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_volume_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVolumeAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_vpc_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_vpc_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcEndpointRequest.t ->
-        (ModifyVpcEndpointResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyVpcEndpointResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_vpc_endpoint_connection_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcEndpointConnectionNotificationRequest.t ->
-        (ModifyVpcEndpointConnectionNotificationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyVpcEndpointConnectionNotificationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_vpc_endpoint_service_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcEndpointServiceConfigurationRequest.t ->
-        (ModifyVpcEndpointServiceConfigurationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyVpcEndpointServiceConfigurationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_vpc_endpoint_service_payer_responsibility :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcEndpointServicePayerResponsibilityRequest.t ->
         (ModifyVpcEndpointServicePayerResponsibilityResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val modify_vpc_endpoint_service_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcEndpointServicePermissionsRequest.t ->
-        (ModifyVpcEndpointServicePermissionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyVpcEndpointServicePermissionsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_vpc_peering_connection_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcPeeringConnectionOptionsRequest.t ->
-        (ModifyVpcPeeringConnectionOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyVpcPeeringConnectionOptionsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val modify_vpc_tenancy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpcTenancyRequest.t ->
-        (ModifyVpcTenancyResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyVpcTenancyResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_vpn_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpnConnectionRequest.t ->
-        (ModifyVpnConnectionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyVpnConnectionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_vpn_connection_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpnConnectionOptionsRequest.t ->
-        (ModifyVpnConnectionOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyVpnConnectionOptionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_vpn_tunnel_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpnTunnelCertificateRequest.t ->
-        (ModifyVpnTunnelCertificateResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyVpnTunnelCertificateResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val modify_vpn_tunnel_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyVpnTunnelOptionsRequest.t ->
-        (ModifyVpnTunnelOptionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyVpnTunnelOptionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val monitor_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MonitorInstancesRequest.t ->
-        (MonitorInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (MonitorInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val move_address_to_vpc :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MoveAddressToVpcRequest.t ->
-        (MoveAddressToVpcResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (MoveAddressToVpcResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val move_byoip_cidr_to_ipam :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MoveByoipCidrToIpamRequest.t ->
-        (MoveByoipCidrToIpamResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (MoveByoipCidrToIpamResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val provision_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ProvisionByoipCidrRequest.t ->
-        (ProvisionByoipCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ProvisionByoipCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val provision_ipam_pool_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ProvisionIpamPoolCidrRequest.t ->
-        (ProvisionIpamPoolCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ProvisionIpamPoolCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val provision_public_ipv4_pool_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ProvisionPublicIpv4PoolCidrRequest.t ->
-        (ProvisionPublicIpv4PoolCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ProvisionPublicIpv4PoolCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val purchase_host_reservation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseHostReservationRequest.t ->
-        (PurchaseHostReservationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PurchaseHostReservationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val purchase_reserved_instances_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseReservedInstancesOfferingRequest.t ->
-        (PurchaseReservedInstancesOfferingResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PurchaseReservedInstancesOfferingResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val purchase_scheduled_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseScheduledInstancesRequest.t ->
-        (PurchaseScheduledInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PurchaseScheduledInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val reboot_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootInstancesRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val register_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterImageRequest.t ->
-        (RegisterImageResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RegisterImageResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val register_instance_event_notification_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterInstanceEventNotificationAttributesRequest.t ->
         (RegisterInstanceEventNotificationAttributesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val register_transit_gateway_multicast_group_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterTransitGatewayMulticastGroupMembersRequest.t ->
         (RegisterTransitGatewayMulticastGroupMembersResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val register_transit_gateway_multicast_group_sources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterTransitGatewayMulticastGroupSourcesRequest.t ->
         (RegisterTransitGatewayMulticastGroupSourcesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val reject_transit_gateway_multicast_domain_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectTransitGatewayMulticastDomainAssociationsRequest.t ->
         (RejectTransitGatewayMulticastDomainAssociationsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val reject_transit_gateway_peering_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectTransitGatewayPeeringAttachmentRequest.t ->
-        (RejectTransitGatewayPeeringAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RejectTransitGatewayPeeringAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val reject_transit_gateway_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectTransitGatewayVpcAttachmentRequest.t ->
-        (RejectTransitGatewayVpcAttachmentResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RejectTransitGatewayVpcAttachmentResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val reject_vpc_endpoint_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectVpcEndpointConnectionsRequest.t ->
-        (RejectVpcEndpointConnectionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RejectVpcEndpointConnectionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val reject_vpc_peering_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectVpcPeeringConnectionRequest.t ->
-        (RejectVpcPeeringConnectionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RejectVpcPeeringConnectionResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val release_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReleaseAddressRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val release_hosts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReleaseHostsRequest.t ->
-        (ReleaseHostsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ReleaseHostsResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val release_ipam_pool_allocation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReleaseIpamPoolAllocationRequest.t ->
-        (ReleaseIpamPoolAllocationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ReleaseIpamPoolAllocationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val replace_iam_instance_profile_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplaceIamInstanceProfileAssociationRequest.t ->
-        (ReplaceIamInstanceProfileAssociationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ReplaceIamInstanceProfileAssociationResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val replace_network_acl_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplaceNetworkAclAssociationRequest.t ->
-        (ReplaceNetworkAclAssociationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ReplaceNetworkAclAssociationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val replace_network_acl_entry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplaceNetworkAclEntryRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val replace_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplaceRouteRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val replace_route_table_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplaceRouteTableAssociationRequest.t ->
-        (ReplaceRouteTableAssociationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ReplaceRouteTableAssociationResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val replace_transit_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplaceTransitGatewayRouteRequest.t ->
-        (ReplaceTransitGatewayRouteResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ReplaceTransitGatewayRouteResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val report_instance_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReportInstanceStatusRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val request_spot_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestSpotFleetRequest.t ->
-        (RequestSpotFleetResponse.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RequestSpotFleetResponse.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val request_spot_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestSpotInstancesRequest.t ->
-        (RequestSpotInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RequestSpotInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val reset_address_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetAddressAttributeRequest.t ->
-        (ResetAddressAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResetAddressAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val reset_ebs_default_kms_key_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetEbsDefaultKmsKeyIdRequest.t ->
-        (ResetEbsDefaultKmsKeyIdResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResetEbsDefaultKmsKeyIdResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val reset_fpga_image_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetFpgaImageAttributeRequest.t ->
-        (ResetFpgaImageAttributeResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResetFpgaImageAttributeResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val reset_image_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetImageAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val reset_instance_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetInstanceAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val reset_network_interface_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetNetworkInterfaceAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val reset_snapshot_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetSnapshotAttributeRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val restore_address_to_classic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreAddressToClassicRequest.t ->
-        (RestoreAddressToClassicResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RestoreAddressToClassicResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val restore_image_from_recycle_bin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreImageFromRecycleBinRequest.t ->
-        (RestoreImageFromRecycleBinResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RestoreImageFromRecycleBinResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val restore_managed_prefix_list_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreManagedPrefixListVersionRequest.t ->
-        (RestoreManagedPrefixListVersionResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RestoreManagedPrefixListVersionResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val restore_snapshot_from_recycle_bin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreSnapshotFromRecycleBinRequest.t ->
-        (RestoreSnapshotFromRecycleBinResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RestoreSnapshotFromRecycleBinResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val restore_snapshot_tier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreSnapshotTierRequest.t ->
-        (RestoreSnapshotTierResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RestoreSnapshotTierResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val revoke_client_vpn_ingress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeClientVpnIngressRequest.t ->
-        (RevokeClientVpnIngressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RevokeClientVpnIngressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val revoke_security_group_egress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeSecurityGroupEgressRequest.t ->
-        (RevokeSecurityGroupEgressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RevokeSecurityGroupEgressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val revoke_security_group_ingress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeSecurityGroupIngressRequest.t ->
-        (RevokeSecurityGroupIngressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RevokeSecurityGroupIngressResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val run_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RunInstancesRequest.t ->
-        (Reservation.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (Reservation.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val run_scheduled_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RunScheduledInstancesRequest.t ->
-        (RunScheduledInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RunScheduledInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val search_local_gateway_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchLocalGatewayRoutesRequest.t ->
-        (SearchLocalGatewayRoutesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchLocalGatewayRoutesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val search_transit_gateway_multicast_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchTransitGatewayMulticastGroupsRequest.t ->
-        (SearchTransitGatewayMulticastGroupsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SearchTransitGatewayMulticastGroupsResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val search_transit_gateway_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchTransitGatewayRoutesRequest.t ->
-        (SearchTransitGatewayRoutesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchTransitGatewayRoutesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val send_diagnostic_interrupt :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendDiagnosticInterruptRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val start_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartInstancesRequest.t ->
-        (StartInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val start_network_insights_access_scope_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartNetworkInsightsAccessScopeAnalysisRequest.t ->
-        (StartNetworkInsightsAccessScopeAnalysisResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartNetworkInsightsAccessScopeAnalysisResult.t, Values.Ec2_error.t)
+          Result.t Async.Deferred.t
 val start_network_insights_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartNetworkInsightsAnalysisRequest.t ->
-        (StartNetworkInsightsAnalysisResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartNetworkInsightsAnalysisResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val start_vpc_endpoint_service_private_dns_verification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartVpcEndpointServicePrivateDnsVerificationRequest.t ->
         (StartVpcEndpointServicePrivateDnsVerificationResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val stop_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopInstancesRequest.t ->
-        (StopInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StopInstancesResult.t, Values.Ec2_error.t) Result.t Async.Deferred.t
 val terminate_client_vpn_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateClientVpnConnectionsRequest.t ->
-        (TerminateClientVpnConnectionsResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TerminateClientVpnConnectionsResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val terminate_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateInstancesRequest.t ->
-        (TerminateInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TerminateInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val unassign_ipv6_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnassignIpv6AddressesRequest.t ->
-        (UnassignIpv6AddressesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UnassignIpv6AddressesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val unassign_private_ip_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnassignPrivateIpAddressesRequest.t ->
-        (unit,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (unit, Values.Ec2_error.t) Result.t Async.Deferred.t
 val unmonitor_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnmonitorInstancesRequest.t ->
-        (UnmonitorInstancesResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UnmonitorInstancesResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t
 val update_security_group_rule_descriptions_egress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSecurityGroupRuleDescriptionsEgressRequest.t ->
         (UpdateSecurityGroupRuleDescriptionsEgressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val update_security_group_rule_descriptions_ingress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSecurityGroupRuleDescriptionsIngressRequest.t ->
         (UpdateSecurityGroupRuleDescriptionsIngressResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          Values.Ec2_error.t) Result.t Async.Deferred.t
 val withdraw_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       WithdrawByoipCidrRequest.t ->
-        (WithdrawByoipCidrResult.t,
-          [ `AWS of Values.Ec2_error.t 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (WithdrawByoipCidrResult.t, Values.Ec2_error.t) Result.t
           Async.Deferred.t

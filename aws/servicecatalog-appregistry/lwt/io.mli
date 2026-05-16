@@ -5,145 +5,121 @@ val associate_attribute_group :
     ?cfg:Awso.Cfg.t ->
       AssociateAttributeGroupRequest.t ->
         (AssociateAttributeGroupResponse.t,
-          [ `AWS of AssociateAttributeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateAttributeGroupResponse.error) Result.t Lwt.t
 val associate_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateResourceRequest.t ->
-        (AssociateResourceResponse.t,
-          [ `AWS of AssociateResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateResourceResponse.t, AssociateResourceResponse.error)
+          Result.t Lwt.t
 val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResponse.t,
-          [ `AWS of CreateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t Lwt.t
 val create_attribute_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAttributeGroupRequest.t ->
-        (CreateAttributeGroupResponse.t,
-          [ `AWS of CreateAttributeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAttributeGroupResponse.t, CreateAttributeGroupResponse.error)
+          Result.t Lwt.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationRequest.t ->
-        (DeleteApplicationResponse.t,
-          [ `AWS of DeleteApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteApplicationResponse.t, DeleteApplicationResponse.error)
+          Result.t Lwt.t
 val delete_attribute_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAttributeGroupRequest.t ->
-        (DeleteAttributeGroupResponse.t,
-          [ `AWS of DeleteAttributeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAttributeGroupResponse.t, DeleteAttributeGroupResponse.error)
+          Result.t Lwt.t
 val disassociate_attribute_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateAttributeGroupRequest.t ->
         (DisassociateAttributeGroupResponse.t,
-          [ `AWS of DisassociateAttributeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateAttributeGroupResponse.error) Result.t Lwt.t
 val disassociate_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateResourceRequest.t ->
-        (DisassociateResourceResponse.t,
-          [ `AWS of DisassociateResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateResourceResponse.t, DisassociateResourceResponse.error)
+          Result.t Lwt.t
 val get_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApplicationRequest.t ->
-        (GetApplicationResponse.t,
-          [ `AWS of GetApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetApplicationResponse.t, GetApplicationResponse.error) Result.t
+          Lwt.t
 val get_associated_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssociatedResourceRequest.t ->
         (GetAssociatedResourceResponse.t,
-          [ `AWS of GetAssociatedResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAssociatedResourceResponse.error) Result.t Lwt.t
 val get_attribute_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAttributeGroupRequest.t ->
-        (GetAttributeGroupResponse.t,
-          [ `AWS of GetAttributeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAttributeGroupResponse.t, GetAttributeGroupResponse.error)
+          Result.t Lwt.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationsRequest.t ->
-        (ListApplicationsResponse.t,
-          [ `AWS of ListApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListApplicationsResponse.t, ListApplicationsResponse.error) Result.t
+          Lwt.t
 val list_associated_attribute_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociatedAttributeGroupsRequest.t ->
         (ListAssociatedAttributeGroupsResponse.t,
-          [ `AWS of ListAssociatedAttributeGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssociatedAttributeGroupsResponse.error) Result.t Lwt.t
 val list_associated_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociatedResourcesRequest.t ->
         (ListAssociatedResourcesResponse.t,
-          [ `AWS of ListAssociatedResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssociatedResourcesResponse.error) Result.t Lwt.t
 val list_attribute_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAttributeGroupsRequest.t ->
-        (ListAttributeGroupsResponse.t,
-          [ `AWS of ListAttributeGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAttributeGroupsResponse.t, ListAttributeGroupsResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val sync_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SyncResourceRequest.t ->
-        (SyncResourceResponse.t,
-          [ `AWS of SyncResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SyncResourceResponse.t, SyncResourceResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationRequest.t ->
-        (UpdateApplicationResponse.t,
-          [ `AWS of UpdateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateApplicationResponse.t, UpdateApplicationResponse.error)
+          Result.t Lwt.t
 val update_attribute_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAttributeGroupRequest.t ->
-        (UpdateAttributeGroupResponse.t,
-          [ `AWS of UpdateAttributeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAttributeGroupResponse.t, UpdateAttributeGroupResponse.error)
+          Result.t Lwt.t

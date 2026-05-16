@@ -5,1301 +5,1044 @@ val associate_phone_number_with_user :
     ?cfg:Awso.Cfg.t ->
       AssociatePhoneNumberWithUserRequest.t ->
         (AssociatePhoneNumberWithUserResponse.t,
-          [ `AWS of AssociatePhoneNumberWithUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociatePhoneNumberWithUserResponse.error) Result.t Lwt.t
 val associate_phone_numbers_with_voice_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociatePhoneNumbersWithVoiceConnectorRequest.t ->
         (AssociatePhoneNumbersWithVoiceConnectorResponse.t,
-          [ `AWS of AssociatePhoneNumbersWithVoiceConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociatePhoneNumbersWithVoiceConnectorResponse.error) Result.t
+          Lwt.t
 val associate_phone_numbers_with_voice_connector_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociatePhoneNumbersWithVoiceConnectorGroupRequest.t ->
         (AssociatePhoneNumbersWithVoiceConnectorGroupResponse.t,
-          [
-            `AWS of
-              AssociatePhoneNumbersWithVoiceConnectorGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociatePhoneNumbersWithVoiceConnectorGroupResponse.error)
+          Result.t Lwt.t
 val associate_signin_delegate_groups_with_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateSigninDelegateGroupsWithAccountRequest.t ->
         (AssociateSigninDelegateGroupsWithAccountResponse.t,
-          [ `AWS of AssociateSigninDelegateGroupsWithAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateSigninDelegateGroupsWithAccountResponse.error) Result.t
+          Lwt.t
 val batch_create_attendee :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreateAttendeeRequest.t ->
-        (BatchCreateAttendeeResponse.t,
-          [ `AWS of BatchCreateAttendeeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchCreateAttendeeResponse.t, BatchCreateAttendeeResponse.error)
+          Result.t Lwt.t
 val batch_create_channel_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreateChannelMembershipRequest.t ->
         (BatchCreateChannelMembershipResponse.t,
-          [ `AWS of BatchCreateChannelMembershipResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchCreateChannelMembershipResponse.error) Result.t Lwt.t
 val batch_create_room_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreateRoomMembershipRequest.t ->
         (BatchCreateRoomMembershipResponse.t,
-          [ `AWS of BatchCreateRoomMembershipResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchCreateRoomMembershipResponse.error) Result.t Lwt.t
 val batch_delete_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeletePhoneNumberRequest.t ->
         (BatchDeletePhoneNumberResponse.t,
-          [ `AWS of BatchDeletePhoneNumberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDeletePhoneNumberResponse.error) Result.t Lwt.t
 val batch_suspend_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchSuspendUserRequest.t ->
-        (BatchSuspendUserResponse.t,
-          [ `AWS of BatchSuspendUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchSuspendUserResponse.t, BatchSuspendUserResponse.error) Result.t
+          Lwt.t
 val batch_unsuspend_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUnsuspendUserRequest.t ->
-        (BatchUnsuspendUserResponse.t,
-          [ `AWS of BatchUnsuspendUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchUnsuspendUserResponse.t, BatchUnsuspendUserResponse.error)
+          Result.t Lwt.t
 val batch_update_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdatePhoneNumberRequest.t ->
         (BatchUpdatePhoneNumberResponse.t,
-          [ `AWS of BatchUpdatePhoneNumberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchUpdatePhoneNumberResponse.error) Result.t Lwt.t
 val batch_update_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdateUserRequest.t ->
-        (BatchUpdateUserResponse.t,
-          [ `AWS of BatchUpdateUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchUpdateUserResponse.t, BatchUpdateUserResponse.error) Result.t
+          Lwt.t
 val create_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAccountRequest.t ->
-        (CreateAccountResponse.t,
-          [ `AWS of CreateAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAccountResponse.t, CreateAccountResponse.error) Result.t Lwt.t
 val create_app_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppInstanceRequest.t ->
-        (CreateAppInstanceResponse.t,
-          [ `AWS of CreateAppInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAppInstanceResponse.t, CreateAppInstanceResponse.error)
+          Result.t Lwt.t
 val create_app_instance_admin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppInstanceAdminRequest.t ->
         (CreateAppInstanceAdminResponse.t,
-          [ `AWS of CreateAppInstanceAdminResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAppInstanceAdminResponse.error) Result.t Lwt.t
 val create_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppInstanceUserRequest.t ->
         (CreateAppInstanceUserResponse.t,
-          [ `AWS of CreateAppInstanceUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAppInstanceUserResponse.error) Result.t Lwt.t
 val create_attendee :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAttendeeRequest.t ->
-        (CreateAttendeeResponse.t,
-          [ `AWS of CreateAttendeeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAttendeeResponse.t, CreateAttendeeResponse.error) Result.t
+          Lwt.t
 val create_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBotRequest.t ->
-        (CreateBotResponse.t,
-          [ `AWS of CreateBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBotResponse.t, CreateBotResponse.error) Result.t Lwt.t
 val create_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelRequest.t ->
-        (CreateChannelResponse.t,
-          [ `AWS of CreateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateChannelResponse.t, CreateChannelResponse.error) Result.t Lwt.t
 val create_channel_ban :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelBanRequest.t ->
-        (CreateChannelBanResponse.t,
-          [ `AWS of CreateChannelBanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateChannelBanResponse.t, CreateChannelBanResponse.error) Result.t
+          Lwt.t
 val create_channel_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelMembershipRequest.t ->
         (CreateChannelMembershipResponse.t,
-          [ `AWS of CreateChannelMembershipResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateChannelMembershipResponse.error) Result.t Lwt.t
 val create_channel_moderator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelModeratorRequest.t ->
         (CreateChannelModeratorResponse.t,
-          [ `AWS of CreateChannelModeratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateChannelModeratorResponse.error) Result.t Lwt.t
 val create_media_capture_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMediaCapturePipelineRequest.t ->
         (CreateMediaCapturePipelineResponse.t,
-          [ `AWS of CreateMediaCapturePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateMediaCapturePipelineResponse.error) Result.t Lwt.t
 val create_meeting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMeetingRequest.t ->
-        (CreateMeetingResponse.t,
-          [ `AWS of CreateMeetingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMeetingResponse.t, CreateMeetingResponse.error) Result.t Lwt.t
 val create_meeting_dial_out :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMeetingDialOutRequest.t ->
-        (CreateMeetingDialOutResponse.t,
-          [ `AWS of CreateMeetingDialOutResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMeetingDialOutResponse.t, CreateMeetingDialOutResponse.error)
+          Result.t Lwt.t
 val create_meeting_with_attendees :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMeetingWithAttendeesRequest.t ->
         (CreateMeetingWithAttendeesResponse.t,
-          [ `AWS of CreateMeetingWithAttendeesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateMeetingWithAttendeesResponse.error) Result.t Lwt.t
 val create_phone_number_order :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePhoneNumberOrderRequest.t ->
         (CreatePhoneNumberOrderResponse.t,
-          [ `AWS of CreatePhoneNumberOrderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreatePhoneNumberOrderResponse.error) Result.t Lwt.t
 val create_proxy_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProxySessionRequest.t ->
-        (CreateProxySessionResponse.t,
-          [ `AWS of CreateProxySessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProxySessionResponse.t, CreateProxySessionResponse.error)
+          Result.t Lwt.t
 val create_room :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRoomRequest.t ->
-        (CreateRoomResponse.t,
-          [ `AWS of CreateRoomResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRoomResponse.t, CreateRoomResponse.error) Result.t Lwt.t
 val create_room_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRoomMembershipRequest.t ->
-        (CreateRoomMembershipResponse.t,
-          [ `AWS of CreateRoomMembershipResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRoomMembershipResponse.t, CreateRoomMembershipResponse.error)
+          Result.t Lwt.t
 val create_sip_media_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSipMediaApplicationRequest.t ->
         (CreateSipMediaApplicationResponse.t,
-          [ `AWS of CreateSipMediaApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSipMediaApplicationResponse.error) Result.t Lwt.t
 val create_sip_media_application_call :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSipMediaApplicationCallRequest.t ->
         (CreateSipMediaApplicationCallResponse.t,
-          [ `AWS of CreateSipMediaApplicationCallResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSipMediaApplicationCallResponse.error) Result.t Lwt.t
 val create_sip_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSipRuleRequest.t ->
-        (CreateSipRuleResponse.t,
-          [ `AWS of CreateSipRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSipRuleResponse.t, CreateSipRuleResponse.error) Result.t Lwt.t
 val create_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserRequest.t ->
-        (CreateUserResponse.t,
-          [ `AWS of CreateUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUserResponse.t, CreateUserResponse.error) Result.t Lwt.t
 val create_voice_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVoiceConnectorRequest.t ->
-        (CreateVoiceConnectorResponse.t,
-          [ `AWS of CreateVoiceConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVoiceConnectorResponse.t, CreateVoiceConnectorResponse.error)
+          Result.t Lwt.t
 val create_voice_connector_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVoiceConnectorGroupRequest.t ->
         (CreateVoiceConnectorGroupResponse.t,
-          [ `AWS of CreateVoiceConnectorGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateVoiceConnectorGroupResponse.error) Result.t Lwt.t
 val delete_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAccountRequest.t ->
-        (DeleteAccountResponse.t,
-          [ `AWS of DeleteAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAccountResponse.t, DeleteAccountResponse.error) Result.t Lwt.t
 val delete_app_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAppInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAppInstanceRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_app_instance_admin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAppInstanceAdminRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAppInstanceAdminRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_app_instance_streaming_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppInstanceStreamingConfigurationsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAppInstanceUserRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAppInstanceUserRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_attendee :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAttendeeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteAttendeeRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_channel :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteChannelRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_channel_ban :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteChannelBanRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteChannelBanRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_channel_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteChannelMembershipRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteChannelMembershipRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_channel_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteChannelMessageRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteChannelMessageRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_channel_moderator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteChannelModeratorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteChannelModeratorRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_events_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteEventsConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteEventsConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_media_capture_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteMediaCapturePipelineRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteMediaCapturePipelineRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_meeting :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteMeetingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteMeetingRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePhoneNumberRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeletePhoneNumberRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_proxy_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteProxySessionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteProxySessionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_room :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteRoomRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteRoomRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_room_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRoomMembershipRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteRoomMembershipRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_sip_media_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteSipMediaApplicationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteSipMediaApplicationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_sip_rule :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteSipRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteSipRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_voice_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVoiceConnectorRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_voice_connector_emergency_calling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVoiceConnectorEmergencyCallingConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_voice_connector_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVoiceConnectorGroupRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_voice_connector_origination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorOriginationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVoiceConnectorOriginationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_voice_connector_proxy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorProxyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVoiceConnectorProxyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_voice_connector_streaming_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVoiceConnectorStreamingConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_voice_connector_termination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorTerminationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVoiceConnectorTerminationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_voice_connector_termination_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVoiceConnectorTerminationCredentialsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val describe_app_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppInstanceRequest.t ->
-        (DescribeAppInstanceResponse.t,
-          [ `AWS of DescribeAppInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAppInstanceResponse.t, DescribeAppInstanceResponse.error)
+          Result.t Lwt.t
 val describe_app_instance_admin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppInstanceAdminRequest.t ->
         (DescribeAppInstanceAdminResponse.t,
-          [ `AWS of DescribeAppInstanceAdminResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAppInstanceAdminResponse.error) Result.t Lwt.t
 val describe_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppInstanceUserRequest.t ->
         (DescribeAppInstanceUserResponse.t,
-          [ `AWS of DescribeAppInstanceUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAppInstanceUserResponse.error) Result.t Lwt.t
 val describe_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelRequest.t ->
-        (DescribeChannelResponse.t,
-          [ `AWS of DescribeChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeChannelResponse.t, DescribeChannelResponse.error) Result.t
+          Lwt.t
 val describe_channel_ban :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelBanRequest.t ->
-        (DescribeChannelBanResponse.t,
-          [ `AWS of DescribeChannelBanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeChannelBanResponse.t, DescribeChannelBanResponse.error)
+          Result.t Lwt.t
 val describe_channel_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelMembershipRequest.t ->
         (DescribeChannelMembershipResponse.t,
-          [ `AWS of DescribeChannelMembershipResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeChannelMembershipResponse.error) Result.t Lwt.t
 val describe_channel_membership_for_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelMembershipForAppInstanceUserRequest.t ->
         (DescribeChannelMembershipForAppInstanceUserResponse.t,
-          [
-            `AWS of DescribeChannelMembershipForAppInstanceUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeChannelMembershipForAppInstanceUserResponse.error) Result.t
+          Lwt.t
 val describe_channel_moderated_by_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelModeratedByAppInstanceUserRequest.t ->
         (DescribeChannelModeratedByAppInstanceUserResponse.t,
-          [ `AWS of DescribeChannelModeratedByAppInstanceUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeChannelModeratedByAppInstanceUserResponse.error) Result.t
+          Lwt.t
 val describe_channel_moderator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelModeratorRequest.t ->
         (DescribeChannelModeratorResponse.t,
-          [ `AWS of DescribeChannelModeratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeChannelModeratorResponse.error) Result.t Lwt.t
 val disassociate_phone_number_from_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociatePhoneNumberFromUserRequest.t ->
         (DisassociatePhoneNumberFromUserResponse.t,
-          [ `AWS of DisassociatePhoneNumberFromUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociatePhoneNumberFromUserResponse.error) Result.t Lwt.t
 val disassociate_phone_numbers_from_voice_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociatePhoneNumbersFromVoiceConnectorRequest.t ->
         (DisassociatePhoneNumbersFromVoiceConnectorResponse.t,
-          [ `AWS of DisassociatePhoneNumbersFromVoiceConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociatePhoneNumbersFromVoiceConnectorResponse.error) Result.t
+          Lwt.t
 val disassociate_phone_numbers_from_voice_connector_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociatePhoneNumbersFromVoiceConnectorGroupRequest.t ->
         (DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.t,
-          [
-            `AWS of
-              DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.error)
+          Result.t Lwt.t
 val disassociate_signin_delegate_groups_from_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateSigninDelegateGroupsFromAccountRequest.t ->
         (DisassociateSigninDelegateGroupsFromAccountResponse.t,
-          [
-            `AWS of DisassociateSigninDelegateGroupsFromAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateSigninDelegateGroupsFromAccountResponse.error) Result.t
+          Lwt.t
 val get_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccountRequest.t ->
-        (GetAccountResponse.t,
-          [ `AWS of GetAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccountResponse.t, GetAccountResponse.error) Result.t Lwt.t
 val get_account_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccountSettingsRequest.t ->
-        (GetAccountSettingsResponse.t,
-          [ `AWS of GetAccountSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccountSettingsResponse.t, GetAccountSettingsResponse.error)
+          Result.t Lwt.t
 val get_app_instance_retention_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppInstanceRetentionSettingsRequest.t ->
         (GetAppInstanceRetentionSettingsResponse.t,
-          [ `AWS of GetAppInstanceRetentionSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAppInstanceRetentionSettingsResponse.error) Result.t Lwt.t
 val get_app_instance_streaming_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppInstanceStreamingConfigurationsRequest.t ->
         (GetAppInstanceStreamingConfigurationsResponse.t,
-          [ `AWS of GetAppInstanceStreamingConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAppInstanceStreamingConfigurationsResponse.error) Result.t Lwt.t
 val get_attendee :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAttendeeRequest.t ->
-        (GetAttendeeResponse.t,
-          [ `AWS of GetAttendeeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAttendeeResponse.t, GetAttendeeResponse.error) Result.t Lwt.t
 val get_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotRequest.t ->
-        (GetBotResponse.t,
-          [ `AWS of GetBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBotResponse.t, GetBotResponse.error) Result.t Lwt.t
 val get_channel_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChannelMessageRequest.t ->
-        (GetChannelMessageResponse.t,
-          [ `AWS of GetChannelMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetChannelMessageResponse.t, GetChannelMessageResponse.error)
+          Result.t Lwt.t
 val get_events_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventsConfigurationRequest.t ->
         (GetEventsConfigurationResponse.t,
-          [ `AWS of GetEventsConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetEventsConfigurationResponse.error) Result.t Lwt.t
 val get_global_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (GetGlobalSettingsResponse.t,
-          [ `AWS of GetGlobalSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGlobalSettingsResponse.t, GetGlobalSettingsResponse.error)
+          Result.t Lwt.t
 val get_media_capture_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMediaCapturePipelineRequest.t ->
         (GetMediaCapturePipelineResponse.t,
-          [ `AWS of GetMediaCapturePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMediaCapturePipelineResponse.error) Result.t Lwt.t
 val get_meeting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMeetingRequest.t ->
-        (GetMeetingResponse.t,
-          [ `AWS of GetMeetingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMeetingResponse.t, GetMeetingResponse.error) Result.t Lwt.t
 val get_messaging_session_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMessagingSessionEndpointRequest.t ->
         (GetMessagingSessionEndpointResponse.t,
-          [ `AWS of GetMessagingSessionEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMessagingSessionEndpointResponse.error) Result.t Lwt.t
 val get_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPhoneNumberRequest.t ->
-        (GetPhoneNumberResponse.t,
-          [ `AWS of GetPhoneNumberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPhoneNumberResponse.t, GetPhoneNumberResponse.error) Result.t
+          Lwt.t
 val get_phone_number_order :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPhoneNumberOrderRequest.t ->
-        (GetPhoneNumberOrderResponse.t,
-          [ `AWS of GetPhoneNumberOrderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPhoneNumberOrderResponse.t, GetPhoneNumberOrderResponse.error)
+          Result.t Lwt.t
 val get_phone_number_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (GetPhoneNumberSettingsResponse.t,
-          [ `AWS of GetPhoneNumberSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPhoneNumberSettingsResponse.error) Result.t Lwt.t
 val get_proxy_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProxySessionRequest.t ->
-        (GetProxySessionResponse.t,
-          [ `AWS of GetProxySessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetProxySessionResponse.t, GetProxySessionResponse.error) Result.t
+          Lwt.t
 val get_retention_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRetentionSettingsRequest.t ->
-        (GetRetentionSettingsResponse.t,
-          [ `AWS of GetRetentionSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRetentionSettingsResponse.t, GetRetentionSettingsResponse.error)
+          Result.t Lwt.t
 val get_room :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRoomRequest.t ->
-        (GetRoomResponse.t,
-          [ `AWS of GetRoomResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRoomResponse.t, GetRoomResponse.error) Result.t Lwt.t
 val get_sip_media_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSipMediaApplicationRequest.t ->
         (GetSipMediaApplicationResponse.t,
-          [ `AWS of GetSipMediaApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSipMediaApplicationResponse.error) Result.t Lwt.t
 val get_sip_media_application_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSipMediaApplicationLoggingConfigurationRequest.t ->
         (GetSipMediaApplicationLoggingConfigurationResponse.t,
-          [ `AWS of GetSipMediaApplicationLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSipMediaApplicationLoggingConfigurationResponse.error) Result.t
+          Lwt.t
 val get_sip_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSipRuleRequest.t ->
-        (GetSipRuleResponse.t,
-          [ `AWS of GetSipRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSipRuleResponse.t, GetSipRuleResponse.error) Result.t Lwt.t
 val get_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserRequest.t ->
-        (GetUserResponse.t,
-          [ `AWS of GetUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUserResponse.t, GetUserResponse.error) Result.t Lwt.t
 val get_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserSettingsRequest.t ->
-        (GetUserSettingsResponse.t,
-          [ `AWS of GetUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUserSettingsResponse.t, GetUserSettingsResponse.error) Result.t
+          Lwt.t
 val get_voice_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorRequest.t ->
-        (GetVoiceConnectorResponse.t,
-          [ `AWS of GetVoiceConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVoiceConnectorResponse.t, GetVoiceConnectorResponse.error)
+          Result.t Lwt.t
 val get_voice_connector_emergency_calling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorEmergencyCallingConfigurationRequest.t ->
         (GetVoiceConnectorEmergencyCallingConfigurationResponse.t,
-          [
-            `AWS of
-              GetVoiceConnectorEmergencyCallingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorEmergencyCallingConfigurationResponse.error)
+          Result.t Lwt.t
 val get_voice_connector_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorGroupRequest.t ->
         (GetVoiceConnectorGroupResponse.t,
-          [ `AWS of GetVoiceConnectorGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorGroupResponse.error) Result.t Lwt.t
 val get_voice_connector_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorLoggingConfigurationRequest.t ->
         (GetVoiceConnectorLoggingConfigurationResponse.t,
-          [ `AWS of GetVoiceConnectorLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorLoggingConfigurationResponse.error) Result.t Lwt.t
 val get_voice_connector_origination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorOriginationRequest.t ->
         (GetVoiceConnectorOriginationResponse.t,
-          [ `AWS of GetVoiceConnectorOriginationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorOriginationResponse.error) Result.t Lwt.t
 val get_voice_connector_proxy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorProxyRequest.t ->
         (GetVoiceConnectorProxyResponse.t,
-          [ `AWS of GetVoiceConnectorProxyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorProxyResponse.error) Result.t Lwt.t
 val get_voice_connector_streaming_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorStreamingConfigurationRequest.t ->
         (GetVoiceConnectorStreamingConfigurationResponse.t,
-          [ `AWS of GetVoiceConnectorStreamingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorStreamingConfigurationResponse.error) Result.t
+          Lwt.t
 val get_voice_connector_termination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorTerminationRequest.t ->
         (GetVoiceConnectorTerminationResponse.t,
-          [ `AWS of GetVoiceConnectorTerminationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorTerminationResponse.error) Result.t Lwt.t
 val get_voice_connector_termination_health :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVoiceConnectorTerminationHealthRequest.t ->
         (GetVoiceConnectorTerminationHealthResponse.t,
-          [ `AWS of GetVoiceConnectorTerminationHealthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetVoiceConnectorTerminationHealthResponse.error) Result.t Lwt.t
 val invite_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InviteUsersRequest.t ->
-        (InviteUsersResponse.t,
-          [ `AWS of InviteUsersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InviteUsersResponse.t, InviteUsersResponse.error) Result.t Lwt.t
 val list_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountsRequest.t ->
-        (ListAccountsResponse.t,
-          [ `AWS of ListAccountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAccountsResponse.t, ListAccountsResponse.error) Result.t Lwt.t
 val list_app_instance_admins :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppInstanceAdminsRequest.t ->
         (ListAppInstanceAdminsResponse.t,
-          [ `AWS of ListAppInstanceAdminsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAppInstanceAdminsResponse.error) Result.t Lwt.t
 val list_app_instance_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppInstanceUsersRequest.t ->
-        (ListAppInstanceUsersResponse.t,
-          [ `AWS of ListAppInstanceUsersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAppInstanceUsersResponse.t, ListAppInstanceUsersResponse.error)
+          Result.t Lwt.t
 val list_app_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppInstancesRequest.t ->
-        (ListAppInstancesResponse.t,
-          [ `AWS of ListAppInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAppInstancesResponse.t, ListAppInstancesResponse.error) Result.t
+          Lwt.t
 val list_attendee_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAttendeeTagsRequest.t ->
-        (ListAttendeeTagsResponse.t,
-          [ `AWS of ListAttendeeTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAttendeeTagsResponse.t, ListAttendeeTagsResponse.error) Result.t
+          Lwt.t
 val list_attendees :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAttendeesRequest.t ->
-        (ListAttendeesResponse.t,
-          [ `AWS of ListAttendeesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAttendeesResponse.t, ListAttendeesResponse.error) Result.t Lwt.t
 val list_bots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBotsRequest.t ->
-        (ListBotsResponse.t,
-          [ `AWS of ListBotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBotsResponse.t, ListBotsResponse.error) Result.t Lwt.t
 val list_channel_bans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelBansRequest.t ->
-        (ListChannelBansResponse.t,
-          [ `AWS of ListChannelBansResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChannelBansResponse.t, ListChannelBansResponse.error) Result.t
+          Lwt.t
 val list_channel_memberships :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelMembershipsRequest.t ->
         (ListChannelMembershipsResponse.t,
-          [ `AWS of ListChannelMembershipsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListChannelMembershipsResponse.error) Result.t Lwt.t
 val list_channel_memberships_for_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelMembershipsForAppInstanceUserRequest.t ->
         (ListChannelMembershipsForAppInstanceUserResponse.t,
-          [ `AWS of ListChannelMembershipsForAppInstanceUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListChannelMembershipsForAppInstanceUserResponse.error) Result.t
+          Lwt.t
 val list_channel_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelMessagesRequest.t ->
-        (ListChannelMessagesResponse.t,
-          [ `AWS of ListChannelMessagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChannelMessagesResponse.t, ListChannelMessagesResponse.error)
+          Result.t Lwt.t
 val list_channel_moderators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelModeratorsRequest.t ->
         (ListChannelModeratorsResponse.t,
-          [ `AWS of ListChannelModeratorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListChannelModeratorsResponse.error) Result.t Lwt.t
 val list_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelsRequest.t ->
-        (ListChannelsResponse.t,
-          [ `AWS of ListChannelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChannelsResponse.t, ListChannelsResponse.error) Result.t Lwt.t
 val list_channels_moderated_by_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelsModeratedByAppInstanceUserRequest.t ->
         (ListChannelsModeratedByAppInstanceUserResponse.t,
-          [ `AWS of ListChannelsModeratedByAppInstanceUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListChannelsModeratedByAppInstanceUserResponse.error) Result.t
+          Lwt.t
 val list_media_capture_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMediaCapturePipelinesRequest.t ->
         (ListMediaCapturePipelinesResponse.t,
-          [ `AWS of ListMediaCapturePipelinesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMediaCapturePipelinesResponse.error) Result.t Lwt.t
 val list_meeting_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMeetingTagsRequest.t ->
-        (ListMeetingTagsResponse.t,
-          [ `AWS of ListMeetingTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMeetingTagsResponse.t, ListMeetingTagsResponse.error) Result.t
+          Lwt.t
 val list_meetings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMeetingsRequest.t ->
-        (ListMeetingsResponse.t,
-          [ `AWS of ListMeetingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMeetingsResponse.t, ListMeetingsResponse.error) Result.t Lwt.t
 val list_phone_number_orders :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPhoneNumberOrdersRequest.t ->
         (ListPhoneNumberOrdersResponse.t,
-          [ `AWS of ListPhoneNumberOrdersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPhoneNumberOrdersResponse.error) Result.t Lwt.t
 val list_phone_numbers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPhoneNumbersRequest.t ->
-        (ListPhoneNumbersResponse.t,
-          [ `AWS of ListPhoneNumbersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPhoneNumbersResponse.t, ListPhoneNumbersResponse.error) Result.t
+          Lwt.t
 val list_proxy_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProxySessionsRequest.t ->
-        (ListProxySessionsResponse.t,
-          [ `AWS of ListProxySessionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProxySessionsResponse.t, ListProxySessionsResponse.error)
+          Result.t Lwt.t
 val list_room_memberships :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRoomMembershipsRequest.t ->
-        (ListRoomMembershipsResponse.t,
-          [ `AWS of ListRoomMembershipsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRoomMembershipsResponse.t, ListRoomMembershipsResponse.error)
+          Result.t Lwt.t
 val list_rooms :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRoomsRequest.t ->
-        (ListRoomsResponse.t,
-          [ `AWS of ListRoomsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRoomsResponse.t, ListRoomsResponse.error) Result.t Lwt.t
 val list_sip_media_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSipMediaApplicationsRequest.t ->
         (ListSipMediaApplicationsResponse.t,
-          [ `AWS of ListSipMediaApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSipMediaApplicationsResponse.error) Result.t Lwt.t
 val list_sip_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSipRulesRequest.t ->
-        (ListSipRulesResponse.t,
-          [ `AWS of ListSipRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSipRulesResponse.t, ListSipRulesResponse.error) Result.t Lwt.t
 val list_supported_phone_number_countries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSupportedPhoneNumberCountriesRequest.t ->
         (ListSupportedPhoneNumberCountriesResponse.t,
-          [ `AWS of ListSupportedPhoneNumberCountriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSupportedPhoneNumberCountriesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsersRequest.t ->
-        (ListUsersResponse.t,
-          [ `AWS of ListUsersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUsersResponse.t, ListUsersResponse.error) Result.t Lwt.t
 val list_voice_connector_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVoiceConnectorGroupsRequest.t ->
         (ListVoiceConnectorGroupsResponse.t,
-          [ `AWS of ListVoiceConnectorGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListVoiceConnectorGroupsResponse.error) Result.t Lwt.t
 val list_voice_connector_termination_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVoiceConnectorTerminationCredentialsRequest.t ->
         (ListVoiceConnectorTerminationCredentialsResponse.t,
-          [ `AWS of ListVoiceConnectorTerminationCredentialsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListVoiceConnectorTerminationCredentialsResponse.error) Result.t
+          Lwt.t
 val list_voice_connectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVoiceConnectorsRequest.t ->
-        (ListVoiceConnectorsResponse.t,
-          [ `AWS of ListVoiceConnectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVoiceConnectorsResponse.t, ListVoiceConnectorsResponse.error)
+          Result.t Lwt.t
 val logout_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LogoutUserRequest.t ->
-        (LogoutUserResponse.t,
-          [ `AWS of LogoutUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LogoutUserResponse.t, LogoutUserResponse.error) Result.t Lwt.t
 val put_app_instance_retention_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAppInstanceRetentionSettingsRequest.t ->
         (PutAppInstanceRetentionSettingsResponse.t,
-          [ `AWS of PutAppInstanceRetentionSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAppInstanceRetentionSettingsResponse.error) Result.t Lwt.t
 val put_app_instance_streaming_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAppInstanceStreamingConfigurationsRequest.t ->
         (PutAppInstanceStreamingConfigurationsResponse.t,
-          [ `AWS of PutAppInstanceStreamingConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAppInstanceStreamingConfigurationsResponse.error) Result.t Lwt.t
 val put_events_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEventsConfigurationRequest.t ->
         (PutEventsConfigurationResponse.t,
-          [ `AWS of PutEventsConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutEventsConfigurationResponse.error) Result.t Lwt.t
 val put_retention_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRetentionSettingsRequest.t ->
-        (PutRetentionSettingsResponse.t,
-          [ `AWS of PutRetentionSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutRetentionSettingsResponse.t, PutRetentionSettingsResponse.error)
+          Result.t Lwt.t
 val put_sip_media_application_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSipMediaApplicationLoggingConfigurationRequest.t ->
         (PutSipMediaApplicationLoggingConfigurationResponse.t,
-          [ `AWS of PutSipMediaApplicationLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutSipMediaApplicationLoggingConfigurationResponse.error) Result.t
+          Lwt.t
 val put_voice_connector_emergency_calling_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutVoiceConnectorEmergencyCallingConfigurationRequest.t ->
         (PutVoiceConnectorEmergencyCallingConfigurationResponse.t,
-          [
-            `AWS of
-              PutVoiceConnectorEmergencyCallingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutVoiceConnectorEmergencyCallingConfigurationResponse.error)
+          Result.t Lwt.t
 val put_voice_connector_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutVoiceConnectorLoggingConfigurationRequest.t ->
         (PutVoiceConnectorLoggingConfigurationResponse.t,
-          [ `AWS of PutVoiceConnectorLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutVoiceConnectorLoggingConfigurationResponse.error) Result.t Lwt.t
 val put_voice_connector_origination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutVoiceConnectorOriginationRequest.t ->
         (PutVoiceConnectorOriginationResponse.t,
-          [ `AWS of PutVoiceConnectorOriginationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutVoiceConnectorOriginationResponse.error) Result.t Lwt.t
 val put_voice_connector_proxy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutVoiceConnectorProxyRequest.t ->
         (PutVoiceConnectorProxyResponse.t,
-          [ `AWS of PutVoiceConnectorProxyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutVoiceConnectorProxyResponse.error) Result.t Lwt.t
 val put_voice_connector_streaming_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutVoiceConnectorStreamingConfigurationRequest.t ->
         (PutVoiceConnectorStreamingConfigurationResponse.t,
-          [ `AWS of PutVoiceConnectorStreamingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutVoiceConnectorStreamingConfigurationResponse.error) Result.t
+          Lwt.t
 val put_voice_connector_termination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutVoiceConnectorTerminationRequest.t ->
         (PutVoiceConnectorTerminationResponse.t,
-          [ `AWS of PutVoiceConnectorTerminationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutVoiceConnectorTerminationResponse.error) Result.t Lwt.t
 val put_voice_connector_termination_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutVoiceConnectorTerminationCredentialsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val redact_channel_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RedactChannelMessageRequest.t ->
-        (RedactChannelMessageResponse.t,
-          [ `AWS of RedactChannelMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RedactChannelMessageResponse.t, RedactChannelMessageResponse.error)
+          Result.t Lwt.t
 val redact_conversation_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RedactConversationMessageRequest.t ->
         (RedactConversationMessageResponse.t,
-          [ `AWS of RedactConversationMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RedactConversationMessageResponse.error) Result.t Lwt.t
 val redact_room_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RedactRoomMessageRequest.t ->
-        (RedactRoomMessageResponse.t,
-          [ `AWS of RedactRoomMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RedactRoomMessageResponse.t, RedactRoomMessageResponse.error)
+          Result.t Lwt.t
 val regenerate_security_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegenerateSecurityTokenRequest.t ->
         (RegenerateSecurityTokenResponse.t,
-          [ `AWS of RegenerateSecurityTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegenerateSecurityTokenResponse.error) Result.t Lwt.t
 val reset_personal_p_i_n :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetPersonalPINRequest.t ->
-        (ResetPersonalPINResponse.t,
-          [ `AWS of ResetPersonalPINResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResetPersonalPINResponse.t, ResetPersonalPINResponse.error) Result.t
+          Lwt.t
 val restore_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestorePhoneNumberRequest.t ->
-        (RestorePhoneNumberResponse.t,
-          [ `AWS of RestorePhoneNumberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RestorePhoneNumberResponse.t, RestorePhoneNumberResponse.error)
+          Result.t Lwt.t
 val search_available_phone_numbers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchAvailablePhoneNumbersRequest.t ->
         (SearchAvailablePhoneNumbersResponse.t,
-          [ `AWS of SearchAvailablePhoneNumbersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchAvailablePhoneNumbersResponse.error) Result.t Lwt.t
 val send_channel_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendChannelMessageRequest.t ->
-        (SendChannelMessageResponse.t,
-          [ `AWS of SendChannelMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendChannelMessageResponse.t, SendChannelMessageResponse.error)
+          Result.t Lwt.t
 val start_meeting_transcription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMeetingTranscriptionRequest.t ->
         (StartMeetingTranscriptionResponse.t,
-          [ `AWS of StartMeetingTranscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartMeetingTranscriptionResponse.error) Result.t Lwt.t
 val stop_meeting_transcription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopMeetingTranscriptionRequest.t ->
         (StopMeetingTranscriptionResponse.t,
-          [ `AWS of StopMeetingTranscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopMeetingTranscriptionResponse.error) Result.t Lwt.t
 val tag_attendee :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagAttendeeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagAttendeeRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_meeting :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagMeetingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagMeetingRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_attendee :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagAttendeeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagAttendeeRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_meeting :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagMeetingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagMeetingRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAccountRequest.t ->
-        (UpdateAccountResponse.t,
-          [ `AWS of UpdateAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAccountResponse.t, UpdateAccountResponse.error) Result.t Lwt.t
 val update_account_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAccountSettingsRequest.t ->
         (UpdateAccountSettingsResponse.t,
-          [ `AWS of UpdateAccountSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateAccountSettingsResponse.error) Result.t Lwt.t
 val update_app_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAppInstanceRequest.t ->
-        (UpdateAppInstanceResponse.t,
-          [ `AWS of UpdateAppInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAppInstanceResponse.t, UpdateAppInstanceResponse.error)
+          Result.t Lwt.t
 val update_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAppInstanceUserRequest.t ->
         (UpdateAppInstanceUserResponse.t,
-          [ `AWS of UpdateAppInstanceUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateAppInstanceUserResponse.error) Result.t Lwt.t
 val update_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBotRequest.t ->
-        (UpdateBotResponse.t,
-          [ `AWS of UpdateBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateBotResponse.t, UpdateBotResponse.error) Result.t Lwt.t
 val update_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChannelRequest.t ->
-        (UpdateChannelResponse.t,
-          [ `AWS of UpdateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateChannelResponse.t, UpdateChannelResponse.error) Result.t Lwt.t
 val update_channel_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChannelMessageRequest.t ->
-        (UpdateChannelMessageResponse.t,
-          [ `AWS of UpdateChannelMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateChannelMessageResponse.t, UpdateChannelMessageResponse.error)
+          Result.t Lwt.t
 val update_channel_read_marker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChannelReadMarkerRequest.t ->
         (UpdateChannelReadMarkerResponse.t,
-          [ `AWS of UpdateChannelReadMarkerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateChannelReadMarkerResponse.error) Result.t Lwt.t
 val update_global_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateGlobalSettingsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateGlobalSettingsRequest.t -> (unit, unit) Result.t Lwt.t
 val update_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePhoneNumberRequest.t ->
-        (UpdatePhoneNumberResponse.t,
-          [ `AWS of UpdatePhoneNumberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePhoneNumberResponse.t, UpdatePhoneNumberResponse.error)
+          Result.t Lwt.t
 val update_phone_number_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdatePhoneNumberSettingsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdatePhoneNumberSettingsRequest.t -> (unit, unit) Result.t Lwt.t
 val update_proxy_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProxySessionRequest.t ->
-        (UpdateProxySessionResponse.t,
-          [ `AWS of UpdateProxySessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProxySessionResponse.t, UpdateProxySessionResponse.error)
+          Result.t Lwt.t
 val update_room :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRoomRequest.t ->
-        (UpdateRoomResponse.t,
-          [ `AWS of UpdateRoomResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRoomResponse.t, UpdateRoomResponse.error) Result.t Lwt.t
 val update_room_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRoomMembershipRequest.t ->
-        (UpdateRoomMembershipResponse.t,
-          [ `AWS of UpdateRoomMembershipResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRoomMembershipResponse.t, UpdateRoomMembershipResponse.error)
+          Result.t Lwt.t
 val update_sip_media_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSipMediaApplicationRequest.t ->
         (UpdateSipMediaApplicationResponse.t,
-          [ `AWS of UpdateSipMediaApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateSipMediaApplicationResponse.error) Result.t Lwt.t
 val update_sip_media_application_call :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSipMediaApplicationCallRequest.t ->
         (UpdateSipMediaApplicationCallResponse.t,
-          [ `AWS of UpdateSipMediaApplicationCallResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateSipMediaApplicationCallResponse.error) Result.t Lwt.t
 val update_sip_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSipRuleRequest.t ->
-        (UpdateSipRuleResponse.t,
-          [ `AWS of UpdateSipRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSipRuleResponse.t, UpdateSipRuleResponse.error) Result.t Lwt.t
 val update_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserRequest.t ->
-        (UpdateUserResponse.t,
-          [ `AWS of UpdateUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateUserResponse.t, UpdateUserResponse.error) Result.t Lwt.t
 val update_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateUserSettingsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateUserSettingsRequest.t -> (unit, unit) Result.t Lwt.t
 val update_voice_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVoiceConnectorRequest.t ->
-        (UpdateVoiceConnectorResponse.t,
-          [ `AWS of UpdateVoiceConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVoiceConnectorResponse.t, UpdateVoiceConnectorResponse.error)
+          Result.t Lwt.t
 val update_voice_connector_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVoiceConnectorGroupRequest.t ->
         (UpdateVoiceConnectorGroupResponse.t,
-          [ `AWS of UpdateVoiceConnectorGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateVoiceConnectorGroupResponse.error) Result.t Lwt.t

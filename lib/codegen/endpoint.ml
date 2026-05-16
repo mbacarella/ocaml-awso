@@ -11,8 +11,30 @@ type t =
   ; payload : Payload.t option
   ; result_decoder : Result_decoder.t option
   }
-let create ~name ~op ~request_module ~result_module ~meth ~request_uri ~query_params ~payload ~result_decoder =
-  { name; op; request_module; result_module; meth; request_uri; query_params; payload; result_decoder }
+
+let create
+      ~name
+      ~op
+      ~request_module
+      ~result_module
+      ~meth
+      ~request_uri
+      ~query_params
+      ~payload
+      ~result_decoder
+  =
+  { name
+  ; op
+  ; request_module
+  ; result_module
+  ; meth
+  ; request_uri
+  ; query_params
+  ; payload
+  ; result_decoder
+  }
+;;
+
 let name t = t.name
 let op t = t.op
 let request_module t = t.request_module
@@ -24,15 +46,15 @@ let payload t = t.payload
 let result_decoder t = t.result_decoder
 
 let create_test
-  ?(op = None)
-  ?(request_module = None)
-  ?(result_module = None)
-  ?(meth = `GET)
-  ?(request_uri = [])
-  ?(query_params = [])
-  ?(payload = None)
-  ?(result_decoder = None)
-  name
+      ?(op = None)
+      ?(request_module = None)
+      ?(result_module = None)
+      ?(meth = `GET)
+      ?(request_uri = [])
+      ?(query_params = [])
+      ?(payload = None)
+      ?(result_decoder = None)
+      name
   =
   create
     ~op

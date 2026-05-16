@@ -1233,602 +1233,676 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "StarlingDoveService.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | BatchGetAggregateResourceConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchGetAggregateResourceConfigResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (BatchGetAggregateResourceConfigResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetAggregateResourceConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetAggregateResourceConfigResponse.error_of_json))
   | BatchGetResourceConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchGetResourceConfigResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (BatchGetResourceConfigResponse.of_json json))
-  | DeleteAggregationAuthorization -> Ok ()
-  | DeleteConfigRule -> Ok ()
-  | DeleteConfigurationAggregator -> Ok ()
-  | DeleteConfigurationRecorder -> Ok ()
-  | DeleteConformancePack -> Ok ()
-  | DeleteDeliveryChannel -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetResourceConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetResourceConfigResponse.error_of_json))
+  | DeleteAggregationAuthorization ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConfigRule ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConfigurationAggregator ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConfigurationRecorder ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConformancePack ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDeliveryChannel ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteEvaluationResults ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteEvaluationResultsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteEvaluationResultsResponse.of_json json))
-  | DeleteOrganizationConfigRule -> Ok ()
-  | DeleteOrganizationConformancePack -> Ok ()
-  | DeletePendingAggregationRequest -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteEvaluationResultsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteEvaluationResultsResponse.error_of_json))
+  | DeleteOrganizationConfigRule ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteOrganizationConformancePack ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePendingAggregationRequest ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRemediationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRemediationConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRemediationConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRemediationConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRemediationConfigurationResponse.error_of_json))
   | DeleteRemediationExceptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRemediationExceptionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRemediationExceptionsResponse.of_json json))
-  | DeleteResourceConfig -> Ok ()
-  | DeleteRetentionConfiguration -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRemediationExceptionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRemediationExceptionsResponse.error_of_json))
+  | DeleteResourceConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRetentionConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStoredQuery ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteStoredQueryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteStoredQueryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteStoredQueryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteStoredQueryResponse.error_of_json))
   | DeliverConfigSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeliverConfigSnapshotResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeliverConfigSnapshotResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeliverConfigSnapshotResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeliverConfigSnapshotResponse.error_of_json))
   | DescribeAggregateComplianceByConfigRules ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAggregateComplianceByConfigRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeAggregateComplianceByConfigRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAggregateComplianceByConfigRulesResponse.of_json json))
+                DescribeAggregateComplianceByConfigRulesResponse.error_of_json))
   | DescribeAggregateComplianceByConformancePacks ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DescribeAggregateComplianceByConformancePacksResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeAggregateComplianceByConformancePacksResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (DescribeAggregateComplianceByConformancePacksResponse.of_json
-                json))
+                DescribeAggregateComplianceByConformancePacksResponse.error_of_json))
   | DescribeAggregationAuthorizations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAggregationAuthorizationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAggregationAuthorizationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAggregationAuthorizationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAggregationAuthorizationsResponse.error_of_json))
   | DescribeComplianceByConfigRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeComplianceByConfigRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeComplianceByConfigRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeComplianceByConfigRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeComplianceByConfigRuleResponse.error_of_json))
   | DescribeComplianceByResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeComplianceByResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeComplianceByResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeComplianceByResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeComplianceByResourceResponse.error_of_json))
   | DescribeConfigRuleEvaluationStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConfigRuleEvaluationStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConfigRuleEvaluationStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConfigRuleEvaluationStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConfigRuleEvaluationStatusResponse.error_of_json))
   | DescribeConfigRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeConfigRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConfigRulesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConfigRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeConfigRulesResponse.error_of_json))
   | DescribeConfigurationAggregatorSourcesStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DescribeConfigurationAggregatorSourcesStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeConfigurationAggregatorSourcesStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (DescribeConfigurationAggregatorSourcesStatusResponse.of_json
-                json))
+                DescribeConfigurationAggregatorSourcesStatusResponse.error_of_json))
   | DescribeConfigurationAggregators ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConfigurationAggregatorsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConfigurationAggregatorsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConfigurationAggregatorsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConfigurationAggregatorsResponse.error_of_json))
   | DescribeConfigurationRecorderStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConfigurationRecorderStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConfigurationRecorderStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConfigurationRecorderStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConfigurationRecorderStatusResponse.error_of_json))
   | DescribeConfigurationRecorders ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConfigurationRecordersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConfigurationRecordersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConfigurationRecordersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConfigurationRecordersResponse.error_of_json))
   | DescribeConformancePackCompliance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConformancePackComplianceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConformancePackComplianceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConformancePackComplianceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConformancePackComplianceResponse.error_of_json))
   | DescribeConformancePackStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConformancePackStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConformancePackStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConformancePackStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConformancePackStatusResponse.error_of_json))
   | DescribeConformancePacks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConformancePacksResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeConformancePacksResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConformancePacksResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConformancePacksResponse.error_of_json))
   | DescribeDeliveryChannelStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDeliveryChannelStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeDeliveryChannelStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDeliveryChannelStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDeliveryChannelStatusResponse.error_of_json))
   | DescribeDeliveryChannels ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDeliveryChannelsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeDeliveryChannelsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDeliveryChannelsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDeliveryChannelsResponse.error_of_json))
   | DescribeOrganizationConfigRuleStatuses ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeOrganizationConfigRuleStatusesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeOrganizationConfigRuleStatusesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeOrganizationConfigRuleStatusesResponse.of_json json))
+                DescribeOrganizationConfigRuleStatusesResponse.error_of_json))
   | DescribeOrganizationConfigRules ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeOrganizationConfigRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeOrganizationConfigRulesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeOrganizationConfigRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOrganizationConfigRulesResponse.error_of_json))
   | DescribeOrganizationConformancePackStatuses ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeOrganizationConformancePackStatusesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeOrganizationConformancePackStatusesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (DescribeOrganizationConformancePackStatusesResponse.of_json
-                json))
+                DescribeOrganizationConformancePackStatusesResponse.error_of_json))
   | DescribeOrganizationConformancePacks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeOrganizationConformancePacksResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeOrganizationConformancePacksResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeOrganizationConformancePacksResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOrganizationConformancePacksResponse.error_of_json))
   | DescribePendingAggregationRequests ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribePendingAggregationRequestsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribePendingAggregationRequestsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePendingAggregationRequestsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribePendingAggregationRequestsResponse.error_of_json))
   | DescribeRemediationConfigurations ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRemediationConfigurationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRemediationConfigurationsResponse.of_json json)
+      else Error (parse_aws_error None)
   | DescribeRemediationExceptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRemediationExceptionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRemediationExceptionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRemediationExceptionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRemediationExceptionsResponse.error_of_json))
   | DescribeRemediationExecutionStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRemediationExecutionStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRemediationExecutionStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRemediationExecutionStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRemediationExecutionStatusResponse.error_of_json))
   | DescribeRetentionConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRetentionConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRetentionConfigurationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRetentionConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRetentionConfigurationsResponse.error_of_json))
   | GetAggregateComplianceDetailsByConfigRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAggregateComplianceDetailsByConfigRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetAggregateComplianceDetailsByConfigRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (GetAggregateComplianceDetailsByConfigRuleResponse.of_json json))
+                GetAggregateComplianceDetailsByConfigRuleResponse.error_of_json))
   | GetAggregateConfigRuleComplianceSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAggregateConfigRuleComplianceSummaryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetAggregateConfigRuleComplianceSummaryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAggregateConfigRuleComplianceSummaryResponse.of_json json))
+                GetAggregateConfigRuleComplianceSummaryResponse.error_of_json))
   | GetAggregateConformancePackComplianceSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (GetAggregateConformancePackComplianceSummaryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetAggregateConformancePackComplianceSummaryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (GetAggregateConformancePackComplianceSummaryResponse.of_json
-                json))
+                GetAggregateConformancePackComplianceSummaryResponse.error_of_json))
   | GetAggregateDiscoveredResourceCounts ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAggregateDiscoveredResourceCountsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAggregateDiscoveredResourceCountsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAggregateDiscoveredResourceCountsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAggregateDiscoveredResourceCountsResponse.error_of_json))
   | GetAggregateResourceConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAggregateResourceConfigResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAggregateResourceConfigResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAggregateResourceConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAggregateResourceConfigResponse.error_of_json))
   | GetComplianceDetailsByConfigRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetComplianceDetailsByConfigRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetComplianceDetailsByConfigRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetComplianceDetailsByConfigRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetComplianceDetailsByConfigRuleResponse.error_of_json))
   | GetComplianceDetailsByResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetComplianceDetailsByResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetComplianceDetailsByResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetComplianceDetailsByResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetComplianceDetailsByResourceResponse.error_of_json))
   | GetComplianceSummaryByConfigRule ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetComplianceSummaryByConfigRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetComplianceSummaryByConfigRuleResponse.of_json json)
+      else Error (parse_aws_error None)
   | GetComplianceSummaryByResourceType ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetComplianceSummaryByResourceTypeResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetComplianceSummaryByResourceTypeResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetComplianceSummaryByResourceTypeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetComplianceSummaryByResourceTypeResponse.error_of_json))
   | GetConformancePackComplianceDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetConformancePackComplianceDetailsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetConformancePackComplianceDetailsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetConformancePackComplianceDetailsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetConformancePackComplianceDetailsResponse.error_of_json))
   | GetConformancePackComplianceSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetConformancePackComplianceSummaryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetConformancePackComplianceSummaryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetConformancePackComplianceSummaryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetConformancePackComplianceSummaryResponse.error_of_json))
   | GetCustomRulePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCustomRulePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetCustomRulePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCustomRulePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetCustomRulePolicyResponse.error_of_json))
   | GetDiscoveredResourceCounts ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDiscoveredResourceCountsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDiscoveredResourceCountsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDiscoveredResourceCountsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDiscoveredResourceCountsResponse.error_of_json))
   | GetOrganizationConfigRuleDetailedStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetOrganizationConfigRuleDetailedStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetOrganizationConfigRuleDetailedStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetOrganizationConfigRuleDetailedStatusResponse.of_json json))
+                GetOrganizationConfigRuleDetailedStatusResponse.error_of_json))
   | GetOrganizationConformancePackDetailedStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (GetOrganizationConformancePackDetailedStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetOrganizationConformancePackDetailedStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (GetOrganizationConformancePackDetailedStatusResponse.of_json
-                json))
+                GetOrganizationConformancePackDetailedStatusResponse.error_of_json))
   | GetOrganizationCustomRulePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetOrganizationCustomRulePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetOrganizationCustomRulePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetOrganizationCustomRulePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetOrganizationCustomRulePolicyResponse.error_of_json))
   | GetResourceConfigHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetResourceConfigHistoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetResourceConfigHistoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourceConfigHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetResourceConfigHistoryResponse.error_of_json))
   | GetStoredQuery ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetStoredQueryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetStoredQueryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetStoredQueryResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetStoredQueryResponse.error_of_json))
   | ListAggregateDiscoveredResources ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAggregateDiscoveredResourcesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAggregateDiscoveredResourcesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAggregateDiscoveredResourcesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAggregateDiscoveredResourcesResponse.error_of_json))
   | ListDiscoveredResources ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDiscoveredResourcesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListDiscoveredResourcesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDiscoveredResourcesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDiscoveredResourcesResponse.error_of_json))
   | ListStoredQueries ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStoredQueriesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListStoredQueriesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListStoredQueriesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListStoredQueriesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutAggregationAuthorization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutAggregationAuthorizationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutAggregationAuthorizationResponse.of_json json))
-  | PutConfigRule -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutAggregationAuthorizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutAggregationAuthorizationResponse.error_of_json))
+  | PutConfigRule ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutConfigurationAggregator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutConfigurationAggregatorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutConfigurationAggregatorResponse.of_json json))
-  | PutConfigurationRecorder -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutConfigurationAggregatorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutConfigurationAggregatorResponse.error_of_json))
+  | PutConfigurationRecorder ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutConformancePack ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutConformancePackResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutConformancePackResponse.of_json json))
-  | PutDeliveryChannel -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutConformancePackResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutConformancePackResponse.error_of_json))
+  | PutDeliveryChannel ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutEvaluations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutEvaluationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutEvaluationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutEvaluationsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutEvaluationsResponse.error_of_json))
   | PutExternalEvaluation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutExternalEvaluationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutExternalEvaluationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutExternalEvaluationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutExternalEvaluationResponse.error_of_json))
   | PutOrganizationConfigRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutOrganizationConfigRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutOrganizationConfigRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutOrganizationConfigRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutOrganizationConfigRuleResponse.error_of_json))
   | PutOrganizationConformancePack ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutOrganizationConformancePackResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutOrganizationConformancePackResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutOrganizationConformancePackResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutOrganizationConformancePackResponse.error_of_json))
   | PutRemediationConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutRemediationConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutRemediationConfigurationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRemediationConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutRemediationConfigurationsResponse.error_of_json))
   | PutRemediationExceptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutRemediationExceptionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutRemediationExceptionsResponse.of_json json))
-  | PutResourceConfig -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRemediationExceptionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutRemediationExceptionsResponse.error_of_json))
+  | PutResourceConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutRetentionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutRetentionConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutRetentionConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRetentionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutRetentionConfigurationResponse.error_of_json))
   | PutStoredQuery ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutStoredQueryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutStoredQueryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutStoredQueryResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutStoredQueryResponse.error_of_json))
   | SelectAggregateResourceConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SelectAggregateResourceConfigResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (SelectAggregateResourceConfigResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SelectAggregateResourceConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SelectAggregateResourceConfigResponse.error_of_json))
   | SelectResourceConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SelectResourceConfigResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (SelectResourceConfigResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SelectResourceConfigResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some SelectResourceConfigResponse.error_of_json))
   | StartConfigRulesEvaluation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartConfigRulesEvaluationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartConfigRulesEvaluationResponse.of_json json))
-  | StartConfigurationRecorder -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartConfigRulesEvaluationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartConfigRulesEvaluationResponse.error_of_json))
+  | StartConfigurationRecorder ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | StartRemediationExecution ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartRemediationExecutionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartRemediationExecutionResponse.of_json json))
-  | StopConfigurationRecorder -> Ok ()
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartRemediationExecutionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartRemediationExecutionResponse.error_of_json))
+  | StopConfigurationRecorder ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)

@@ -7,9 +7,7 @@ let default_max_results = 20
 let list_user_pools cfg ?(max_results = default_max_results) () =
   Log.Global.debug "list-user-pools" ~tags:[ "max_results", Int.to_string max_results ];
   let maxResults = PoolQueryLimitType.make max_results in
-  match%bind
-    Io.list_user_pools ~cfg (ListUserPoolsRequest.make ~maxResults ())
-  with
+  match%bind Io.list_user_pools ~cfg (ListUserPoolsRequest.make ~maxResults ()) with
   | Error _ -> failwithf "idp.list_user_pools" ()
   | Ok x -> return x
 ;;
@@ -83,10 +81,7 @@ end
 
 module User = Awso_cognito_idp.User
 
-type get_user_error =
-  [ `AWS of GetUserResponse.error
-  | `Transport of Awso.Http.Io.Error.call
-  ]
+type get_user_error = GetUserResponse.error
 
 exception
   (* Convenience exception for [get_user] AWS calls which wraps the many error

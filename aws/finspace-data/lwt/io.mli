@@ -4,174 +4,135 @@ val create_changeset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChangesetRequest.t ->
-        (CreateChangesetResponse.t,
-          [ `AWS of CreateChangesetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateChangesetResponse.t, CreateChangesetResponse.error) Result.t
+          Lwt.t
 val create_data_view :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataViewRequest.t ->
-        (CreateDataViewResponse.t,
-          [ `AWS of CreateDataViewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDataViewResponse.t, CreateDataViewResponse.error) Result.t
+          Lwt.t
 val create_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetRequest.t ->
-        (CreateDatasetResponse.t,
-          [ `AWS of CreateDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t Lwt.t
 val create_permission_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePermissionGroupRequest.t ->
         (CreatePermissionGroupResponse.t,
-          [ `AWS of CreatePermissionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreatePermissionGroupResponse.error) Result.t Lwt.t
 val create_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserRequest.t ->
-        (CreateUserResponse.t,
-          [ `AWS of CreateUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUserResponse.t, CreateUserResponse.error) Result.t Lwt.t
 val delete_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDatasetRequest.t ->
-        (DeleteDatasetResponse.t,
-          [ `AWS of DeleteDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDatasetResponse.t, DeleteDatasetResponse.error) Result.t Lwt.t
 val delete_permission_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePermissionGroupRequest.t ->
         (DeletePermissionGroupResponse.t,
-          [ `AWS of DeletePermissionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeletePermissionGroupResponse.error) Result.t Lwt.t
 val disable_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableUserRequest.t ->
-        (DisableUserResponse.t,
-          [ `AWS of DisableUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableUserResponse.t, DisableUserResponse.error) Result.t Lwt.t
 val enable_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableUserRequest.t ->
-        (EnableUserResponse.t,
-          [ `AWS of EnableUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableUserResponse.t, EnableUserResponse.error) Result.t Lwt.t
 val get_changeset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChangesetRequest.t ->
-        (GetChangesetResponse.t,
-          [ `AWS of GetChangesetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetChangesetResponse.t, GetChangesetResponse.error) Result.t Lwt.t
 val get_data_view :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataViewRequest.t ->
-        (GetDataViewResponse.t,
-          [ `AWS of GetDataViewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDataViewResponse.t, GetDataViewResponse.error) Result.t Lwt.t
 val get_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDatasetRequest.t ->
-        (GetDatasetResponse.t,
-          [ `AWS of GetDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDatasetResponse.t, GetDatasetResponse.error) Result.t Lwt.t
 val get_programmatic_access_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProgrammaticAccessCredentialsRequest.t ->
         (GetProgrammaticAccessCredentialsResponse.t,
-          [ `AWS of GetProgrammaticAccessCredentialsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetProgrammaticAccessCredentialsResponse.error) Result.t Lwt.t
 val get_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserRequest.t ->
-        (GetUserResponse.t,
-          [ `AWS of GetUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUserResponse.t, GetUserResponse.error) Result.t Lwt.t
 val get_working_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkingLocationRequest.t ->
-        (GetWorkingLocationResponse.t,
-          [ `AWS of GetWorkingLocationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWorkingLocationResponse.t, GetWorkingLocationResponse.error)
+          Result.t Lwt.t
 val list_changesets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChangesetsRequest.t ->
-        (ListChangesetsResponse.t,
-          [ `AWS of ListChangesetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChangesetsResponse.t, ListChangesetsResponse.error) Result.t
+          Lwt.t
 val list_data_views :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDataViewsRequest.t ->
-        (ListDataViewsResponse.t,
-          [ `AWS of ListDataViewsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDataViewsResponse.t, ListDataViewsResponse.error) Result.t Lwt.t
 val list_datasets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetsRequest.t ->
-        (ListDatasetsResponse.t,
-          [ `AWS of ListDatasetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t Lwt.t
 val list_permission_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionGroupsRequest.t ->
-        (ListPermissionGroupsResponse.t,
-          [ `AWS of ListPermissionGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPermissionGroupsResponse.t, ListPermissionGroupsResponse.error)
+          Result.t Lwt.t
 val list_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsersRequest.t ->
-        (ListUsersResponse.t,
-          [ `AWS of ListUsersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUsersResponse.t, ListUsersResponse.error) Result.t Lwt.t
 val reset_user_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetUserPasswordRequest.t ->
-        (ResetUserPasswordResponse.t,
-          [ `AWS of ResetUserPasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResetUserPasswordResponse.t, ResetUserPasswordResponse.error)
+          Result.t Lwt.t
 val update_changeset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChangesetRequest.t ->
-        (UpdateChangesetResponse.t,
-          [ `AWS of UpdateChangesetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateChangesetResponse.t, UpdateChangesetResponse.error) Result.t
+          Lwt.t
 val update_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDatasetRequest.t ->
-        (UpdateDatasetResponse.t,
-          [ `AWS of UpdateDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDatasetResponse.t, UpdateDatasetResponse.error) Result.t Lwt.t
 val update_permission_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePermissionGroupRequest.t ->
         (UpdatePermissionGroupResponse.t,
-          [ `AWS of UpdatePermissionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdatePermissionGroupResponse.error) Result.t Lwt.t
 val update_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserRequest.t ->
-        (UpdateUserResponse.t,
-          [ `AWS of UpdateUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateUserResponse.t, UpdateUserResponse.error) Result.t Lwt.t

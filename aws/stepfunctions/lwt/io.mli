@@ -4,160 +4,126 @@ val create_activity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateActivityInput.t ->
-        (CreateActivityOutput.t,
-          [ `AWS of CreateActivityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateActivityOutput.t, CreateActivityOutput.error) Result.t Lwt.t
 val create_state_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStateMachineInput.t ->
-        (CreateStateMachineOutput.t,
-          [ `AWS of CreateStateMachineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateStateMachineOutput.t, CreateStateMachineOutput.error) Result.t
+          Lwt.t
 val delete_activity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteActivityInput.t ->
-        (DeleteActivityOutput.t,
-          [ `AWS of DeleteActivityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteActivityOutput.t, DeleteActivityOutput.error) Result.t Lwt.t
 val delete_state_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStateMachineInput.t ->
-        (DeleteStateMachineOutput.t,
-          [ `AWS of DeleteStateMachineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteStateMachineOutput.t, DeleteStateMachineOutput.error) Result.t
+          Lwt.t
 val describe_activity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeActivityInput.t ->
-        (DescribeActivityOutput.t,
-          [ `AWS of DescribeActivityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeActivityOutput.t, DescribeActivityOutput.error) Result.t
+          Lwt.t
 val describe_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExecutionInput.t ->
-        (DescribeExecutionOutput.t,
-          [ `AWS of DescribeExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeExecutionOutput.t, DescribeExecutionOutput.error) Result.t
+          Lwt.t
 val describe_state_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStateMachineInput.t ->
-        (DescribeStateMachineOutput.t,
-          [ `AWS of DescribeStateMachineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeStateMachineOutput.t, DescribeStateMachineOutput.error)
+          Result.t Lwt.t
 val describe_state_machine_for_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStateMachineForExecutionInput.t ->
         (DescribeStateMachineForExecutionOutput.t,
-          [ `AWS of DescribeStateMachineForExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeStateMachineForExecutionOutput.error) Result.t Lwt.t
 val get_activity_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetActivityTaskInput.t ->
-        (GetActivityTaskOutput.t,
-          [ `AWS of GetActivityTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetActivityTaskOutput.t, GetActivityTaskOutput.error) Result.t Lwt.t
 val get_execution_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExecutionHistoryInput.t ->
-        (GetExecutionHistoryOutput.t,
-          [ `AWS of GetExecutionHistoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetExecutionHistoryOutput.t, GetExecutionHistoryOutput.error)
+          Result.t Lwt.t
 val list_activities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListActivitiesInput.t ->
-        (ListActivitiesOutput.t,
-          [ `AWS of ListActivitiesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListActivitiesOutput.t, ListActivitiesOutput.error) Result.t Lwt.t
 val list_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExecutionsInput.t ->
-        (ListExecutionsOutput.t,
-          [ `AWS of ListExecutionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListExecutionsOutput.t, ListExecutionsOutput.error) Result.t Lwt.t
 val list_state_machines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStateMachinesInput.t ->
-        (ListStateMachinesOutput.t,
-          [ `AWS of ListStateMachinesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStateMachinesOutput.t, ListStateMachinesOutput.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val send_task_failure :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendTaskFailureInput.t ->
-        (SendTaskFailureOutput.t,
-          [ `AWS of SendTaskFailureOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendTaskFailureOutput.t, SendTaskFailureOutput.error) Result.t Lwt.t
 val send_task_heartbeat :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendTaskHeartbeatInput.t ->
-        (SendTaskHeartbeatOutput.t,
-          [ `AWS of SendTaskHeartbeatOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendTaskHeartbeatOutput.t, SendTaskHeartbeatOutput.error) Result.t
+          Lwt.t
 val send_task_success :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendTaskSuccessInput.t ->
-        (SendTaskSuccessOutput.t,
-          [ `AWS of SendTaskSuccessOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendTaskSuccessOutput.t, SendTaskSuccessOutput.error) Result.t Lwt.t
 val start_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartExecutionInput.t ->
-        (StartExecutionOutput.t,
-          [ `AWS of StartExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartExecutionOutput.t, StartExecutionOutput.error) Result.t Lwt.t
 val start_sync_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSyncExecutionInput.t ->
-        (StartSyncExecutionOutput.t,
-          [ `AWS of StartSyncExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartSyncExecutionOutput.t, StartSyncExecutionOutput.error) Result.t
+          Lwt.t
 val stop_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopExecutionInput.t ->
-        (StopExecutionOutput.t,
-          [ `AWS of StopExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopExecutionOutput.t, StopExecutionOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
 val update_state_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStateMachineInput.t ->
-        (UpdateStateMachineOutput.t,
-          [ `AWS of UpdateStateMachineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateStateMachineOutput.t, UpdateStateMachineOutput.error) Result.t
+          Lwt.t

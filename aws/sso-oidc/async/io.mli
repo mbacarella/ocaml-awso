@@ -4,23 +4,17 @@ val create_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTokenRequest.t ->
-        (CreateTokenResponse.t,
-          [ `AWS of CreateTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTokenResponse.t, CreateTokenResponse.error) Result.t
           Async.Deferred.t
 val register_client :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterClientRequest.t ->
-        (RegisterClientResponse.t,
-          [ `AWS of RegisterClientResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterClientResponse.t, RegisterClientResponse.error) Result.t
           Async.Deferred.t
 val start_device_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDeviceAuthorizationRequest.t ->
         (StartDeviceAuthorizationResponse.t,
-          [ `AWS of StartDeviceAuthorizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartDeviceAuthorizationResponse.error) Result.t Async.Deferred.t

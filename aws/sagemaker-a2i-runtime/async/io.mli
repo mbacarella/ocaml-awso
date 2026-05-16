@@ -4,39 +4,29 @@ val delete_human_loop :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHumanLoopRequest.t ->
-        (DeleteHumanLoopResponse.t,
-          [ `AWS of DeleteHumanLoopResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteHumanLoopResponse.t, DeleteHumanLoopResponse.error) Result.t
           Async.Deferred.t
 val describe_human_loop :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHumanLoopRequest.t ->
-        (DescribeHumanLoopResponse.t,
-          [ `AWS of DescribeHumanLoopResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeHumanLoopResponse.t, DescribeHumanLoopResponse.error)
+          Result.t Async.Deferred.t
 val list_human_loops :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListHumanLoopsRequest.t ->
-        (ListHumanLoopsResponse.t,
-          [ `AWS of ListHumanLoopsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListHumanLoopsResponse.t, ListHumanLoopsResponse.error) Result.t
           Async.Deferred.t
 val start_human_loop :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartHumanLoopRequest.t ->
-        (StartHumanLoopResponse.t,
-          [ `AWS of StartHumanLoopResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartHumanLoopResponse.t, StartHumanLoopResponse.error) Result.t
           Async.Deferred.t
 val stop_human_loop :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopHumanLoopRequest.t ->
-        (StopHumanLoopResponse.t,
-          [ `AWS of StopHumanLoopResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopHumanLoopResponse.t, StopHumanLoopResponse.error) Result.t
           Async.Deferred.t

@@ -4,231 +4,173 @@ val create_replication_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReplicationSetInput.t ->
-        (CreateReplicationSetOutput.t,
-          [ `AWS of CreateReplicationSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateReplicationSetOutput.t, CreateReplicationSetOutput.error)
+          Result.t Async.Deferred.t
 val create_response_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResponsePlanInput.t ->
-        (CreateResponsePlanOutput.t,
-          [ `AWS of CreateResponsePlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateResponsePlanOutput.t, CreateResponsePlanOutput.error) Result.t
           Async.Deferred.t
 val create_timeline_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTimelineEventInput.t ->
-        (CreateTimelineEventOutput.t,
-          [ `AWS of CreateTimelineEventOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateTimelineEventOutput.t, CreateTimelineEventOutput.error)
+          Result.t Async.Deferred.t
 val delete_incident_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIncidentRecordInput.t ->
-        (DeleteIncidentRecordOutput.t,
-          [ `AWS of DeleteIncidentRecordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteIncidentRecordOutput.t, DeleteIncidentRecordOutput.error)
+          Result.t Async.Deferred.t
 val delete_replication_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReplicationSetInput.t ->
-        (DeleteReplicationSetOutput.t,
-          [ `AWS of DeleteReplicationSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteReplicationSetOutput.t, DeleteReplicationSetOutput.error)
+          Result.t Async.Deferred.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyInput.t ->
-        (DeleteResourcePolicyOutput.t,
-          [ `AWS of DeleteResourcePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteResourcePolicyOutput.t, DeleteResourcePolicyOutput.error)
+          Result.t Async.Deferred.t
 val delete_response_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResponsePlanInput.t ->
-        (DeleteResponsePlanOutput.t,
-          [ `AWS of DeleteResponsePlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteResponsePlanOutput.t, DeleteResponsePlanOutput.error) Result.t
           Async.Deferred.t
 val delete_timeline_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTimelineEventInput.t ->
-        (DeleteTimelineEventOutput.t,
-          [ `AWS of DeleteTimelineEventOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteTimelineEventOutput.t, DeleteTimelineEventOutput.error)
+          Result.t Async.Deferred.t
 val get_incident_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIncidentRecordInput.t ->
-        (GetIncidentRecordOutput.t,
-          [ `AWS of GetIncidentRecordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIncidentRecordOutput.t, GetIncidentRecordOutput.error) Result.t
           Async.Deferred.t
 val get_replication_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReplicationSetInput.t ->
-        (GetReplicationSetOutput.t,
-          [ `AWS of GetReplicationSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetReplicationSetOutput.t, GetReplicationSetOutput.error) Result.t
           Async.Deferred.t
 val get_resource_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePoliciesInput.t ->
-        (GetResourcePoliciesOutput.t,
-          [ `AWS of GetResourcePoliciesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetResourcePoliciesOutput.t, GetResourcePoliciesOutput.error)
+          Result.t Async.Deferred.t
 val get_response_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResponsePlanInput.t ->
-        (GetResponsePlanOutput.t,
-          [ `AWS of GetResponsePlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetResponsePlanOutput.t, GetResponsePlanOutput.error) Result.t
           Async.Deferred.t
 val get_timeline_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTimelineEventInput.t ->
-        (GetTimelineEventOutput.t,
-          [ `AWS of GetTimelineEventOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTimelineEventOutput.t, GetTimelineEventOutput.error) Result.t
           Async.Deferred.t
 val list_incident_records :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIncidentRecordsInput.t ->
-        (ListIncidentRecordsOutput.t,
-          [ `AWS of ListIncidentRecordsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListIncidentRecordsOutput.t, ListIncidentRecordsOutput.error)
+          Result.t Async.Deferred.t
 val list_related_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRelatedItemsInput.t ->
-        (ListRelatedItemsOutput.t,
-          [ `AWS of ListRelatedItemsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRelatedItemsOutput.t, ListRelatedItemsOutput.error) Result.t
           Async.Deferred.t
 val list_replication_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReplicationSetsInput.t ->
-        (ListReplicationSetsOutput.t,
-          [ `AWS of ListReplicationSetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListReplicationSetsOutput.t, ListReplicationSetsOutput.error)
+          Result.t Async.Deferred.t
 val list_response_plans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResponsePlansInput.t ->
-        (ListResponsePlansOutput.t,
-          [ `AWS of ListResponsePlansOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListResponsePlansOutput.t, ListResponsePlansOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_timeline_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTimelineEventsInput.t ->
-        (ListTimelineEventsOutput.t,
-          [ `AWS of ListTimelineEventsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTimelineEventsOutput.t, ListTimelineEventsOutput.error) Result.t
           Async.Deferred.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyInput.t ->
-        (PutResourcePolicyOutput.t,
-          [ `AWS of PutResourcePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutResourcePolicyOutput.t, PutResourcePolicyOutput.error) Result.t
           Async.Deferred.t
 val start_incident :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartIncidentInput.t ->
-        (StartIncidentOutput.t,
-          [ `AWS of StartIncidentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartIncidentOutput.t, StartIncidentOutput.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_deletion_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDeletionProtectionInput.t ->
         (UpdateDeletionProtectionOutput.t,
-          [ `AWS of UpdateDeletionProtectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateDeletionProtectionOutput.error) Result.t Async.Deferred.t
 val update_incident_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIncidentRecordInput.t ->
-        (UpdateIncidentRecordOutput.t,
-          [ `AWS of UpdateIncidentRecordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateIncidentRecordOutput.t, UpdateIncidentRecordOutput.error)
+          Result.t Async.Deferred.t
 val update_related_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRelatedItemsInput.t ->
-        (UpdateRelatedItemsOutput.t,
-          [ `AWS of UpdateRelatedItemsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateRelatedItemsOutput.t, UpdateRelatedItemsOutput.error) Result.t
           Async.Deferred.t
 val update_replication_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReplicationSetInput.t ->
-        (UpdateReplicationSetOutput.t,
-          [ `AWS of UpdateReplicationSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateReplicationSetOutput.t, UpdateReplicationSetOutput.error)
+          Result.t Async.Deferred.t
 val update_response_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResponsePlanInput.t ->
-        (UpdateResponsePlanOutput.t,
-          [ `AWS of UpdateResponsePlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateResponsePlanOutput.t, UpdateResponsePlanOutput.error) Result.t
           Async.Deferred.t
 val update_timeline_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTimelineEventInput.t ->
-        (UpdateTimelineEventOutput.t,
-          [ `AWS of UpdateTimelineEventOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateTimelineEventOutput.t, UpdateTimelineEventOutput.error)
+          Result.t Async.Deferred.t

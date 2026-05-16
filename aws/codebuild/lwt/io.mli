@@ -4,314 +4,251 @@ val batch_delete_builds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteBuildsInput.t ->
-        (BatchDeleteBuildsOutput.t,
-          [ `AWS of BatchDeleteBuildsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDeleteBuildsOutput.t, BatchDeleteBuildsOutput.error) Result.t
+          Lwt.t
 val batch_get_build_batches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetBuildBatchesInput.t ->
-        (BatchGetBuildBatchesOutput.t,
-          [ `AWS of BatchGetBuildBatchesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetBuildBatchesOutput.t, BatchGetBuildBatchesOutput.error)
+          Result.t Lwt.t
 val batch_get_builds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetBuildsInput.t ->
-        (BatchGetBuildsOutput.t,
-          [ `AWS of BatchGetBuildsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetBuildsOutput.t, BatchGetBuildsOutput.error) Result.t Lwt.t
 val batch_get_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetProjectsInput.t ->
-        (BatchGetProjectsOutput.t,
-          [ `AWS of BatchGetProjectsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetProjectsOutput.t, BatchGetProjectsOutput.error) Result.t
+          Lwt.t
 val batch_get_report_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetReportGroupsInput.t ->
-        (BatchGetReportGroupsOutput.t,
-          [ `AWS of BatchGetReportGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetReportGroupsOutput.t, BatchGetReportGroupsOutput.error)
+          Result.t Lwt.t
 val batch_get_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetReportsInput.t ->
-        (BatchGetReportsOutput.t,
-          [ `AWS of BatchGetReportsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetReportsOutput.t, BatchGetReportsOutput.error) Result.t Lwt.t
 val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectInput.t ->
-        (CreateProjectOutput.t,
-          [ `AWS of CreateProjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectOutput.t, CreateProjectOutput.error) Result.t Lwt.t
 val create_report_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReportGroupInput.t ->
-        (CreateReportGroupOutput.t,
-          [ `AWS of CreateReportGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateReportGroupOutput.t, CreateReportGroupOutput.error) Result.t
+          Lwt.t
 val create_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWebhookInput.t ->
-        (CreateWebhookOutput.t,
-          [ `AWS of CreateWebhookOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWebhookOutput.t, CreateWebhookOutput.error) Result.t Lwt.t
 val delete_build_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBuildBatchInput.t ->
-        (DeleteBuildBatchOutput.t,
-          [ `AWS of DeleteBuildBatchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBuildBatchOutput.t, DeleteBuildBatchOutput.error) Result.t
+          Lwt.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectInput.t ->
-        (DeleteProjectOutput.t,
-          [ `AWS of DeleteProjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectOutput.t, DeleteProjectOutput.error) Result.t Lwt.t
 val delete_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReportInput.t ->
-        (DeleteReportOutput.t,
-          [ `AWS of DeleteReportOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteReportOutput.t, DeleteReportOutput.error) Result.t Lwt.t
 val delete_report_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReportGroupInput.t ->
-        (DeleteReportGroupOutput.t,
-          [ `AWS of DeleteReportGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteReportGroupOutput.t, DeleteReportGroupOutput.error) Result.t
+          Lwt.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyInput.t ->
-        (DeleteResourcePolicyOutput.t,
-          [ `AWS of DeleteResourcePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourcePolicyOutput.t, DeleteResourcePolicyOutput.error)
+          Result.t Lwt.t
 val delete_source_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSourceCredentialsInput.t ->
         (DeleteSourceCredentialsOutput.t,
-          [ `AWS of DeleteSourceCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteSourceCredentialsOutput.error) Result.t Lwt.t
 val delete_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWebhookInput.t ->
-        (DeleteWebhookOutput.t,
-          [ `AWS of DeleteWebhookOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWebhookOutput.t, DeleteWebhookOutput.error) Result.t Lwt.t
 val describe_code_coverages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCodeCoveragesInput.t ->
-        (DescribeCodeCoveragesOutput.t,
-          [ `AWS of DescribeCodeCoveragesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCodeCoveragesOutput.t, DescribeCodeCoveragesOutput.error)
+          Result.t Lwt.t
 val describe_test_cases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTestCasesInput.t ->
-        (DescribeTestCasesOutput.t,
-          [ `AWS of DescribeTestCasesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTestCasesOutput.t, DescribeTestCasesOutput.error) Result.t
+          Lwt.t
 val get_report_group_trend :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReportGroupTrendInput.t ->
-        (GetReportGroupTrendOutput.t,
-          [ `AWS of GetReportGroupTrendOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetReportGroupTrendOutput.t, GetReportGroupTrendOutput.error)
+          Result.t Lwt.t
 val get_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePolicyInput.t ->
-        (GetResourcePolicyOutput.t,
-          [ `AWS of GetResourcePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourcePolicyOutput.t, GetResourcePolicyOutput.error) Result.t
+          Lwt.t
 val import_source_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportSourceCredentialsInput.t ->
         (ImportSourceCredentialsOutput.t,
-          [ `AWS of ImportSourceCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ImportSourceCredentialsOutput.error) Result.t Lwt.t
 val invalidate_project_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InvalidateProjectCacheInput.t ->
-        (InvalidateProjectCacheOutput.t,
-          [ `AWS of InvalidateProjectCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InvalidateProjectCacheOutput.t, InvalidateProjectCacheOutput.error)
+          Result.t Lwt.t
 val list_build_batches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBuildBatchesInput.t ->
-        (ListBuildBatchesOutput.t,
-          [ `AWS of ListBuildBatchesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBuildBatchesOutput.t, ListBuildBatchesOutput.error) Result.t
+          Lwt.t
 val list_build_batches_for_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBuildBatchesForProjectInput.t ->
         (ListBuildBatchesForProjectOutput.t,
-          [ `AWS of ListBuildBatchesForProjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBuildBatchesForProjectOutput.error) Result.t Lwt.t
 val list_builds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBuildsInput.t ->
-        (ListBuildsOutput.t,
-          [ `AWS of ListBuildsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBuildsOutput.t, ListBuildsOutput.error) Result.t Lwt.t
 val list_builds_for_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBuildsForProjectInput.t ->
-        (ListBuildsForProjectOutput.t,
-          [ `AWS of ListBuildsForProjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBuildsForProjectOutput.t, ListBuildsForProjectOutput.error)
+          Result.t Lwt.t
 val list_curated_environment_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCuratedEnvironmentImagesInput.t ->
         (ListCuratedEnvironmentImagesOutput.t,
-          [ `AWS of ListCuratedEnvironmentImagesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCuratedEnvironmentImagesOutput.error) Result.t Lwt.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectsInput.t ->
-        (ListProjectsOutput.t,
-          [ `AWS of ListProjectsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProjectsOutput.t, ListProjectsOutput.error) Result.t Lwt.t
 val list_report_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReportGroupsInput.t ->
-        (ListReportGroupsOutput.t,
-          [ `AWS of ListReportGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListReportGroupsOutput.t, ListReportGroupsOutput.error) Result.t
+          Lwt.t
 val list_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReportsInput.t ->
-        (ListReportsOutput.t,
-          [ `AWS of ListReportsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListReportsOutput.t, ListReportsOutput.error) Result.t Lwt.t
 val list_reports_for_report_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReportsForReportGroupInput.t ->
         (ListReportsForReportGroupOutput.t,
-          [ `AWS of ListReportsForReportGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListReportsForReportGroupOutput.error) Result.t Lwt.t
 val list_shared_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSharedProjectsInput.t ->
-        (ListSharedProjectsOutput.t,
-          [ `AWS of ListSharedProjectsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSharedProjectsOutput.t, ListSharedProjectsOutput.error) Result.t
+          Lwt.t
 val list_shared_report_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSharedReportGroupsInput.t ->
-        (ListSharedReportGroupsOutput.t,
-          [ `AWS of ListSharedReportGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSharedReportGroupsOutput.t, ListSharedReportGroupsOutput.error)
+          Result.t Lwt.t
 val list_source_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSourceCredentialsInput.t ->
-        (ListSourceCredentialsOutput.t,
-          [ `AWS of ListSourceCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSourceCredentialsOutput.t, ListSourceCredentialsOutput.error)
+          Result.t Lwt.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyInput.t ->
-        (PutResourcePolicyOutput.t,
-          [ `AWS of PutResourcePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutResourcePolicyOutput.t, PutResourcePolicyOutput.error) Result.t
+          Lwt.t
 val retry_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetryBuildInput.t ->
-        (RetryBuildOutput.t,
-          [ `AWS of RetryBuildOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RetryBuildOutput.t, RetryBuildOutput.error) Result.t Lwt.t
 val retry_build_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetryBuildBatchInput.t ->
-        (RetryBuildBatchOutput.t,
-          [ `AWS of RetryBuildBatchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RetryBuildBatchOutput.t, RetryBuildBatchOutput.error) Result.t Lwt.t
 val start_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartBuildInput.t ->
-        (StartBuildOutput.t,
-          [ `AWS of StartBuildOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartBuildOutput.t, StartBuildOutput.error) Result.t Lwt.t
 val start_build_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartBuildBatchInput.t ->
-        (StartBuildBatchOutput.t,
-          [ `AWS of StartBuildBatchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartBuildBatchOutput.t, StartBuildBatchOutput.error) Result.t Lwt.t
 val stop_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopBuildInput.t ->
-        (StopBuildOutput.t,
-          [ `AWS of StopBuildOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopBuildOutput.t, StopBuildOutput.error) Result.t Lwt.t
 val stop_build_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopBuildBatchInput.t ->
-        (StopBuildBatchOutput.t,
-          [ `AWS of StopBuildBatchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopBuildBatchOutput.t, StopBuildBatchOutput.error) Result.t Lwt.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectInput.t ->
-        (UpdateProjectOutput.t,
-          [ `AWS of UpdateProjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProjectOutput.t, UpdateProjectOutput.error) Result.t Lwt.t
 val update_project_visibility :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectVisibilityInput.t ->
         (UpdateProjectVisibilityOutput.t,
-          [ `AWS of UpdateProjectVisibilityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateProjectVisibilityOutput.error) Result.t Lwt.t
 val update_report_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReportGroupInput.t ->
-        (UpdateReportGroupOutput.t,
-          [ `AWS of UpdateReportGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateReportGroupOutput.t, UpdateReportGroupOutput.error) Result.t
+          Lwt.t
 val update_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWebhookInput.t ->
-        (UpdateWebhookOutput.t,
-          [ `AWS of UpdateWebhookOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateWebhookOutput.t, UpdateWebhookOutput.error) Result.t Lwt.t

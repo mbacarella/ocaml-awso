@@ -138,12 +138,13 @@ module Ini_file_parser (Stanza : Stanza_spec) (File_env : File_env_spec) = struc
 
   let yojson_of_t m =
     `Assoc (Map.to_alist m |> List.map ~f:(fun (k, v) -> k, Stanza.yojson_of_t v))
+  ;;
 
   let _t_of_yojson = function
     | `Assoc l ->
-      String.Map.of_alist_exn
-        (List.map l ~f:(fun (k, v) -> k, Stanza.t_of_yojson v))
+      String.Map.of_alist_exn (List.map l ~f:(fun (k, v) -> k, Stanza.t_of_yojson v))
     | _ -> failwith "expected object"
+  ;;
 
   let of_string s =
     s
@@ -248,10 +249,7 @@ module Config_file_stanza = struct
 
   let set_field ~is_s3_field ~name ~value ~line_num (completed, name_settings) =
     let message =
-      sprintf
-        "Line %d: attempting to set field outside of any profile: %S"
-        line_num
-        name
+      sprintf "Line %d: attempting to set field outside of any profile: %S" line_num name
     in
     match is_s3_field with
     | true ->
@@ -263,22 +261,17 @@ module Config_file_stanza = struct
       in
       let s3 =
         match name with
-        | "max_concurrent_requests" ->
-          { s3 with max_concurrent_requests = Some value }
+        | "max_concurrent_requests" -> { s3 with max_concurrent_requests = Some value }
         | "max_queue_size" -> { s3 with max_queue_size = Some value }
         | "multipart_threshold" -> { s3 with multipart_threshold = Some value }
         | "multipart_chunksize" -> { s3 with multipart_chunksize = Some value }
         | "max_bandwidth" -> { s3 with max_bandwidth = Some value }
-        | "use_accelerate_endpoint" ->
-          { s3 with use_accelerate_endpoint = Some value }
-        | "use_dualstack_endpoint" ->
-          { s3 with use_dualstack_endpoint = Some value }
+        | "use_accelerate_endpoint" -> { s3 with use_accelerate_endpoint = Some value }
+        | "use_dualstack_endpoint" -> { s3 with use_dualstack_endpoint = Some value }
         | "addressing_style" -> { s3 with addressing_style = Some value }
         | _ -> failwithf "Line %d: unknown field: %S (s3)" line_num name ()
       in
-      let new_profile =
-        { profile with s3_custom_command_settings = Some s3 }
-      in
+      let new_profile = { profile with s3_custom_command_settings = Some s3 } in
       completed, Some (profile_name, new_profile)
     | false ->
       let profile_name, profile = Option.value_exn ~message name_settings in
@@ -310,7 +303,8 @@ module Config_file_stanza = struct
         | "sso_region" -> { profile with sso_region = Some value }
         | "sso_role_name" -> { profile with sso_role_name = Some value }
         | "sso_start_url" -> { profile with sso_start_url = Some value }
-        | "web_identity_token_file" -> { profile with web_identity_token_file = Some value }
+        | "web_identity_token_file" ->
+          { profile with web_identity_token_file = Some value }
         | "tcp_keepalive" -> { profile with tcp_keepalive = Some value }
         | _ -> failwithf "Line %d: unknown field: %S" line_num name ()
       in
@@ -334,7 +328,8 @@ let%expect_test "File.of_string" =
   let test s =
     match Config_file.of_string s with
     | Error s -> printf "Failed with: %s\n" s
-    | Ok r -> r |> Config_file.yojson_of_t |> Yojson.Safe.pretty_to_string |> print_endline
+    | Ok r ->
+      r |> Config_file.yojson_of_t |> Yojson.Safe.pretty_to_string |> print_endline
   in
   test
     {|
@@ -420,31 +415,37 @@ region=us-east-1
   test "output=json";
   [%expect
     {| Failed with: Line 1: attempting to set field outside of any profile: "output" |}];
-  test {|
+  test
+    {|
 [default]
 unknown_field=1
     |};
   [%expect {| Failed with: Line 3: unknown field: "unknown_field" |}];
-  test {|
+  test
+    {|
 [a]
 region=us-east-1
 [a]
 region=us-east-2
     |};
-  [%expect {|
+  [%expect
+    {|
     Failed with: profile defined multiple times: "a" |}];
-  test {|
+  test
+    {|
 [a]
 [b]
 [a]
     |};
   [%expect {| Failed with: profile defined multiple times: "a" |}];
-  test {|
+  test
+    {|
 [a]
 no_equal_sign
     |};
   [%expect {| Failed with: invalid line: "no_equal_sign" |}];
-  test {|
+  test
+    {|
 [a]
 a=b=c
     |};
@@ -463,10 +464,7 @@ module Shared_credentials_file_stanza = struct
   let set_field ~is_s3_field ~name ~value ~line_num (completed, name_settings) =
     assert (not is_s3_field);
     let message =
-      sprintf
-        "Line %d: attempting to set field outside of any profile: %S"
-        line_num
-        name
+      sprintf "Line %d: attempting to set field outside of any profile: %S" line_num name
     in
     let profile_name, profile = Option.value_exn ~message name_settings in
     let new_profile =
@@ -533,14 +531,14 @@ let merge ~(from : Config_file_stanza.t) ~(to_ : Config_file_stanza.t)
 ;;
 
 let make_internal
-  ?(config_file : (string * Config_file_stanza.t String.Map.t) option)
-  ?shared_credentials_file
-  ?profile
-  ?aws_access_key_id
-  ?aws_secret_access_key
-  ?region
-  ?output
-  ()
+      ?(config_file : (string * Config_file_stanza.t String.Map.t) option)
+      ?shared_credentials_file
+      ?profile
+      ?aws_access_key_id
+      ?aws_secret_access_key
+      ?region
+      ?output
+      ()
   =
   let config_file, config_profiles =
     match config_file with
@@ -701,14 +699,14 @@ let empty =
 ;;
 
 let make
-  ?(config_file : (string * Config_file_stanza.t String.Map.t) option)
-  ?shared_credentials_file
-  ?profile
-  ?aws_access_key_id
-  ?aws_secret_access_key
-  ?region
-  ?output
-  ()
+      ?(config_file : (string * Config_file_stanza.t String.Map.t) option)
+      ?shared_credentials_file
+      ?profile
+      ?aws_access_key_id
+      ?aws_secret_access_key
+      ?region
+      ?output
+      ()
   =
   match
     make_internal

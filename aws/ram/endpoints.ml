@@ -824,235 +824,244 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AcceptResourceShareInvitation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AcceptResourceShareInvitationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AcceptResourceShareInvitationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AcceptResourceShareInvitationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AcceptResourceShareInvitationResponse.error_of_json))
   | AssociateResourceShare ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateResourceShareResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateResourceShareResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (AssociateResourceShareResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateResourceShareResponse.error_of_json))
   | AssociateResourceSharePermission ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateResourceSharePermissionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateResourceSharePermissionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AssociateResourceSharePermissionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateResourceSharePermissionResponse.error_of_json))
   | CreateResourceShare ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateResourceShareResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateResourceShareResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateResourceShareResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateResourceShareResponse.error_of_json))
   | DeleteResourceShare ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteResourceShareResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteResourceShareResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteResourceShareResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteResourceShareResponse.error_of_json))
   | DisassociateResourceShare ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateResourceShareResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateResourceShareResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DisassociateResourceShareResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateResourceShareResponse.error_of_json))
   | DisassociateResourceSharePermission ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateResourceSharePermissionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateResourceSharePermissionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DisassociateResourceSharePermissionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateResourceSharePermissionResponse.error_of_json))
   | EnableSharingWithAwsOrganization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EnableSharingWithAwsOrganizationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (EnableSharingWithAwsOrganizationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (EnableSharingWithAwsOrganizationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some EnableSharingWithAwsOrganizationResponse.error_of_json))
   | GetPermission ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPermissionResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetPermissionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPermissionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetPermissionResponse.error_of_json))
   | GetResourcePolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourcePoliciesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetResourcePoliciesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourcePoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePoliciesResponse.error_of_json))
   | GetResourceShareAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetResourceShareAssociationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetResourceShareAssociationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetResourceShareAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetResourceShareAssociationsResponse.error_of_json))
   | GetResourceShareInvitations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetResourceShareInvitationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetResourceShareInvitationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetResourceShareInvitationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetResourceShareInvitationsResponse.error_of_json))
   | GetResourceShares ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourceSharesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetResourceSharesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourceSharesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourceSharesResponse.error_of_json))
   | ListPendingInvitationResources ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPendingInvitationResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPendingInvitationResourcesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListPendingInvitationResourcesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPendingInvitationResourcesResponse.error_of_json))
   | ListPermissionVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPermissionVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPermissionVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListPermissionVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPermissionVersionsResponse.error_of_json))
   | ListPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPermissionsResponse.error_of_json))
   | ListPrincipals ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPrincipalsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPrincipalsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPrincipalsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPrincipalsResponse.error_of_json))
   | ListResourceSharePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListResourceSharePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListResourceSharePermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListResourceSharePermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceSharePermissionsResponse.error_of_json))
   | ListResourceTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListResourceTypesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListResourceTypesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListResourceTypesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListResourceTypesResponse.error_of_json))
   | ListResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListResourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListResourcesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListResourcesResponse.error_of_json))
   | PromoteResourceShareCreatedFromPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (PromoteResourceShareCreatedFromPolicyResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                PromoteResourceShareCreatedFromPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PromoteResourceShareCreatedFromPolicyResponse.of_json
-                (response_to_json resp)))
+                PromoteResourceShareCreatedFromPolicyResponse.error_of_json))
   | RejectResourceShareInvitation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RejectResourceShareInvitationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RejectResourceShareInvitationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (RejectResourceShareInvitationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RejectResourceShareInvitationResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateResourceShare ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateResourceShareResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateResourceShareResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateResourceShareResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateResourceShareResponse.error_of_json))

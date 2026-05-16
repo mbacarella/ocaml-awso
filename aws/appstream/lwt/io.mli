@@ -5,453 +5,364 @@ val associate_application_fleet :
     ?cfg:Awso.Cfg.t ->
       AssociateApplicationFleetRequest.t ->
         (AssociateApplicationFleetResult.t,
-          [ `AWS of AssociateApplicationFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateApplicationFleetResult.error) Result.t Lwt.t
 val associate_application_to_entitlement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateApplicationToEntitlementRequest.t ->
         (AssociateApplicationToEntitlementResult.t,
-          [ `AWS of AssociateApplicationToEntitlementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateApplicationToEntitlementResult.error) Result.t Lwt.t
 val associate_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateFleetRequest.t ->
-        (AssociateFleetResult.t,
-          [ `AWS of AssociateFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateFleetResult.t, AssociateFleetResult.error) Result.t Lwt.t
 val batch_associate_user_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchAssociateUserStackRequest.t ->
         (BatchAssociateUserStackResult.t,
-          [ `AWS of BatchAssociateUserStackResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchAssociateUserStackResult.error) Result.t Lwt.t
 val batch_disassociate_user_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateUserStackRequest.t ->
         (BatchDisassociateUserStackResult.t,
-          [ `AWS of BatchDisassociateUserStackResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDisassociateUserStackResult.error) Result.t Lwt.t
 val copy_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyImageRequest.t ->
-        (CopyImageResponse.t,
-          [ `AWS of CopyImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CopyImageResponse.t, CopyImageResponse.error) Result.t Lwt.t
 val create_app_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppBlockRequest.t ->
-        (CreateAppBlockResult.t,
-          [ `AWS of CreateAppBlockResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAppBlockResult.t, CreateAppBlockResult.error) Result.t Lwt.t
 val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResult.t,
-          [ `AWS of CreateApplicationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateApplicationResult.t, CreateApplicationResult.error) Result.t
+          Lwt.t
 val create_directory_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDirectoryConfigRequest.t ->
-        (CreateDirectoryConfigResult.t,
-          [ `AWS of CreateDirectoryConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDirectoryConfigResult.t, CreateDirectoryConfigResult.error)
+          Result.t Lwt.t
 val create_entitlement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEntitlementRequest.t ->
-        (CreateEntitlementResult.t,
-          [ `AWS of CreateEntitlementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEntitlementResult.t, CreateEntitlementResult.error) Result.t
+          Lwt.t
 val create_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFleetRequest.t ->
-        (CreateFleetResult.t,
-          [ `AWS of CreateFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFleetResult.t, CreateFleetResult.error) Result.t Lwt.t
 val create_image_builder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateImageBuilderRequest.t ->
-        (CreateImageBuilderResult.t,
-          [ `AWS of CreateImageBuilderResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateImageBuilderResult.t, CreateImageBuilderResult.error) Result.t
+          Lwt.t
 val create_image_builder_streaming_u_r_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateImageBuilderStreamingURLRequest.t ->
         (CreateImageBuilderStreamingURLResult.t,
-          [ `AWS of CreateImageBuilderStreamingURLResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateImageBuilderStreamingURLResult.error) Result.t Lwt.t
 val create_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStackRequest.t ->
-        (CreateStackResult.t,
-          [ `AWS of CreateStackResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateStackResult.t, CreateStackResult.error) Result.t Lwt.t
 val create_streaming_u_r_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamingURLRequest.t ->
-        (CreateStreamingURLResult.t,
-          [ `AWS of CreateStreamingURLResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateStreamingURLResult.t, CreateStreamingURLResult.error) Result.t
+          Lwt.t
 val create_updated_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUpdatedImageRequest.t ->
-        (CreateUpdatedImageResult.t,
-          [ `AWS of CreateUpdatedImageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUpdatedImageResult.t, CreateUpdatedImageResult.error) Result.t
+          Lwt.t
 val create_usage_report_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUsageReportSubscriptionRequest.t ->
         (CreateUsageReportSubscriptionResult.t,
-          [ `AWS of CreateUsageReportSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateUsageReportSubscriptionResult.error) Result.t Lwt.t
 val create_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserRequest.t ->
-        (CreateUserResult.t,
-          [ `AWS of CreateUserResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUserResult.t, CreateUserResult.error) Result.t Lwt.t
 val delete_app_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppBlockRequest.t ->
-        (DeleteAppBlockResult.t,
-          [ `AWS of DeleteAppBlockResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAppBlockResult.t, DeleteAppBlockResult.error) Result.t Lwt.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationRequest.t ->
-        (DeleteApplicationResult.t,
-          [ `AWS of DeleteApplicationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteApplicationResult.t, DeleteApplicationResult.error) Result.t
+          Lwt.t
 val delete_directory_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDirectoryConfigRequest.t ->
-        (DeleteDirectoryConfigResult.t,
-          [ `AWS of DeleteDirectoryConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDirectoryConfigResult.t, DeleteDirectoryConfigResult.error)
+          Result.t Lwt.t
 val delete_entitlement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEntitlementRequest.t ->
-        (DeleteEntitlementResult.t,
-          [ `AWS of DeleteEntitlementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEntitlementResult.t, DeleteEntitlementResult.error) Result.t
+          Lwt.t
 val delete_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFleetRequest.t ->
-        (DeleteFleetResult.t,
-          [ `AWS of DeleteFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFleetResult.t, DeleteFleetResult.error) Result.t Lwt.t
 val delete_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteImageRequest.t ->
-        (DeleteImageResult.t,
-          [ `AWS of DeleteImageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteImageResult.t, DeleteImageResult.error) Result.t Lwt.t
 val delete_image_builder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteImageBuilderRequest.t ->
-        (DeleteImageBuilderResult.t,
-          [ `AWS of DeleteImageBuilderResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteImageBuilderResult.t, DeleteImageBuilderResult.error) Result.t
+          Lwt.t
 val delete_image_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteImagePermissionsRequest.t ->
-        (DeleteImagePermissionsResult.t,
-          [ `AWS of DeleteImagePermissionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteImagePermissionsResult.t, DeleteImagePermissionsResult.error)
+          Result.t Lwt.t
 val delete_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStackRequest.t ->
-        (DeleteStackResult.t,
-          [ `AWS of DeleteStackResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteStackResult.t, DeleteStackResult.error) Result.t Lwt.t
 val delete_usage_report_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUsageReportSubscriptionRequest.t ->
         (DeleteUsageReportSubscriptionResult.t,
-          [ `AWS of DeleteUsageReportSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteUsageReportSubscriptionResult.error) Result.t Lwt.t
 val delete_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserRequest.t ->
-        (DeleteUserResult.t,
-          [ `AWS of DeleteUserResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteUserResult.t, DeleteUserResult.error) Result.t Lwt.t
 val describe_app_blocks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppBlocksRequest.t ->
-        (DescribeAppBlocksResult.t,
-          [ `AWS of DescribeAppBlocksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAppBlocksResult.t, DescribeAppBlocksResult.error) Result.t
+          Lwt.t
 val describe_application_fleet_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationFleetAssociationsRequest.t ->
         (DescribeApplicationFleetAssociationsResult.t,
-          [ `AWS of DescribeApplicationFleetAssociationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeApplicationFleetAssociationsResult.error) Result.t Lwt.t
 val describe_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationsRequest.t ->
-        (DescribeApplicationsResult.t,
-          [ `AWS of DescribeApplicationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeApplicationsResult.t, DescribeApplicationsResult.error)
+          Result.t Lwt.t
 val describe_directory_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDirectoryConfigsRequest.t ->
         (DescribeDirectoryConfigsResult.t,
-          [ `AWS of DescribeDirectoryConfigsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDirectoryConfigsResult.error) Result.t Lwt.t
 val describe_entitlements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEntitlementsRequest.t ->
-        (DescribeEntitlementsResult.t,
-          [ `AWS of DescribeEntitlementsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEntitlementsResult.t, DescribeEntitlementsResult.error)
+          Result.t Lwt.t
 val describe_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetsRequest.t ->
-        (DescribeFleetsResult.t,
-          [ `AWS of DescribeFleetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeFleetsResult.t, DescribeFleetsResult.error) Result.t Lwt.t
 val describe_image_builders :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImageBuildersRequest.t ->
-        (DescribeImageBuildersResult.t,
-          [ `AWS of DescribeImageBuildersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeImageBuildersResult.t, DescribeImageBuildersResult.error)
+          Result.t Lwt.t
 val describe_image_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImagePermissionsRequest.t ->
         (DescribeImagePermissionsResult.t,
-          [ `AWS of DescribeImagePermissionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeImagePermissionsResult.error) Result.t Lwt.t
 val describe_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImagesRequest.t ->
-        (DescribeImagesResult.t,
-          [ `AWS of DescribeImagesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeImagesResult.t, DescribeImagesResult.error) Result.t Lwt.t
 val describe_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSessionsRequest.t ->
-        (DescribeSessionsResult.t,
-          [ `AWS of DescribeSessionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSessionsResult.t, DescribeSessionsResult.error) Result.t
+          Lwt.t
 val describe_stacks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStacksRequest.t ->
-        (DescribeStacksResult.t,
-          [ `AWS of DescribeStacksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeStacksResult.t, DescribeStacksResult.error) Result.t Lwt.t
 val describe_usage_report_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUsageReportSubscriptionsRequest.t ->
         (DescribeUsageReportSubscriptionsResult.t,
-          [ `AWS of DescribeUsageReportSubscriptionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeUsageReportSubscriptionsResult.error) Result.t Lwt.t
 val describe_user_stack_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserStackAssociationsRequest.t ->
         (DescribeUserStackAssociationsResult.t,
-          [ `AWS of DescribeUserStackAssociationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeUserStackAssociationsResult.error) Result.t Lwt.t
 val describe_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUsersRequest.t ->
-        (DescribeUsersResult.t,
-          [ `AWS of DescribeUsersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeUsersResult.t, DescribeUsersResult.error) Result.t Lwt.t
 val disable_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableUserRequest.t ->
-        (DisableUserResult.t,
-          [ `AWS of DisableUserResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableUserResult.t, DisableUserResult.error) Result.t Lwt.t
 val disassociate_application_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateApplicationFleetRequest.t ->
         (DisassociateApplicationFleetResult.t,
-          [ `AWS of DisassociateApplicationFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateApplicationFleetResult.error) Result.t Lwt.t
 val disassociate_application_from_entitlement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateApplicationFromEntitlementRequest.t ->
         (DisassociateApplicationFromEntitlementResult.t,
-          [ `AWS of DisassociateApplicationFromEntitlementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateApplicationFromEntitlementResult.error) Result.t Lwt.t
 val disassociate_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateFleetRequest.t ->
-        (DisassociateFleetResult.t,
-          [ `AWS of DisassociateFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateFleetResult.t, DisassociateFleetResult.error) Result.t
+          Lwt.t
 val enable_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableUserRequest.t ->
-        (EnableUserResult.t,
-          [ `AWS of EnableUserResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableUserResult.t, EnableUserResult.error) Result.t Lwt.t
 val expire_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExpireSessionRequest.t ->
-        (ExpireSessionResult.t,
-          [ `AWS of ExpireSessionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExpireSessionResult.t, ExpireSessionResult.error) Result.t Lwt.t
 val list_associated_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociatedFleetsRequest.t ->
-        (ListAssociatedFleetsResult.t,
-          [ `AWS of ListAssociatedFleetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssociatedFleetsResult.t, ListAssociatedFleetsResult.error)
+          Result.t Lwt.t
 val list_associated_stacks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociatedStacksRequest.t ->
-        (ListAssociatedStacksResult.t,
-          [ `AWS of ListAssociatedStacksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssociatedStacksResult.t, ListAssociatedStacksResult.error)
+          Result.t Lwt.t
 val list_entitled_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEntitledApplicationsRequest.t ->
         (ListEntitledApplicationsResult.t,
-          [ `AWS of ListEntitledApplicationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEntitledApplicationsResult.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val start_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFleetRequest.t ->
-        (StartFleetResult.t,
-          [ `AWS of StartFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartFleetResult.t, StartFleetResult.error) Result.t Lwt.t
 val start_image_builder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImageBuilderRequest.t ->
-        (StartImageBuilderResult.t,
-          [ `AWS of StartImageBuilderResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartImageBuilderResult.t, StartImageBuilderResult.error) Result.t
+          Lwt.t
 val stop_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopFleetRequest.t ->
-        (StopFleetResult.t,
-          [ `AWS of StopFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopFleetResult.t, StopFleetResult.error) Result.t Lwt.t
 val stop_image_builder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopImageBuilderRequest.t ->
-        (StopImageBuilderResult.t,
-          [ `AWS of StopImageBuilderResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopImageBuilderResult.t, StopImageBuilderResult.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationRequest.t ->
-        (UpdateApplicationResult.t,
-          [ `AWS of UpdateApplicationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateApplicationResult.t, UpdateApplicationResult.error) Result.t
+          Lwt.t
 val update_directory_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDirectoryConfigRequest.t ->
-        (UpdateDirectoryConfigResult.t,
-          [ `AWS of UpdateDirectoryConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDirectoryConfigResult.t, UpdateDirectoryConfigResult.error)
+          Result.t Lwt.t
 val update_entitlement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEntitlementRequest.t ->
-        (UpdateEntitlementResult.t,
-          [ `AWS of UpdateEntitlementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEntitlementResult.t, UpdateEntitlementResult.error) Result.t
+          Lwt.t
 val update_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFleetRequest.t ->
-        (UpdateFleetResult.t,
-          [ `AWS of UpdateFleetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateFleetResult.t, UpdateFleetResult.error) Result.t Lwt.t
 val update_image_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateImagePermissionsRequest.t ->
-        (UpdateImagePermissionsResult.t,
-          [ `AWS of UpdateImagePermissionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateImagePermissionsResult.t, UpdateImagePermissionsResult.error)
+          Result.t Lwt.t
 val update_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStackRequest.t ->
-        (UpdateStackResult.t,
-          [ `AWS of UpdateStackResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateStackResult.t, UpdateStackResult.error) Result.t Lwt.t

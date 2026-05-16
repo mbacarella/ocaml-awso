@@ -3,6 +3,7 @@ include Awso_common.Jane_compat
 let failwithj ~here:_ msg v to_json =
   let json_str = Yojson.Safe.pretty_to_string (to_json v) in
   failwith (msg ^ ": " ^ json_str)
+;;
 
 module Sexp = struct
   type t =
@@ -11,13 +12,16 @@ module Sexp = struct
 
   let rec to_string = function
     | Atom s ->
-      if Stdlib.String.contains s ' ' || Stdlib.String.contains s '"'
-         || Stdlib.String.contains s '(' || Stdlib.String.contains s ')'
-         || Stdlib.String.length s = 0
+      if
+        Stdlib.String.contains s ' '
+        || Stdlib.String.contains s '"'
+        || Stdlib.String.contains s '('
+        || Stdlib.String.contains s ')'
+        || Stdlib.String.length s = 0
       then sprintf "%S" s
       else s
-    | List l ->
-      sprintf "(%s)" (Stdlib.String.concat " " (Stdlib.List.map to_string l))
+    | List l -> sprintf "(%s)" (Stdlib.String.concat " " (Stdlib.List.map to_string l))
+  ;;
 end
 
 module Uri_json = struct
@@ -50,14 +54,14 @@ module Uri_json = struct
        @ (match query with
           | [] -> []
           | _ ->
-            [ "query"
-            , `Assoc
-                (Stdlib.List.map
-                   (fun (k, vs) ->
-                     k, `List (Stdlib.List.map (fun v -> `String v) vs))
-                   query)
+            [ ( "query"
+              , `Assoc
+                  (Stdlib.List.map
+                     (fun (k, vs) -> k, `List (Stdlib.List.map (fun v -> `String v) vs))
+                     query) )
             ])
        @ opt "fragment" Uri.fragment)
+  ;;
 
   let t_of_yojson = function
     | `String s -> Uri.of_string s
@@ -77,14 +81,17 @@ module Uri_json = struct
         | Some (`Assoc pairs) ->
           Stdlib.List.map
             (fun (k, v) ->
-              let vs = match v with
-                | `List l ->
-                  Stdlib.List.filter_map
-                    (function `String s -> Some s | _ -> None)
-                    l
-                | _ -> []
-              in
-              k, vs)
+               let vs =
+                 match v with
+                 | `List l ->
+                   Stdlib.List.filter_map
+                     (function
+                       | `String s -> Some s
+                       | _ -> None)
+                     l
+                 | _ -> []
+               in
+               k, vs)
             pairs
         | _ -> []
       in
@@ -98,6 +105,7 @@ module Uri_json = struct
         ?fragment:(get "fragment")
         ()
     | _ -> failwith "Uri_json.t_of_yojson: expected string or object"
+  ;;
 end
 
 (* Process.run uses Unix.select to simultaneously drain stdout and stderr,
@@ -138,14 +146,15 @@ module Process = struct
         | _ ->
           let readable, _, _ = Unix.select fds [] [] (-1.0) in
           let fds =
-            Stdlib.List.fold_left (fun fds fd ->
-              if Stdlib.List.mem fd readable then begin
-                let buffer =
-                  if Stdlib.( = ) fd stdout_fd then outbuf else errbuf
-                in
-                if read_into fd buffer then fds
-                else Stdlib.List.filter (fun fd' -> not (Stdlib.( = ) fd' fd)) fds
-              end else fds)
+            Stdlib.List.fold_left
+              (fun fds fd ->
+                 if Stdlib.List.mem fd readable
+                 then (
+                   let buffer = if Stdlib.( = ) fd stdout_fd then outbuf else errbuf in
+                   if read_into fd buffer
+                   then fds
+                   else Stdlib.List.filter (fun fd' -> not (Stdlib.( = ) fd' fd)) fds)
+                 else fds)
               fds
               fds
           in
@@ -163,6 +172,7 @@ module Process = struct
       ; stdout = Buffer.contents outbuf
       ; stderr = Buffer.contents errbuf
       })
+  ;;
 end
 
 module Sys_unix = struct
@@ -175,18 +185,23 @@ module Sys_unix = struct
     in
     let entries = loop [] in
     Unix.closedir h;
-    Stdlib.List.filter (fun n -> not (Stdlib.String.equal n ".") && not (Stdlib.String.equal n "..")) entries
+    Stdlib.List.filter
+      (fun n -> (not (Stdlib.String.equal n ".")) && not (Stdlib.String.equal n ".."))
+      entries
     |> Stdlib.List.sort Stdlib.String.compare
+  ;;
 
   let is_directory_exn path = Sys.is_directory path
 
   let is_directory path =
-    try if Sys.is_directory path then `Yes else `No
-    with Sys_error _ -> `Unknown
+    try if Sys.is_directory path then `Yes else `No with
+    | Sys_error _ -> `Unknown
+  ;;
 
   let is_file path =
-    try if Sys.file_exists path && not (Sys.is_directory path) then `Yes else `No
-    with Sys_error _ -> `Unknown
+    try if Sys.file_exists path && not (Sys.is_directory path) then `Yes else `No with
+    | Sys_error _ -> `Unknown
+  ;;
 
   let remove = Sys.remove
 end
@@ -202,13 +217,15 @@ module Util = struct
     else (
       try Unix.mkdir dir 0o755 with
       | Unix.Unix_error (Unix.EEXIST, _, _) -> ())
+  ;;
 
   let camel_to_snake_case ?(sep = '_') (s : string) : string =
     String.uncapitalize s
     |> String.concat_map ~f:(fun c ->
-         if Char.is_uppercase c
-         then Printf.sprintf "%c%c" sep (Char.lowercase_ascii c)
-         else String.of_char c)
+      if Char.is_uppercase c
+      then Printf.sprintf "%c%c" sep (Char.lowercase_ascii c)
+      else String.of_char c)
+  ;;
 
   let%expect_test "camel_to_snake_case" =
     let test s = print_endline (camel_to_snake_case s) in
@@ -216,6 +233,7 @@ module Util = struct
     [%expect "abort_multipart_upload"];
     test "CompleteMultipartUpload";
     [%expect "complete_multipart_upload"]
+  ;;
 
   let tokenize (read_token : Sedlexing.lexbuf -> ('a option, 'err) result) (s : string)
     : ('a list, 'err) result
@@ -233,24 +251,30 @@ module Util = struct
     match loop () with
     | Ok () -> Ok (Stdlib.List.rev !accum)
     | Error _ as e -> e
+  ;;
 
   let to_string_of_printer (f : Format.formatter -> 'a -> unit) : 'a -> string =
     fun x ->
-      let buf = Buffer.create 128 in
-      let fmt = Format.formatter_of_buffer buf in
-      f fmt x;
-      Format.pp_print_flush fmt ();
-      Buffer.contents buf
+    let buf = Buffer.create 128 in
+    let fmt = Format.formatter_of_buffer buf in
+    f fmt x;
+    Format.pp_print_flush fmt ();
+    Buffer.contents buf
+  ;;
 
   let structure_to_string : Parsetree.structure -> string =
     to_string_of_printer Pprintast.structure
+  ;;
 
   let signature_to_string : Parsetree.signature -> string =
     to_string_of_printer Pprintast.signature
+  ;;
 
   let expression_to_string : Parsetree.expression -> string =
     to_string_of_printer Pprintast.expression
+  ;;
 
   let core_type_to_string : Parsetree.core_type -> string =
     to_string_of_printer Pprintast.core_type
+  ;;
 end

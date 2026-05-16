@@ -4,320 +4,231 @@ val cancel_key_deletion :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelKeyDeletionRequest.t ->
-        (CancelKeyDeletionResponse.t,
-          [ `AWS of CancelKeyDeletionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelKeyDeletionResponse.t, CancelKeyDeletionResponse.error)
+          Result.t Lwt.t
 val connect_custom_key_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConnectCustomKeyStoreRequest.t ->
         (ConnectCustomKeyStoreResponse.t,
-          [ `AWS of ConnectCustomKeyStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ConnectCustomKeyStoreResponse.error) Result.t Lwt.t
 val create_alias :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> CreateAliasRequest.t -> (unit, unit) Result.t Lwt.t
 val create_custom_key_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomKeyStoreRequest.t ->
-        (CreateCustomKeyStoreResponse.t,
-          [ `AWS of CreateCustomKeyStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCustomKeyStoreResponse.t, CreateCustomKeyStoreResponse.error)
+          Result.t Lwt.t
 val create_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGrantRequest.t ->
-        (CreateGrantResponse.t,
-          [ `AWS of CreateGrantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGrantResponse.t, CreateGrantResponse.error) Result.t Lwt.t
 val create_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateKeyRequest.t ->
-        (CreateKeyResponse.t,
-          [ `AWS of CreateKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateKeyResponse.t, CreateKeyResponse.error) Result.t Lwt.t
 val decrypt :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DecryptRequest.t ->
-        (DecryptResponse.t,
-          [ `AWS of DecryptResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DecryptResponse.t, DecryptResponse.error) Result.t Lwt.t
 val delete_alias :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteAliasRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_custom_key_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCustomKeyStoreRequest.t ->
-        (DeleteCustomKeyStoreResponse.t,
-          [ `AWS of DeleteCustomKeyStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCustomKeyStoreResponse.t, DeleteCustomKeyStoreResponse.error)
+          Result.t Lwt.t
 val delete_imported_key_material :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteImportedKeyMaterialRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteImportedKeyMaterialRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_custom_key_stores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomKeyStoresRequest.t ->
         (DescribeCustomKeyStoresResponse.t,
-          [ `AWS of DescribeCustomKeyStoresResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCustomKeyStoresResponse.error) Result.t Lwt.t
 val describe_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeKeyRequest.t ->
-        (DescribeKeyResponse.t,
-          [ `AWS of DescribeKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeKeyResponse.t, DescribeKeyResponse.error) Result.t Lwt.t
 val disable_key :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DisableKeyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DisableKeyRequest.t -> (unit, unit) Result.t Lwt.t
 val disable_key_rotation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisableKeyRotationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisableKeyRotationRequest.t -> (unit, unit) Result.t Lwt.t
 val disconnect_custom_key_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisconnectCustomKeyStoreRequest.t ->
         (DisconnectCustomKeyStoreResponse.t,
-          [ `AWS of DisconnectCustomKeyStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisconnectCustomKeyStoreResponse.error) Result.t Lwt.t
 val enable_key :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      EnableKeyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> EnableKeyRequest.t -> (unit, unit) Result.t Lwt.t
 val enable_key_rotation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      EnableKeyRotationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      EnableKeyRotationRequest.t -> (unit, unit) Result.t Lwt.t
 val encrypt :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EncryptRequest.t ->
-        (EncryptResponse.t,
-          [ `AWS of EncryptResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EncryptResponse.t, EncryptResponse.error) Result.t Lwt.t
 val generate_data_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateDataKeyRequest.t ->
-        (GenerateDataKeyResponse.t,
-          [ `AWS of GenerateDataKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GenerateDataKeyResponse.t, GenerateDataKeyResponse.error) Result.t
+          Lwt.t
 val generate_data_key_pair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateDataKeyPairRequest.t ->
-        (GenerateDataKeyPairResponse.t,
-          [ `AWS of GenerateDataKeyPairResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GenerateDataKeyPairResponse.t, GenerateDataKeyPairResponse.error)
+          Result.t Lwt.t
 val generate_data_key_pair_without_plaintext :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateDataKeyPairWithoutPlaintextRequest.t ->
         (GenerateDataKeyPairWithoutPlaintextResponse.t,
-          [ `AWS of GenerateDataKeyPairWithoutPlaintextResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GenerateDataKeyPairWithoutPlaintextResponse.error) Result.t Lwt.t
 val generate_data_key_without_plaintext :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateDataKeyWithoutPlaintextRequest.t ->
         (GenerateDataKeyWithoutPlaintextResponse.t,
-          [ `AWS of GenerateDataKeyWithoutPlaintextResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GenerateDataKeyWithoutPlaintextResponse.error) Result.t Lwt.t
 val generate_random :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateRandomRequest.t ->
-        (GenerateRandomResponse.t,
-          [ `AWS of GenerateRandomResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GenerateRandomResponse.t, GenerateRandomResponse.error) Result.t
+          Lwt.t
 val get_key_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetKeyPolicyRequest.t ->
-        (GetKeyPolicyResponse.t,
-          [ `AWS of GetKeyPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetKeyPolicyResponse.t, GetKeyPolicyResponse.error) Result.t Lwt.t
 val get_key_rotation_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetKeyRotationStatusRequest.t ->
-        (GetKeyRotationStatusResponse.t,
-          [ `AWS of GetKeyRotationStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetKeyRotationStatusResponse.t, GetKeyRotationStatusResponse.error)
+          Result.t Lwt.t
 val get_parameters_for_import :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetParametersForImportRequest.t ->
         (GetParametersForImportResponse.t,
-          [ `AWS of GetParametersForImportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetParametersForImportResponse.error) Result.t Lwt.t
 val get_public_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPublicKeyRequest.t ->
-        (GetPublicKeyResponse.t,
-          [ `AWS of GetPublicKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPublicKeyResponse.t, GetPublicKeyResponse.error) Result.t Lwt.t
 val import_key_material :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportKeyMaterialRequest.t ->
-        (ImportKeyMaterialResponse.t,
-          [ `AWS of ImportKeyMaterialResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportKeyMaterialResponse.t, ImportKeyMaterialResponse.error)
+          Result.t Lwt.t
 val list_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAliasesRequest.t ->
-        (ListAliasesResponse.t,
-          [ `AWS of ListAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAliasesResponse.t, ListAliasesResponse.error) Result.t Lwt.t
 val list_grants :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGrantsRequest.t ->
-        (ListGrantsResponse.t,
-          [ `AWS of ListGrantsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGrantsResponse.t, ListGrantsResponse.error) Result.t Lwt.t
 val list_key_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKeyPoliciesRequest.t ->
-        (ListKeyPoliciesResponse.t,
-          [ `AWS of ListKeyPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListKeyPoliciesResponse.t, ListKeyPoliciesResponse.error) Result.t
+          Lwt.t
 val list_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKeysRequest.t ->
-        (ListKeysResponse.t,
-          [ `AWS of ListKeysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListKeysResponse.t, ListKeysResponse.error) Result.t Lwt.t
 val list_resource_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceTagsRequest.t ->
-        (ListResourceTagsResponse.t,
-          [ `AWS of ListResourceTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourceTagsResponse.t, ListResourceTagsResponse.error) Result.t
+          Lwt.t
 val list_retirable_grants :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRetirableGrantsRequest.t ->
-        (ListGrantsResponse.t,
-          [ `AWS of ListGrantsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGrantsResponse.t, ListGrantsResponse.error) Result.t Lwt.t
 val put_key_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutKeyPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutKeyPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val re_encrypt :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReEncryptRequest.t ->
-        (ReEncryptResponse.t,
-          [ `AWS of ReEncryptResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReEncryptResponse.t, ReEncryptResponse.error) Result.t Lwt.t
 val replicate_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplicateKeyRequest.t ->
-        (ReplicateKeyResponse.t,
-          [ `AWS of ReplicateKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReplicateKeyResponse.t, ReplicateKeyResponse.error) Result.t Lwt.t
 val retire_grant :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      RetireGrantRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> RetireGrantRequest.t -> (unit, unit) Result.t Lwt.t
 val revoke_grant :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      RevokeGrantRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> RevokeGrantRequest.t -> (unit, unit) Result.t Lwt.t
 val schedule_key_deletion :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ScheduleKeyDeletionRequest.t ->
-        (ScheduleKeyDeletionResponse.t,
-          [ `AWS of ScheduleKeyDeletionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ScheduleKeyDeletionResponse.t, ScheduleKeyDeletionResponse.error)
+          Result.t Lwt.t
 val sign :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SignRequest.t ->
-        (SignResponse.t,
-          [ `AWS of SignResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      SignRequest.t -> (SignResponse.t, SignResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_alias :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UpdateAliasRequest.t -> (unit, unit) Result.t Lwt.t
 val update_custom_key_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCustomKeyStoreRequest.t ->
-        (UpdateCustomKeyStoreResponse.t,
-          [ `AWS of UpdateCustomKeyStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateCustomKeyStoreResponse.t, UpdateCustomKeyStoreResponse.error)
+          Result.t Lwt.t
 val update_key_description :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateKeyDescriptionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateKeyDescriptionRequest.t -> (unit, unit) Result.t Lwt.t
 val update_primary_region :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdatePrimaryRegionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdatePrimaryRegionRequest.t -> (unit, unit) Result.t Lwt.t
 val verify :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifyRequest.t ->
-        (VerifyResponse.t,
-          [ `AWS of VerifyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (VerifyResponse.t, VerifyResponse.error) Result.t Lwt.t

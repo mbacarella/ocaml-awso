@@ -4,317 +4,232 @@ val create_bot_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBotVersionRequest.t ->
-        (CreateBotVersionResponse.t,
-          [ `AWS of CreateBotVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateBotVersionResponse.t, CreateBotVersionResponse.error) Result.t
           Async.Deferred.t
 val create_intent_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIntentVersionRequest.t ->
-        (CreateIntentVersionResponse.t,
-          [ `AWS of CreateIntentVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateIntentVersionResponse.t, CreateIntentVersionResponse.error)
+          Result.t Async.Deferred.t
 val create_slot_type_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSlotTypeVersionRequest.t ->
         (CreateSlotTypeVersionResponse.t,
-          [ `AWS of CreateSlotTypeVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateSlotTypeVersionResponse.error) Result.t Async.Deferred.t
 val delete_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBotRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteBotRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_bot_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBotAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteBotAliasRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_bot_channel_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBotChannelAssociationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_bot_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBotVersionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteBotVersionRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_intent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteIntentRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteIntentRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_intent_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteIntentVersionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteIntentVersionRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_slot_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteSlotTypeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteSlotTypeRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_slot_type_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSlotTypeVersionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_utterances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteUtterancesRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteUtterancesRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val get_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotRequest.t ->
-        (GetBotResponse.t,
-          [ `AWS of GetBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBotResponse.t, GetBotResponse.error) Result.t Async.Deferred.t
 val get_bot_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotAliasRequest.t ->
-        (GetBotAliasResponse.t,
-          [ `AWS of GetBotAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBotAliasResponse.t, GetBotAliasResponse.error) Result.t
           Async.Deferred.t
 val get_bot_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotAliasesRequest.t ->
-        (GetBotAliasesResponse.t,
-          [ `AWS of GetBotAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBotAliasesResponse.t, GetBotAliasesResponse.error) Result.t
           Async.Deferred.t
 val get_bot_channel_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotChannelAssociationRequest.t ->
         (GetBotChannelAssociationResponse.t,
-          [ `AWS of GetBotChannelAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetBotChannelAssociationResponse.error) Result.t Async.Deferred.t
 val get_bot_channel_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotChannelAssociationsRequest.t ->
         (GetBotChannelAssociationsResponse.t,
-          [ `AWS of GetBotChannelAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetBotChannelAssociationsResponse.error) Result.t Async.Deferred.t
 val get_bot_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotVersionsRequest.t ->
-        (GetBotVersionsResponse.t,
-          [ `AWS of GetBotVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBotVersionsResponse.t, GetBotVersionsResponse.error) Result.t
           Async.Deferred.t
 val get_bots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotsRequest.t ->
-        (GetBotsResponse.t,
-          [ `AWS of GetBotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBotsResponse.t, GetBotsResponse.error) Result.t Async.Deferred.t
 val get_builtin_intent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBuiltinIntentRequest.t ->
-        (GetBuiltinIntentResponse.t,
-          [ `AWS of GetBuiltinIntentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBuiltinIntentResponse.t, GetBuiltinIntentResponse.error) Result.t
           Async.Deferred.t
 val get_builtin_intents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBuiltinIntentsRequest.t ->
-        (GetBuiltinIntentsResponse.t,
-          [ `AWS of GetBuiltinIntentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBuiltinIntentsResponse.t, GetBuiltinIntentsResponse.error)
+          Result.t Async.Deferred.t
 val get_builtin_slot_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBuiltinSlotTypesRequest.t ->
-        (GetBuiltinSlotTypesResponse.t,
-          [ `AWS of GetBuiltinSlotTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBuiltinSlotTypesResponse.t, GetBuiltinSlotTypesResponse.error)
+          Result.t Async.Deferred.t
 val get_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExportRequest.t ->
-        (GetExportResponse.t,
-          [ `AWS of GetExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetExportResponse.t, GetExportResponse.error) Result.t
           Async.Deferred.t
 val get_import :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetImportRequest.t ->
-        (GetImportResponse.t,
-          [ `AWS of GetImportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetImportResponse.t, GetImportResponse.error) Result.t
           Async.Deferred.t
 val get_intent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIntentRequest.t ->
-        (GetIntentResponse.t,
-          [ `AWS of GetIntentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIntentResponse.t, GetIntentResponse.error) Result.t
           Async.Deferred.t
 val get_intent_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIntentVersionsRequest.t ->
-        (GetIntentVersionsResponse.t,
-          [ `AWS of GetIntentVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetIntentVersionsResponse.t, GetIntentVersionsResponse.error)
+          Result.t Async.Deferred.t
 val get_intents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIntentsRequest.t ->
-        (GetIntentsResponse.t,
-          [ `AWS of GetIntentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIntentsResponse.t, GetIntentsResponse.error) Result.t
           Async.Deferred.t
 val get_migration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMigrationRequest.t ->
-        (GetMigrationResponse.t,
-          [ `AWS of GetMigrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMigrationResponse.t, GetMigrationResponse.error) Result.t
           Async.Deferred.t
 val get_migrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMigrationsRequest.t ->
-        (GetMigrationsResponse.t,
-          [ `AWS of GetMigrationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMigrationsResponse.t, GetMigrationsResponse.error) Result.t
           Async.Deferred.t
 val get_slot_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSlotTypeRequest.t ->
-        (GetSlotTypeResponse.t,
-          [ `AWS of GetSlotTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSlotTypeResponse.t, GetSlotTypeResponse.error) Result.t
           Async.Deferred.t
 val get_slot_type_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSlotTypeVersionsRequest.t ->
-        (GetSlotTypeVersionsResponse.t,
-          [ `AWS of GetSlotTypeVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetSlotTypeVersionsResponse.t, GetSlotTypeVersionsResponse.error)
+          Result.t Async.Deferred.t
 val get_slot_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSlotTypesRequest.t ->
-        (GetSlotTypesResponse.t,
-          [ `AWS of GetSlotTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSlotTypesResponse.t, GetSlotTypesResponse.error) Result.t
           Async.Deferred.t
 val get_utterances_view :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUtterancesViewRequest.t ->
-        (GetUtterancesViewResponse.t,
-          [ `AWS of GetUtterancesViewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetUtterancesViewResponse.t, GetUtterancesViewResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutBotRequest.t ->
-        (PutBotResponse.t,
-          [ `AWS of PutBotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutBotResponse.t, PutBotResponse.error) Result.t Async.Deferred.t
 val put_bot_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutBotAliasRequest.t ->
-        (PutBotAliasResponse.t,
-          [ `AWS of PutBotAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutBotAliasResponse.t, PutBotAliasResponse.error) Result.t
           Async.Deferred.t
 val put_intent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutIntentRequest.t ->
-        (PutIntentResponse.t,
-          [ `AWS of PutIntentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutIntentResponse.t, PutIntentResponse.error) Result.t
           Async.Deferred.t
 val put_slot_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSlotTypeRequest.t ->
-        (PutSlotTypeResponse.t,
-          [ `AWS of PutSlotTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutSlotTypeResponse.t, PutSlotTypeResponse.error) Result.t
           Async.Deferred.t
 val start_import :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImportRequest.t ->
-        (StartImportResponse.t,
-          [ `AWS of StartImportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartImportResponse.t, StartImportResponse.error) Result.t
           Async.Deferred.t
 val start_migration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMigrationRequest.t ->
-        (StartMigrationResponse.t,
-          [ `AWS of StartMigrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartMigrationResponse.t, StartMigrationResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

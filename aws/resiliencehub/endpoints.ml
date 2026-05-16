@@ -1210,344 +1210,357 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AddDraftAppVersionResourceMappings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AddDraftAppVersionResourceMappingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AddDraftAppVersionResourceMappingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AddDraftAppVersionResourceMappingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AddDraftAppVersionResourceMappingsResponse.error_of_json))
   | CreateApp ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateAppResponse.error_of_json)
-       | Ok resp -> Ok (CreateAppResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAppResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateAppResponse.error_of_json))
   | CreateRecommendationTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateRecommendationTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateRecommendationTemplateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateRecommendationTemplateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRecommendationTemplateResponse.error_of_json))
   | CreateResiliencyPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateResiliencyPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateResiliencyPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateResiliencyPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateResiliencyPolicyResponse.error_of_json))
   | DeleteApp ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteAppResponse.error_of_json)
-       | Ok resp -> Ok (DeleteAppResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAppResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteAppResponse.error_of_json))
   | DeleteAppAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAppAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteAppAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAppAssessmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteAppAssessmentResponse.error_of_json))
   | DeleteRecommendationTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRecommendationTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteRecommendationTemplateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteRecommendationTemplateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRecommendationTemplateResponse.error_of_json))
   | DeleteResiliencyPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteResiliencyPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteResiliencyPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteResiliencyPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteResiliencyPolicyResponse.error_of_json))
   | DescribeApp ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAppResponse.error_of_json)
-       | Ok resp -> Ok (DescribeAppResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAppResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeAppResponse.error_of_json))
   | DescribeAppAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAppAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAppAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAppAssessmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAppAssessmentResponse.error_of_json))
   | DescribeAppVersionResourcesResolutionStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeAppVersionResourcesResolutionStatusResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeAppVersionResourcesResolutionStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAppVersionResourcesResolutionStatusResponse.of_json
-                (response_to_json resp)))
+                DescribeAppVersionResourcesResolutionStatusResponse.error_of_json))
   | DescribeAppVersionTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAppVersionTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAppVersionTemplateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeAppVersionTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppVersionTemplateResponse.error_of_json))
   | DescribeDraftAppVersionResourcesImportStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeDraftAppVersionResourcesImportStatusResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeDraftAppVersionResourcesImportStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDraftAppVersionResourcesImportStatusResponse.of_json
-                (response_to_json resp)))
+                DescribeDraftAppVersionResourcesImportStatusResponse.error_of_json))
   | DescribeResiliencyPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeResiliencyPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeResiliencyPolicyResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeResiliencyPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeResiliencyPolicyResponse.error_of_json))
   | ImportResourcesToDraftAppVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ImportResourcesToDraftAppVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ImportResourcesToDraftAppVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ImportResourcesToDraftAppVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ImportResourcesToDraftAppVersionResponse.error_of_json))
   | ListAlarmRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAlarmRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAlarmRecommendationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListAlarmRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAlarmRecommendationsResponse.error_of_json))
   | ListAppAssessments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAppAssessmentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppAssessmentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppAssessmentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppAssessmentsResponse.error_of_json))
   | ListAppComponentCompliances ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppComponentCompliancesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAppComponentCompliancesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAppComponentCompliancesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppComponentCompliancesResponse.error_of_json))
   | ListAppComponentRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppComponentRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAppComponentRecommendationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAppComponentRecommendationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppComponentRecommendationsResponse.error_of_json))
   | ListAppVersionResourceMappings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppVersionResourceMappingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAppVersionResourceMappingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAppVersionResourceMappingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppVersionResourceMappingsResponse.error_of_json))
   | ListAppVersionResources ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppVersionResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAppVersionResourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListAppVersionResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppVersionResourcesResponse.error_of_json))
   | ListAppVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAppVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppVersionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAppVersionsResponse.error_of_json))
   | ListApps ->
-      (match resp with
-       | Error err -> handle_error err (Some ListAppsResponse.error_of_json)
-       | Ok resp -> Ok (ListAppsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAppsResponse.error_of_json))
   | ListRecommendationTemplates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListRecommendationTemplatesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListRecommendationTemplatesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListRecommendationTemplatesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecommendationTemplatesResponse.error_of_json))
   | ListResiliencyPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListResiliencyPoliciesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListResiliencyPoliciesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListResiliencyPoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListResiliencyPoliciesResponse.error_of_json))
   | ListSopRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSopRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListSopRecommendationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListSopRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSopRecommendationsResponse.error_of_json))
   | ListSuggestedResiliencyPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSuggestedResiliencyPoliciesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListSuggestedResiliencyPoliciesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListSuggestedResiliencyPoliciesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSuggestedResiliencyPoliciesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTestRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTestRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListTestRecommendationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListTestRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTestRecommendationsResponse.error_of_json))
   | ListUnsupportedAppVersionResources ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListUnsupportedAppVersionResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListUnsupportedAppVersionResourcesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListUnsupportedAppVersionResourcesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListUnsupportedAppVersionResourcesResponse.error_of_json))
   | PublishAppVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PublishAppVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (PublishAppVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PublishAppVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PublishAppVersionResponse.error_of_json))
   | PutDraftAppVersionTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutDraftAppVersionTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutDraftAppVersionTemplateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutDraftAppVersionTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutDraftAppVersionTemplateResponse.error_of_json))
   | RemoveDraftAppVersionResourceMappings ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (RemoveDraftAppVersionResourceMappingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                RemoveDraftAppVersionResourceMappingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RemoveDraftAppVersionResourceMappingsResponse.of_json
-                (response_to_json resp)))
+                RemoveDraftAppVersionResourceMappingsResponse.error_of_json))
   | ResolveAppVersionResources ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ResolveAppVersionResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ResolveAppVersionResourcesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ResolveAppVersionResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ResolveAppVersionResourcesResponse.error_of_json))
   | StartAppAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartAppAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartAppAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartAppAssessmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartAppAssessmentResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateApp ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateAppResponse.error_of_json)
-       | Ok resp -> Ok (UpdateAppResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAppResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateAppResponse.error_of_json))
   | UpdateResiliencyPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateResiliencyPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateResiliencyPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateResiliencyPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateResiliencyPolicyResponse.error_of_json))

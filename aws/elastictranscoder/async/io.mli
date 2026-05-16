@@ -4,135 +4,101 @@ val cancel_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobRequest.t ->
-        (CancelJobResponse.t,
-          [ `AWS of CancelJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelJobResponse.t, CancelJobResponse.error) Result.t
           Async.Deferred.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobRequest.t ->
-        (CreateJobResponse.t,
-          [ `AWS of CreateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateJobResponse.t, CreateJobResponse.error) Result.t
           Async.Deferred.t
 val create_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePipelineRequest.t ->
-        (CreatePipelineResponse.t,
-          [ `AWS of CreatePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePipelineResponse.t, CreatePipelineResponse.error) Result.t
           Async.Deferred.t
 val create_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePresetRequest.t ->
-        (CreatePresetResponse.t,
-          [ `AWS of CreatePresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePresetResponse.t, CreatePresetResponse.error) Result.t
           Async.Deferred.t
 val delete_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePipelineRequest.t ->
-        (DeletePipelineResponse.t,
-          [ `AWS of DeletePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeletePipelineResponse.t, DeletePipelineResponse.error) Result.t
           Async.Deferred.t
 val delete_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePresetRequest.t ->
-        (DeletePresetResponse.t,
-          [ `AWS of DeletePresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeletePresetResponse.t, DeletePresetResponse.error) Result.t
           Async.Deferred.t
 val list_jobs_by_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsByPipelineRequest.t ->
-        (ListJobsByPipelineResponse.t,
-          [ `AWS of ListJobsByPipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListJobsByPipelineResponse.t, ListJobsByPipelineResponse.error)
+          Result.t Async.Deferred.t
 val list_jobs_by_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsByStatusRequest.t ->
-        (ListJobsByStatusResponse.t,
-          [ `AWS of ListJobsByStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListJobsByStatusResponse.t, ListJobsByStatusResponse.error) Result.t
           Async.Deferred.t
 val list_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPipelinesRequest.t ->
-        (ListPipelinesResponse.t,
-          [ `AWS of ListPipelinesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPipelinesResponse.t, ListPipelinesResponse.error) Result.t
           Async.Deferred.t
 val list_presets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPresetsRequest.t ->
-        (ListPresetsResponse.t,
-          [ `AWS of ListPresetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPresetsResponse.t, ListPresetsResponse.error) Result.t
           Async.Deferred.t
 val read_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReadJobRequest.t ->
-        (ReadJobResponse.t,
-          [ `AWS of ReadJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ReadJobResponse.t, ReadJobResponse.error) Result.t Async.Deferred.t
 val read_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReadPipelineRequest.t ->
-        (ReadPipelineResponse.t,
-          [ `AWS of ReadPipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ReadPipelineResponse.t, ReadPipelineResponse.error) Result.t
           Async.Deferred.t
 val read_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReadPresetRequest.t ->
-        (ReadPresetResponse.t,
-          [ `AWS of ReadPresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ReadPresetResponse.t, ReadPresetResponse.error) Result.t
           Async.Deferred.t
 val test_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestRoleRequest.t ->
-        (TestRoleResponse.t,
-          [ `AWS of TestRoleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TestRoleResponse.t, TestRoleResponse.error) Result.t
           Async.Deferred.t
 val update_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePipelineRequest.t ->
-        (UpdatePipelineResponse.t,
-          [ `AWS of UpdatePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdatePipelineResponse.t, UpdatePipelineResponse.error) Result.t
           Async.Deferred.t
 val update_pipeline_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePipelineNotificationsRequest.t ->
         (UpdatePipelineNotificationsResponse.t,
-          [ `AWS of UpdatePipelineNotificationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdatePipelineNotificationsResponse.error) Result.t
           Async.Deferred.t
 val update_pipeline_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePipelineStatusRequest.t ->
-        (UpdatePipelineStatusResponse.t,
-          [ `AWS of UpdatePipelineStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdatePipelineStatusResponse.t, UpdatePipelineStatusResponse.error)
+          Result.t Async.Deferred.t

@@ -4,641 +4,540 @@ val associate_role_to_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateRoleToGroupRequest.t ->
-        (AssociateRoleToGroupResponse.t,
-          [ `AWS of AssociateRoleToGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateRoleToGroupResponse.t, AssociateRoleToGroupResponse.error)
+          Result.t Lwt.t
 val associate_service_role_to_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateServiceRoleToAccountRequest.t ->
         (AssociateServiceRoleToAccountResponse.t,
-          [ `AWS of AssociateServiceRoleToAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateServiceRoleToAccountResponse.error) Result.t Lwt.t
 val create_connector_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectorDefinitionRequest.t ->
         (CreateConnectorDefinitionResponse.t,
-          [ `AWS of CreateConnectorDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateConnectorDefinitionResponse.error) Result.t Lwt.t
 val create_connector_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectorDefinitionVersionRequest.t ->
         (CreateConnectorDefinitionVersionResponse.t,
-          [ `AWS of CreateConnectorDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateConnectorDefinitionVersionResponse.error) Result.t Lwt.t
 val create_core_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCoreDefinitionRequest.t ->
-        (CreateCoreDefinitionResponse.t,
-          [ `AWS of CreateCoreDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCoreDefinitionResponse.t, CreateCoreDefinitionResponse.error)
+          Result.t Lwt.t
 val create_core_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCoreDefinitionVersionRequest.t ->
         (CreateCoreDefinitionVersionResponse.t,
-          [ `AWS of CreateCoreDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCoreDefinitionVersionResponse.error) Result.t Lwt.t
 val create_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentRequest.t ->
-        (CreateDeploymentResponse.t,
-          [ `AWS of CreateDeploymentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeploymentResponse.t, CreateDeploymentResponse.error) Result.t
+          Lwt.t
 val create_device_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeviceDefinitionRequest.t ->
         (CreateDeviceDefinitionResponse.t,
-          [ `AWS of CreateDeviceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDeviceDefinitionResponse.error) Result.t Lwt.t
 val create_device_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeviceDefinitionVersionRequest.t ->
         (CreateDeviceDefinitionVersionResponse.t,
-          [ `AWS of CreateDeviceDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDeviceDefinitionVersionResponse.error) Result.t Lwt.t
 val create_function_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFunctionDefinitionRequest.t ->
         (CreateFunctionDefinitionResponse.t,
-          [ `AWS of CreateFunctionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateFunctionDefinitionResponse.error) Result.t Lwt.t
 val create_function_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFunctionDefinitionVersionRequest.t ->
         (CreateFunctionDefinitionVersionResponse.t,
-          [ `AWS of CreateFunctionDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateFunctionDefinitionVersionResponse.error) Result.t Lwt.t
 val create_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupRequest.t ->
-        (CreateGroupResponse.t,
-          [ `AWS of CreateGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGroupResponse.t, CreateGroupResponse.error) Result.t Lwt.t
 val create_group_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupCertificateAuthorityRequest.t ->
         (CreateGroupCertificateAuthorityResponse.t,
-          [ `AWS of CreateGroupCertificateAuthorityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateGroupCertificateAuthorityResponse.error) Result.t Lwt.t
 val create_group_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupVersionRequest.t ->
-        (CreateGroupVersionResponse.t,
-          [ `AWS of CreateGroupVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGroupVersionResponse.t, CreateGroupVersionResponse.error)
+          Result.t Lwt.t
 val create_logger_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLoggerDefinitionRequest.t ->
         (CreateLoggerDefinitionResponse.t,
-          [ `AWS of CreateLoggerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLoggerDefinitionResponse.error) Result.t Lwt.t
 val create_logger_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLoggerDefinitionVersionRequest.t ->
         (CreateLoggerDefinitionVersionResponse.t,
-          [ `AWS of CreateLoggerDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLoggerDefinitionVersionResponse.error) Result.t Lwt.t
 val create_resource_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceDefinitionRequest.t ->
         (CreateResourceDefinitionResponse.t,
-          [ `AWS of CreateResourceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateResourceDefinitionResponse.error) Result.t Lwt.t
 val create_resource_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceDefinitionVersionRequest.t ->
         (CreateResourceDefinitionVersionResponse.t,
-          [ `AWS of CreateResourceDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateResourceDefinitionVersionResponse.error) Result.t Lwt.t
 val create_software_update_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSoftwareUpdateJobRequest.t ->
         (CreateSoftwareUpdateJobResponse.t,
-          [ `AWS of CreateSoftwareUpdateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSoftwareUpdateJobResponse.error) Result.t Lwt.t
 val create_subscription_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSubscriptionDefinitionRequest.t ->
         (CreateSubscriptionDefinitionResponse.t,
-          [ `AWS of CreateSubscriptionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSubscriptionDefinitionResponse.error) Result.t Lwt.t
 val create_subscription_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSubscriptionDefinitionVersionRequest.t ->
         (CreateSubscriptionDefinitionVersionResponse.t,
-          [ `AWS of CreateSubscriptionDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSubscriptionDefinitionVersionResponse.error) Result.t Lwt.t
 val delete_connector_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectorDefinitionRequest.t ->
         (DeleteConnectorDefinitionResponse.t,
-          [ `AWS of DeleteConnectorDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteConnectorDefinitionResponse.error) Result.t Lwt.t
 val delete_core_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCoreDefinitionRequest.t ->
-        (DeleteCoreDefinitionResponse.t,
-          [ `AWS of DeleteCoreDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCoreDefinitionResponse.t, DeleteCoreDefinitionResponse.error)
+          Result.t Lwt.t
 val delete_device_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDeviceDefinitionRequest.t ->
         (DeleteDeviceDefinitionResponse.t,
-          [ `AWS of DeleteDeviceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDeviceDefinitionResponse.error) Result.t Lwt.t
 val delete_function_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFunctionDefinitionRequest.t ->
         (DeleteFunctionDefinitionResponse.t,
-          [ `AWS of DeleteFunctionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteFunctionDefinitionResponse.error) Result.t Lwt.t
 val delete_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGroupRequest.t ->
-        (DeleteGroupResponse.t,
-          [ `AWS of DeleteGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteGroupResponse.t, DeleteGroupResponse.error) Result.t Lwt.t
 val delete_logger_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLoggerDefinitionRequest.t ->
         (DeleteLoggerDefinitionResponse.t,
-          [ `AWS of DeleteLoggerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteLoggerDefinitionResponse.error) Result.t Lwt.t
 val delete_resource_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourceDefinitionRequest.t ->
         (DeleteResourceDefinitionResponse.t,
-          [ `AWS of DeleteResourceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteResourceDefinitionResponse.error) Result.t Lwt.t
 val delete_subscription_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSubscriptionDefinitionRequest.t ->
         (DeleteSubscriptionDefinitionResponse.t,
-          [ `AWS of DeleteSubscriptionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteSubscriptionDefinitionResponse.error) Result.t Lwt.t
 val disassociate_role_from_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateRoleFromGroupRequest.t ->
         (DisassociateRoleFromGroupResponse.t,
-          [ `AWS of DisassociateRoleFromGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateRoleFromGroupResponse.error) Result.t Lwt.t
 val disassociate_service_role_from_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateServiceRoleFromAccountRequest.t ->
         (DisassociateServiceRoleFromAccountResponse.t,
-          [ `AWS of DisassociateServiceRoleFromAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateServiceRoleFromAccountResponse.error) Result.t Lwt.t
 val get_associated_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssociatedRoleRequest.t ->
-        (GetAssociatedRoleResponse.t,
-          [ `AWS of GetAssociatedRoleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAssociatedRoleResponse.t, GetAssociatedRoleResponse.error)
+          Result.t Lwt.t
 val get_bulk_deployment_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBulkDeploymentStatusRequest.t ->
         (GetBulkDeploymentStatusResponse.t,
-          [ `AWS of GetBulkDeploymentStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBulkDeploymentStatusResponse.error) Result.t Lwt.t
 val get_connectivity_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectivityInfoRequest.t ->
-        (GetConnectivityInfoResponse.t,
-          [ `AWS of GetConnectivityInfoResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetConnectivityInfoResponse.t, GetConnectivityInfoResponse.error)
+          Result.t Lwt.t
 val get_connector_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectorDefinitionRequest.t ->
         (GetConnectorDefinitionResponse.t,
-          [ `AWS of GetConnectorDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetConnectorDefinitionResponse.error) Result.t Lwt.t
 val get_connector_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectorDefinitionVersionRequest.t ->
         (GetConnectorDefinitionVersionResponse.t,
-          [ `AWS of GetConnectorDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetConnectorDefinitionVersionResponse.error) Result.t Lwt.t
 val get_core_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCoreDefinitionRequest.t ->
-        (GetCoreDefinitionResponse.t,
-          [ `AWS of GetCoreDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCoreDefinitionResponse.t, GetCoreDefinitionResponse.error)
+          Result.t Lwt.t
 val get_core_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCoreDefinitionVersionRequest.t ->
         (GetCoreDefinitionVersionResponse.t,
-          [ `AWS of GetCoreDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCoreDefinitionVersionResponse.error) Result.t Lwt.t
 val get_deployment_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeploymentStatusRequest.t ->
-        (GetDeploymentStatusResponse.t,
-          [ `AWS of GetDeploymentStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeploymentStatusResponse.t, GetDeploymentStatusResponse.error)
+          Result.t Lwt.t
 val get_device_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceDefinitionRequest.t ->
-        (GetDeviceDefinitionResponse.t,
-          [ `AWS of GetDeviceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeviceDefinitionResponse.t, GetDeviceDefinitionResponse.error)
+          Result.t Lwt.t
 val get_device_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceDefinitionVersionRequest.t ->
         (GetDeviceDefinitionVersionResponse.t,
-          [ `AWS of GetDeviceDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDeviceDefinitionVersionResponse.error) Result.t Lwt.t
 val get_function_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionDefinitionRequest.t ->
         (GetFunctionDefinitionResponse.t,
-          [ `AWS of GetFunctionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFunctionDefinitionResponse.error) Result.t Lwt.t
 val get_function_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionDefinitionVersionRequest.t ->
         (GetFunctionDefinitionVersionResponse.t,
-          [ `AWS of GetFunctionDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFunctionDefinitionVersionResponse.error) Result.t Lwt.t
 val get_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupRequest.t ->
-        (GetGroupResponse.t,
-          [ `AWS of GetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGroupResponse.t, GetGroupResponse.error) Result.t Lwt.t
 val get_group_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupCertificateAuthorityRequest.t ->
         (GetGroupCertificateAuthorityResponse.t,
-          [ `AWS of GetGroupCertificateAuthorityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetGroupCertificateAuthorityResponse.error) Result.t Lwt.t
 val get_group_certificate_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupCertificateConfigurationRequest.t ->
         (GetGroupCertificateConfigurationResponse.t,
-          [ `AWS of GetGroupCertificateConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetGroupCertificateConfigurationResponse.error) Result.t Lwt.t
 val get_group_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupVersionRequest.t ->
-        (GetGroupVersionResponse.t,
-          [ `AWS of GetGroupVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGroupVersionResponse.t, GetGroupVersionResponse.error) Result.t
+          Lwt.t
 val get_logger_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLoggerDefinitionRequest.t ->
-        (GetLoggerDefinitionResponse.t,
-          [ `AWS of GetLoggerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLoggerDefinitionResponse.t, GetLoggerDefinitionResponse.error)
+          Result.t Lwt.t
 val get_logger_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLoggerDefinitionVersionRequest.t ->
         (GetLoggerDefinitionVersionResponse.t,
-          [ `AWS of GetLoggerDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLoggerDefinitionVersionResponse.error) Result.t Lwt.t
 val get_resource_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceDefinitionRequest.t ->
         (GetResourceDefinitionResponse.t,
-          [ `AWS of GetResourceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResourceDefinitionResponse.error) Result.t Lwt.t
 val get_resource_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceDefinitionVersionRequest.t ->
         (GetResourceDefinitionVersionResponse.t,
-          [ `AWS of GetResourceDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResourceDefinitionVersionResponse.error) Result.t Lwt.t
 val get_service_role_for_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceRoleForAccountRequest.t ->
         (GetServiceRoleForAccountResponse.t,
-          [ `AWS of GetServiceRoleForAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetServiceRoleForAccountResponse.error) Result.t Lwt.t
 val get_subscription_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSubscriptionDefinitionRequest.t ->
         (GetSubscriptionDefinitionResponse.t,
-          [ `AWS of GetSubscriptionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSubscriptionDefinitionResponse.error) Result.t Lwt.t
 val get_subscription_definition_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSubscriptionDefinitionVersionRequest.t ->
         (GetSubscriptionDefinitionVersionResponse.t,
-          [ `AWS of GetSubscriptionDefinitionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSubscriptionDefinitionVersionResponse.error) Result.t Lwt.t
 val get_thing_runtime_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetThingRuntimeConfigurationRequest.t ->
         (GetThingRuntimeConfigurationResponse.t,
-          [ `AWS of GetThingRuntimeConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetThingRuntimeConfigurationResponse.error) Result.t Lwt.t
 val list_bulk_deployment_detailed_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBulkDeploymentDetailedReportsRequest.t ->
         (ListBulkDeploymentDetailedReportsResponse.t,
-          [ `AWS of ListBulkDeploymentDetailedReportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBulkDeploymentDetailedReportsResponse.error) Result.t Lwt.t
 val list_bulk_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBulkDeploymentsRequest.t ->
-        (ListBulkDeploymentsResponse.t,
-          [ `AWS of ListBulkDeploymentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBulkDeploymentsResponse.t, ListBulkDeploymentsResponse.error)
+          Result.t Lwt.t
 val list_connector_definition_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectorDefinitionVersionsRequest.t ->
         (ListConnectorDefinitionVersionsResponse.t,
-          [ `AWS of ListConnectorDefinitionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListConnectorDefinitionVersionsResponse.error) Result.t Lwt.t
 val list_connector_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectorDefinitionsRequest.t ->
         (ListConnectorDefinitionsResponse.t,
-          [ `AWS of ListConnectorDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListConnectorDefinitionsResponse.error) Result.t Lwt.t
 val list_core_definition_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoreDefinitionVersionsRequest.t ->
         (ListCoreDefinitionVersionsResponse.t,
-          [ `AWS of ListCoreDefinitionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCoreDefinitionVersionsResponse.error) Result.t Lwt.t
 val list_core_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoreDefinitionsRequest.t ->
-        (ListCoreDefinitionsResponse.t,
-          [ `AWS of ListCoreDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCoreDefinitionsResponse.t, ListCoreDefinitionsResponse.error)
+          Result.t Lwt.t
 val list_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentsRequest.t ->
-        (ListDeploymentsResponse.t,
-          [ `AWS of ListDeploymentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeploymentsResponse.t, ListDeploymentsResponse.error) Result.t
+          Lwt.t
 val list_device_definition_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeviceDefinitionVersionsRequest.t ->
         (ListDeviceDefinitionVersionsResponse.t,
-          [ `AWS of ListDeviceDefinitionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDeviceDefinitionVersionsResponse.error) Result.t Lwt.t
 val list_device_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeviceDefinitionsRequest.t ->
         (ListDeviceDefinitionsResponse.t,
-          [ `AWS of ListDeviceDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDeviceDefinitionsResponse.error) Result.t Lwt.t
 val list_function_definition_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFunctionDefinitionVersionsRequest.t ->
         (ListFunctionDefinitionVersionsResponse.t,
-          [ `AWS of ListFunctionDefinitionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFunctionDefinitionVersionsResponse.error) Result.t Lwt.t
 val list_function_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFunctionDefinitionsRequest.t ->
         (ListFunctionDefinitionsResponse.t,
-          [ `AWS of ListFunctionDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFunctionDefinitionsResponse.error) Result.t Lwt.t
 val list_group_certificate_authorities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupCertificateAuthoritiesRequest.t ->
         (ListGroupCertificateAuthoritiesResponse.t,
-          [ `AWS of ListGroupCertificateAuthoritiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListGroupCertificateAuthoritiesResponse.error) Result.t Lwt.t
 val list_group_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupVersionsRequest.t ->
-        (ListGroupVersionsResponse.t,
-          [ `AWS of ListGroupVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGroupVersionsResponse.t, ListGroupVersionsResponse.error)
+          Result.t Lwt.t
 val list_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupsRequest.t ->
-        (ListGroupsResponse.t,
-          [ `AWS of ListGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGroupsResponse.t, ListGroupsResponse.error) Result.t Lwt.t
 val list_logger_definition_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLoggerDefinitionVersionsRequest.t ->
         (ListLoggerDefinitionVersionsResponse.t,
-          [ `AWS of ListLoggerDefinitionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListLoggerDefinitionVersionsResponse.error) Result.t Lwt.t
 val list_logger_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLoggerDefinitionsRequest.t ->
         (ListLoggerDefinitionsResponse.t,
-          [ `AWS of ListLoggerDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListLoggerDefinitionsResponse.error) Result.t Lwt.t
 val list_resource_definition_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceDefinitionVersionsRequest.t ->
         (ListResourceDefinitionVersionsResponse.t,
-          [ `AWS of ListResourceDefinitionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourceDefinitionVersionsResponse.error) Result.t Lwt.t
 val list_resource_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceDefinitionsRequest.t ->
         (ListResourceDefinitionsResponse.t,
-          [ `AWS of ListResourceDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourceDefinitionsResponse.error) Result.t Lwt.t
 val list_subscription_definition_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSubscriptionDefinitionVersionsRequest.t ->
         (ListSubscriptionDefinitionVersionsResponse.t,
-          [ `AWS of ListSubscriptionDefinitionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSubscriptionDefinitionVersionsResponse.error) Result.t Lwt.t
 val list_subscription_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSubscriptionDefinitionsRequest.t ->
         (ListSubscriptionDefinitionsResponse.t,
-          [ `AWS of ListSubscriptionDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSubscriptionDefinitionsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val reset_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetDeploymentsRequest.t ->
-        (ResetDeploymentsResponse.t,
-          [ `AWS of ResetDeploymentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResetDeploymentsResponse.t, ResetDeploymentsResponse.error) Result.t
+          Lwt.t
 val start_bulk_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartBulkDeploymentRequest.t ->
-        (StartBulkDeploymentResponse.t,
-          [ `AWS of StartBulkDeploymentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartBulkDeploymentResponse.t, StartBulkDeploymentResponse.error)
+          Result.t Lwt.t
 val stop_bulk_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopBulkDeploymentRequest.t ->
-        (StopBulkDeploymentResponse.t,
-          [ `AWS of StopBulkDeploymentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopBulkDeploymentResponse.t, StopBulkDeploymentResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_connectivity_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectivityInfoRequest.t ->
         (UpdateConnectivityInfoResponse.t,
-          [ `AWS of UpdateConnectivityInfoResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateConnectivityInfoResponse.error) Result.t Lwt.t
 val update_connector_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectorDefinitionRequest.t ->
         (UpdateConnectorDefinitionResponse.t,
-          [ `AWS of UpdateConnectorDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateConnectorDefinitionResponse.error) Result.t Lwt.t
 val update_core_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCoreDefinitionRequest.t ->
-        (UpdateCoreDefinitionResponse.t,
-          [ `AWS of UpdateCoreDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateCoreDefinitionResponse.t, UpdateCoreDefinitionResponse.error)
+          Result.t Lwt.t
 val update_device_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDeviceDefinitionRequest.t ->
         (UpdateDeviceDefinitionResponse.t,
-          [ `AWS of UpdateDeviceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDeviceDefinitionResponse.error) Result.t Lwt.t
 val update_function_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFunctionDefinitionRequest.t ->
         (UpdateFunctionDefinitionResponse.t,
-          [ `AWS of UpdateFunctionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateFunctionDefinitionResponse.error) Result.t Lwt.t
 val update_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGroupRequest.t ->
-        (UpdateGroupResponse.t,
-          [ `AWS of UpdateGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateGroupResponse.t, UpdateGroupResponse.error) Result.t Lwt.t
 val update_group_certificate_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGroupCertificateConfigurationRequest.t ->
         (UpdateGroupCertificateConfigurationResponse.t,
-          [ `AWS of UpdateGroupCertificateConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateGroupCertificateConfigurationResponse.error) Result.t Lwt.t
 val update_logger_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLoggerDefinitionRequest.t ->
         (UpdateLoggerDefinitionResponse.t,
-          [ `AWS of UpdateLoggerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateLoggerDefinitionResponse.error) Result.t Lwt.t
 val update_resource_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceDefinitionRequest.t ->
         (UpdateResourceDefinitionResponse.t,
-          [ `AWS of UpdateResourceDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateResourceDefinitionResponse.error) Result.t Lwt.t
 val update_subscription_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSubscriptionDefinitionRequest.t ->
         (UpdateSubscriptionDefinitionResponse.t,
-          [ `AWS of UpdateSubscriptionDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateSubscriptionDefinitionResponse.error) Result.t Lwt.t
 val update_thing_runtime_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateThingRuntimeConfigurationRequest.t ->
         (UpdateThingRuntimeConfigurationResponse.t,
-          [ `AWS of UpdateThingRuntimeConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateThingRuntimeConfigurationResponse.error) Result.t Lwt.t

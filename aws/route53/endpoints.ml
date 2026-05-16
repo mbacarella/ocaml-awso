@@ -761,496 +761,488 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateTrafficPolicyInstance ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "Error"), _), _) as xml ->
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS (error_of_xml (String.strip error_code) xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "Error"), _), _) as xml ->
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
   let response_to_xml resp =
     Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+  let _ = parse_aws_error in
+  let _ = response_to_xml in
+  let _ = resp in
   match endpoint with
   | ActivateKeySigningKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ActivateKeySigningKeyResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ActivateKeySigningKeyResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ActivateKeySigningKeyResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ActivateKeySigningKeyResponse.error_of_xml))
   | AssociateVPCWithHostedZone ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateVPCWithHostedZoneResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (AssociateVPCWithHostedZoneResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok (AssociateVPCWithHostedZoneResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateVPCWithHostedZoneResponse.error_of_xml))
   | ChangeResourceRecordSets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ChangeResourceRecordSetsResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ChangeResourceRecordSetsResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ChangeResourceRecordSetsResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ChangeResourceRecordSetsResponse.error_of_xml))
   | ChangeTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ChangeTagsForResourceResponse.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (ChangeTagsForResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ChangeTagsForResourceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some ChangeTagsForResourceResponse.error_of_xml))
   | CreateHealthCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateHealthCheckResponse.error_of_xml)
-       | Ok resp ->
-           Ok (CreateHealthCheckResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateHealthCheckResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some CreateHealthCheckResponse.error_of_xml))
   | CreateHostedZone ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateHostedZoneResponse.error_of_xml)
-       | Ok resp ->
-           Ok (CreateHostedZoneResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateHostedZoneResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some CreateHostedZoneResponse.error_of_xml))
   | CreateKeySigningKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateKeySigningKeyResponse.error_of_xml)
-       | Ok resp ->
-           Ok (CreateKeySigningKeyResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateKeySigningKeyResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some CreateKeySigningKeyResponse.error_of_xml))
   | CreateQueryLoggingConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateQueryLoggingConfigResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateQueryLoggingConfigResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (CreateQueryLoggingConfigResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateQueryLoggingConfigResponse.error_of_xml))
   | CreateReusableDelegationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateReusableDelegationSetResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateReusableDelegationSetResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (CreateReusableDelegationSetResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateReusableDelegationSetResponse.error_of_xml))
   | CreateTrafficPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTrafficPolicyResponse.error_of_xml)
-       | Ok resp ->
-           Ok (CreateTrafficPolicyResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateTrafficPolicyResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some CreateTrafficPolicyResponse.error_of_xml))
   | CreateTrafficPolicyInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateTrafficPolicyInstanceResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateTrafficPolicyInstanceResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (CreateTrafficPolicyInstanceResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTrafficPolicyInstanceResponse.error_of_xml))
   | CreateTrafficPolicyVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateTrafficPolicyVersionResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateTrafficPolicyVersionResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok (CreateTrafficPolicyVersionResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTrafficPolicyVersionResponse.error_of_xml))
   | CreateVPCAssociationAuthorization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateVPCAssociationAuthorizationResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateVPCAssociationAuthorizationResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (CreateVPCAssociationAuthorizationResponse.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateVPCAssociationAuthorizationResponse.error_of_xml))
   | DeactivateKeySigningKey ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeactivateKeySigningKeyResponse.error_of_xml)
-       | Ok resp ->
-           Ok (DeactivateKeySigningKeyResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (DeactivateKeySigningKeyResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeactivateKeySigningKeyResponse.error_of_xml))
   | DeleteHealthCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteHealthCheckResponse.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteHealthCheckResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteHealthCheckResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteHealthCheckResponse.error_of_xml))
   | DeleteHostedZone ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteHostedZoneResponse.error_of_xml)
-       | Ok resp ->
-           Ok (DeleteHostedZoneResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (DeleteHostedZoneResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some DeleteHostedZoneResponse.error_of_xml))
   | DeleteKeySigningKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteKeySigningKeyResponse.error_of_xml)
-       | Ok resp ->
-           Ok (DeleteKeySigningKeyResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (DeleteKeySigningKeyResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteKeySigningKeyResponse.error_of_xml))
   | DeleteQueryLoggingConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteQueryLoggingConfigResponse.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteQueryLoggingConfigResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteQueryLoggingConfigResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteQueryLoggingConfigResponse.error_of_xml))
   | DeleteReusableDelegationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteReusableDelegationSetResponse.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteReusableDelegationSetResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteReusableDelegationSetResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteReusableDelegationSetResponse.error_of_xml))
   | DeleteTrafficPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTrafficPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteTrafficPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTrafficPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteTrafficPolicyResponse.error_of_xml))
   | DeleteTrafficPolicyInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteTrafficPolicyInstanceResponse.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteTrafficPolicyInstanceResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteTrafficPolicyInstanceResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTrafficPolicyInstanceResponse.error_of_xml))
   | DeleteVPCAssociationAuthorization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteVPCAssociationAuthorizationResponse.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteVPCAssociationAuthorizationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteVPCAssociationAuthorizationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteVPCAssociationAuthorizationResponse.error_of_xml))
   | DisableHostedZoneDNSSEC ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisableHostedZoneDNSSECResponse.error_of_xml)
-       | Ok resp ->
-           Ok (DisableHostedZoneDNSSECResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (DisableHostedZoneDNSSECResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisableHostedZoneDNSSECResponse.error_of_xml))
   | DisassociateVPCFromHostedZone ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateVPCFromHostedZoneResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (DisassociateVPCFromHostedZoneResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (DisassociateVPCFromHostedZoneResponse.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateVPCFromHostedZoneResponse.error_of_xml))
   | EnableHostedZoneDNSSEC ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EnableHostedZoneDNSSECResponse.error_of_xml)
-       | Ok resp ->
-           Ok (EnableHostedZoneDNSSECResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (EnableHostedZoneDNSSECResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some EnableHostedZoneDNSSECResponse.error_of_xml))
   | GetAccountLimit ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccountLimitResponse.error_of_xml)
-       | Ok resp ->
-           Ok (GetAccountLimitResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetAccountLimitResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some GetAccountLimitResponse.error_of_xml))
   | GetChange ->
-      (match resp with
-       | Error err -> handle_error err (Some GetChangeResponse.error_of_xml)
-       | Ok resp -> Ok (GetChangeResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetChangeResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetChangeResponse.error_of_xml))
   | GetCheckerIpRanges ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetCheckerIpRangesResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetCheckerIpRangesResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetDNSSEC ->
-      (match resp with
-       | Error err -> handle_error err (Some GetDNSSECResponse.error_of_xml)
-       | Ok resp -> Ok (GetDNSSECResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetDNSSECResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetDNSSECResponse.error_of_xml))
   | GetGeoLocation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetGeoLocationResponse.error_of_xml)
-       | Ok resp -> Ok (GetGeoLocationResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetGeoLocationResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetGeoLocationResponse.error_of_xml))
   | GetHealthCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetHealthCheckResponse.error_of_xml)
-       | Ok resp -> Ok (GetHealthCheckResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetHealthCheckResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetHealthCheckResponse.error_of_xml))
   | GetHealthCheckCount ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetHealthCheckCountResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetHealthCheckCountResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetHealthCheckLastFailureReason ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetHealthCheckLastFailureReasonResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetHealthCheckLastFailureReasonResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetHealthCheckLastFailureReasonResponse.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetHealthCheckLastFailureReasonResponse.error_of_xml))
   | GetHealthCheckStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetHealthCheckStatusResponse.error_of_xml)
-       | Ok resp ->
-           Ok (GetHealthCheckStatusResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetHealthCheckStatusResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetHealthCheckStatusResponse.error_of_xml))
   | GetHostedZone ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetHostedZoneResponse.error_of_xml)
-       | Ok resp -> Ok (GetHostedZoneResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetHostedZoneResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetHostedZoneResponse.error_of_xml))
   | GetHostedZoneCount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetHostedZoneCountResponse.error_of_xml)
-       | Ok resp ->
-           Ok (GetHostedZoneCountResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetHostedZoneCountResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetHostedZoneCountResponse.error_of_xml))
   | GetHostedZoneLimit ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetHostedZoneLimitResponse.error_of_xml)
-       | Ok resp ->
-           Ok (GetHostedZoneLimitResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetHostedZoneLimitResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetHostedZoneLimitResponse.error_of_xml))
   | GetQueryLoggingConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetQueryLoggingConfigResponse.error_of_xml)
-       | Ok resp ->
-           Ok (GetQueryLoggingConfigResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetQueryLoggingConfigResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetQueryLoggingConfigResponse.error_of_xml))
   | GetReusableDelegationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetReusableDelegationSetResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetReusableDelegationSetResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (GetReusableDelegationSetResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetReusableDelegationSetResponse.error_of_xml))
   | GetReusableDelegationSetLimit ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetReusableDelegationSetLimitResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetReusableDelegationSetLimitResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetReusableDelegationSetLimitResponse.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetReusableDelegationSetLimitResponse.error_of_xml))
   | GetTrafficPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTrafficPolicyResponse.error_of_xml)
-       | Ok resp ->
-           Ok (GetTrafficPolicyResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetTrafficPolicyResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some GetTrafficPolicyResponse.error_of_xml))
   | GetTrafficPolicyInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetTrafficPolicyInstanceResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetTrafficPolicyInstanceResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (GetTrafficPolicyInstanceResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTrafficPolicyInstanceResponse.error_of_xml))
   | GetTrafficPolicyInstanceCount ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetTrafficPolicyInstanceCountResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetTrafficPolicyInstanceCountResponse.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListGeoLocations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGeoLocationsResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListGeoLocationsResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListGeoLocationsResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListGeoLocationsResponse.error_of_xml))
   | ListHealthChecks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListHealthChecksResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListHealthChecksResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListHealthChecksResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListHealthChecksResponse.error_of_xml))
   | ListHostedZones ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListHostedZonesResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListHostedZonesResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListHostedZonesResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListHostedZonesResponse.error_of_xml))
   | ListHostedZonesByName ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListHostedZonesByNameResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListHostedZonesByNameResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListHostedZonesByNameResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListHostedZonesByNameResponse.error_of_xml))
   | ListHostedZonesByVPC ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListHostedZonesByVPCResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListHostedZonesByVPCResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListHostedZonesByVPCResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListHostedZonesByVPCResponse.error_of_xml))
   | ListQueryLoggingConfigs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListQueryLoggingConfigsResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListQueryLoggingConfigsResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListQueryLoggingConfigsResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListQueryLoggingConfigsResponse.error_of_xml))
   | ListResourceRecordSets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListResourceRecordSetsResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListResourceRecordSetsResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListResourceRecordSetsResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListResourceRecordSetsResponse.error_of_xml))
   | ListReusableDelegationSets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListReusableDelegationSetsResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListReusableDelegationSetsResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ListReusableDelegationSetsResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListReusableDelegationSetsResponse.error_of_xml))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_xml))
   | ListTagsForResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourcesResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListTagsForResourcesResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListTagsForResourcesResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourcesResponse.error_of_xml))
   | ListTrafficPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTrafficPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           Ok (ListTrafficPoliciesResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListTrafficPoliciesResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListTrafficPoliciesResponse.error_of_xml))
   | ListTrafficPolicyInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTrafficPolicyInstancesResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListTrafficPolicyInstancesResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ListTrafficPolicyInstancesResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTrafficPolicyInstancesResponse.error_of_xml))
   | ListTrafficPolicyInstancesByHostedZone ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListTrafficPolicyInstancesByHostedZoneResponse.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListTrafficPolicyInstancesByHostedZoneResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListTrafficPolicyInstancesByHostedZoneResponse.of_xml
-                (response_to_xml resp)))
+                ListTrafficPolicyInstancesByHostedZoneResponse.error_of_xml))
   | ListTrafficPolicyInstancesByPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTrafficPolicyInstancesByPolicyResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListTrafficPolicyInstancesByPolicyResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListTrafficPolicyInstancesByPolicyResponse.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTrafficPolicyInstancesByPolicyResponse.error_of_xml))
   | ListTrafficPolicyVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTrafficPolicyVersionsResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListTrafficPolicyVersionsResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ListTrafficPolicyVersionsResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTrafficPolicyVersionsResponse.error_of_xml))
   | ListVPCAssociationAuthorizations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListVPCAssociationAuthorizationsResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListVPCAssociationAuthorizationsResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListVPCAssociationAuthorizationsResponse.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListVPCAssociationAuthorizationsResponse.error_of_xml))
   | TestDNSAnswer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TestDNSAnswerResponse.error_of_xml)
-       | Ok resp -> Ok (TestDNSAnswerResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (TestDNSAnswerResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some TestDNSAnswerResponse.error_of_xml))
   | UpdateHealthCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateHealthCheckResponse.error_of_xml)
-       | Ok resp ->
-           Ok (UpdateHealthCheckResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateHealthCheckResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some UpdateHealthCheckResponse.error_of_xml))
   | UpdateHostedZoneComment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateHostedZoneCommentResponse.error_of_xml)
-       | Ok resp ->
-           Ok (UpdateHostedZoneCommentResponse.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateHostedZoneCommentResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateHostedZoneCommentResponse.error_of_xml))
   | UpdateTrafficPolicyComment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateTrafficPolicyCommentResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (UpdateTrafficPolicyCommentResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok (UpdateTrafficPolicyCommentResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTrafficPolicyCommentResponse.error_of_xml))
   | UpdateTrafficPolicyInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateTrafficPolicyInstanceResponse.error_of_xml)
-       | Ok resp ->
-           Ok
-             (UpdateTrafficPolicyInstanceResponse.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (UpdateTrafficPolicyInstanceResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTrafficPolicyInstanceResponse.error_of_xml))

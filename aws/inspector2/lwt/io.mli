@@ -4,209 +4,167 @@ val associate_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateMemberRequest.t ->
-        (AssociateMemberResponse.t,
-          [ `AWS of AssociateMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateMemberResponse.t, AssociateMemberResponse.error) Result.t
+          Lwt.t
 val batch_get_account_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetAccountStatusRequest.t ->
         (BatchGetAccountStatusResponse.t,
-          [ `AWS of BatchGetAccountStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetAccountStatusResponse.error) Result.t Lwt.t
 val batch_get_free_trial_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetFreeTrialInfoRequest.t ->
         (BatchGetFreeTrialInfoResponse.t,
-          [ `AWS of BatchGetFreeTrialInfoResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetFreeTrialInfoResponse.error) Result.t Lwt.t
 val cancel_findings_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelFindingsReportRequest.t ->
-        (CancelFindingsReportResponse.t,
-          [ `AWS of CancelFindingsReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelFindingsReportResponse.t, CancelFindingsReportResponse.error)
+          Result.t Lwt.t
 val create_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFilterRequest.t ->
-        (CreateFilterResponse.t,
-          [ `AWS of CreateFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFilterResponse.t, CreateFilterResponse.error) Result.t Lwt.t
 val create_findings_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFindingsReportRequest.t ->
-        (CreateFindingsReportResponse.t,
-          [ `AWS of CreateFindingsReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFindingsReportResponse.t, CreateFindingsReportResponse.error)
+          Result.t Lwt.t
 val delete_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFilterRequest.t ->
-        (DeleteFilterResponse.t,
-          [ `AWS of DeleteFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFilterResponse.t, DeleteFilterResponse.error) Result.t Lwt.t
 val describe_organization_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationConfigurationRequest.t ->
         (DescribeOrganizationConfigurationResponse.t,
-          [ `AWS of DescribeOrganizationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOrganizationConfigurationResponse.error) Result.t Lwt.t
 val disable :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableRequest.t ->
-        (DisableResponse.t,
-          [ `AWS of DisableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableResponse.t, DisableResponse.error) Result.t Lwt.t
 val disable_delegated_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableDelegatedAdminAccountRequest.t ->
         (DisableDelegatedAdminAccountResponse.t,
-          [ `AWS of DisableDelegatedAdminAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisableDelegatedAdminAccountResponse.error) Result.t Lwt.t
 val disassociate_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateMemberRequest.t ->
-        (DisassociateMemberResponse.t,
-          [ `AWS of DisassociateMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateMemberResponse.t, DisassociateMemberResponse.error)
+          Result.t Lwt.t
 val enable :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableRequest.t ->
-        (EnableResponse.t,
-          [ `AWS of EnableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableResponse.t, EnableResponse.error) Result.t Lwt.t
 val enable_delegated_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableDelegatedAdminAccountRequest.t ->
         (EnableDelegatedAdminAccountResponse.t,
-          [ `AWS of EnableDelegatedAdminAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableDelegatedAdminAccountResponse.error) Result.t Lwt.t
 val get_delegated_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDelegatedAdminAccountRequest.t ->
         (GetDelegatedAdminAccountResponse.t,
-          [ `AWS of GetDelegatedAdminAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDelegatedAdminAccountResponse.error) Result.t Lwt.t
 val get_findings_report_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFindingsReportStatusRequest.t ->
         (GetFindingsReportStatusResponse.t,
-          [ `AWS of GetFindingsReportStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFindingsReportStatusResponse.error) Result.t Lwt.t
 val get_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMemberRequest.t ->
-        (GetMemberResponse.t,
-          [ `AWS of GetMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMemberResponse.t, GetMemberResponse.error) Result.t Lwt.t
 val list_account_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountPermissionsRequest.t ->
         (ListAccountPermissionsResponse.t,
-          [ `AWS of ListAccountPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAccountPermissionsResponse.error) Result.t Lwt.t
 val list_coverage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoverageRequest.t ->
-        (ListCoverageResponse.t,
-          [ `AWS of ListCoverageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCoverageResponse.t, ListCoverageResponse.error) Result.t Lwt.t
 val list_coverage_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoverageStatisticsRequest.t ->
         (ListCoverageStatisticsResponse.t,
-          [ `AWS of ListCoverageStatisticsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCoverageStatisticsResponse.error) Result.t Lwt.t
 val list_delegated_admin_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDelegatedAdminAccountsRequest.t ->
         (ListDelegatedAdminAccountsResponse.t,
-          [ `AWS of ListDelegatedAdminAccountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDelegatedAdminAccountsResponse.error) Result.t Lwt.t
 val list_filters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFiltersRequest.t ->
-        (ListFiltersResponse.t,
-          [ `AWS of ListFiltersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFiltersResponse.t, ListFiltersResponse.error) Result.t Lwt.t
 val list_finding_aggregations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFindingAggregationsRequest.t ->
         (ListFindingAggregationsResponse.t,
-          [ `AWS of ListFindingAggregationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFindingAggregationsResponse.error) Result.t Lwt.t
 val list_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFindingsRequest.t ->
-        (ListFindingsResponse.t,
-          [ `AWS of ListFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFindingsResponse.t, ListFindingsResponse.error) Result.t Lwt.t
 val list_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMembersRequest.t ->
-        (ListMembersResponse.t,
-          [ `AWS of ListMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMembersResponse.t, ListMembersResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_usage_totals :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsageTotalsRequest.t ->
-        (ListUsageTotalsResponse.t,
-          [ `AWS of ListUsageTotalsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUsageTotalsResponse.t, ListUsageTotalsResponse.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFilterRequest.t ->
-        (UpdateFilterResponse.t,
-          [ `AWS of UpdateFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateFilterResponse.t, UpdateFilterResponse.error) Result.t Lwt.t
 val update_organization_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOrganizationConfigurationRequest.t ->
         (UpdateOrganizationConfigurationResponse.t,
-          [ `AWS of UpdateOrganizationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateOrganizationConfigurationResponse.error) Result.t Lwt.t

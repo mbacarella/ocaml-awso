@@ -4,23 +4,17 @@ val describe_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServicesRequest.t ->
-        (DescribeServicesResponse.t,
-          [ `AWS of DescribeServicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeServicesResponse.t, DescribeServicesResponse.error) Result.t
           Async.Deferred.t
 val get_attribute_values :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAttributeValuesRequest.t ->
-        (GetAttributeValuesResponse.t,
-          [ `AWS of GetAttributeValuesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetAttributeValuesResponse.t, GetAttributeValuesResponse.error)
+          Result.t Async.Deferred.t
 val get_products :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProductsRequest.t ->
-        (GetProductsResponse.t,
-          [ `AWS of GetProductsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetProductsResponse.t, GetProductsResponse.error) Result.t
           Async.Deferred.t

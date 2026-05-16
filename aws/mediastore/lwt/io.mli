@@ -4,146 +4,116 @@ val create_container :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateContainerInput.t ->
-        (CreateContainerOutput.t,
-          [ `AWS of CreateContainerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateContainerOutput.t, CreateContainerOutput.error) Result.t Lwt.t
 val delete_container :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContainerInput.t ->
-        (DeleteContainerOutput.t,
-          [ `AWS of DeleteContainerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteContainerOutput.t, DeleteContainerOutput.error) Result.t Lwt.t
 val delete_container_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContainerPolicyInput.t ->
-        (DeleteContainerPolicyOutput.t,
-          [ `AWS of DeleteContainerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteContainerPolicyOutput.t, DeleteContainerPolicyOutput.error)
+          Result.t Lwt.t
 val delete_cors_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCorsPolicyInput.t ->
-        (DeleteCorsPolicyOutput.t,
-          [ `AWS of DeleteCorsPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCorsPolicyOutput.t, DeleteCorsPolicyOutput.error) Result.t
+          Lwt.t
 val delete_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLifecyclePolicyInput.t ->
-        (DeleteLifecyclePolicyOutput.t,
-          [ `AWS of DeleteLifecyclePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLifecyclePolicyOutput.t, DeleteLifecyclePolicyOutput.error)
+          Result.t Lwt.t
 val delete_metric_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMetricPolicyInput.t ->
-        (DeleteMetricPolicyOutput.t,
-          [ `AWS of DeleteMetricPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMetricPolicyOutput.t, DeleteMetricPolicyOutput.error) Result.t
+          Lwt.t
 val describe_container :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeContainerInput.t ->
-        (DescribeContainerOutput.t,
-          [ `AWS of DescribeContainerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeContainerOutput.t, DescribeContainerOutput.error) Result.t
+          Lwt.t
 val get_container_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContainerPolicyInput.t ->
-        (GetContainerPolicyOutput.t,
-          [ `AWS of GetContainerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContainerPolicyOutput.t, GetContainerPolicyOutput.error) Result.t
+          Lwt.t
 val get_cors_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCorsPolicyInput.t ->
-        (GetCorsPolicyOutput.t,
-          [ `AWS of GetCorsPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCorsPolicyOutput.t, GetCorsPolicyOutput.error) Result.t Lwt.t
 val get_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLifecyclePolicyInput.t ->
-        (GetLifecyclePolicyOutput.t,
-          [ `AWS of GetLifecyclePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLifecyclePolicyOutput.t, GetLifecyclePolicyOutput.error) Result.t
+          Lwt.t
 val get_metric_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMetricPolicyInput.t ->
-        (GetMetricPolicyOutput.t,
-          [ `AWS of GetMetricPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMetricPolicyOutput.t, GetMetricPolicyOutput.error) Result.t Lwt.t
 val list_containers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListContainersInput.t ->
-        (ListContainersOutput.t,
-          [ `AWS of ListContainersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListContainersOutput.t, ListContainersOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val put_container_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutContainerPolicyInput.t ->
-        (PutContainerPolicyOutput.t,
-          [ `AWS of PutContainerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutContainerPolicyOutput.t, PutContainerPolicyOutput.error) Result.t
+          Lwt.t
 val put_cors_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutCorsPolicyInput.t ->
-        (PutCorsPolicyOutput.t,
-          [ `AWS of PutCorsPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutCorsPolicyOutput.t, PutCorsPolicyOutput.error) Result.t Lwt.t
 val put_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLifecyclePolicyInput.t ->
-        (PutLifecyclePolicyOutput.t,
-          [ `AWS of PutLifecyclePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutLifecyclePolicyOutput.t, PutLifecyclePolicyOutput.error) Result.t
+          Lwt.t
 val put_metric_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMetricPolicyInput.t ->
-        (PutMetricPolicyOutput.t,
-          [ `AWS of PutMetricPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutMetricPolicyOutput.t, PutMetricPolicyOutput.error) Result.t Lwt.t
 val start_access_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAccessLoggingInput.t ->
-        (StartAccessLoggingOutput.t,
-          [ `AWS of StartAccessLoggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartAccessLoggingOutput.t, StartAccessLoggingOutput.error) Result.t
+          Lwt.t
 val stop_access_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopAccessLoggingInput.t ->
-        (StopAccessLoggingOutput.t,
-          [ `AWS of StopAccessLoggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopAccessLoggingOutput.t, StopAccessLoggingOutput.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t

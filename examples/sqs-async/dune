@@ -3,5 +3,4 @@
  (libraries awso-async.sqs core_unix.time_unix)
  (preprocess
   (pps ppx_jane))
- (flags
-  (:standard)))
+ (flags (:standard)))

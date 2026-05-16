@@ -4,90 +4,68 @@ val create_canary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCanaryRequest.t ->
-        (CreateCanaryResponse.t,
-          [ `AWS of CreateCanaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCanaryResponse.t, CreateCanaryResponse.error) Result.t Lwt.t
 val delete_canary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCanaryRequest.t ->
-        (DeleteCanaryResponse.t,
-          [ `AWS of DeleteCanaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCanaryResponse.t, DeleteCanaryResponse.error) Result.t Lwt.t
 val describe_canaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCanariesRequest.t ->
-        (DescribeCanariesResponse.t,
-          [ `AWS of DescribeCanariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCanariesResponse.t, DescribeCanariesResponse.error) Result.t
+          Lwt.t
 val describe_canaries_last_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCanariesLastRunRequest.t ->
         (DescribeCanariesLastRunResponse.t,
-          [ `AWS of DescribeCanariesLastRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCanariesLastRunResponse.error) Result.t Lwt.t
 val describe_runtime_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRuntimeVersionsRequest.t ->
         (DescribeRuntimeVersionsResponse.t,
-          [ `AWS of DescribeRuntimeVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRuntimeVersionsResponse.error) Result.t Lwt.t
 val get_canary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCanaryRequest.t ->
-        (GetCanaryResponse.t,
-          [ `AWS of GetCanaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCanaryResponse.t, GetCanaryResponse.error) Result.t Lwt.t
 val get_canary_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCanaryRunsRequest.t ->
-        (GetCanaryRunsResponse.t,
-          [ `AWS of GetCanaryRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCanaryRunsResponse.t, GetCanaryRunsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val start_canary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartCanaryRequest.t ->
-        (StartCanaryResponse.t,
-          [ `AWS of StartCanaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartCanaryResponse.t, StartCanaryResponse.error) Result.t Lwt.t
 val stop_canary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopCanaryRequest.t ->
-        (StopCanaryResponse.t,
-          [ `AWS of StopCanaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopCanaryResponse.t, StopCanaryResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_canary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCanaryRequest.t ->
-        (UpdateCanaryResponse.t,
-          [ `AWS of UpdateCanaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateCanaryResponse.t, UpdateCanaryResponse.error) Result.t Lwt.t

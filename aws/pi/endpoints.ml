@@ -92,70 +92,76 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             "PerformanceInsightsv20180227.ListAvailableResourceMetrics")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | DescribeDimensionKeys ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDimensionKeysResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeDimensionKeysResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDimensionKeysResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeDimensionKeysResponse.error_of_json))
   | GetDimensionKeyDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDimensionKeyDetailsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDimensionKeyDetailsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDimensionKeyDetailsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDimensionKeyDetailsResponse.error_of_json))
   | GetResourceMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourceMetadataResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetResourceMetadataResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourceMetadataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourceMetadataResponse.error_of_json))
   | GetResourceMetrics ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourceMetricsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetResourceMetricsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourceMetricsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourceMetricsResponse.error_of_json))
   | ListAvailableResourceDimensions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAvailableResourceDimensionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAvailableResourceDimensionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAvailableResourceDimensionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAvailableResourceDimensionsResponse.error_of_json))
   | ListAvailableResourceMetrics ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAvailableResourceMetricsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAvailableResourceMetricsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAvailableResourceMetricsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAvailableResourceMetricsResponse.error_of_json))

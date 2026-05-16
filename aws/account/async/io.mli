@@ -4,19 +4,14 @@ val delete_alternate_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAlternateContactRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val get_alternate_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAlternateContactRequest.t ->
-        (GetAlternateContactResponse.t,
-          [ `AWS of GetAlternateContactResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetAlternateContactResponse.t, GetAlternateContactResponse.error)
+          Result.t Async.Deferred.t
 val put_alternate_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutAlternateContactRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      PutAlternateContactRequest.t -> (unit, unit) Result.t Async.Deferred.t

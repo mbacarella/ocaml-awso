@@ -4,629 +4,509 @@ val activate_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ActivateGatewayInput.t ->
-        (ActivateGatewayOutput.t,
-          [ `AWS of ActivateGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivateGatewayOutput.t, ActivateGatewayOutput.error) Result.t Lwt.t
 val add_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddCacheInput.t ->
-        (AddCacheOutput.t,
-          [ `AWS of AddCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddCacheOutput.t, AddCacheOutput.error) Result.t Lwt.t
 val add_tags_to_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsToResourceInput.t ->
-        (AddTagsToResourceOutput.t,
-          [ `AWS of AddTagsToResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddTagsToResourceOutput.t, AddTagsToResourceOutput.error) Result.t
+          Lwt.t
 val add_upload_buffer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddUploadBufferInput.t ->
-        (AddUploadBufferOutput.t,
-          [ `AWS of AddUploadBufferOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddUploadBufferOutput.t, AddUploadBufferOutput.error) Result.t Lwt.t
 val add_working_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddWorkingStorageInput.t ->
-        (AddWorkingStorageOutput.t,
-          [ `AWS of AddWorkingStorageOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddWorkingStorageOutput.t, AddWorkingStorageOutput.error) Result.t
+          Lwt.t
 val assign_tape_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssignTapePoolInput.t ->
-        (AssignTapePoolOutput.t,
-          [ `AWS of AssignTapePoolOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssignTapePoolOutput.t, AssignTapePoolOutput.error) Result.t Lwt.t
 val associate_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateFileSystemInput.t ->
-        (AssociateFileSystemOutput.t,
-          [ `AWS of AssociateFileSystemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateFileSystemOutput.t, AssociateFileSystemOutput.error)
+          Result.t Lwt.t
 val attach_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachVolumeInput.t ->
-        (AttachVolumeOutput.t,
-          [ `AWS of AttachVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AttachVolumeOutput.t, AttachVolumeOutput.error) Result.t Lwt.t
 val cancel_archival :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelArchivalInput.t ->
-        (CancelArchivalOutput.t,
-          [ `AWS of CancelArchivalOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelArchivalOutput.t, CancelArchivalOutput.error) Result.t Lwt.t
 val cancel_retrieval :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelRetrievalInput.t ->
-        (CancelRetrievalOutput.t,
-          [ `AWS of CancelRetrievalOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelRetrievalOutput.t, CancelRetrievalOutput.error) Result.t Lwt.t
 val create_cachedi_s_c_s_i_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCachediSCSIVolumeInput.t ->
         (CreateCachediSCSIVolumeOutput.t,
-          [ `AWS of CreateCachediSCSIVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCachediSCSIVolumeOutput.error) Result.t Lwt.t
 val create_n_f_s_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNFSFileShareInput.t ->
-        (CreateNFSFileShareOutput.t,
-          [ `AWS of CreateNFSFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateNFSFileShareOutput.t, CreateNFSFileShareOutput.error) Result.t
+          Lwt.t
 val create_s_m_b_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSMBFileShareInput.t ->
-        (CreateSMBFileShareOutput.t,
-          [ `AWS of CreateSMBFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSMBFileShareOutput.t, CreateSMBFileShareOutput.error) Result.t
+          Lwt.t
 val create_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotInput.t ->
-        (CreateSnapshotOutput.t,
-          [ `AWS of CreateSnapshotOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSnapshotOutput.t, CreateSnapshotOutput.error) Result.t Lwt.t
 val create_snapshot_from_volume_recovery_point :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotFromVolumeRecoveryPointInput.t ->
         (CreateSnapshotFromVolumeRecoveryPointOutput.t,
-          [ `AWS of CreateSnapshotFromVolumeRecoveryPointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSnapshotFromVolumeRecoveryPointOutput.error) Result.t Lwt.t
 val create_storedi_s_c_s_i_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStorediSCSIVolumeInput.t ->
         (CreateStorediSCSIVolumeOutput.t,
-          [ `AWS of CreateStorediSCSIVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateStorediSCSIVolumeOutput.error) Result.t Lwt.t
 val create_tape_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTapePoolInput.t ->
-        (CreateTapePoolOutput.t,
-          [ `AWS of CreateTapePoolOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTapePoolOutput.t, CreateTapePoolOutput.error) Result.t Lwt.t
 val create_tape_with_barcode :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTapeWithBarcodeInput.t ->
-        (CreateTapeWithBarcodeOutput.t,
-          [ `AWS of CreateTapeWithBarcodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTapeWithBarcodeOutput.t, CreateTapeWithBarcodeOutput.error)
+          Result.t Lwt.t
 val create_tapes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTapesInput.t ->
-        (CreateTapesOutput.t,
-          [ `AWS of CreateTapesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTapesOutput.t, CreateTapesOutput.error) Result.t Lwt.t
 val delete_automatic_tape_creation_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAutomaticTapeCreationPolicyInput.t ->
         (DeleteAutomaticTapeCreationPolicyOutput.t,
-          [ `AWS of DeleteAutomaticTapeCreationPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAutomaticTapeCreationPolicyOutput.error) Result.t Lwt.t
 val delete_bandwidth_rate_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBandwidthRateLimitInput.t ->
         (DeleteBandwidthRateLimitOutput.t,
-          [ `AWS of DeleteBandwidthRateLimitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteBandwidthRateLimitOutput.error) Result.t Lwt.t
 val delete_chap_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteChapCredentialsInput.t ->
-        (DeleteChapCredentialsOutput.t,
-          [ `AWS of DeleteChapCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteChapCredentialsOutput.t, DeleteChapCredentialsOutput.error)
+          Result.t Lwt.t
 val delete_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFileShareInput.t ->
-        (DeleteFileShareOutput.t,
-          [ `AWS of DeleteFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFileShareOutput.t, DeleteFileShareOutput.error) Result.t Lwt.t
 val delete_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGatewayInput.t ->
-        (DeleteGatewayOutput.t,
-          [ `AWS of DeleteGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteGatewayOutput.t, DeleteGatewayOutput.error) Result.t Lwt.t
 val delete_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSnapshotScheduleInput.t ->
-        (DeleteSnapshotScheduleOutput.t,
-          [ `AWS of DeleteSnapshotScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSnapshotScheduleOutput.t, DeleteSnapshotScheduleOutput.error)
+          Result.t Lwt.t
 val delete_tape :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTapeInput.t ->
-        (DeleteTapeOutput.t,
-          [ `AWS of DeleteTapeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTapeOutput.t, DeleteTapeOutput.error) Result.t Lwt.t
 val delete_tape_archive :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTapeArchiveInput.t ->
-        (DeleteTapeArchiveOutput.t,
-          [ `AWS of DeleteTapeArchiveOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTapeArchiveOutput.t, DeleteTapeArchiveOutput.error) Result.t
+          Lwt.t
 val delete_tape_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTapePoolInput.t ->
-        (DeleteTapePoolOutput.t,
-          [ `AWS of DeleteTapePoolOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTapePoolOutput.t, DeleteTapePoolOutput.error) Result.t Lwt.t
 val delete_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVolumeInput.t ->
-        (DeleteVolumeOutput.t,
-          [ `AWS of DeleteVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteVolumeOutput.t, DeleteVolumeOutput.error) Result.t Lwt.t
 val describe_availability_monitor_test :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAvailabilityMonitorTestInput.t ->
         (DescribeAvailabilityMonitorTestOutput.t,
-          [ `AWS of DescribeAvailabilityMonitorTestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAvailabilityMonitorTestOutput.error) Result.t Lwt.t
 val describe_bandwidth_rate_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBandwidthRateLimitInput.t ->
         (DescribeBandwidthRateLimitOutput.t,
-          [ `AWS of DescribeBandwidthRateLimitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeBandwidthRateLimitOutput.error) Result.t Lwt.t
 val describe_bandwidth_rate_limit_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBandwidthRateLimitScheduleInput.t ->
         (DescribeBandwidthRateLimitScheduleOutput.t,
-          [ `AWS of DescribeBandwidthRateLimitScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeBandwidthRateLimitScheduleOutput.error) Result.t Lwt.t
 val describe_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCacheInput.t ->
-        (DescribeCacheOutput.t,
-          [ `AWS of DescribeCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCacheOutput.t, DescribeCacheOutput.error) Result.t Lwt.t
 val describe_cachedi_s_c_s_i_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCachediSCSIVolumesInput.t ->
         (DescribeCachediSCSIVolumesOutput.t,
-          [ `AWS of DescribeCachediSCSIVolumesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCachediSCSIVolumesOutput.error) Result.t Lwt.t
 val describe_chap_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChapCredentialsInput.t ->
         (DescribeChapCredentialsOutput.t,
-          [ `AWS of DescribeChapCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeChapCredentialsOutput.error) Result.t Lwt.t
 val describe_file_system_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFileSystemAssociationsInput.t ->
         (DescribeFileSystemAssociationsOutput.t,
-          [ `AWS of DescribeFileSystemAssociationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeFileSystemAssociationsOutput.error) Result.t Lwt.t
 val describe_gateway_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGatewayInformationInput.t ->
         (DescribeGatewayInformationOutput.t,
-          [ `AWS of DescribeGatewayInformationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeGatewayInformationOutput.error) Result.t Lwt.t
 val describe_maintenance_start_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceStartTimeInput.t ->
         (DescribeMaintenanceStartTimeOutput.t,
-          [ `AWS of DescribeMaintenanceStartTimeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceStartTimeOutput.error) Result.t Lwt.t
 val describe_n_f_s_file_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNFSFileSharesInput.t ->
-        (DescribeNFSFileSharesOutput.t,
-          [ `AWS of DescribeNFSFileSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeNFSFileSharesOutput.t, DescribeNFSFileSharesOutput.error)
+          Result.t Lwt.t
 val describe_s_m_b_file_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSMBFileSharesInput.t ->
-        (DescribeSMBFileSharesOutput.t,
-          [ `AWS of DescribeSMBFileSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSMBFileSharesOutput.t, DescribeSMBFileSharesOutput.error)
+          Result.t Lwt.t
 val describe_s_m_b_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSMBSettingsInput.t ->
-        (DescribeSMBSettingsOutput.t,
-          [ `AWS of DescribeSMBSettingsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSMBSettingsOutput.t, DescribeSMBSettingsOutput.error)
+          Result.t Lwt.t
 val describe_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotScheduleInput.t ->
         (DescribeSnapshotScheduleOutput.t,
-          [ `AWS of DescribeSnapshotScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSnapshotScheduleOutput.error) Result.t Lwt.t
 val describe_storedi_s_c_s_i_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStorediSCSIVolumesInput.t ->
         (DescribeStorediSCSIVolumesOutput.t,
-          [ `AWS of DescribeStorediSCSIVolumesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeStorediSCSIVolumesOutput.error) Result.t Lwt.t
 val describe_tape_archives :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTapeArchivesInput.t ->
-        (DescribeTapeArchivesOutput.t,
-          [ `AWS of DescribeTapeArchivesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTapeArchivesOutput.t, DescribeTapeArchivesOutput.error)
+          Result.t Lwt.t
 val describe_tape_recovery_points :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTapeRecoveryPointsInput.t ->
         (DescribeTapeRecoveryPointsOutput.t,
-          [ `AWS of DescribeTapeRecoveryPointsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTapeRecoveryPointsOutput.error) Result.t Lwt.t
 val describe_tapes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTapesInput.t ->
-        (DescribeTapesOutput.t,
-          [ `AWS of DescribeTapesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTapesOutput.t, DescribeTapesOutput.error) Result.t Lwt.t
 val describe_upload_buffer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUploadBufferInput.t ->
-        (DescribeUploadBufferOutput.t,
-          [ `AWS of DescribeUploadBufferOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeUploadBufferOutput.t, DescribeUploadBufferOutput.error)
+          Result.t Lwt.t
 val describe_v_t_l_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVTLDevicesInput.t ->
-        (DescribeVTLDevicesOutput.t,
-          [ `AWS of DescribeVTLDevicesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeVTLDevicesOutput.t, DescribeVTLDevicesOutput.error) Result.t
+          Lwt.t
 val describe_working_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkingStorageInput.t ->
-        (DescribeWorkingStorageOutput.t,
-          [ `AWS of DescribeWorkingStorageOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeWorkingStorageOutput.t, DescribeWorkingStorageOutput.error)
+          Result.t Lwt.t
 val detach_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachVolumeInput.t ->
-        (DetachVolumeOutput.t,
-          [ `AWS of DetachVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetachVolumeOutput.t, DetachVolumeOutput.error) Result.t Lwt.t
 val disable_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableGatewayInput.t ->
-        (DisableGatewayOutput.t,
-          [ `AWS of DisableGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableGatewayOutput.t, DisableGatewayOutput.error) Result.t Lwt.t
 val disassociate_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateFileSystemInput.t ->
-        (DisassociateFileSystemOutput.t,
-          [ `AWS of DisassociateFileSystemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateFileSystemOutput.t, DisassociateFileSystemOutput.error)
+          Result.t Lwt.t
 val join_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       JoinDomainInput.t ->
-        (JoinDomainOutput.t,
-          [ `AWS of JoinDomainOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (JoinDomainOutput.t, JoinDomainOutput.error) Result.t Lwt.t
 val list_automatic_tape_creation_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAutomaticTapeCreationPoliciesInput.t ->
         (ListAutomaticTapeCreationPoliciesOutput.t,
-          [ `AWS of ListAutomaticTapeCreationPoliciesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAutomaticTapeCreationPoliciesOutput.error) Result.t Lwt.t
 val list_file_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFileSharesInput.t ->
-        (ListFileSharesOutput.t,
-          [ `AWS of ListFileSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFileSharesOutput.t, ListFileSharesOutput.error) Result.t Lwt.t
 val list_file_system_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFileSystemAssociationsInput.t ->
         (ListFileSystemAssociationsOutput.t,
-          [ `AWS of ListFileSystemAssociationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFileSystemAssociationsOutput.error) Result.t Lwt.t
 val list_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGatewaysInput.t ->
-        (ListGatewaysOutput.t,
-          [ `AWS of ListGatewaysOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGatewaysOutput.t, ListGatewaysOutput.error) Result.t Lwt.t
 val list_local_disks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLocalDisksInput.t ->
-        (ListLocalDisksOutput.t,
-          [ `AWS of ListLocalDisksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLocalDisksOutput.t, ListLocalDisksOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val list_tape_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTapePoolsInput.t ->
-        (ListTapePoolsOutput.t,
-          [ `AWS of ListTapePoolsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTapePoolsOutput.t, ListTapePoolsOutput.error) Result.t Lwt.t
 val list_tapes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTapesInput.t ->
-        (ListTapesOutput.t,
-          [ `AWS of ListTapesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTapesOutput.t, ListTapesOutput.error) Result.t Lwt.t
 val list_volume_initiators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVolumeInitiatorsInput.t ->
-        (ListVolumeInitiatorsOutput.t,
-          [ `AWS of ListVolumeInitiatorsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVolumeInitiatorsOutput.t, ListVolumeInitiatorsOutput.error)
+          Result.t Lwt.t
 val list_volume_recovery_points :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVolumeRecoveryPointsInput.t ->
         (ListVolumeRecoveryPointsOutput.t,
-          [ `AWS of ListVolumeRecoveryPointsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListVolumeRecoveryPointsOutput.error) Result.t Lwt.t
 val list_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVolumesInput.t ->
-        (ListVolumesOutput.t,
-          [ `AWS of ListVolumesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVolumesOutput.t, ListVolumesOutput.error) Result.t Lwt.t
 val notify_when_uploaded :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       NotifyWhenUploadedInput.t ->
-        (NotifyWhenUploadedOutput.t,
-          [ `AWS of NotifyWhenUploadedOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (NotifyWhenUploadedOutput.t, NotifyWhenUploadedOutput.error) Result.t
+          Lwt.t
 val refresh_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RefreshCacheInput.t ->
-        (RefreshCacheOutput.t,
-          [ `AWS of RefreshCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RefreshCacheOutput.t, RefreshCacheOutput.error) Result.t Lwt.t
 val remove_tags_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsFromResourceInput.t ->
-        (RemoveTagsFromResourceOutput.t,
-          [ `AWS of RemoveTagsFromResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveTagsFromResourceOutput.t, RemoveTagsFromResourceOutput.error)
+          Result.t Lwt.t
 val reset_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetCacheInput.t ->
-        (ResetCacheOutput.t,
-          [ `AWS of ResetCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResetCacheOutput.t, ResetCacheOutput.error) Result.t Lwt.t
 val retrieve_tape_archive :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetrieveTapeArchiveInput.t ->
-        (RetrieveTapeArchiveOutput.t,
-          [ `AWS of RetrieveTapeArchiveOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RetrieveTapeArchiveOutput.t, RetrieveTapeArchiveOutput.error)
+          Result.t Lwt.t
 val retrieve_tape_recovery_point :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetrieveTapeRecoveryPointInput.t ->
         (RetrieveTapeRecoveryPointOutput.t,
-          [ `AWS of RetrieveTapeRecoveryPointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RetrieveTapeRecoveryPointOutput.error) Result.t Lwt.t
 val set_local_console_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetLocalConsolePasswordInput.t ->
         (SetLocalConsolePasswordOutput.t,
-          [ `AWS of SetLocalConsolePasswordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetLocalConsolePasswordOutput.error) Result.t Lwt.t
 val set_s_m_b_guest_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetSMBGuestPasswordInput.t ->
-        (SetSMBGuestPasswordOutput.t,
-          [ `AWS of SetSMBGuestPasswordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SetSMBGuestPasswordOutput.t, SetSMBGuestPasswordOutput.error)
+          Result.t Lwt.t
 val shutdown_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ShutdownGatewayInput.t ->
-        (ShutdownGatewayOutput.t,
-          [ `AWS of ShutdownGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ShutdownGatewayOutput.t, ShutdownGatewayOutput.error) Result.t Lwt.t
 val start_availability_monitor_test :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAvailabilityMonitorTestInput.t ->
         (StartAvailabilityMonitorTestOutput.t,
-          [ `AWS of StartAvailabilityMonitorTestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartAvailabilityMonitorTestOutput.error) Result.t Lwt.t
 val start_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartGatewayInput.t ->
-        (StartGatewayOutput.t,
-          [ `AWS of StartGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartGatewayOutput.t, StartGatewayOutput.error) Result.t Lwt.t
 val update_automatic_tape_creation_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAutomaticTapeCreationPolicyInput.t ->
         (UpdateAutomaticTapeCreationPolicyOutput.t,
-          [ `AWS of UpdateAutomaticTapeCreationPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateAutomaticTapeCreationPolicyOutput.error) Result.t Lwt.t
 val update_bandwidth_rate_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBandwidthRateLimitInput.t ->
         (UpdateBandwidthRateLimitOutput.t,
-          [ `AWS of UpdateBandwidthRateLimitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateBandwidthRateLimitOutput.error) Result.t Lwt.t
 val update_bandwidth_rate_limit_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBandwidthRateLimitScheduleInput.t ->
         (UpdateBandwidthRateLimitScheduleOutput.t,
-          [ `AWS of UpdateBandwidthRateLimitScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateBandwidthRateLimitScheduleOutput.error) Result.t Lwt.t
 val update_chap_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChapCredentialsInput.t ->
-        (UpdateChapCredentialsOutput.t,
-          [ `AWS of UpdateChapCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateChapCredentialsOutput.t, UpdateChapCredentialsOutput.error)
+          Result.t Lwt.t
 val update_file_system_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFileSystemAssociationInput.t ->
         (UpdateFileSystemAssociationOutput.t,
-          [ `AWS of UpdateFileSystemAssociationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateFileSystemAssociationOutput.error) Result.t Lwt.t
 val update_gateway_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGatewayInformationInput.t ->
         (UpdateGatewayInformationOutput.t,
-          [ `AWS of UpdateGatewayInformationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateGatewayInformationOutput.error) Result.t Lwt.t
 val update_gateway_software_now :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGatewaySoftwareNowInput.t ->
         (UpdateGatewaySoftwareNowOutput.t,
-          [ `AWS of UpdateGatewaySoftwareNowOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateGatewaySoftwareNowOutput.error) Result.t Lwt.t
 val update_maintenance_start_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMaintenanceStartTimeInput.t ->
         (UpdateMaintenanceStartTimeOutput.t,
-          [ `AWS of UpdateMaintenanceStartTimeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateMaintenanceStartTimeOutput.error) Result.t Lwt.t
 val update_n_f_s_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNFSFileShareInput.t ->
-        (UpdateNFSFileShareOutput.t,
-          [ `AWS of UpdateNFSFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateNFSFileShareOutput.t, UpdateNFSFileShareOutput.error) Result.t
+          Lwt.t
 val update_s_m_b_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBFileShareInput.t ->
-        (UpdateSMBFileShareOutput.t,
-          [ `AWS of UpdateSMBFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSMBFileShareOutput.t, UpdateSMBFileShareOutput.error) Result.t
+          Lwt.t
 val update_s_m_b_file_share_visibility :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBFileShareVisibilityInput.t ->
         (UpdateSMBFileShareVisibilityOutput.t,
-          [ `AWS of UpdateSMBFileShareVisibilityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateSMBFileShareVisibilityOutput.error) Result.t Lwt.t
 val update_s_m_b_local_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBLocalGroupsInput.t ->
-        (UpdateSMBLocalGroupsOutput.t,
-          [ `AWS of UpdateSMBLocalGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSMBLocalGroupsOutput.t, UpdateSMBLocalGroupsOutput.error)
+          Result.t Lwt.t
 val update_s_m_b_security_strategy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBSecurityStrategyInput.t ->
         (UpdateSMBSecurityStrategyOutput.t,
-          [ `AWS of UpdateSMBSecurityStrategyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateSMBSecurityStrategyOutput.error) Result.t Lwt.t
 val update_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSnapshotScheduleInput.t ->
-        (UpdateSnapshotScheduleOutput.t,
-          [ `AWS of UpdateSnapshotScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSnapshotScheduleOutput.t, UpdateSnapshotScheduleOutput.error)
+          Result.t Lwt.t
 val update_v_t_l_device_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVTLDeviceTypeInput.t ->
-        (UpdateVTLDeviceTypeOutput.t,
-          [ `AWS of UpdateVTLDeviceTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVTLDeviceTypeOutput.t, UpdateVTLDeviceTypeOutput.error)
+          Result.t Lwt.t

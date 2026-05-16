@@ -4,95 +4,69 @@ val create_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectionInput.t ->
-        (CreateConnectionOutput.t,
-          [ `AWS of CreateConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateConnectionOutput.t, CreateConnectionOutput.error) Result.t
           Async.Deferred.t
 val create_host :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateHostInput.t ->
-        (CreateHostOutput.t,
-          [ `AWS of CreateHostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateHostOutput.t, CreateHostOutput.error) Result.t
           Async.Deferred.t
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectionInput.t ->
-        (DeleteConnectionOutput.t,
-          [ `AWS of DeleteConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteConnectionOutput.t, DeleteConnectionOutput.error) Result.t
           Async.Deferred.t
 val delete_host :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHostInput.t ->
-        (DeleteHostOutput.t,
-          [ `AWS of DeleteHostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteHostOutput.t, DeleteHostOutput.error) Result.t
           Async.Deferred.t
 val get_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectionInput.t ->
-        (GetConnectionOutput.t,
-          [ `AWS of GetConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetConnectionOutput.t, GetConnectionOutput.error) Result.t
           Async.Deferred.t
 val get_host :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetHostInput.t ->
-        (GetHostOutput.t,
-          [ `AWS of GetHostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetHostOutput.t, GetHostOutput.error) Result.t Async.Deferred.t
 val list_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectionsInput.t ->
-        (ListConnectionsOutput.t,
-          [ `AWS of ListConnectionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListConnectionsOutput.t, ListConnectionsOutput.error) Result.t
           Async.Deferred.t
 val list_hosts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListHostsInput.t ->
-        (ListHostsOutput.t,
-          [ `AWS of ListHostsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListHostsOutput.t, ListHostsOutput.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t
           Async.Deferred.t
 val update_host :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateHostInput.t ->
-        (UpdateHostOutput.t,
-          [ `AWS of UpdateHostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateHostOutput.t, UpdateHostOutput.error) Result.t
           Async.Deferred.t

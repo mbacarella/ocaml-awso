@@ -5,250 +5,214 @@ val associate_d_r_t_log_bucket :
     ?cfg:Awso.Cfg.t ->
       AssociateDRTLogBucketRequest.t ->
         (AssociateDRTLogBucketResponse.t,
-          [ `AWS of AssociateDRTLogBucketResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateDRTLogBucketResponse.error) Result.t Lwt.t
 val associate_d_r_t_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateDRTRoleRequest.t ->
-        (AssociateDRTRoleResponse.t,
-          [ `AWS of AssociateDRTRoleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateDRTRoleResponse.t, AssociateDRTRoleResponse.error) Result.t
+          Lwt.t
 val associate_health_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateHealthCheckRequest.t ->
-        (AssociateHealthCheckResponse.t,
-          [ `AWS of AssociateHealthCheckResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateHealthCheckResponse.t, AssociateHealthCheckResponse.error)
+          Result.t Lwt.t
 val associate_proactive_engagement_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateProactiveEngagementDetailsRequest.t ->
         (AssociateProactiveEngagementDetailsResponse.t,
-          [ `AWS of AssociateProactiveEngagementDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateProactiveEngagementDetailsResponse.error) Result.t Lwt.t
 val create_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProtectionRequest.t ->
-        (CreateProtectionResponse.t,
-          [ `AWS of CreateProtectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProtectionResponse.t, CreateProtectionResponse.error) Result.t
+          Lwt.t
 val create_protection_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProtectionGroupRequest.t ->
         (CreateProtectionGroupResponse.t,
-          [ `AWS of CreateProtectionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateProtectionGroupResponse.error) Result.t Lwt.t
 val create_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSubscriptionRequest.t ->
-        (CreateSubscriptionResponse.t,
-          [ `AWS of CreateSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSubscriptionResponse.t, CreateSubscriptionResponse.error)
+          Result.t Lwt.t
 val delete_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProtectionRequest.t ->
-        (DeleteProtectionResponse.t,
-          [ `AWS of DeleteProtectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProtectionResponse.t, DeleteProtectionResponse.error) Result.t
+          Lwt.t
 val delete_protection_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProtectionGroupRequest.t ->
         (DeleteProtectionGroupResponse.t,
-          [ `AWS of DeleteProtectionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteProtectionGroupResponse.error) Result.t Lwt.t
 val delete_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSubscriptionRequest.t ->
-        (DeleteSubscriptionResponse.t,
-          [ `AWS of DeleteSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSubscriptionResponse.t, DeleteSubscriptionResponse.error)
+          Result.t Lwt.t
 val describe_attack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAttackRequest.t ->
-        (DescribeAttackResponse.t,
-          [ `AWS of DescribeAttackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAttackResponse.t, DescribeAttackResponse.error) Result.t
+          Lwt.t
 val describe_attack_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAttackStatisticsRequest.t ->
         (DescribeAttackStatisticsResponse.t,
-          [ `AWS of DescribeAttackStatisticsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAttackStatisticsResponse.error) Result.t Lwt.t
 val describe_d_r_t_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDRTAccessRequest.t ->
-        (DescribeDRTAccessResponse.t,
-          [ `AWS of DescribeDRTAccessResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDRTAccessResponse.t, DescribeDRTAccessResponse.error)
+          Result.t Lwt.t
 val describe_emergency_contact_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEmergencyContactSettingsRequest.t ->
         (DescribeEmergencyContactSettingsResponse.t,
-          [ `AWS of DescribeEmergencyContactSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEmergencyContactSettingsResponse.error) Result.t Lwt.t
 val describe_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProtectionRequest.t ->
-        (DescribeProtectionResponse.t,
-          [ `AWS of DescribeProtectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProtectionResponse.t, DescribeProtectionResponse.error)
+          Result.t Lwt.t
 val describe_protection_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProtectionGroupRequest.t ->
         (DescribeProtectionGroupResponse.t,
-          [ `AWS of DescribeProtectionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeProtectionGroupResponse.error) Result.t Lwt.t
 val describe_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSubscriptionRequest.t ->
-        (DescribeSubscriptionResponse.t,
-          [ `AWS of DescribeSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSubscriptionResponse.t, DescribeSubscriptionResponse.error)
+          Result.t Lwt.t
 val disable_application_layer_automatic_response :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableApplicationLayerAutomaticResponseRequest.t ->
         (DisableApplicationLayerAutomaticResponseResponse.t,
-          [ `AWS of DisableApplicationLayerAutomaticResponseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisableApplicationLayerAutomaticResponseResponse.error) Result.t
+          Lwt.t
 val disable_proactive_engagement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableProactiveEngagementRequest.t ->
         (DisableProactiveEngagementResponse.t,
-          [ `AWS of DisableProactiveEngagementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisableProactiveEngagementResponse.error) Result.t Lwt.t
 val disassociate_d_r_t_log_bucket :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateDRTLogBucketRequest.t ->
         (DisassociateDRTLogBucketResponse.t,
-          [ `AWS of DisassociateDRTLogBucketResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateDRTLogBucketResponse.error) Result.t Lwt.t
 val disassociate_d_r_t_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateDRTRoleRequest.t ->
-        (DisassociateDRTRoleResponse.t,
-          [ `AWS of DisassociateDRTRoleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateDRTRoleResponse.t, DisassociateDRTRoleResponse.error)
+          Result.t Lwt.t
 val disassociate_health_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateHealthCheckRequest.t ->
         (DisassociateHealthCheckResponse.t,
-          [ `AWS of DisassociateHealthCheckResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateHealthCheckResponse.error) Result.t Lwt.t
 val enable_application_layer_automatic_response :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableApplicationLayerAutomaticResponseRequest.t ->
         (EnableApplicationLayerAutomaticResponseResponse.t,
-          [ `AWS of EnableApplicationLayerAutomaticResponseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableApplicationLayerAutomaticResponseResponse.error) Result.t
+          Lwt.t
 val enable_proactive_engagement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableProactiveEngagementRequest.t ->
         (EnableProactiveEngagementResponse.t,
-          [ `AWS of EnableProactiveEngagementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableProactiveEngagementResponse.error) Result.t Lwt.t
 val get_subscription_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSubscriptionStateRequest.t ->
-        (GetSubscriptionStateResponse.t,
-          [ `AWS of GetSubscriptionStateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSubscriptionStateResponse.t, GetSubscriptionStateResponse.error)
+          Result.t Lwt.t
 val list_attacks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAttacksRequest.t ->
-        (ListAttacksResponse.t,
-          [ `AWS of ListAttacksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAttacksResponse.t, ListAttacksResponse.error) Result.t Lwt.t
 val list_protection_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProtectionGroupsRequest.t ->
-        (ListProtectionGroupsResponse.t,
-          [ `AWS of ListProtectionGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProtectionGroupsResponse.t, ListProtectionGroupsResponse.error)
+          Result.t Lwt.t
 val list_protections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProtectionsRequest.t ->
-        (ListProtectionsResponse.t,
-          [ `AWS of ListProtectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProtectionsResponse.t, ListProtectionsResponse.error) Result.t
+          Lwt.t
 val list_resources_in_protection_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesInProtectionGroupRequest.t ->
         (ListResourcesInProtectionGroupResponse.t,
-          [ `AWS of ListResourcesInProtectionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourcesInProtectionGroupResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_application_layer_automatic_response :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationLayerAutomaticResponseRequest.t ->
         (UpdateApplicationLayerAutomaticResponseResponse.t,
-          [ `AWS of UpdateApplicationLayerAutomaticResponseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateApplicationLayerAutomaticResponseResponse.error) Result.t
+          Lwt.t
 val update_emergency_contact_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEmergencyContactSettingsRequest.t ->
         (UpdateEmergencyContactSettingsResponse.t,
-          [ `AWS of UpdateEmergencyContactSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateEmergencyContactSettingsResponse.error) Result.t Lwt.t
 val update_protection_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProtectionGroupRequest.t ->
         (UpdateProtectionGroupResponse.t,
-          [ `AWS of UpdateProtectionGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateProtectionGroupResponse.error) Result.t Lwt.t
 val update_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSubscriptionRequest.t ->
-        (UpdateSubscriptionResponse.t,
-          [ `AWS of UpdateSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSubscriptionResponse.t, UpdateSubscriptionResponse.error)
+          Result.t Lwt.t

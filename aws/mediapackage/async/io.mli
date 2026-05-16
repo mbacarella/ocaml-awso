@@ -4,147 +4,110 @@ val configure_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfigureLogsRequest.t ->
-        (ConfigureLogsResponse.t,
-          [ `AWS of ConfigureLogsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ConfigureLogsResponse.t, ConfigureLogsResponse.error) Result.t
           Async.Deferred.t
 val create_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelRequest.t ->
-        (CreateChannelResponse.t,
-          [ `AWS of CreateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateChannelResponse.t, CreateChannelResponse.error) Result.t
           Async.Deferred.t
 val create_harvest_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateHarvestJobRequest.t ->
-        (CreateHarvestJobResponse.t,
-          [ `AWS of CreateHarvestJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateHarvestJobResponse.t, CreateHarvestJobResponse.error) Result.t
           Async.Deferred.t
 val create_origin_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOriginEndpointRequest.t ->
-        (CreateOriginEndpointResponse.t,
-          [ `AWS of CreateOriginEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateOriginEndpointResponse.t, CreateOriginEndpointResponse.error)
+          Result.t Async.Deferred.t
 val delete_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteChannelRequest.t ->
-        (DeleteChannelResponse.t,
-          [ `AWS of DeleteChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteChannelResponse.t, DeleteChannelResponse.error) Result.t
           Async.Deferred.t
 val delete_origin_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOriginEndpointRequest.t ->
-        (DeleteOriginEndpointResponse.t,
-          [ `AWS of DeleteOriginEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteOriginEndpointResponse.t, DeleteOriginEndpointResponse.error)
+          Result.t Async.Deferred.t
 val describe_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelRequest.t ->
-        (DescribeChannelResponse.t,
-          [ `AWS of DescribeChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeChannelResponse.t, DescribeChannelResponse.error) Result.t
           Async.Deferred.t
 val describe_harvest_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHarvestJobRequest.t ->
-        (DescribeHarvestJobResponse.t,
-          [ `AWS of DescribeHarvestJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeHarvestJobResponse.t, DescribeHarvestJobResponse.error)
+          Result.t Async.Deferred.t
 val describe_origin_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOriginEndpointRequest.t ->
         (DescribeOriginEndpointResponse.t,
-          [ `AWS of DescribeOriginEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeOriginEndpointResponse.error) Result.t Async.Deferred.t
 val list_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelsRequest.t ->
-        (ListChannelsResponse.t,
-          [ `AWS of ListChannelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListChannelsResponse.t, ListChannelsResponse.error) Result.t
           Async.Deferred.t
 val list_harvest_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListHarvestJobsRequest.t ->
-        (ListHarvestJobsResponse.t,
-          [ `AWS of ListHarvestJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListHarvestJobsResponse.t, ListHarvestJobsResponse.error) Result.t
           Async.Deferred.t
 val list_origin_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOriginEndpointsRequest.t ->
-        (ListOriginEndpointsResponse.t,
-          [ `AWS of ListOriginEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListOriginEndpointsResponse.t, ListOriginEndpointsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val rotate_channel_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RotateChannelCredentialsRequest.t ->
         (RotateChannelCredentialsResponse.t,
-          [ `AWS of RotateChannelCredentialsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RotateChannelCredentialsResponse.error) Result.t Async.Deferred.t
 val rotate_ingest_endpoint_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RotateIngestEndpointCredentialsRequest.t ->
         (RotateIngestEndpointCredentialsResponse.t,
-          [ `AWS of RotateIngestEndpointCredentialsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RotateIngestEndpointCredentialsResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChannelRequest.t ->
-        (UpdateChannelResponse.t,
-          [ `AWS of UpdateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateChannelResponse.t, UpdateChannelResponse.error) Result.t
           Async.Deferred.t
 val update_origin_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOriginEndpointRequest.t ->
-        (UpdateOriginEndpointResponse.t,
-          [ `AWS of UpdateOriginEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateOriginEndpointResponse.t, UpdateOriginEndpointResponse.error)
+          Result.t Async.Deferred.t

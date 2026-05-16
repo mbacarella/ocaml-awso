@@ -4,87 +4,65 @@ val cancel_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelQueryRequest.t ->
-        (CancelQueryResponse.t,
-          [ `AWS of CancelQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelQueryResponse.t, CancelQueryResponse.error) Result.t Lwt.t
 val create_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateScheduledQueryRequest.t ->
-        (CreateScheduledQueryResponse.t,
-          [ `AWS of CreateScheduledQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateScheduledQueryResponse.t, CreateScheduledQueryResponse.error)
+          Result.t Lwt.t
 val delete_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteScheduledQueryRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteScheduledQueryRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointsRequest.t ->
-        (DescribeEndpointsResponse.t,
-          [ `AWS of DescribeEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEndpointsResponse.t, DescribeEndpointsResponse.error)
+          Result.t Lwt.t
 val describe_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScheduledQueryRequest.t ->
         (DescribeScheduledQueryResponse.t,
-          [ `AWS of DescribeScheduledQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeScheduledQueryResponse.error) Result.t Lwt.t
 val execute_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ExecuteScheduledQueryRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      ExecuteScheduledQueryRequest.t -> (unit, unit) Result.t Lwt.t
 val list_scheduled_queries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListScheduledQueriesRequest.t ->
-        (ListScheduledQueriesResponse.t,
-          [ `AWS of ListScheduledQueriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListScheduledQueriesResponse.t, ListScheduledQueriesResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val prepare_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PrepareQueryRequest.t ->
-        (PrepareQueryResponse.t,
-          [ `AWS of PrepareQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PrepareQueryResponse.t, PrepareQueryResponse.error) Result.t Lwt.t
 val query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      QueryRequest.t ->
-        (QueryResponse.t,
-          [ `AWS of QueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      QueryRequest.t -> (QueryResponse.t, QueryResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateScheduledQueryRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateScheduledQueryRequest.t -> (unit, unit) Result.t Lwt.t

@@ -4,215 +4,161 @@ val batch_get_traces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetTracesRequest.t ->
-        (BatchGetTracesResult.t,
-          [ `AWS of BatchGetTracesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchGetTracesResult.t, BatchGetTracesResult.error) Result.t
           Async.Deferred.t
 val create_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupRequest.t ->
-        (CreateGroupResult.t,
-          [ `AWS of CreateGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateGroupResult.t, CreateGroupResult.error) Result.t
           Async.Deferred.t
 val create_sampling_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSamplingRuleRequest.t ->
-        (CreateSamplingRuleResult.t,
-          [ `AWS of CreateSamplingRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSamplingRuleResult.t, CreateSamplingRuleResult.error) Result.t
           Async.Deferred.t
 val delete_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGroupRequest.t ->
-        (DeleteGroupResult.t,
-          [ `AWS of DeleteGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteGroupResult.t, DeleteGroupResult.error) Result.t
           Async.Deferred.t
 val delete_sampling_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSamplingRuleRequest.t ->
-        (DeleteSamplingRuleResult.t,
-          [ `AWS of DeleteSamplingRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSamplingRuleResult.t, DeleteSamplingRuleResult.error) Result.t
           Async.Deferred.t
 val get_encryption_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEncryptionConfigRequest.t ->
-        (GetEncryptionConfigResult.t,
-          [ `AWS of GetEncryptionConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetEncryptionConfigResult.t, GetEncryptionConfigResult.error)
+          Result.t Async.Deferred.t
 val get_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupRequest.t ->
-        (GetGroupResult.t,
-          [ `AWS of GetGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetGroupResult.t, GetGroupResult.error) Result.t Async.Deferred.t
 val get_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupsRequest.t ->
-        (GetGroupsResult.t,
-          [ `AWS of GetGroupsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetGroupsResult.t, GetGroupsResult.error) Result.t Async.Deferred.t
 val get_insight :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightRequest.t ->
-        (GetInsightResult.t,
-          [ `AWS of GetInsightResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetInsightResult.t, GetInsightResult.error) Result.t
           Async.Deferred.t
 val get_insight_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightEventsRequest.t ->
-        (GetInsightEventsResult.t,
-          [ `AWS of GetInsightEventsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetInsightEventsResult.t, GetInsightEventsResult.error) Result.t
           Async.Deferred.t
 val get_insight_impact_graph :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightImpactGraphRequest.t ->
-        (GetInsightImpactGraphResult.t,
-          [ `AWS of GetInsightImpactGraphResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetInsightImpactGraphResult.t, GetInsightImpactGraphResult.error)
+          Result.t Async.Deferred.t
 val get_insight_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightSummariesRequest.t ->
-        (GetInsightSummariesResult.t,
-          [ `AWS of GetInsightSummariesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetInsightSummariesResult.t, GetInsightSummariesResult.error)
+          Result.t Async.Deferred.t
 val get_sampling_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSamplingRulesRequest.t ->
-        (GetSamplingRulesResult.t,
-          [ `AWS of GetSamplingRulesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSamplingRulesResult.t, GetSamplingRulesResult.error) Result.t
           Async.Deferred.t
 val get_sampling_statistic_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSamplingStatisticSummariesRequest.t ->
         (GetSamplingStatisticSummariesResult.t,
-          [ `AWS of GetSamplingStatisticSummariesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetSamplingStatisticSummariesResult.error) Result.t
           Async.Deferred.t
 val get_sampling_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSamplingTargetsRequest.t ->
-        (GetSamplingTargetsResult.t,
-          [ `AWS of GetSamplingTargetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSamplingTargetsResult.t, GetSamplingTargetsResult.error) Result.t
           Async.Deferred.t
 val get_service_graph :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceGraphRequest.t ->
-        (GetServiceGraphResult.t,
-          [ `AWS of GetServiceGraphResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetServiceGraphResult.t, GetServiceGraphResult.error) Result.t
           Async.Deferred.t
 val get_time_series_service_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTimeSeriesServiceStatisticsRequest.t ->
         (GetTimeSeriesServiceStatisticsResult.t,
-          [ `AWS of GetTimeSeriesServiceStatisticsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetTimeSeriesServiceStatisticsResult.error) Result.t
           Async.Deferred.t
 val get_trace_graph :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTraceGraphRequest.t ->
-        (GetTraceGraphResult.t,
-          [ `AWS of GetTraceGraphResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTraceGraphResult.t, GetTraceGraphResult.error) Result.t
           Async.Deferred.t
 val get_trace_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTraceSummariesRequest.t ->
-        (GetTraceSummariesResult.t,
-          [ `AWS of GetTraceSummariesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTraceSummariesResult.t, GetTraceSummariesResult.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_encryption_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEncryptionConfigRequest.t ->
-        (PutEncryptionConfigResult.t,
-          [ `AWS of PutEncryptionConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutEncryptionConfigResult.t, PutEncryptionConfigResult.error)
+          Result.t Async.Deferred.t
 val put_telemetry_records :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutTelemetryRecordsRequest.t ->
-        (PutTelemetryRecordsResult.t,
-          [ `AWS of PutTelemetryRecordsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutTelemetryRecordsResult.t, PutTelemetryRecordsResult.error)
+          Result.t Async.Deferred.t
 val put_trace_segments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutTraceSegmentsRequest.t ->
-        (PutTraceSegmentsResult.t,
-          [ `AWS of PutTraceSegmentsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutTraceSegmentsResult.t, PutTraceSegmentsResult.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGroupRequest.t ->
-        (UpdateGroupResult.t,
-          [ `AWS of UpdateGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateGroupResult.t, UpdateGroupResult.error) Result.t
           Async.Deferred.t
 val update_sampling_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSamplingRuleRequest.t ->
-        (UpdateSamplingRuleResult.t,
-          [ `AWS of UpdateSamplingRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSamplingRuleResult.t, UpdateSamplingRuleResult.error) Result.t
           Async.Deferred.t

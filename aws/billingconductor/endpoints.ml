@@ -860,253 +860,249 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdatePricingPlan -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePricingRule -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateAccounts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociateAccountsOutput.error_of_json)
-       | Ok resp ->
-           Ok (AssociateAccountsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociateAccountsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some AssociateAccountsOutput.error_of_json))
   | AssociatePricingRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociatePricingRulesOutput.error_of_json)
-       | Ok resp ->
-           Ok (AssociatePricingRulesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociatePricingRulesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AssociatePricingRulesOutput.error_of_json))
   | BatchAssociateResourcesToCustomLineItem ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (BatchAssociateResourcesToCustomLineItemOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchAssociateResourcesToCustomLineItemOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchAssociateResourcesToCustomLineItemOutput.of_json
-                (response_to_json resp)))
+                BatchAssociateResourcesToCustomLineItemOutput.error_of_json))
   | BatchDisassociateResourcesFromCustomLineItem ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (BatchDisassociateResourcesFromCustomLineItemOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchDisassociateResourcesFromCustomLineItemOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDisassociateResourcesFromCustomLineItemOutput.of_json
-                (response_to_json resp)))
+                BatchDisassociateResourcesFromCustomLineItemOutput.error_of_json))
   | CreateBillingGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBillingGroupOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateBillingGroupOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBillingGroupOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBillingGroupOutput.error_of_json))
   | CreateCustomLineItem ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCustomLineItemOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateCustomLineItemOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateCustomLineItemOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateCustomLineItemOutput.error_of_json))
   | CreatePricingPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePricingPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreatePricingPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePricingPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreatePricingPlanOutput.error_of_json))
   | CreatePricingRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePricingRuleOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreatePricingRuleOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePricingRuleOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreatePricingRuleOutput.error_of_json))
   | DeleteBillingGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBillingGroupOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBillingGroupOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBillingGroupOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteBillingGroupOutput.error_of_json))
   | DeleteCustomLineItem ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteCustomLineItemOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteCustomLineItemOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteCustomLineItemOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteCustomLineItemOutput.error_of_json))
   | DeletePricingPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePricingPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeletePricingPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeletePricingPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeletePricingPlanOutput.error_of_json))
   | DeletePricingRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePricingRuleOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeletePricingRuleOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeletePricingRuleOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeletePricingRuleOutput.error_of_json))
   | DisassociateAccounts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisassociateAccountsOutput.error_of_json)
-       | Ok resp ->
-           Ok (DisassociateAccountsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisassociateAccountsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DisassociateAccountsOutput.error_of_json))
   | DisassociatePricingRules ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociatePricingRulesOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociatePricingRulesOutput.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DisassociatePricingRulesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociatePricingRulesOutput.error_of_json))
   | ListAccountAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAccountAssociationsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListAccountAssociationsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAccountAssociationsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAccountAssociationsOutput.error_of_json))
   | ListBillingGroupCostReports ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListBillingGroupCostReportsOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListBillingGroupCostReportsOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListBillingGroupCostReportsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListBillingGroupCostReportsOutput.error_of_json))
   | ListBillingGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBillingGroupsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListBillingGroupsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBillingGroupsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListBillingGroupsOutput.error_of_json))
   | ListCustomLineItems ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCustomLineItemsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListCustomLineItemsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCustomLineItemsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListCustomLineItemsOutput.error_of_json))
   | ListPricingPlans ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPricingPlansOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListPricingPlansOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPricingPlansOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPricingPlansOutput.error_of_json))
   | ListPricingPlansAssociatedWithPricingRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListPricingPlansAssociatedWithPricingRuleOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListPricingPlansAssociatedWithPricingRuleOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPricingPlansAssociatedWithPricingRuleOutput.of_json
-                (response_to_json resp)))
+                ListPricingPlansAssociatedWithPricingRuleOutput.error_of_json))
   | ListPricingRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPricingRulesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListPricingRulesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPricingRulesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPricingRulesOutput.error_of_json))
   | ListPricingRulesAssociatedToPricingPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListPricingRulesAssociatedToPricingPlanOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListPricingRulesAssociatedToPricingPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPricingRulesAssociatedToPricingPlanOutput.of_json
-                (response_to_json resp)))
+                ListPricingRulesAssociatedToPricingPlanOutput.error_of_json))
   | ListResourcesAssociatedToCustomLineItem ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListResourcesAssociatedToCustomLineItemOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListResourcesAssociatedToCustomLineItemOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListResourcesAssociatedToCustomLineItemOutput.of_json
-                (response_to_json resp)))
+                ListResourcesAssociatedToCustomLineItemOutput.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateBillingGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBillingGroupOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBillingGroupOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBillingGroupOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateBillingGroupOutput.error_of_json))
   | UpdateCustomLineItem ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateCustomLineItemOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateCustomLineItemOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateCustomLineItemOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateCustomLineItemOutput.error_of_json))
   | UpdatePricingPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePricingPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdatePricingPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePricingPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdatePricingPlanOutput.error_of_json))
   | UpdatePricingRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePricingRuleOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdatePricingRuleOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePricingRuleOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdatePricingRuleOutput.error_of_json))

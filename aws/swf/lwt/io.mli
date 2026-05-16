@@ -4,240 +4,166 @@ val count_closed_workflow_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CountClosedWorkflowExecutionsInput.t ->
-        (WorkflowExecutionCount.t,
-          [ `AWS of WorkflowExecutionCount.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WorkflowExecutionCount.t, WorkflowExecutionCount.error) Result.t
+          Lwt.t
 val count_open_workflow_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CountOpenWorkflowExecutionsInput.t ->
-        (WorkflowExecutionCount.t,
-          [ `AWS of WorkflowExecutionCount.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WorkflowExecutionCount.t, WorkflowExecutionCount.error) Result.t
+          Lwt.t
 val count_pending_activity_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CountPendingActivityTasksInput.t ->
-        (PendingTaskCount.t,
-          [ `AWS of PendingTaskCount.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PendingTaskCount.t, PendingTaskCount.error) Result.t Lwt.t
 val count_pending_decision_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CountPendingDecisionTasksInput.t ->
-        (PendingTaskCount.t,
-          [ `AWS of PendingTaskCount.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PendingTaskCount.t, PendingTaskCount.error) Result.t Lwt.t
 val deprecate_activity_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeprecateActivityTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeprecateActivityTypeInput.t -> (unit, unit) Result.t Lwt.t
 val deprecate_domain :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeprecateDomainInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeprecateDomainInput.t -> (unit, unit) Result.t Lwt.t
 val deprecate_workflow_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeprecateWorkflowTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeprecateWorkflowTypeInput.t -> (unit, unit) Result.t Lwt.t
 val describe_activity_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeActivityTypeInput.t ->
-        (ActivityTypeDetail.t,
-          [ `AWS of ActivityTypeDetail.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivityTypeDetail.t, ActivityTypeDetail.error) Result.t Lwt.t
 val describe_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainInput.t ->
-        (DomainDetail.t,
-          [ `AWS of DomainDetail.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DomainDetail.t, DomainDetail.error) Result.t Lwt.t
 val describe_workflow_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkflowExecutionInput.t ->
-        (WorkflowExecutionDetail.t,
-          [ `AWS of WorkflowExecutionDetail.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WorkflowExecutionDetail.t, WorkflowExecutionDetail.error) Result.t
+          Lwt.t
 val describe_workflow_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkflowTypeInput.t ->
-        (WorkflowTypeDetail.t,
-          [ `AWS of WorkflowTypeDetail.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WorkflowTypeDetail.t, WorkflowTypeDetail.error) Result.t Lwt.t
 val get_workflow_execution_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkflowExecutionHistoryInput.t ->
-        (History.t,
-          [ `AWS of History.error  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (History.t, History.error) Result.t Lwt.t
 val list_activity_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListActivityTypesInput.t ->
-        (ActivityTypeInfos.t,
-          [ `AWS of ActivityTypeInfos.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivityTypeInfos.t, ActivityTypeInfos.error) Result.t Lwt.t
 val list_closed_workflow_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClosedWorkflowExecutionsInput.t ->
-        (WorkflowExecutionInfos.t,
-          [ `AWS of WorkflowExecutionInfos.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WorkflowExecutionInfos.t, WorkflowExecutionInfos.error) Result.t
+          Lwt.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ListDomainsInput.t ->
-        (DomainInfos.t,
-          [ `AWS of DomainInfos.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      ListDomainsInput.t -> (DomainInfos.t, DomainInfos.error) Result.t Lwt.t
 val list_open_workflow_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOpenWorkflowExecutionsInput.t ->
-        (WorkflowExecutionInfos.t,
-          [ `AWS of WorkflowExecutionInfos.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WorkflowExecutionInfos.t, WorkflowExecutionInfos.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val list_workflow_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkflowTypesInput.t ->
-        (WorkflowTypeInfos.t,
-          [ `AWS of WorkflowTypeInfos.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WorkflowTypeInfos.t, WorkflowTypeInfos.error) Result.t Lwt.t
 val poll_for_activity_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PollForActivityTaskInput.t ->
-        (ActivityTask.t,
-          [ `AWS of ActivityTask.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivityTask.t, ActivityTask.error) Result.t Lwt.t
 val poll_for_decision_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PollForDecisionTaskInput.t ->
-        (DecisionTask.t,
-          [ `AWS of DecisionTask.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DecisionTask.t, DecisionTask.error) Result.t Lwt.t
 val record_activity_task_heartbeat :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RecordActivityTaskHeartbeatInput.t ->
-        (ActivityTaskStatus.t,
-          [ `AWS of ActivityTaskStatus.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivityTaskStatus.t, ActivityTaskStatus.error) Result.t Lwt.t
 val register_activity_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RegisterActivityTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RegisterActivityTypeInput.t -> (unit, unit) Result.t Lwt.t
 val register_domain :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      RegisterDomainInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> RegisterDomainInput.t -> (unit, unit) Result.t Lwt.t
 val register_workflow_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RegisterWorkflowTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RegisterWorkflowTypeInput.t -> (unit, unit) Result.t Lwt.t
 val request_cancel_workflow_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RequestCancelWorkflowExecutionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RequestCancelWorkflowExecutionInput.t -> (unit, unit) Result.t Lwt.t
 val respond_activity_task_canceled :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RespondActivityTaskCanceledInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RespondActivityTaskCanceledInput.t -> (unit, unit) Result.t Lwt.t
 val respond_activity_task_completed :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RespondActivityTaskCompletedInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RespondActivityTaskCompletedInput.t -> (unit, unit) Result.t Lwt.t
 val respond_activity_task_failed :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RespondActivityTaskFailedInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RespondActivityTaskFailedInput.t -> (unit, unit) Result.t Lwt.t
 val respond_decision_task_completed :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RespondDecisionTaskCompletedInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RespondDecisionTaskCompletedInput.t -> (unit, unit) Result.t Lwt.t
 val signal_workflow_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SignalWorkflowExecutionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SignalWorkflowExecutionInput.t -> (unit, unit) Result.t Lwt.t
 val start_workflow_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StartWorkflowExecutionInput.t ->
-        (Run.t,
-          [ `AWS of Run.error  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StartWorkflowExecutionInput.t -> (Run.t, Run.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceInput.t -> (unit, unit) Result.t Lwt.t
 val terminate_workflow_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TerminateWorkflowExecutionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      TerminateWorkflowExecutionInput.t -> (unit, unit) Result.t Lwt.t
 val undeprecate_activity_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UndeprecateActivityTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UndeprecateActivityTypeInput.t -> (unit, unit) Result.t Lwt.t
 val undeprecate_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UndeprecateDomainInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UndeprecateDomainInput.t -> (unit, unit) Result.t Lwt.t
 val undeprecate_workflow_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UndeprecateWorkflowTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UndeprecateWorkflowTypeInput.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceInput.t -> (unit, unit) Result.t Lwt.t

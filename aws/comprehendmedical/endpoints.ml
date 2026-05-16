@@ -357,222 +357,240 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             "ComprehendMedical_20181030.StopSNOMEDCTInferenceJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | DescribeEntitiesDetectionV2Job ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeEntitiesDetectionV2JobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeEntitiesDetectionV2JobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeEntitiesDetectionV2JobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEntitiesDetectionV2JobResponse.error_of_json))
   | DescribeICD10CMInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeICD10CMInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeICD10CMInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeICD10CMInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeICD10CMInferenceJobResponse.error_of_json))
   | DescribePHIDetectionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribePHIDetectionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribePHIDetectionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePHIDetectionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribePHIDetectionJobResponse.error_of_json))
   | DescribeRxNormInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRxNormInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRxNormInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRxNormInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRxNormInferenceJobResponse.error_of_json))
   | DescribeSNOMEDCTInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSNOMEDCTInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeSNOMEDCTInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSNOMEDCTInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSNOMEDCTInferenceJobResponse.error_of_json))
   | DetectEntities ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetectEntitiesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DetectEntitiesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetectEntitiesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DetectEntitiesResponse.error_of_json))
   | DetectEntitiesV2 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetectEntitiesV2Response.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DetectEntitiesV2Response.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetectEntitiesV2Response.of_json json)
+      else
+        Error (parse_aws_error (Some DetectEntitiesV2Response.error_of_json))
   | DetectPHI ->
-      (match resp with
-       | Error err -> handle_error err (Some DetectPHIResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DetectPHIResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetectPHIResponse.of_json json)
+      else Error (parse_aws_error (Some DetectPHIResponse.error_of_json))
   | InferICD10CM ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InferICD10CMResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (InferICD10CMResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (InferICD10CMResponse.of_json json)
+      else Error (parse_aws_error (Some InferICD10CMResponse.error_of_json))
   | InferRxNorm ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InferRxNormResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (InferRxNormResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (InferRxNormResponse.of_json json)
+      else Error (parse_aws_error (Some InferRxNormResponse.error_of_json))
   | InferSNOMEDCT ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InferSNOMEDCTResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (InferSNOMEDCTResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (InferSNOMEDCTResponse.of_json json)
+      else Error (parse_aws_error (Some InferSNOMEDCTResponse.error_of_json))
   | ListEntitiesDetectionV2Jobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListEntitiesDetectionV2JobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListEntitiesDetectionV2JobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListEntitiesDetectionV2JobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListEntitiesDetectionV2JobsResponse.error_of_json))
   | ListICD10CMInferenceJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListICD10CMInferenceJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListICD10CMInferenceJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListICD10CMInferenceJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListICD10CMInferenceJobsResponse.error_of_json))
   | ListPHIDetectionJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPHIDetectionJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListPHIDetectionJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPHIDetectionJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListPHIDetectionJobsResponse.error_of_json))
   | ListRxNormInferenceJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListRxNormInferenceJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListRxNormInferenceJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRxNormInferenceJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListRxNormInferenceJobsResponse.error_of_json))
   | ListSNOMEDCTInferenceJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSNOMEDCTInferenceJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSNOMEDCTInferenceJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSNOMEDCTInferenceJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSNOMEDCTInferenceJobsResponse.error_of_json))
   | StartEntitiesDetectionV2Job ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartEntitiesDetectionV2JobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartEntitiesDetectionV2JobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartEntitiesDetectionV2JobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartEntitiesDetectionV2JobResponse.error_of_json))
   | StartICD10CMInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartICD10CMInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartICD10CMInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartICD10CMInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartICD10CMInferenceJobResponse.error_of_json))
   | StartPHIDetectionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartPHIDetectionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartPHIDetectionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartPHIDetectionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartPHIDetectionJobResponse.error_of_json))
   | StartRxNormInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartRxNormInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartRxNormInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartRxNormInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartRxNormInferenceJobResponse.error_of_json))
   | StartSNOMEDCTInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartSNOMEDCTInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartSNOMEDCTInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartSNOMEDCTInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartSNOMEDCTInferenceJobResponse.error_of_json))
   | StopEntitiesDetectionV2Job ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopEntitiesDetectionV2JobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopEntitiesDetectionV2JobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopEntitiesDetectionV2JobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopEntitiesDetectionV2JobResponse.error_of_json))
   | StopICD10CMInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopICD10CMInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopICD10CMInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopICD10CMInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopICD10CMInferenceJobResponse.error_of_json))
   | StopPHIDetectionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopPHIDetectionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopPHIDetectionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopPHIDetectionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StopPHIDetectionJobResponse.error_of_json))
   | StopRxNormInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopRxNormInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopRxNormInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopRxNormInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopRxNormInferenceJobResponse.error_of_json))
   | StopSNOMEDCTInferenceJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopSNOMEDCTInferenceJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopSNOMEDCTInferenceJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopSNOMEDCTInferenceJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopSNOMEDCTInferenceJobResponse.error_of_json))

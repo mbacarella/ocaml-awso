@@ -4,217 +4,165 @@ val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResponse.t,
-          [ `AWS of CreateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t Async.Deferred.t
 val create_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateComponentRequest.t ->
-        (CreateComponentResponse.t,
-          [ `AWS of CreateComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateComponentResponse.t, CreateComponentResponse.error) Result.t
           Async.Deferred.t
 val create_log_pattern :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLogPatternRequest.t ->
-        (CreateLogPatternResponse.t,
-          [ `AWS of CreateLogPatternResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLogPatternResponse.t, CreateLogPatternResponse.error) Result.t
           Async.Deferred.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationRequest.t ->
-        (DeleteApplicationResponse.t,
-          [ `AWS of DeleteApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteApplicationResponse.t, DeleteApplicationResponse.error)
+          Result.t Async.Deferred.t
 val delete_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteComponentRequest.t ->
-        (DeleteComponentResponse.t,
-          [ `AWS of DeleteComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteComponentResponse.t, DeleteComponentResponse.error) Result.t
           Async.Deferred.t
 val delete_log_pattern :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLogPatternRequest.t ->
-        (DeleteLogPatternResponse.t,
-          [ `AWS of DeleteLogPatternResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLogPatternResponse.t, DeleteLogPatternResponse.error) Result.t
           Async.Deferred.t
 val describe_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationRequest.t ->
-        (DescribeApplicationResponse.t,
-          [ `AWS of DescribeApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeApplicationResponse.t, DescribeApplicationResponse.error)
+          Result.t Async.Deferred.t
 val describe_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeComponentRequest.t ->
-        (DescribeComponentResponse.t,
-          [ `AWS of DescribeComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeComponentResponse.t, DescribeComponentResponse.error)
+          Result.t Async.Deferred.t
 val describe_component_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeComponentConfigurationRequest.t ->
         (DescribeComponentConfigurationResponse.t,
-          [ `AWS of DescribeComponentConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeComponentConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_component_configuration_recommendation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeComponentConfigurationRecommendationRequest.t ->
         (DescribeComponentConfigurationRecommendationResponse.t,
-          [
-            `AWS of
-              DescribeComponentConfigurationRecommendationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeComponentConfigurationRecommendationResponse.error)
+          Result.t Async.Deferred.t
 val describe_log_pattern :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLogPatternRequest.t ->
-        (DescribeLogPatternResponse.t,
-          [ `AWS of DescribeLogPatternResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeLogPatternResponse.t, DescribeLogPatternResponse.error)
+          Result.t Async.Deferred.t
 val describe_observation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeObservationRequest.t ->
-        (DescribeObservationResponse.t,
-          [ `AWS of DescribeObservationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeObservationResponse.t, DescribeObservationResponse.error)
+          Result.t Async.Deferred.t
 val describe_problem :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProblemRequest.t ->
-        (DescribeProblemResponse.t,
-          [ `AWS of DescribeProblemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeProblemResponse.t, DescribeProblemResponse.error) Result.t
           Async.Deferred.t
 val describe_problem_observations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProblemObservationsRequest.t ->
         (DescribeProblemObservationsResponse.t,
-          [ `AWS of DescribeProblemObservationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeProblemObservationsResponse.error) Result.t
           Async.Deferred.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationsRequest.t ->
-        (ListApplicationsResponse.t,
-          [ `AWS of ListApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListApplicationsResponse.t, ListApplicationsResponse.error) Result.t
           Async.Deferred.t
 val list_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComponentsRequest.t ->
-        (ListComponentsResponse.t,
-          [ `AWS of ListComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListComponentsResponse.t, ListComponentsResponse.error) Result.t
           Async.Deferred.t
 val list_configuration_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConfigurationHistoryRequest.t ->
         (ListConfigurationHistoryResponse.t,
-          [ `AWS of ListConfigurationHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListConfigurationHistoryResponse.error) Result.t Async.Deferred.t
 val list_log_pattern_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLogPatternSetsRequest.t ->
-        (ListLogPatternSetsResponse.t,
-          [ `AWS of ListLogPatternSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListLogPatternSetsResponse.t, ListLogPatternSetsResponse.error)
+          Result.t Async.Deferred.t
 val list_log_patterns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLogPatternsRequest.t ->
-        (ListLogPatternsResponse.t,
-          [ `AWS of ListLogPatternsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLogPatternsResponse.t, ListLogPatternsResponse.error) Result.t
           Async.Deferred.t
 val list_problems :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProblemsRequest.t ->
-        (ListProblemsResponse.t,
-          [ `AWS of ListProblemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListProblemsResponse.t, ListProblemsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationRequest.t ->
-        (UpdateApplicationResponse.t,
-          [ `AWS of UpdateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateApplicationResponse.t, UpdateApplicationResponse.error)
+          Result.t Async.Deferred.t
 val update_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateComponentRequest.t ->
-        (UpdateComponentResponse.t,
-          [ `AWS of UpdateComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateComponentResponse.t, UpdateComponentResponse.error) Result.t
           Async.Deferred.t
 val update_component_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateComponentConfigurationRequest.t ->
         (UpdateComponentConfigurationResponse.t,
-          [ `AWS of UpdateComponentConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateComponentConfigurationResponse.error) Result.t
           Async.Deferred.t
 val update_log_pattern :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLogPatternRequest.t ->
-        (UpdateLogPatternResponse.t,
-          [ `AWS of UpdateLogPatternResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateLogPatternResponse.t, UpdateLogPatternResponse.error) Result.t
           Async.Deferred.t

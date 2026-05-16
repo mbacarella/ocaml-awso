@@ -435,185 +435,198 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateAppInstanceUserEndpoint ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateAppInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAppInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAppInstanceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAppInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAppInstanceResponse.error_of_json))
   | CreateAppInstanceAdmin ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAppInstanceAdminResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateAppInstanceAdminResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateAppInstanceAdminResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAppInstanceAdminResponse.error_of_json))
   | CreateAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAppInstanceUserResponse.of_json (response_to_json resp)))
-  | DeleteAppInstance -> Ok ()
-  | DeleteAppInstanceAdmin -> Ok ()
-  | DeleteAppInstanceUser -> Ok ()
-  | DeregisterAppInstanceUserEndpoint -> Ok ()
+      if is_success
+      then Ok (CreateAppInstanceUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAppInstanceUserResponse.error_of_json))
+  | DeleteAppInstance ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAppInstanceAdmin ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAppInstanceUser ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeregisterAppInstanceUserEndpoint ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAppInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAppInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAppInstanceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAppInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAppInstanceResponse.error_of_json))
   | DescribeAppInstanceAdmin ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAppInstanceAdminResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAppInstanceAdminResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeAppInstanceAdminResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppInstanceAdminResponse.error_of_json))
   | DescribeAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAppInstanceUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeAppInstanceUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppInstanceUserResponse.error_of_json))
   | DescribeAppInstanceUserEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAppInstanceUserEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAppInstanceUserEndpointResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeAppInstanceUserEndpointResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppInstanceUserEndpointResponse.error_of_json))
   | GetAppInstanceRetentionSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAppInstanceRetentionSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAppInstanceRetentionSettingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetAppInstanceRetentionSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAppInstanceRetentionSettingsResponse.error_of_json))
   | ListAppInstanceAdmins ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppInstanceAdminsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppInstanceAdminsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppInstanceAdminsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppInstanceAdminsResponse.error_of_json))
   | ListAppInstanceUserEndpoints ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppInstanceUserEndpointsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAppInstanceUserEndpointsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAppInstanceUserEndpointsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAppInstanceUserEndpointsResponse.error_of_json))
   | ListAppInstanceUsers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAppInstanceUsersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppInstanceUsersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppInstanceUsersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppInstanceUsersResponse.error_of_json))
   | ListAppInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAppInstancesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppInstancesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppInstancesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAppInstancesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutAppInstanceRetentionSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutAppInstanceRetentionSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutAppInstanceRetentionSettingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutAppInstanceRetentionSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutAppInstanceRetentionSettingsResponse.error_of_json))
   | RegisterAppInstanceUserEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegisterAppInstanceUserEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RegisterAppInstanceUserEndpointResponse.of_json
-                (response_to_json resp)))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        Ok
+          (RegisterAppInstanceUserEndpointResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterAppInstanceUserEndpointResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateAppInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAppInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAppInstanceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAppInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAppInstanceResponse.error_of_json))
   | UpdateAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAppInstanceUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAppInstanceUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAppInstanceUserResponse.error_of_json))
   | UpdateAppInstanceUserEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAppInstanceUserEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAppInstanceUserEndpointResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateAppInstanceUserEndpointResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAppInstanceUserEndpointResponse.error_of_json))

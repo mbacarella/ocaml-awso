@@ -3,144 +3,109 @@ open Awso_detective.Values
 val accept_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AcceptInvitationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AcceptInvitationRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val create_graph :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGraphRequest.t ->
-        (CreateGraphResponse.t,
-          [ `AWS of CreateGraphResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateGraphResponse.t, CreateGraphResponse.error) Result.t
           Async.Deferred.t
 val create_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMembersRequest.t ->
-        (CreateMembersResponse.t,
-          [ `AWS of CreateMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateMembersResponse.t, CreateMembersResponse.error) Result.t
           Async.Deferred.t
 val delete_graph :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteGraphRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteGraphRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMembersRequest.t ->
-        (DeleteMembersResponse.t,
-          [ `AWS of DeleteMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteMembersResponse.t, DeleteMembersResponse.error) Result.t
           Async.Deferred.t
 val describe_organization_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationConfigurationRequest.t ->
         (DescribeOrganizationConfigurationResponse.t,
-          [ `AWS of DescribeOrganizationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeOrganizationConfigurationResponse.error) Result.t
           Async.Deferred.t
 val disable_organization_admin_account :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      unit ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+    ?cfg:Awso.Cfg.t -> unit -> (unit, unit) Result.t Async.Deferred.t
 val disassociate_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateMembershipRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val enable_organization_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableOrganizationAdminAccountRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val get_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMembersRequest.t ->
-        (GetMembersResponse.t,
-          [ `AWS of GetMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMembersResponse.t, GetMembersResponse.error) Result.t
           Async.Deferred.t
 val list_graphs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGraphsRequest.t ->
-        (ListGraphsResponse.t,
-          [ `AWS of ListGraphsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListGraphsResponse.t, ListGraphsResponse.error) Result.t
           Async.Deferred.t
 val list_invitations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInvitationsRequest.t ->
-        (ListInvitationsResponse.t,
-          [ `AWS of ListInvitationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListInvitationsResponse.t, ListInvitationsResponse.error) Result.t
           Async.Deferred.t
 val list_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMembersRequest.t ->
-        (ListMembersResponse.t,
-          [ `AWS of ListMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListMembersResponse.t, ListMembersResponse.error) Result.t
           Async.Deferred.t
 val list_organization_admin_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOrganizationAdminAccountsRequest.t ->
         (ListOrganizationAdminAccountsResponse.t,
-          [ `AWS of ListOrganizationAdminAccountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListOrganizationAdminAccountsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val reject_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RejectInvitationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      RejectInvitationRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val start_monitoring_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMonitoringMemberRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_organization_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOrganizationConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t

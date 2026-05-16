@@ -2,19 +2,10 @@
 open Awso_personalize_events.Values
 val put_events :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutEventsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutEventsRequest.t -> (unit, unit) Result.t Lwt.t
 val put_items :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutItemsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutItemsRequest.t -> (unit, unit) Result.t Lwt.t
 val put_users :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutUsersRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutUsersRequest.t -> (unit, unit) Result.t Lwt.t

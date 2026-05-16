@@ -4,171 +4,128 @@ val cancel_rotate_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelRotateSecretRequest.t ->
-        (CancelRotateSecretResponse.t,
-          [ `AWS of CancelRotateSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CancelRotateSecretResponse.t, CancelRotateSecretResponse.error)
+          Result.t Async.Deferred.t
 val create_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSecretRequest.t ->
-        (CreateSecretResponse.t,
-          [ `AWS of CreateSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSecretResponse.t, CreateSecretResponse.error) Result.t
           Async.Deferred.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyRequest.t ->
-        (DeleteResourcePolicyResponse.t,
-          [ `AWS of DeleteResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val delete_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSecretRequest.t ->
-        (DeleteSecretResponse.t,
-          [ `AWS of DeleteSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSecretResponse.t, DeleteSecretResponse.error) Result.t
           Async.Deferred.t
 val describe_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSecretRequest.t ->
-        (DescribeSecretResponse.t,
-          [ `AWS of DescribeSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSecretResponse.t, DescribeSecretResponse.error) Result.t
           Async.Deferred.t
 val get_random_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRandomPasswordRequest.t ->
-        (GetRandomPasswordResponse.t,
-          [ `AWS of GetRandomPasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRandomPasswordResponse.t, GetRandomPasswordResponse.error)
+          Result.t Async.Deferred.t
 val get_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePolicyRequest.t ->
-        (GetResourcePolicyResponse.t,
-          [ `AWS of GetResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val get_secret_value :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSecretValueRequest.t ->
-        (GetSecretValueResponse.t,
-          [ `AWS of GetSecretValueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSecretValueResponse.t, GetSecretValueResponse.error) Result.t
           Async.Deferred.t
 val list_secret_version_ids :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSecretVersionIdsRequest.t ->
-        (ListSecretVersionIdsResponse.t,
-          [ `AWS of ListSecretVersionIdsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSecretVersionIdsResponse.t, ListSecretVersionIdsResponse.error)
+          Result.t Async.Deferred.t
 val list_secrets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSecretsRequest.t ->
-        (ListSecretsResponse.t,
-          [ `AWS of ListSecretsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListSecretsResponse.t, ListSecretsResponse.error) Result.t
           Async.Deferred.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyRequest.t ->
-        (PutResourcePolicyResponse.t,
-          [ `AWS of PutResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val put_secret_value :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSecretValueRequest.t ->
-        (PutSecretValueResponse.t,
-          [ `AWS of PutSecretValueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutSecretValueResponse.t, PutSecretValueResponse.error) Result.t
           Async.Deferred.t
 val remove_regions_from_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveRegionsFromReplicationRequest.t ->
         (RemoveRegionsFromReplicationResponse.t,
-          [ `AWS of RemoveRegionsFromReplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RemoveRegionsFromReplicationResponse.error) Result.t
           Async.Deferred.t
 val replicate_secret_to_regions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReplicateSecretToRegionsRequest.t ->
         (ReplicateSecretToRegionsResponse.t,
-          [ `AWS of ReplicateSecretToRegionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ReplicateSecretToRegionsResponse.error) Result.t Async.Deferred.t
 val restore_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreSecretRequest.t ->
-        (RestoreSecretResponse.t,
-          [ `AWS of RestoreSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RestoreSecretResponse.t, RestoreSecretResponse.error) Result.t
           Async.Deferred.t
 val rotate_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RotateSecretRequest.t ->
-        (RotateSecretResponse.t,
-          [ `AWS of RotateSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RotateSecretResponse.t, RotateSecretResponse.error) Result.t
           Async.Deferred.t
 val stop_replication_to_replica :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopReplicationToReplicaRequest.t ->
         (StopReplicationToReplicaResponse.t,
-          [ `AWS of StopReplicationToReplicaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopReplicationToReplicaResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSecretRequest.t ->
-        (UpdateSecretResponse.t,
-          [ `AWS of UpdateSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSecretResponse.t, UpdateSecretResponse.error) Result.t
           Async.Deferred.t
 val update_secret_version_stage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSecretVersionStageRequest.t ->
         (UpdateSecretVersionStageResponse.t,
-          [ `AWS of UpdateSecretVersionStageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateSecretVersionStageResponse.error) Result.t Async.Deferred.t
 val validate_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ValidateResourcePolicyRequest.t ->
         (ValidateResourcePolicyResponse.t,
-          [ `AWS of ValidateResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ValidateResourcePolicyResponse.error) Result.t Async.Deferred.t

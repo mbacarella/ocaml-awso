@@ -448,192 +448,187 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateConfig -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMissionProfile -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CancelContact ->
-      (match resp with
-       | Error err -> handle_error err (Some ContactIdResponse.error_of_json)
-       | Ok resp -> Ok (ContactIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ContactIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ContactIdResponse.error_of_json))
   | CreateConfig ->
-      (match resp with
-       | Error err -> handle_error err (Some ConfigIdResponse.error_of_json)
-       | Ok resp -> Ok (ConfigIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ConfigIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ConfigIdResponse.error_of_json))
   | CreateDataflowEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DataflowEndpointGroupIdResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DataflowEndpointGroupIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DataflowEndpointGroupIdResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DataflowEndpointGroupIdResponse.error_of_json))
   | CreateMissionProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some MissionProfileIdResponse.error_of_json)
-       | Ok resp ->
-           Ok (MissionProfileIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (MissionProfileIdResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some MissionProfileIdResponse.error_of_json))
   | DeleteConfig ->
-      (match resp with
-       | Error err -> handle_error err (Some ConfigIdResponse.error_of_json)
-       | Ok resp -> Ok (ConfigIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ConfigIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ConfigIdResponse.error_of_json))
   | DeleteDataflowEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DataflowEndpointGroupIdResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DataflowEndpointGroupIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DataflowEndpointGroupIdResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DataflowEndpointGroupIdResponse.error_of_json))
   | DeleteMissionProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some MissionProfileIdResponse.error_of_json)
-       | Ok resp ->
-           Ok (MissionProfileIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (MissionProfileIdResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some MissionProfileIdResponse.error_of_json))
   | DescribeContact ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeContactResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeContactResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeContactResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeContactResponse.error_of_json))
   | GetConfig ->
-      (match resp with
-       | Error err -> handle_error err (Some GetConfigResponse.error_of_json)
-       | Ok resp -> Ok (GetConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetConfigResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetConfigResponse.error_of_json))
   | GetDataflowEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDataflowEndpointGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetDataflowEndpointGroupResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetDataflowEndpointGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDataflowEndpointGroupResponse.error_of_json))
   | GetMinuteUsage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMinuteUsageResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetMinuteUsageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMinuteUsageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetMinuteUsageResponse.error_of_json))
   | GetMissionProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMissionProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetMissionProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMissionProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetMissionProfileResponse.error_of_json))
   | GetSatellite ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSatelliteResponse.error_of_json)
-       | Ok resp -> Ok (GetSatelliteResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSatelliteResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSatelliteResponse.error_of_json))
   | ListConfigs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListConfigsResponse.error_of_json)
-       | Ok resp -> Ok (ListConfigsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListConfigsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListConfigsResponse.error_of_json))
   | ListContacts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListContactsResponse.error_of_json)
-       | Ok resp -> Ok (ListContactsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListContactsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListContactsResponse.error_of_json))
   | ListDataflowEndpointGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDataflowEndpointGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListDataflowEndpointGroupsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListDataflowEndpointGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataflowEndpointGroupsResponse.error_of_json))
   | ListGroundStations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGroundStationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListGroundStationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGroundStationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListGroundStationsResponse.error_of_json))
   | ListMissionProfiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMissionProfilesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListMissionProfilesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMissionProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListMissionProfilesResponse.error_of_json))
   | ListSatellites ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSatellitesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSatellitesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSatellitesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListSatellitesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ReserveContact ->
-      (match resp with
-       | Error err -> handle_error err (Some ContactIdResponse.error_of_json)
-       | Ok resp -> Ok (ContactIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ContactIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ContactIdResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateConfig ->
-      (match resp with
-       | Error err -> handle_error err (Some ConfigIdResponse.error_of_json)
-       | Ok resp -> Ok (ConfigIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ConfigIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ConfigIdResponse.error_of_json))
   | UpdateMissionProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some MissionProfileIdResponse.error_of_json)
-       | Ok resp ->
-           Ok (MissionProfileIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (MissionProfileIdResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some MissionProfileIdResponse.error_of_json))

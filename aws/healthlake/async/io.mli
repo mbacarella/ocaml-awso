@@ -4,103 +4,77 @@ val create_f_h_i_r_datastore :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFHIRDatastoreRequest.t ->
-        (CreateFHIRDatastoreResponse.t,
-          [ `AWS of CreateFHIRDatastoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateFHIRDatastoreResponse.t, CreateFHIRDatastoreResponse.error)
+          Result.t Async.Deferred.t
 val delete_f_h_i_r_datastore :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFHIRDatastoreRequest.t ->
-        (DeleteFHIRDatastoreResponse.t,
-          [ `AWS of DeleteFHIRDatastoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteFHIRDatastoreResponse.t, DeleteFHIRDatastoreResponse.error)
+          Result.t Async.Deferred.t
 val describe_f_h_i_r_datastore :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFHIRDatastoreRequest.t ->
         (DescribeFHIRDatastoreResponse.t,
-          [ `AWS of DescribeFHIRDatastoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFHIRDatastoreResponse.error) Result.t Async.Deferred.t
 val describe_f_h_i_r_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFHIRExportJobRequest.t ->
         (DescribeFHIRExportJobResponse.t,
-          [ `AWS of DescribeFHIRExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFHIRExportJobResponse.error) Result.t Async.Deferred.t
 val describe_f_h_i_r_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFHIRImportJobRequest.t ->
         (DescribeFHIRImportJobResponse.t,
-          [ `AWS of DescribeFHIRImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFHIRImportJobResponse.error) Result.t Async.Deferred.t
 val list_f_h_i_r_datastores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFHIRDatastoresRequest.t ->
-        (ListFHIRDatastoresResponse.t,
-          [ `AWS of ListFHIRDatastoresResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListFHIRDatastoresResponse.t, ListFHIRDatastoresResponse.error)
+          Result.t Async.Deferred.t
 val list_f_h_i_r_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFHIRExportJobsRequest.t ->
-        (ListFHIRExportJobsResponse.t,
-          [ `AWS of ListFHIRExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListFHIRExportJobsResponse.t, ListFHIRExportJobsResponse.error)
+          Result.t Async.Deferred.t
 val list_f_h_i_r_import_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFHIRImportJobsRequest.t ->
-        (ListFHIRImportJobsResponse.t,
-          [ `AWS of ListFHIRImportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListFHIRImportJobsResponse.t, ListFHIRImportJobsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val start_f_h_i_r_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFHIRExportJobRequest.t ->
-        (StartFHIRExportJobResponse.t,
-          [ `AWS of StartFHIRExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartFHIRExportJobResponse.t, StartFHIRExportJobResponse.error)
+          Result.t Async.Deferred.t
 val start_f_h_i_r_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFHIRImportJobRequest.t ->
-        (StartFHIRImportJobResponse.t,
-          [ `AWS of StartFHIRImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartFHIRImportJobResponse.t, StartFHIRImportJobResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

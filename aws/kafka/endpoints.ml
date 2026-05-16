@@ -540,265 +540,259 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateMonitoring -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSecurity -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BatchAssociateScramSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchAssociateScramSecretResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchAssociateScramSecretResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchAssociateScramSecretResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchAssociateScramSecretResponse.error_of_json))
   | CreateCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateClusterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateClusterResponse.error_of_json))
   | CreateClusterV2 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateClusterV2Response.error_of_json)
-       | Ok resp ->
-           Ok (CreateClusterV2Response.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateClusterV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateClusterV2Response.error_of_json))
   | CreateConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateConfigurationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateConfigurationResponse.error_of_json))
   | DeleteCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteClusterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
   | DeleteConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteConfigurationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteConfigurationResponse.error_of_json))
   | DescribeCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeClusterResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeClusterResponse.error_of_json))
   | DescribeClusterV2 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeClusterV2Response.error_of_json)
-       | Ok resp ->
-           Ok (DescribeClusterV2Response.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeClusterV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeClusterV2Response.error_of_json))
   | DescribeClusterOperation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeClusterOperationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeClusterOperationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeClusterOperationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeClusterOperationResponse.error_of_json))
   | DescribeConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeConfigurationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeConfigurationResponse.error_of_json))
   | DescribeConfigurationRevision ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConfigurationRevisionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeConfigurationRevisionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeConfigurationRevisionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConfigurationRevisionResponse.error_of_json))
   | BatchDisassociateScramSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDisassociateScramSecretResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDisassociateScramSecretResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchDisassociateScramSecretResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDisassociateScramSecretResponse.error_of_json))
   | GetBootstrapBrokers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBootstrapBrokersResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBootstrapBrokersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBootstrapBrokersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBootstrapBrokersResponse.error_of_json))
   | GetCompatibleKafkaVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCompatibleKafkaVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetCompatibleKafkaVersionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetCompatibleKafkaVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCompatibleKafkaVersionsResponse.error_of_json))
   | ListClusterOperations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListClusterOperationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListClusterOperationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListClusterOperationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListClusterOperationsResponse.error_of_json))
   | ListClusters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListClustersResponse.error_of_json)
-       | Ok resp -> Ok (ListClustersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListClustersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListClustersResponse.error_of_json))
   | ListClustersV2 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListClustersV2Response.error_of_json)
-       | Ok resp ->
-           Ok (ListClustersV2Response.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListClustersV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListClustersV2Response.error_of_json))
   | ListConfigurationRevisions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListConfigurationRevisionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListConfigurationRevisionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListConfigurationRevisionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListConfigurationRevisionsResponse.error_of_json))
   | ListConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListConfigurationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListConfigurationsResponse.error_of_json))
   | ListKafkaVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListKafkaVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListKafkaVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListKafkaVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListKafkaVersionsResponse.error_of_json))
   | ListNodes ->
-      (match resp with
-       | Error err -> handle_error err (Some ListNodesResponse.error_of_json)
-       | Ok resp -> Ok (ListNodesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNodesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListNodesResponse.error_of_json))
   | ListScramSecrets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListScramSecretsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListScramSecretsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListScramSecretsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListScramSecretsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | RebootBroker ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RebootBrokerResponse.error_of_json)
-       | Ok resp -> Ok (RebootBrokerResponse.of_json (response_to_json resp)))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then Ok (RebootBrokerResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some RebootBrokerResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateBrokerCount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBrokerCountResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBrokerCountResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBrokerCountResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateBrokerCountResponse.error_of_json))
   | UpdateBrokerType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBrokerTypeResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBrokerTypeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBrokerTypeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateBrokerTypeResponse.error_of_json))
   | UpdateBrokerStorage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBrokerStorageResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBrokerStorageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBrokerStorageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateBrokerStorageResponse.error_of_json))
   | UpdateConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateConfigurationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateConfigurationResponse.error_of_json))
   | UpdateConnectivity ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateConnectivityResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateConnectivityResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateConnectivityResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateConnectivityResponse.error_of_json))
   | UpdateClusterConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateClusterConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateClusterConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateClusterConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateClusterConfigurationResponse.error_of_json))
   | UpdateClusterKafkaVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateClusterKafkaVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateClusterKafkaVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateClusterKafkaVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateClusterKafkaVersionResponse.error_of_json))
   | UpdateMonitoring ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateMonitoringResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateMonitoringResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateMonitoringResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateMonitoringResponse.error_of_json))
   | UpdateSecurity ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSecurityResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateSecurityResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSecurityResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateSecurityResponse.error_of_json))

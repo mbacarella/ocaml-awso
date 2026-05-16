@@ -4,207 +4,160 @@ val build_suggesters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BuildSuggestersRequest.t ->
-        (BuildSuggestersResponse.t,
-          [ `AWS of BuildSuggestersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BuildSuggestersResponse.t, BuildSuggestersResponse.error) Result.t
           Async.Deferred.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
-        (CreateDomainResponse.t,
-          [ `AWS of CreateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDomainResponse.t, CreateDomainResponse.error) Result.t
           Async.Deferred.t
 val define_analysis_scheme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DefineAnalysisSchemeRequest.t ->
-        (DefineAnalysisSchemeResponse.t,
-          [ `AWS of DefineAnalysisSchemeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DefineAnalysisSchemeResponse.t, DefineAnalysisSchemeResponse.error)
+          Result.t Async.Deferred.t
 val define_expression :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DefineExpressionRequest.t ->
-        (DefineExpressionResponse.t,
-          [ `AWS of DefineExpressionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DefineExpressionResponse.t, DefineExpressionResponse.error) Result.t
           Async.Deferred.t
 val define_index_field :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DefineIndexFieldRequest.t ->
-        (DefineIndexFieldResponse.t,
-          [ `AWS of DefineIndexFieldResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DefineIndexFieldResponse.t, DefineIndexFieldResponse.error) Result.t
           Async.Deferred.t
 val define_suggester :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DefineSuggesterRequest.t ->
-        (DefineSuggesterResponse.t,
-          [ `AWS of DefineSuggesterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DefineSuggesterResponse.t, DefineSuggesterResponse.error) Result.t
           Async.Deferred.t
 val delete_analysis_scheme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAnalysisSchemeRequest.t ->
-        (DeleteAnalysisSchemeResponse.t,
-          [ `AWS of DeleteAnalysisSchemeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteAnalysisSchemeResponse.t, DeleteAnalysisSchemeResponse.error)
+          Result.t Async.Deferred.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t ->
-        (DeleteDomainResponse.t,
-          [ `AWS of DeleteDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteDomainResponse.t, DeleteDomainResponse.error) Result.t
           Async.Deferred.t
 val delete_expression :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteExpressionRequest.t ->
-        (DeleteExpressionResponse.t,
-          [ `AWS of DeleteExpressionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteExpressionResponse.t, DeleteExpressionResponse.error) Result.t
           Async.Deferred.t
 val delete_index_field :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIndexFieldRequest.t ->
-        (DeleteIndexFieldResponse.t,
-          [ `AWS of DeleteIndexFieldResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteIndexFieldResponse.t, DeleteIndexFieldResponse.error) Result.t
           Async.Deferred.t
 val delete_suggester :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSuggesterRequest.t ->
-        (DeleteSuggesterResponse.t,
-          [ `AWS of DeleteSuggesterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSuggesterResponse.t, DeleteSuggesterResponse.error) Result.t
           Async.Deferred.t
 val describe_analysis_schemes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAnalysisSchemesRequest.t ->
         (DescribeAnalysisSchemesResponse.t,
-          [ `AWS of DescribeAnalysisSchemesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeAnalysisSchemesResponse.error) Result.t Async.Deferred.t
 val describe_availability_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAvailabilityOptionsRequest.t ->
         (DescribeAvailabilityOptionsResponse.t,
-          [ `AWS of DescribeAvailabilityOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAvailabilityOptionsResponse.error) Result.t
           Async.Deferred.t
 val describe_domain_endpoint_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainEndpointOptionsRequest.t ->
         (DescribeDomainEndpointOptionsResponse.t,
-          [ `AWS of DescribeDomainEndpointOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDomainEndpointOptionsResponse.error) Result.t
           Async.Deferred.t
 val describe_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainsRequest.t ->
-        (DescribeDomainsResponse.t,
-          [ `AWS of DescribeDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDomainsResponse.t, DescribeDomainsResponse.error) Result.t
           Async.Deferred.t
 val describe_expressions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExpressionsRequest.t ->
-        (DescribeExpressionsResponse.t,
-          [ `AWS of DescribeExpressionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeExpressionsResponse.t, DescribeExpressionsResponse.error)
+          Result.t Async.Deferred.t
 val describe_index_fields :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIndexFieldsRequest.t ->
-        (DescribeIndexFieldsResponse.t,
-          [ `AWS of DescribeIndexFieldsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeIndexFieldsResponse.t, DescribeIndexFieldsResponse.error)
+          Result.t Async.Deferred.t
 val describe_scaling_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingParametersRequest.t ->
         (DescribeScalingParametersResponse.t,
-          [ `AWS of DescribeScalingParametersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeScalingParametersResponse.error) Result.t Async.Deferred.t
 val describe_service_access_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServiceAccessPoliciesRequest.t ->
         (DescribeServiceAccessPoliciesResponse.t,
-          [ `AWS of DescribeServiceAccessPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeServiceAccessPoliciesResponse.error) Result.t
           Async.Deferred.t
 val describe_suggesters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSuggestersRequest.t ->
-        (DescribeSuggestersResponse.t,
-          [ `AWS of DescribeSuggestersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSuggestersResponse.t, DescribeSuggestersResponse.error)
+          Result.t Async.Deferred.t
 val index_documents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       IndexDocumentsRequest.t ->
-        (IndexDocumentsResponse.t,
-          [ `AWS of IndexDocumentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (IndexDocumentsResponse.t, IndexDocumentsResponse.error) Result.t
           Async.Deferred.t
 val list_domain_names :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (ListDomainNamesResponse.t,
-          [ `AWS of ListDomainNamesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDomainNamesResponse.t, ListDomainNamesResponse.error) Result.t
           Async.Deferred.t
 val update_availability_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAvailabilityOptionsRequest.t ->
         (UpdateAvailabilityOptionsResponse.t,
-          [ `AWS of UpdateAvailabilityOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateAvailabilityOptionsResponse.error) Result.t Async.Deferred.t
 val update_domain_endpoint_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainEndpointOptionsRequest.t ->
         (UpdateDomainEndpointOptionsResponse.t,
-          [ `AWS of UpdateDomainEndpointOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateDomainEndpointOptionsResponse.error) Result.t
           Async.Deferred.t
 val update_scaling_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateScalingParametersRequest.t ->
         (UpdateScalingParametersResponse.t,
-          [ `AWS of UpdateScalingParametersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateScalingParametersResponse.error) Result.t Async.Deferred.t
 val update_service_access_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceAccessPoliciesRequest.t ->
         (UpdateServiceAccessPoliciesResponse.t,
-          [ `AWS of UpdateServiceAccessPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateServiceAccessPoliciesResponse.error) Result.t
           Async.Deferred.t

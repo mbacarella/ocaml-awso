@@ -3,189 +3,146 @@ open Awso_accessanalyzer.Values
 val apply_archive_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ApplyArchiveRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      ApplyArchiveRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val cancel_policy_generation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelPolicyGenerationRequest.t ->
         (CancelPolicyGenerationResponse.t,
-          [ `AWS of CancelPolicyGenerationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelPolicyGenerationResponse.error) Result.t Lwt.t
 val create_access_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAccessPreviewRequest.t ->
-        (CreateAccessPreviewResponse.t,
-          [ `AWS of CreateAccessPreviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAccessPreviewResponse.t, CreateAccessPreviewResponse.error)
+          Result.t Lwt.t
 val create_analyzer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAnalyzerRequest.t ->
-        (CreateAnalyzerResponse.t,
-          [ `AWS of CreateAnalyzerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAnalyzerResponse.t, CreateAnalyzerResponse.error) Result.t
+          Lwt.t
 val create_archive_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateArchiveRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CreateArchiveRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_analyzer :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAnalyzerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteAnalyzerRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_archive_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteArchiveRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteArchiveRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val get_access_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccessPreviewRequest.t ->
-        (GetAccessPreviewResponse.t,
-          [ `AWS of GetAccessPreviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccessPreviewResponse.t, GetAccessPreviewResponse.error) Result.t
+          Lwt.t
 val get_analyzed_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnalyzedResourceRequest.t ->
-        (GetAnalyzedResourceResponse.t,
-          [ `AWS of GetAnalyzedResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAnalyzedResourceResponse.t, GetAnalyzedResourceResponse.error)
+          Result.t Lwt.t
 val get_analyzer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnalyzerRequest.t ->
-        (GetAnalyzerResponse.t,
-          [ `AWS of GetAnalyzerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAnalyzerResponse.t, GetAnalyzerResponse.error) Result.t Lwt.t
 val get_archive_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetArchiveRuleRequest.t ->
-        (GetArchiveRuleResponse.t,
-          [ `AWS of GetArchiveRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetArchiveRuleResponse.t, GetArchiveRuleResponse.error) Result.t
+          Lwt.t
 val get_finding :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFindingRequest.t ->
-        (GetFindingResponse.t,
-          [ `AWS of GetFindingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFindingResponse.t, GetFindingResponse.error) Result.t Lwt.t
 val get_generated_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGeneratedPolicyRequest.t ->
-        (GetGeneratedPolicyResponse.t,
-          [ `AWS of GetGeneratedPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGeneratedPolicyResponse.t, GetGeneratedPolicyResponse.error)
+          Result.t Lwt.t
 val list_access_preview_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccessPreviewFindingsRequest.t ->
         (ListAccessPreviewFindingsResponse.t,
-          [ `AWS of ListAccessPreviewFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAccessPreviewFindingsResponse.error) Result.t Lwt.t
 val list_access_previews :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccessPreviewsRequest.t ->
-        (ListAccessPreviewsResponse.t,
-          [ `AWS of ListAccessPreviewsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAccessPreviewsResponse.t, ListAccessPreviewsResponse.error)
+          Result.t Lwt.t
 val list_analyzed_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAnalyzedResourcesRequest.t ->
         (ListAnalyzedResourcesResponse.t,
-          [ `AWS of ListAnalyzedResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAnalyzedResourcesResponse.error) Result.t Lwt.t
 val list_analyzers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAnalyzersRequest.t ->
-        (ListAnalyzersResponse.t,
-          [ `AWS of ListAnalyzersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAnalyzersResponse.t, ListAnalyzersResponse.error) Result.t Lwt.t
 val list_archive_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListArchiveRulesRequest.t ->
-        (ListArchiveRulesResponse.t,
-          [ `AWS of ListArchiveRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListArchiveRulesResponse.t, ListArchiveRulesResponse.error) Result.t
+          Lwt.t
 val list_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFindingsRequest.t ->
-        (ListFindingsResponse.t,
-          [ `AWS of ListFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFindingsResponse.t, ListFindingsResponse.error) Result.t Lwt.t
 val list_policy_generations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPolicyGenerationsRequest.t ->
         (ListPolicyGenerationsResponse.t,
-          [ `AWS of ListPolicyGenerationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPolicyGenerationsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val start_policy_generation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartPolicyGenerationRequest.t ->
         (StartPolicyGenerationResponse.t,
-          [ `AWS of StartPolicyGenerationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartPolicyGenerationResponse.error) Result.t Lwt.t
 val start_resource_scan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StartResourceScanRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StartResourceScanRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_archive_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateArchiveRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateArchiveRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val update_findings :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateFindingsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UpdateFindingsRequest.t -> (unit, unit) Result.t Lwt.t
 val validate_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ValidatePolicyRequest.t ->
-        (ValidatePolicyResponse.t,
-          [ `AWS of ValidatePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ValidatePolicyResponse.t, ValidatePolicyResponse.error) Result.t
+          Lwt.t

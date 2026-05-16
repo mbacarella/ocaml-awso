@@ -9,9 +9,9 @@ open! Async
     If the function [f] fails to evaluate after [retry_cnt] iterations, the
     final exception is reraised as is and nothing is logged. *)
 let with_retries
-  ?(retry_delay : Time_float_unix.Span.t = Time_float_unix.Span.of_ms 50.)
-  ?(retry_cnt : int = 3)
-  (f : unit -> 'a Deferred.t)
+      ?(retry_delay : Time_float_unix.Span.t = Time_float_unix.Span.of_ms 50.)
+      ?(retry_cnt : int = 3)
+      (f : unit -> 'a Deferred.t)
   : 'a Deferred.t
   =
   let rec retry n =

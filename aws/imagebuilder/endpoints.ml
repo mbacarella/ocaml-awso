@@ -778,389 +778,386 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateInfrastructureConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CancelImageCreation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelImageCreationResponse.error_of_json)
-       | Ok resp ->
-           Ok (CancelImageCreationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CancelImageCreationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CancelImageCreationResponse.error_of_json))
   | CreateComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateComponentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateComponentResponse.error_of_json))
   | CreateContainerRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateContainerRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateContainerRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateContainerRecipeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateContainerRecipeResponse.error_of_json))
   | CreateDistributionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateDistributionConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateDistributionConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateDistributionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDistributionConfigurationResponse.error_of_json))
   | CreateImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateImageResponse.error_of_json)
-       | Ok resp -> Ok (CreateImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateImageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateImageResponse.error_of_json))
   | CreateImagePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateImagePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateImagePipelineResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateImagePipelineResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateImagePipelineResponse.error_of_json))
   | CreateImageRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateImageRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateImageRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateImageRecipeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateImageRecipeResponse.error_of_json))
   | CreateInfrastructureConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateInfrastructureConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateInfrastructureConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateInfrastructureConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateInfrastructureConfigurationResponse.error_of_json))
   | DeleteComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteComponentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteComponentResponse.error_of_json))
   | DeleteContainerRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteContainerRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteContainerRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteContainerRecipeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteContainerRecipeResponse.error_of_json))
   | DeleteDistributionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteDistributionConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteDistributionConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteDistributionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDistributionConfigurationResponse.error_of_json))
   | DeleteImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteImageResponse.error_of_json)
-       | Ok resp -> Ok (DeleteImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteImageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteImageResponse.error_of_json))
   | DeleteImagePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteImagePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteImagePipelineResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteImagePipelineResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteImagePipelineResponse.error_of_json))
   | DeleteImageRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteImageRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteImageRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteImageRecipeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteImageRecipeResponse.error_of_json))
   | DeleteInfrastructureConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteInfrastructureConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteInfrastructureConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteInfrastructureConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteInfrastructureConfigurationResponse.error_of_json))
   | GetComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetComponentResponse.error_of_json)
-       | Ok resp -> Ok (GetComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetComponentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetComponentResponse.error_of_json))
   | GetComponentPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetComponentPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetComponentPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetComponentPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetComponentPolicyResponse.error_of_json))
   | GetContainerRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetContainerRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetContainerRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetContainerRecipeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetContainerRecipeResponse.error_of_json))
   | GetContainerRecipePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetContainerRecipePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetContainerRecipePolicyResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetContainerRecipePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetContainerRecipePolicyResponse.error_of_json))
   | GetDistributionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDistributionConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetDistributionConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetDistributionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDistributionConfigurationResponse.error_of_json))
   | GetImage ->
-      (match resp with
-       | Error err -> handle_error err (Some GetImageResponse.error_of_json)
-       | Ok resp -> Ok (GetImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetImageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetImageResponse.error_of_json))
   | GetImagePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetImagePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetImagePipelineResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetImagePipelineResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetImagePipelineResponse.error_of_json))
   | GetImagePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetImagePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetImagePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetImagePolicyResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetImagePolicyResponse.error_of_json))
   | GetImageRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetImageRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetImageRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetImageRecipeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetImageRecipeResponse.error_of_json))
   | GetImageRecipePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetImageRecipePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetImageRecipePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetImageRecipePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetImageRecipePolicyResponse.error_of_json))
   | GetInfrastructureConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetInfrastructureConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetInfrastructureConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetInfrastructureConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetInfrastructureConfigurationResponse.error_of_json))
   | ImportComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ImportComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (ImportComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ImportComponentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ImportComponentResponse.error_of_json))
   | ImportVmImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ImportVmImageResponse.error_of_json)
-       | Ok resp ->
-           Ok (ImportVmImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ImportVmImageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ImportVmImageResponse.error_of_json))
   | ListComponentBuildVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListComponentBuildVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListComponentBuildVersionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListComponentBuildVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListComponentBuildVersionsResponse.error_of_json))
   | ListComponents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListComponentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListComponentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListComponentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListComponentsResponse.error_of_json))
   | ListContainerRecipes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListContainerRecipesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListContainerRecipesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListContainerRecipesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListContainerRecipesResponse.error_of_json))
   | ListDistributionConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDistributionConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListDistributionConfigurationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListDistributionConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionConfigurationsResponse.error_of_json))
   | ListImageBuildVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListImageBuildVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListImageBuildVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListImageBuildVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListImageBuildVersionsResponse.error_of_json))
   | ListImagePackages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListImagePackagesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListImagePackagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListImagePackagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListImagePackagesResponse.error_of_json))
   | ListImagePipelineImages ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListImagePipelineImagesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListImagePipelineImagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListImagePipelineImagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListImagePipelineImagesResponse.error_of_json))
   | ListImagePipelines ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListImagePipelinesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListImagePipelinesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListImagePipelinesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListImagePipelinesResponse.error_of_json))
   | ListImageRecipes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListImageRecipesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListImageRecipesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListImageRecipesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListImageRecipesResponse.error_of_json))
   | ListImages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListImagesResponse.error_of_json)
-       | Ok resp -> Ok (ListImagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListImagesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListImagesResponse.error_of_json))
   | ListInfrastructureConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListInfrastructureConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListInfrastructureConfigurationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListInfrastructureConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListInfrastructureConfigurationsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutComponentPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutComponentPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutComponentPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutComponentPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutComponentPolicyResponse.error_of_json))
   | PutContainerRecipePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutContainerRecipePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutContainerRecipePolicyResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (PutContainerRecipePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutContainerRecipePolicyResponse.error_of_json))
   | PutImagePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutImagePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutImagePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutImagePolicyResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some PutImagePolicyResponse.error_of_json))
   | PutImageRecipePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutImageRecipePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutImageRecipePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutImageRecipePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutImageRecipePolicyResponse.error_of_json))
   | StartImagePipelineExecution ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartImagePipelineExecutionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartImagePipelineExecutionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (StartImagePipelineExecutionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartImagePipelineExecutionResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateDistributionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDistributionConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateDistributionConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateDistributionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDistributionConfigurationResponse.error_of_json))
   | UpdateImagePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateImagePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateImagePipelineResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateImagePipelineResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateImagePipelineResponse.error_of_json))
   | UpdateInfrastructureConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateInfrastructureConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateInfrastructureConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateInfrastructureConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateInfrastructureConfigurationResponse.error_of_json))

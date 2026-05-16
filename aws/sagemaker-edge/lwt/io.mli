@@ -4,12 +4,8 @@ val get_device_registration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceRegistrationRequest.t ->
-        (GetDeviceRegistrationResult.t,
-          [ `AWS of GetDeviceRegistrationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeviceRegistrationResult.t, GetDeviceRegistrationResult.error)
+          Result.t Lwt.t
 val send_heartbeat :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      SendHeartbeatRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> SendHeartbeatRequest.t -> (unit, unit) Result.t Lwt.t

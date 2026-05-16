@@ -766,228 +766,226 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CancelJob ->
-      (match resp with
-       | Error err -> handle_error err (Some CancelJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CancelJobResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelJobResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some CancelJobResponse.error_of_json))
   | CreateComputeEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateComputeEnvironmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateComputeEnvironmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateComputeEnvironmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateComputeEnvironmentResponse.error_of_json))
   | CreateJobQueue ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateJobQueueResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateJobQueueResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateJobQueueResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateJobQueueResponse.error_of_json))
   | CreateSchedulingPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSchedulingPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateSchedulingPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateSchedulingPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSchedulingPolicyResponse.error_of_json))
   | DeleteComputeEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteComputeEnvironmentResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteComputeEnvironmentResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteComputeEnvironmentResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteComputeEnvironmentResponse.error_of_json))
   | DeleteJobQueue ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteJobQueueResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteJobQueueResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteJobQueueResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteJobQueueResponse.error_of_json))
   | DeleteSchedulingPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteSchedulingPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteSchedulingPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteSchedulingPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSchedulingPolicyResponse.error_of_json))
   | DeregisterJobDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeregisterJobDefinitionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeregisterJobDefinitionResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeregisterJobDefinitionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterJobDefinitionResponse.error_of_json))
   | DescribeComputeEnvironments ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeComputeEnvironmentsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeComputeEnvironmentsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeComputeEnvironmentsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeComputeEnvironmentsResponse.error_of_json))
   | DescribeJobDefinitions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeJobDefinitionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeJobDefinitionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeJobDefinitionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeJobDefinitionsResponse.error_of_json))
   | DescribeJobQueues ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeJobQueuesResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeJobQueuesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeJobQueuesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeJobQueuesResponse.error_of_json))
   | DescribeJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeJobsResponse.error_of_json)
-       | Ok resp -> Ok (DescribeJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeJobsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeJobsResponse.error_of_json))
   | DescribeSchedulingPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSchedulingPoliciesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeSchedulingPoliciesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeSchedulingPoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSchedulingPoliciesResponse.error_of_json))
   | ListJobs ->
-      (match resp with
-       | Error err -> handle_error err (Some ListJobsResponse.error_of_json)
-       | Ok resp -> Ok (ListJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListJobsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListJobsResponse.error_of_json))
   | ListSchedulingPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSchedulingPoliciesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListSchedulingPoliciesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListSchedulingPoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSchedulingPoliciesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | RegisterJobDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegisterJobDefinitionResponse.error_of_json)
-       | Ok resp ->
-           Ok (RegisterJobDefinitionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RegisterJobDefinitionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RegisterJobDefinitionResponse.error_of_json))
   | SubmitJob ->
-      (match resp with
-       | Error err -> handle_error err (Some SubmitJobResponse.error_of_json)
-       | Ok resp -> Ok (SubmitJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SubmitJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SubmitJobResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | TerminateJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TerminateJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TerminateJobResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TerminateJobResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TerminateJobResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateComputeEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateComputeEnvironmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateComputeEnvironmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateComputeEnvironmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateComputeEnvironmentResponse.error_of_json))
   | UpdateJobQueue ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateJobQueueResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateJobQueueResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateJobQueueResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateJobQueueResponse.error_of_json))
   | UpdateSchedulingPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateSchedulingPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateSchedulingPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateSchedulingPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSchedulingPolicyResponse.error_of_json))

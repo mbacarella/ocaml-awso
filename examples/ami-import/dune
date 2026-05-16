@@ -1,7 +1,6 @@
 (executable
  (name ami_import)
  (libraries awso-async.ebs awso-async.ec2 core_unix.command_unix)
- (flags
-  (:standard))
+ (flags (:standard))
  (preprocess
   (pps ppx_jane)))

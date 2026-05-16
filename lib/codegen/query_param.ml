@@ -6,8 +6,11 @@ type t =
   ; shape : string
   ; is_required : bool
   }
+
 let create ~name ~field_name ~shape ~is_required =
   { name; field_name; shape; is_required }
+;;
+
 let is_required t = t.is_required
 let param_name t = t.name
 let field_name t = t.field_name
@@ -20,16 +23,16 @@ let of_input_shape (structure_shape : Botodata.structure_shape) =
   List.filter_map
     structure_shape.members
     ~f:(fun (key, { location; locationName; shape; _ }) ->
-    match location with
-    | Some `querystring ->
-      let name = Option.value locationName ~default:shape in
-      let is_required =
-        structure_shape.Botodata.required
-        |> Option.value ~default:[]
-        |> fun l -> List.mem ~equal:String.equal l key
-      in
-      Some (create ~name ~shape ~is_required ~field_name:key)
-    | _ -> None)
+      match location with
+      | Some `querystring ->
+        let name = Option.value locationName ~default:shape in
+        let is_required =
+          structure_shape.Botodata.required
+          |> Option.value ~default:[]
+          |> fun l -> List.mem ~equal:String.equal l key
+        in
+        Some (create ~name ~shape ~is_required ~field_name:key)
+      | _ -> None)
 ;;
 
 let of_botodata (op : Botodata.operation) ~shapes =

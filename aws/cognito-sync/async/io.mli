@@ -4,133 +4,101 @@ val bulk_publish :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BulkPublishRequest.t ->
-        (BulkPublishResponse.t,
-          [ `AWS of BulkPublishResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BulkPublishResponse.t, BulkPublishResponse.error) Result.t
           Async.Deferred.t
 val delete_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDatasetRequest.t ->
-        (DeleteDatasetResponse.t,
-          [ `AWS of DeleteDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteDatasetResponse.t, DeleteDatasetResponse.error) Result.t
           Async.Deferred.t
 val describe_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetRequest.t ->
-        (DescribeDatasetResponse.t,
-          [ `AWS of DescribeDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
           Async.Deferred.t
 val describe_identity_pool_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityPoolUsageRequest.t ->
         (DescribeIdentityPoolUsageResponse.t,
-          [ `AWS of DescribeIdentityPoolUsageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeIdentityPoolUsageResponse.error) Result.t Async.Deferred.t
 val describe_identity_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityUsageRequest.t ->
         (DescribeIdentityUsageResponse.t,
-          [ `AWS of DescribeIdentityUsageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeIdentityUsageResponse.error) Result.t Async.Deferred.t
 val get_bulk_publish_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBulkPublishDetailsRequest.t ->
         (GetBulkPublishDetailsResponse.t,
-          [ `AWS of GetBulkPublishDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetBulkPublishDetailsResponse.error) Result.t Async.Deferred.t
 val get_cognito_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCognitoEventsRequest.t ->
-        (GetCognitoEventsResponse.t,
-          [ `AWS of GetCognitoEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCognitoEventsResponse.t, GetCognitoEventsResponse.error) Result.t
           Async.Deferred.t
 val get_identity_pool_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityPoolConfigurationRequest.t ->
         (GetIdentityPoolConfigurationResponse.t,
-          [ `AWS of GetIdentityPoolConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetIdentityPoolConfigurationResponse.error) Result.t
           Async.Deferred.t
 val list_datasets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetsRequest.t ->
-        (ListDatasetsResponse.t,
-          [ `AWS of ListDatasetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t
           Async.Deferred.t
 val list_identity_pool_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentityPoolUsageRequest.t ->
         (ListIdentityPoolUsageResponse.t,
-          [ `AWS of ListIdentityPoolUsageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListIdentityPoolUsageResponse.error) Result.t Async.Deferred.t
 val list_records :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecordsRequest.t ->
-        (ListRecordsResponse.t,
-          [ `AWS of ListRecordsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRecordsResponse.t, ListRecordsResponse.error) Result.t
           Async.Deferred.t
 val register_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterDeviceRequest.t ->
-        (RegisterDeviceResponse.t,
-          [ `AWS of RegisterDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterDeviceResponse.t, RegisterDeviceResponse.error) Result.t
           Async.Deferred.t
 val set_cognito_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetCognitoEventsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetCognitoEventsRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val set_identity_pool_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetIdentityPoolConfigurationRequest.t ->
         (SetIdentityPoolConfigurationResponse.t,
-          [ `AWS of SetIdentityPoolConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          SetIdentityPoolConfigurationResponse.error) Result.t
           Async.Deferred.t
 val subscribe_to_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SubscribeToDatasetRequest.t ->
-        (SubscribeToDatasetResponse.t,
-          [ `AWS of SubscribeToDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SubscribeToDatasetResponse.t, SubscribeToDatasetResponse.error)
+          Result.t Async.Deferred.t
 val unsubscribe_from_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnsubscribeFromDatasetRequest.t ->
         (UnsubscribeFromDatasetResponse.t,
-          [ `AWS of UnsubscribeFromDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UnsubscribeFromDatasetResponse.error) Result.t Async.Deferred.t
 val update_records :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRecordsRequest.t ->
-        (UpdateRecordsResponse.t,
-          [ `AWS of UpdateRecordsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateRecordsResponse.t, UpdateRecordsResponse.error) Result.t
           Async.Deferred.t

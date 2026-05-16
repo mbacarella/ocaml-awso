@@ -1140,436 +1140,410 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateSlot -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSlotType -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BuildBotLocale ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BuildBotLocaleResponse.error_of_json)
-       | Ok resp ->
-           Ok (BuildBotLocaleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BuildBotLocaleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BuildBotLocaleResponse.error_of_json))
   | CreateBot ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateBotResponse.error_of_json)
-       | Ok resp -> Ok (CreateBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateBotResponse.error_of_json))
   | CreateBotAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBotAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBotAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBotAliasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBotAliasResponse.error_of_json))
   | CreateBotLocale ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBotLocaleResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBotLocaleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBotLocaleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBotLocaleResponse.error_of_json))
   | CreateBotVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBotVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBotVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBotVersionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBotVersionResponse.error_of_json))
   | CreateExport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateExportResponse.error_of_json)
-       | Ok resp -> Ok (CreateExportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateExportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateExportResponse.error_of_json))
   | CreateIntent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateIntentResponse.error_of_json)
-       | Ok resp -> Ok (CreateIntentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateIntentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateIntentResponse.error_of_json))
   | CreateResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateResourcePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateResourcePolicyResponse.error_of_json))
   | CreateResourcePolicyStatement ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateResourcePolicyStatementResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateResourcePolicyStatementResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateResourcePolicyStatementResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateResourcePolicyStatementResponse.error_of_json))
   | CreateSlot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSlotResponse.error_of_json)
-       | Ok resp -> Ok (CreateSlotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSlotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateSlotResponse.error_of_json))
   | CreateSlotType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSlotTypeResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateSlotTypeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSlotTypeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateSlotTypeResponse.error_of_json))
   | CreateUploadUrl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateUploadUrlResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateUploadUrlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateUploadUrlResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateUploadUrlResponse.error_of_json))
   | DeleteBot ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteBotResponse.error_of_json)
-       | Ok resp -> Ok (DeleteBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteBotResponse.error_of_json))
   | DeleteBotAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBotAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBotAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBotAliasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteBotAliasResponse.error_of_json))
   | DeleteBotLocale ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBotLocaleResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBotLocaleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBotLocaleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteBotLocaleResponse.error_of_json))
   | DeleteBotVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBotVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBotVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteBotVersionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteBotVersionResponse.error_of_json))
   | DeleteCustomVocabulary ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteCustomVocabularyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteCustomVocabularyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteCustomVocabularyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCustomVocabularyResponse.error_of_json))
   | DeleteExport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteExportResponse.error_of_json)
-       | Ok resp -> Ok (DeleteExportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteExportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteExportResponse.error_of_json))
   | DeleteImport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteImportResponse.error_of_json)
-       | Ok resp -> Ok (DeleteImportResponse.of_json (response_to_json resp)))
-  | DeleteIntent -> Ok ()
+      if is_success
+      then Ok (DeleteImportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteImportResponse.error_of_json))
+  | DeleteIntent ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteResourcePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
   | DeleteResourcePolicyStatement ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteResourcePolicyStatementResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteResourcePolicyStatementResponse.of_json
-                (response_to_json resp)))
-  | DeleteSlot -> Ok ()
-  | DeleteSlotType -> Ok ()
+      if is_success
+      then
+        Ok
+          (DeleteResourcePolicyStatementResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteResourcePolicyStatementResponse.error_of_json))
+  | DeleteSlot -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSlotType ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUtterances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteUtterancesResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteUtterancesResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteUtterancesResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteUtterancesResponse.error_of_json))
   | DescribeBot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeBotResponse.error_of_json)
-       | Ok resp -> Ok (DescribeBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeBotResponse.error_of_json))
   | DescribeBotAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeBotAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeBotAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeBotAliasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeBotAliasResponse.error_of_json))
   | DescribeBotLocale ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeBotLocaleResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeBotLocaleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeBotLocaleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeBotLocaleResponse.error_of_json))
   | DescribeBotRecommendation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeBotRecommendationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeBotRecommendationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeBotRecommendationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBotRecommendationResponse.error_of_json))
   | DescribeBotVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeBotVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeBotVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeBotVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeBotVersionResponse.error_of_json))
   | DescribeCustomVocabularyMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeCustomVocabularyMetadataResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeCustomVocabularyMetadataResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeCustomVocabularyMetadataResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCustomVocabularyMetadataResponse.error_of_json))
   | DescribeExport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeExportResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeExportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeExportResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeExportResponse.error_of_json))
   | DescribeImport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeImportResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeImportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeImportResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeImportResponse.error_of_json))
   | DescribeIntent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeIntentResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeIntentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeIntentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeIntentResponse.error_of_json))
   | DescribeResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeResourcePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeResourcePolicyResponse.error_of_json))
   | DescribeSlot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSlotResponse.error_of_json)
-       | Ok resp -> Ok (DescribeSlotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeSlotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeSlotResponse.error_of_json))
   | DescribeSlotType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSlotTypeResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeSlotTypeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeSlotTypeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeSlotTypeResponse.error_of_json))
   | ListAggregatedUtterances ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAggregatedUtterancesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAggregatedUtterancesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListAggregatedUtterancesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAggregatedUtterancesResponse.error_of_json))
   | ListBotAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBotAliasesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListBotAliasesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBotAliasesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListBotAliasesResponse.error_of_json))
   | ListBotLocales ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBotLocalesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListBotLocalesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBotLocalesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListBotLocalesResponse.error_of_json))
   | ListBotRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListBotRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListBotRecommendationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListBotRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListBotRecommendationsResponse.error_of_json))
   | ListBotVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBotVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListBotVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBotVersionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListBotVersionsResponse.error_of_json))
   | ListBots ->
-      (match resp with
-       | Error err -> handle_error err (Some ListBotsResponse.error_of_json)
-       | Ok resp -> Ok (ListBotsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBotsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListBotsResponse.error_of_json))
   | ListBuiltInIntents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBuiltInIntentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListBuiltInIntentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBuiltInIntentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBuiltInIntentsResponse.error_of_json))
   | ListBuiltInSlotTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBuiltInSlotTypesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListBuiltInSlotTypesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBuiltInSlotTypesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBuiltInSlotTypesResponse.error_of_json))
   | ListExports ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListExportsResponse.error_of_json)
-       | Ok resp -> Ok (ListExportsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListExportsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListExportsResponse.error_of_json))
   | ListImports ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListImportsResponse.error_of_json)
-       | Ok resp -> Ok (ListImportsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListImportsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListImportsResponse.error_of_json))
   | ListIntents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListIntentsResponse.error_of_json)
-       | Ok resp -> Ok (ListIntentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListIntentsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListIntentsResponse.error_of_json))
   | ListRecommendedIntents ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListRecommendedIntentsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListRecommendedIntentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListRecommendedIntentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecommendedIntentsResponse.error_of_json))
   | ListSlotTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSlotTypesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSlotTypesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSlotTypesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListSlotTypesResponse.error_of_json))
   | ListSlots ->
-      (match resp with
-       | Error err -> handle_error err (Some ListSlotsResponse.error_of_json)
-       | Ok resp -> Ok (ListSlotsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSlotsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListSlotsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | SearchAssociatedTranscripts ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SearchAssociatedTranscriptsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SearchAssociatedTranscriptsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (SearchAssociatedTranscriptsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchAssociatedTranscriptsResponse.error_of_json))
   | StartBotRecommendation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartBotRecommendationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartBotRecommendationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (StartBotRecommendationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartBotRecommendationResponse.error_of_json))
   | StartImport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartImportResponse.error_of_json)
-       | Ok resp -> Ok (StartImportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartImportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartImportResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateBot ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateBotResponse.error_of_json)
-       | Ok resp -> Ok (UpdateBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateBotResponse.error_of_json))
   | UpdateBotAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBotAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBotAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBotAliasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateBotAliasResponse.error_of_json))
   | UpdateBotLocale ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBotLocaleResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBotLocaleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBotLocaleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateBotLocaleResponse.error_of_json))
   | UpdateBotRecommendation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateBotRecommendationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateBotRecommendationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateBotRecommendationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateBotRecommendationResponse.error_of_json))
   | UpdateExport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateExportResponse.error_of_json)
-       | Ok resp -> Ok (UpdateExportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateExportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateExportResponse.error_of_json))
   | UpdateIntent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateIntentResponse.error_of_json)
-       | Ok resp -> Ok (UpdateIntentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateIntentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateIntentResponse.error_of_json))
   | UpdateResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateResourcePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateResourcePolicyResponse.error_of_json))
   | UpdateSlot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSlotResponse.error_of_json)
-       | Ok resp -> Ok (UpdateSlotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSlotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateSlotResponse.error_of_json))
   | UpdateSlotType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSlotTypeResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateSlotTypeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSlotTypeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateSlotTypeResponse.error_of_json))

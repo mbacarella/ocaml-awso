@@ -4,27 +4,19 @@ val batch_meter_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchMeterUsageRequest.t ->
-        (BatchMeterUsageResult.t,
-          [ `AWS of BatchMeterUsageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchMeterUsageResult.t, BatchMeterUsageResult.error) Result.t Lwt.t
 val meter_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MeterUsageRequest.t ->
-        (MeterUsageResult.t,
-          [ `AWS of MeterUsageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (MeterUsageResult.t, MeterUsageResult.error) Result.t Lwt.t
 val register_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterUsageRequest.t ->
-        (RegisterUsageResult.t,
-          [ `AWS of RegisterUsageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterUsageResult.t, RegisterUsageResult.error) Result.t Lwt.t
 val resolve_customer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResolveCustomerRequest.t ->
-        (ResolveCustomerResult.t,
-          [ `AWS of ResolveCustomerResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResolveCustomerResult.t, ResolveCustomerResult.error) Result.t Lwt.t

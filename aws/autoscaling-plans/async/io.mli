@@ -4,47 +4,37 @@ val create_scaling_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateScalingPlanRequest.t ->
-        (CreateScalingPlanResponse.t,
-          [ `AWS of CreateScalingPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateScalingPlanResponse.t, CreateScalingPlanResponse.error)
+          Result.t Async.Deferred.t
 val delete_scaling_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScalingPlanRequest.t ->
-        (DeleteScalingPlanResponse.t,
-          [ `AWS of DeleteScalingPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteScalingPlanResponse.t, DeleteScalingPlanResponse.error)
+          Result.t Async.Deferred.t
 val describe_scaling_plan_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingPlanResourcesRequest.t ->
         (DescribeScalingPlanResourcesResponse.t,
-          [ `AWS of DescribeScalingPlanResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeScalingPlanResourcesResponse.error) Result.t
           Async.Deferred.t
 val describe_scaling_plans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingPlansRequest.t ->
-        (DescribeScalingPlansResponse.t,
-          [ `AWS of DescribeScalingPlansResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeScalingPlansResponse.t, DescribeScalingPlansResponse.error)
+          Result.t Async.Deferred.t
 val get_scaling_plan_resource_forecast_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetScalingPlanResourceForecastDataRequest.t ->
         (GetScalingPlanResourceForecastDataResponse.t,
-          [ `AWS of GetScalingPlanResourceForecastDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetScalingPlanResourceForecastDataResponse.error) Result.t
           Async.Deferred.t
 val update_scaling_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateScalingPlanRequest.t ->
-        (UpdateScalingPlanResponse.t,
-          [ `AWS of UpdateScalingPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateScalingPlanResponse.t, UpdateScalingPlanResponse.error)
+          Result.t Async.Deferred.t

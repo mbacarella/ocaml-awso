@@ -40,7 +40,11 @@ let of_string (x : string) =
 let to_string (x : t) = x
 let compare = String.compare
 let yojson_of_t (x : t) = `String x
-let t_of_yojson = function `String s -> of_string s | _ -> failwith "expected string"
+
+let t_of_yojson = function
+  | `String s -> of_string s
+  | _ -> failwith "expected string"
+;;
 
 (* Asia Pacific *)
 let ap_northeast_1 = "ap-northeast-1"

@@ -199,6 +199,7 @@ let yojson_of_constr = function
   | Pattern x -> `List [ `String "Pattern"; `String x ]
   | List_min x -> `List [ `String "List_min"; `Int x ]
   | List_max x -> `List [ `String "List_max"; `Int x ]
+;;
 
 type kind =
   | Constraints of
@@ -210,13 +211,14 @@ type kind =
 let yojson_of_kind = function
   | Constraints { constraints; base_type } ->
     `Assoc
-      [ "Constraints",
-        `Assoc
-          [ "constraints", `List (Stdlib.List.map yojson_of_constr constraints)
-          ; "base_type", `String (Util.core_type_to_string base_type)
-          ]
+      [ ( "Constraints"
+        , `Assoc
+            [ "constraints", `List (Stdlib.List.map yojson_of_constr constraints)
+            ; "base_type", `String (Util.core_type_to_string base_type)
+            ] )
       ]
   | Build _ -> `String "Build"
+;;
 
 let constraints base_type l = Constraints { constraints = List.filter_opt l; base_type }
 
@@ -273,7 +275,8 @@ let%expect_test "kind" =
   test (integer_shape ~max:5 ());
   [%expect {| {"Constraints":{"constraints":[["Int_max",5]],"base_type":"int"}} |}];
   test (integer_shape ~min:3 ~max:5 ());
-  [%expect {| {"Constraints":{"constraints":[["Int_min",3],["Int_max",5]],"base_type":"int"}} |}];
+  [%expect
+    {| {"Constraints":{"constraints":[["Int_min",3],["Int_max",5]],"base_type":"int"}} |}];
   let long_shape ?min ?max () =
     Botodata.Long_shape { box = None; min; max; documentation = None }
   in

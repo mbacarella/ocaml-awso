@@ -243,79 +243,82 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BatchExecuteStatement ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchExecuteStatementResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchExecuteStatementResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchExecuteStatementResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchExecuteStatementResponse.error_of_json))
   | BeginTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BeginTransactionResponse.error_of_json)
-       | Ok resp ->
-           Ok (BeginTransactionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BeginTransactionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BeginTransactionResponse.error_of_json))
   | CommitTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CommitTransactionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CommitTransactionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CommitTransactionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CommitTransactionResponse.error_of_json))
   | ExecuteSql ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExecuteSqlResponse.error_of_json)
-       | Ok resp -> Ok (ExecuteSqlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExecuteSqlResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExecuteSqlResponse.error_of_json))
   | ExecuteStatement ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExecuteStatementResponse.error_of_json)
-       | Ok resp ->
-           Ok (ExecuteStatementResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExecuteStatementResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ExecuteStatementResponse.error_of_json))
   | RollbackTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RollbackTransactionResponse.error_of_json)
-       | Ok resp ->
-           Ok (RollbackTransactionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RollbackTransactionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RollbackTransactionResponse.error_of_json))

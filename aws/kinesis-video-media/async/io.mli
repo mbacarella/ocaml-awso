@@ -4,7 +4,4 @@ val get_media :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMediaInput.t ->
-        (GetMediaOutput.t,
-          [ `AWS of GetMediaOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetMediaOutput.t, GetMediaOutput.error) Result.t Async.Deferred.t

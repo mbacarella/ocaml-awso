@@ -5,187 +5,151 @@ val activate_anomaly_detector :
     ?cfg:Awso.Cfg.t ->
       ActivateAnomalyDetectorRequest.t ->
         (ActivateAnomalyDetectorResponse.t,
-          [ `AWS of ActivateAnomalyDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ActivateAnomalyDetectorResponse.error) Result.t Lwt.t
 val back_test_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BackTestAnomalyDetectorRequest.t ->
         (BackTestAnomalyDetectorResponse.t,
-          [ `AWS of BackTestAnomalyDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BackTestAnomalyDetectorResponse.error) Result.t Lwt.t
 val create_alert :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAlertRequest.t ->
-        (CreateAlertResponse.t,
-          [ `AWS of CreateAlertResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAlertResponse.t, CreateAlertResponse.error) Result.t Lwt.t
 val create_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAnomalyDetectorRequest.t ->
         (CreateAnomalyDetectorResponse.t,
-          [ `AWS of CreateAnomalyDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAnomalyDetectorResponse.error) Result.t Lwt.t
 val create_metric_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMetricSetRequest.t ->
-        (CreateMetricSetResponse.t,
-          [ `AWS of CreateMetricSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMetricSetResponse.t, CreateMetricSetResponse.error) Result.t
+          Lwt.t
 val deactivate_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeactivateAnomalyDetectorRequest.t ->
         (DeactivateAnomalyDetectorResponse.t,
-          [ `AWS of DeactivateAnomalyDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeactivateAnomalyDetectorResponse.error) Result.t Lwt.t
 val delete_alert :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAlertRequest.t ->
-        (DeleteAlertResponse.t,
-          [ `AWS of DeleteAlertResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAlertResponse.t, DeleteAlertResponse.error) Result.t Lwt.t
 val delete_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAnomalyDetectorRequest.t ->
         (DeleteAnomalyDetectorResponse.t,
-          [ `AWS of DeleteAnomalyDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAnomalyDetectorResponse.error) Result.t Lwt.t
 val describe_alert :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlertRequest.t ->
-        (DescribeAlertResponse.t,
-          [ `AWS of DescribeAlertResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAlertResponse.t, DescribeAlertResponse.error) Result.t Lwt.t
 val describe_anomaly_detection_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAnomalyDetectionExecutionsRequest.t ->
         (DescribeAnomalyDetectionExecutionsResponse.t,
-          [ `AWS of DescribeAnomalyDetectionExecutionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAnomalyDetectionExecutionsResponse.error) Result.t Lwt.t
 val describe_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAnomalyDetectorRequest.t ->
         (DescribeAnomalyDetectorResponse.t,
-          [ `AWS of DescribeAnomalyDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAnomalyDetectorResponse.error) Result.t Lwt.t
 val describe_metric_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMetricSetRequest.t ->
-        (DescribeMetricSetResponse.t,
-          [ `AWS of DescribeMetricSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeMetricSetResponse.t, DescribeMetricSetResponse.error)
+          Result.t Lwt.t
 val get_anomaly_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnomalyGroupRequest.t ->
-        (GetAnomalyGroupResponse.t,
-          [ `AWS of GetAnomalyGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAnomalyGroupResponse.t, GetAnomalyGroupResponse.error) Result.t
+          Lwt.t
 val get_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFeedbackRequest.t ->
-        (GetFeedbackResponse.t,
-          [ `AWS of GetFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFeedbackResponse.t, GetFeedbackResponse.error) Result.t Lwt.t
 val get_sample_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSampleDataRequest.t ->
-        (GetSampleDataResponse.t,
-          [ `AWS of GetSampleDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSampleDataResponse.t, GetSampleDataResponse.error) Result.t Lwt.t
 val list_alerts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAlertsRequest.t ->
-        (ListAlertsResponse.t,
-          [ `AWS of ListAlertsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAlertsResponse.t, ListAlertsResponse.error) Result.t Lwt.t
 val list_anomaly_detectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAnomalyDetectorsRequest.t ->
-        (ListAnomalyDetectorsResponse.t,
-          [ `AWS of ListAnomalyDetectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAnomalyDetectorsResponse.t, ListAnomalyDetectorsResponse.error)
+          Result.t Lwt.t
 val list_anomaly_group_related_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAnomalyGroupRelatedMetricsRequest.t ->
         (ListAnomalyGroupRelatedMetricsResponse.t,
-          [ `AWS of ListAnomalyGroupRelatedMetricsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAnomalyGroupRelatedMetricsResponse.error) Result.t Lwt.t
 val list_anomaly_group_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAnomalyGroupSummariesRequest.t ->
         (ListAnomalyGroupSummariesResponse.t,
-          [ `AWS of ListAnomalyGroupSummariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAnomalyGroupSummariesResponse.error) Result.t Lwt.t
 val list_anomaly_group_time_series :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAnomalyGroupTimeSeriesRequest.t ->
         (ListAnomalyGroupTimeSeriesResponse.t,
-          [ `AWS of ListAnomalyGroupTimeSeriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAnomalyGroupTimeSeriesResponse.error) Result.t Lwt.t
 val list_metric_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMetricSetsRequest.t ->
-        (ListMetricSetsResponse.t,
-          [ `AWS of ListMetricSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMetricSetsResponse.t, ListMetricSetsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutFeedbackRequest.t ->
-        (PutFeedbackResponse.t,
-          [ `AWS of PutFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutFeedbackResponse.t, PutFeedbackResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAnomalyDetectorRequest.t ->
         (UpdateAnomalyDetectorResponse.t,
-          [ `AWS of UpdateAnomalyDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateAnomalyDetectorResponse.error) Result.t Lwt.t
 val update_metric_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMetricSetRequest.t ->
-        (UpdateMetricSetResponse.t,
-          [ `AWS of UpdateMetricSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateMetricSetResponse.t, UpdateMetricSetResponse.error) Result.t
+          Lwt.t

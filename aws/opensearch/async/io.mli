@@ -5,314 +5,239 @@ val accept_inbound_connection :
     ?cfg:Awso.Cfg.t ->
       AcceptInboundConnectionRequest.t ->
         (AcceptInboundConnectionResponse.t,
-          [ `AWS of AcceptInboundConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AcceptInboundConnectionResponse.error) Result.t Async.Deferred.t
 val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AddTagsRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val associate_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociatePackageRequest.t ->
-        (AssociatePackageResponse.t,
-          [ `AWS of AssociatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociatePackageResponse.t, AssociatePackageResponse.error) Result.t
           Async.Deferred.t
 val cancel_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelServiceSoftwareUpdateRequest.t ->
         (CancelServiceSoftwareUpdateResponse.t,
-          [ `AWS of CancelServiceSoftwareUpdateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CancelServiceSoftwareUpdateResponse.error) Result.t
           Async.Deferred.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
-        (CreateDomainResponse.t,
-          [ `AWS of CreateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDomainResponse.t, CreateDomainResponse.error) Result.t
           Async.Deferred.t
 val create_outbound_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOutboundConnectionRequest.t ->
         (CreateOutboundConnectionResponse.t,
-          [ `AWS of CreateOutboundConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateOutboundConnectionResponse.error) Result.t Async.Deferred.t
 val create_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePackageRequest.t ->
-        (CreatePackageResponse.t,
-          [ `AWS of CreatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePackageResponse.t, CreatePackageResponse.error) Result.t
           Async.Deferred.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t ->
-        (DeleteDomainResponse.t,
-          [ `AWS of DeleteDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteDomainResponse.t, DeleteDomainResponse.error) Result.t
           Async.Deferred.t
 val delete_inbound_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInboundConnectionRequest.t ->
         (DeleteInboundConnectionResponse.t,
-          [ `AWS of DeleteInboundConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteInboundConnectionResponse.error) Result.t Async.Deferred.t
 val delete_outbound_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOutboundConnectionRequest.t ->
         (DeleteOutboundConnectionResponse.t,
-          [ `AWS of DeleteOutboundConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteOutboundConnectionResponse.error) Result.t Async.Deferred.t
 val delete_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePackageRequest.t ->
-        (DeletePackageResponse.t,
-          [ `AWS of DeletePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeletePackageResponse.t, DeletePackageResponse.error) Result.t
           Async.Deferred.t
 val describe_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainRequest.t ->
-        (DescribeDomainResponse.t,
-          [ `AWS of DescribeDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDomainResponse.t, DescribeDomainResponse.error) Result.t
           Async.Deferred.t
 val describe_domain_auto_tunes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainAutoTunesRequest.t ->
         (DescribeDomainAutoTunesResponse.t,
-          [ `AWS of DescribeDomainAutoTunesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeDomainAutoTunesResponse.error) Result.t Async.Deferred.t
 val describe_domain_change_progress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainChangeProgressRequest.t ->
         (DescribeDomainChangeProgressResponse.t,
-          [ `AWS of DescribeDomainChangeProgressResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDomainChangeProgressResponse.error) Result.t
           Async.Deferred.t
 val describe_domain_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainConfigRequest.t ->
-        (DescribeDomainConfigResponse.t,
-          [ `AWS of DescribeDomainConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeDomainConfigResponse.t, DescribeDomainConfigResponse.error)
+          Result.t Async.Deferred.t
 val describe_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainsRequest.t ->
-        (DescribeDomainsResponse.t,
-          [ `AWS of DescribeDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDomainsResponse.t, DescribeDomainsResponse.error) Result.t
           Async.Deferred.t
 val describe_inbound_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInboundConnectionsRequest.t ->
         (DescribeInboundConnectionsResponse.t,
-          [ `AWS of DescribeInboundConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeInboundConnectionsResponse.error) Result.t Async.Deferred.t
 val describe_instance_type_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceTypeLimitsRequest.t ->
         (DescribeInstanceTypeLimitsResponse.t,
-          [ `AWS of DescribeInstanceTypeLimitsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeInstanceTypeLimitsResponse.error) Result.t Async.Deferred.t
 val describe_outbound_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOutboundConnectionsRequest.t ->
         (DescribeOutboundConnectionsResponse.t,
-          [ `AWS of DescribeOutboundConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeOutboundConnectionsResponse.error) Result.t
           Async.Deferred.t
 val describe_packages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePackagesRequest.t ->
-        (DescribePackagesResponse.t,
-          [ `AWS of DescribePackagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribePackagesResponse.t, DescribePackagesResponse.error) Result.t
           Async.Deferred.t
 val describe_reserved_instance_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedInstanceOfferingsRequest.t ->
         (DescribeReservedInstanceOfferingsResponse.t,
-          [ `AWS of DescribeReservedInstanceOfferingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeReservedInstanceOfferingsResponse.error) Result.t
           Async.Deferred.t
 val describe_reserved_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedInstancesRequest.t ->
         (DescribeReservedInstancesResponse.t,
-          [ `AWS of DescribeReservedInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeReservedInstancesResponse.error) Result.t Async.Deferred.t
 val dissociate_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DissociatePackageRequest.t ->
-        (DissociatePackageResponse.t,
-          [ `AWS of DissociatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DissociatePackageResponse.t, DissociatePackageResponse.error)
+          Result.t Async.Deferred.t
 val get_compatible_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCompatibleVersionsRequest.t ->
         (GetCompatibleVersionsResponse.t,
-          [ `AWS of GetCompatibleVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetCompatibleVersionsResponse.error) Result.t Async.Deferred.t
 val get_package_version_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPackageVersionHistoryRequest.t ->
         (GetPackageVersionHistoryResponse.t,
-          [ `AWS of GetPackageVersionHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetPackageVersionHistoryResponse.error) Result.t Async.Deferred.t
 val get_upgrade_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUpgradeHistoryRequest.t ->
-        (GetUpgradeHistoryResponse.t,
-          [ `AWS of GetUpgradeHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetUpgradeHistoryResponse.t, GetUpgradeHistoryResponse.error)
+          Result.t Async.Deferred.t
 val get_upgrade_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUpgradeStatusRequest.t ->
-        (GetUpgradeStatusResponse.t,
-          [ `AWS of GetUpgradeStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetUpgradeStatusResponse.t, GetUpgradeStatusResponse.error) Result.t
           Async.Deferred.t
 val list_domain_names :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainNamesRequest.t ->
-        (ListDomainNamesResponse.t,
-          [ `AWS of ListDomainNamesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDomainNamesResponse.t, ListDomainNamesResponse.error) Result.t
           Async.Deferred.t
 val list_domains_for_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsForPackageRequest.t ->
         (ListDomainsForPackageResponse.t,
-          [ `AWS of ListDomainsForPackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListDomainsForPackageResponse.error) Result.t Async.Deferred.t
 val list_instance_type_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstanceTypeDetailsRequest.t ->
         (ListInstanceTypeDetailsResponse.t,
-          [ `AWS of ListInstanceTypeDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListInstanceTypeDetailsResponse.error) Result.t Async.Deferred.t
 val list_packages_for_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackagesForDomainRequest.t ->
         (ListPackagesForDomainResponse.t,
-          [ `AWS of ListPackagesForDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListPackagesForDomainResponse.error) Result.t Async.Deferred.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResponse.t,
-          [ `AWS of ListTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTagsResponse.t, ListTagsResponse.error) Result.t
           Async.Deferred.t
 val list_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVersionsRequest.t ->
-        (ListVersionsResponse.t,
-          [ `AWS of ListVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListVersionsResponse.t, ListVersionsResponse.error) Result.t
           Async.Deferred.t
 val purchase_reserved_instance_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseReservedInstanceOfferingRequest.t ->
         (PurchaseReservedInstanceOfferingResponse.t,
-          [ `AWS of PurchaseReservedInstanceOfferingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PurchaseReservedInstanceOfferingResponse.error) Result.t
           Async.Deferred.t
 val reject_inbound_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectInboundConnectionRequest.t ->
         (RejectInboundConnectionResponse.t,
-          [ `AWS of RejectInboundConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RejectInboundConnectionResponse.error) Result.t Async.Deferred.t
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveTagsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      RemoveTagsRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val start_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartServiceSoftwareUpdateRequest.t ->
         (StartServiceSoftwareUpdateResponse.t,
-          [ `AWS of StartServiceSoftwareUpdateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartServiceSoftwareUpdateResponse.error) Result.t Async.Deferred.t
 val update_domain_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainConfigRequest.t ->
-        (UpdateDomainConfigResponse.t,
-          [ `AWS of UpdateDomainConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateDomainConfigResponse.t, UpdateDomainConfigResponse.error)
+          Result.t Async.Deferred.t
 val update_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePackageRequest.t ->
-        (UpdatePackageResponse.t,
-          [ `AWS of UpdatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdatePackageResponse.t, UpdatePackageResponse.error) Result.t
           Async.Deferred.t
 val upgrade_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpgradeDomainRequest.t ->
-        (UpgradeDomainResponse.t,
-          [ `AWS of UpgradeDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpgradeDomainResponse.t, UpgradeDomainResponse.error) Result.t
           Async.Deferred.t

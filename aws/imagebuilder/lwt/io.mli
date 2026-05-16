@@ -4,349 +4,291 @@ val cancel_image_creation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelImageCreationRequest.t ->
-        (CancelImageCreationResponse.t,
-          [ `AWS of CancelImageCreationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelImageCreationResponse.t, CancelImageCreationResponse.error)
+          Result.t Lwt.t
 val create_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateComponentRequest.t ->
-        (CreateComponentResponse.t,
-          [ `AWS of CreateComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateComponentResponse.t, CreateComponentResponse.error) Result.t
+          Lwt.t
 val create_container_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateContainerRecipeRequest.t ->
         (CreateContainerRecipeResponse.t,
-          [ `AWS of CreateContainerRecipeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateContainerRecipeResponse.error) Result.t Lwt.t
 val create_distribution_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDistributionConfigurationRequest.t ->
         (CreateDistributionConfigurationResponse.t,
-          [ `AWS of CreateDistributionConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDistributionConfigurationResponse.error) Result.t Lwt.t
 val create_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateImageRequest.t ->
-        (CreateImageResponse.t,
-          [ `AWS of CreateImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateImageResponse.t, CreateImageResponse.error) Result.t Lwt.t
 val create_image_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateImagePipelineRequest.t ->
-        (CreateImagePipelineResponse.t,
-          [ `AWS of CreateImagePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateImagePipelineResponse.t, CreateImagePipelineResponse.error)
+          Result.t Lwt.t
 val create_image_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateImageRecipeRequest.t ->
-        (CreateImageRecipeResponse.t,
-          [ `AWS of CreateImageRecipeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateImageRecipeResponse.t, CreateImageRecipeResponse.error)
+          Result.t Lwt.t
 val create_infrastructure_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInfrastructureConfigurationRequest.t ->
         (CreateInfrastructureConfigurationResponse.t,
-          [ `AWS of CreateInfrastructureConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateInfrastructureConfigurationResponse.error) Result.t Lwt.t
 val delete_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteComponentRequest.t ->
-        (DeleteComponentResponse.t,
-          [ `AWS of DeleteComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteComponentResponse.t, DeleteComponentResponse.error) Result.t
+          Lwt.t
 val delete_container_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContainerRecipeRequest.t ->
         (DeleteContainerRecipeResponse.t,
-          [ `AWS of DeleteContainerRecipeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteContainerRecipeResponse.error) Result.t Lwt.t
 val delete_distribution_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDistributionConfigurationRequest.t ->
         (DeleteDistributionConfigurationResponse.t,
-          [ `AWS of DeleteDistributionConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDistributionConfigurationResponse.error) Result.t Lwt.t
 val delete_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteImageRequest.t ->
-        (DeleteImageResponse.t,
-          [ `AWS of DeleteImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteImageResponse.t, DeleteImageResponse.error) Result.t Lwt.t
 val delete_image_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteImagePipelineRequest.t ->
-        (DeleteImagePipelineResponse.t,
-          [ `AWS of DeleteImagePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteImagePipelineResponse.t, DeleteImagePipelineResponse.error)
+          Result.t Lwt.t
 val delete_image_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteImageRecipeRequest.t ->
-        (DeleteImageRecipeResponse.t,
-          [ `AWS of DeleteImageRecipeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteImageRecipeResponse.t, DeleteImageRecipeResponse.error)
+          Result.t Lwt.t
 val delete_infrastructure_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInfrastructureConfigurationRequest.t ->
         (DeleteInfrastructureConfigurationResponse.t,
-          [ `AWS of DeleteInfrastructureConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteInfrastructureConfigurationResponse.error) Result.t Lwt.t
 val get_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComponentRequest.t ->
-        (GetComponentResponse.t,
-          [ `AWS of GetComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetComponentResponse.t, GetComponentResponse.error) Result.t Lwt.t
 val get_component_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComponentPolicyRequest.t ->
-        (GetComponentPolicyResponse.t,
-          [ `AWS of GetComponentPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetComponentPolicyResponse.t, GetComponentPolicyResponse.error)
+          Result.t Lwt.t
 val get_container_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContainerRecipeRequest.t ->
-        (GetContainerRecipeResponse.t,
-          [ `AWS of GetContainerRecipeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContainerRecipeResponse.t, GetContainerRecipeResponse.error)
+          Result.t Lwt.t
 val get_container_recipe_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContainerRecipePolicyRequest.t ->
         (GetContainerRecipePolicyResponse.t,
-          [ `AWS of GetContainerRecipePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetContainerRecipePolicyResponse.error) Result.t Lwt.t
 val get_distribution_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDistributionConfigurationRequest.t ->
         (GetDistributionConfigurationResponse.t,
-          [ `AWS of GetDistributionConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDistributionConfigurationResponse.error) Result.t Lwt.t
 val get_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetImageRequest.t ->
-        (GetImageResponse.t,
-          [ `AWS of GetImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetImageResponse.t, GetImageResponse.error) Result.t Lwt.t
 val get_image_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetImagePipelineRequest.t ->
-        (GetImagePipelineResponse.t,
-          [ `AWS of GetImagePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetImagePipelineResponse.t, GetImagePipelineResponse.error) Result.t
+          Lwt.t
 val get_image_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetImagePolicyRequest.t ->
-        (GetImagePolicyResponse.t,
-          [ `AWS of GetImagePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetImagePolicyResponse.t, GetImagePolicyResponse.error) Result.t
+          Lwt.t
 val get_image_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetImageRecipeRequest.t ->
-        (GetImageRecipeResponse.t,
-          [ `AWS of GetImageRecipeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetImageRecipeResponse.t, GetImageRecipeResponse.error) Result.t
+          Lwt.t
 val get_image_recipe_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetImageRecipePolicyRequest.t ->
-        (GetImageRecipePolicyResponse.t,
-          [ `AWS of GetImageRecipePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetImageRecipePolicyResponse.t, GetImageRecipePolicyResponse.error)
+          Result.t Lwt.t
 val get_infrastructure_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInfrastructureConfigurationRequest.t ->
         (GetInfrastructureConfigurationResponse.t,
-          [ `AWS of GetInfrastructureConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetInfrastructureConfigurationResponse.error) Result.t Lwt.t
 val import_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportComponentRequest.t ->
-        (ImportComponentResponse.t,
-          [ `AWS of ImportComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportComponentResponse.t, ImportComponentResponse.error) Result.t
+          Lwt.t
 val import_vm_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportVmImageRequest.t ->
-        (ImportVmImageResponse.t,
-          [ `AWS of ImportVmImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportVmImageResponse.t, ImportVmImageResponse.error) Result.t Lwt.t
 val list_component_build_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComponentBuildVersionsRequest.t ->
         (ListComponentBuildVersionsResponse.t,
-          [ `AWS of ListComponentBuildVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListComponentBuildVersionsResponse.error) Result.t Lwt.t
 val list_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComponentsRequest.t ->
-        (ListComponentsResponse.t,
-          [ `AWS of ListComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListComponentsResponse.t, ListComponentsResponse.error) Result.t
+          Lwt.t
 val list_container_recipes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListContainerRecipesRequest.t ->
-        (ListContainerRecipesResponse.t,
-          [ `AWS of ListContainerRecipesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListContainerRecipesResponse.t, ListContainerRecipesResponse.error)
+          Result.t Lwt.t
 val list_distribution_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionConfigurationsRequest.t ->
         (ListDistributionConfigurationsResponse.t,
-          [ `AWS of ListDistributionConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDistributionConfigurationsResponse.error) Result.t Lwt.t
 val list_image_build_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImageBuildVersionsRequest.t ->
         (ListImageBuildVersionsResponse.t,
-          [ `AWS of ListImageBuildVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListImageBuildVersionsResponse.error) Result.t Lwt.t
 val list_image_packages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImagePackagesRequest.t ->
-        (ListImagePackagesResponse.t,
-          [ `AWS of ListImagePackagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListImagePackagesResponse.t, ListImagePackagesResponse.error)
+          Result.t Lwt.t
 val list_image_pipeline_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImagePipelineImagesRequest.t ->
         (ListImagePipelineImagesResponse.t,
-          [ `AWS of ListImagePipelineImagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListImagePipelineImagesResponse.error) Result.t Lwt.t
 val list_image_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImagePipelinesRequest.t ->
-        (ListImagePipelinesResponse.t,
-          [ `AWS of ListImagePipelinesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListImagePipelinesResponse.t, ListImagePipelinesResponse.error)
+          Result.t Lwt.t
 val list_image_recipes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImageRecipesRequest.t ->
-        (ListImageRecipesResponse.t,
-          [ `AWS of ListImageRecipesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListImageRecipesResponse.t, ListImageRecipesResponse.error) Result.t
+          Lwt.t
 val list_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImagesRequest.t ->
-        (ListImagesResponse.t,
-          [ `AWS of ListImagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListImagesResponse.t, ListImagesResponse.error) Result.t Lwt.t
 val list_infrastructure_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInfrastructureConfigurationsRequest.t ->
         (ListInfrastructureConfigurationsResponse.t,
-          [ `AWS of ListInfrastructureConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListInfrastructureConfigurationsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_component_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutComponentPolicyRequest.t ->
-        (PutComponentPolicyResponse.t,
-          [ `AWS of PutComponentPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutComponentPolicyResponse.t, PutComponentPolicyResponse.error)
+          Result.t Lwt.t
 val put_container_recipe_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutContainerRecipePolicyRequest.t ->
         (PutContainerRecipePolicyResponse.t,
-          [ `AWS of PutContainerRecipePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutContainerRecipePolicyResponse.error) Result.t Lwt.t
 val put_image_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutImagePolicyRequest.t ->
-        (PutImagePolicyResponse.t,
-          [ `AWS of PutImagePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutImagePolicyResponse.t, PutImagePolicyResponse.error) Result.t
+          Lwt.t
 val put_image_recipe_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutImageRecipePolicyRequest.t ->
-        (PutImageRecipePolicyResponse.t,
-          [ `AWS of PutImageRecipePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutImageRecipePolicyResponse.t, PutImageRecipePolicyResponse.error)
+          Result.t Lwt.t
 val start_image_pipeline_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImagePipelineExecutionRequest.t ->
         (StartImagePipelineExecutionResponse.t,
-          [ `AWS of StartImagePipelineExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartImagePipelineExecutionResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_distribution_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDistributionConfigurationRequest.t ->
         (UpdateDistributionConfigurationResponse.t,
-          [ `AWS of UpdateDistributionConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDistributionConfigurationResponse.error) Result.t Lwt.t
 val update_image_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateImagePipelineRequest.t ->
-        (UpdateImagePipelineResponse.t,
-          [ `AWS of UpdateImagePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateImagePipelineResponse.t, UpdateImagePipelineResponse.error)
+          Result.t Lwt.t
 val update_infrastructure_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateInfrastructureConfigurationRequest.t ->
         (UpdateInfrastructureConfigurationResponse.t,
-          [ `AWS of UpdateInfrastructureConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateInfrastructureConfigurationResponse.error) Result.t Lwt.t

@@ -4,263 +4,199 @@ val acknowledge_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcknowledgeJobInput.t ->
-        (AcknowledgeJobOutput.t,
-          [ `AWS of AcknowledgeJobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AcknowledgeJobOutput.t, AcknowledgeJobOutput.error) Result.t Lwt.t
 val acknowledge_third_party_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcknowledgeThirdPartyJobInput.t ->
         (AcknowledgeThirdPartyJobOutput.t,
-          [ `AWS of AcknowledgeThirdPartyJobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AcknowledgeThirdPartyJobOutput.error) Result.t Lwt.t
 val create_custom_action_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomActionTypeInput.t ->
-        (CreateCustomActionTypeOutput.t,
-          [ `AWS of CreateCustomActionTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCustomActionTypeOutput.t, CreateCustomActionTypeOutput.error)
+          Result.t Lwt.t
 val create_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePipelineInput.t ->
-        (CreatePipelineOutput.t,
-          [ `AWS of CreatePipelineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePipelineOutput.t, CreatePipelineOutput.error) Result.t Lwt.t
 val delete_custom_action_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCustomActionTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteCustomActionTypeInput.t -> (unit, unit) Result.t Lwt.t
 val delete_pipeline :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeletePipelineInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeletePipelineInput.t -> (unit, unit) Result.t Lwt.t
 val delete_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWebhookInput.t ->
-        (DeleteWebhookOutput.t,
-          [ `AWS of DeleteWebhookOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWebhookOutput.t, DeleteWebhookOutput.error) Result.t Lwt.t
 val deregister_webhook_with_third_party :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterWebhookWithThirdPartyInput.t ->
         (DeregisterWebhookWithThirdPartyOutput.t,
-          [ `AWS of DeregisterWebhookWithThirdPartyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterWebhookWithThirdPartyOutput.error) Result.t Lwt.t
 val disable_stage_transition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisableStageTransitionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisableStageTransitionInput.t -> (unit, unit) Result.t Lwt.t
 val enable_stage_transition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      EnableStageTransitionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      EnableStageTransitionInput.t -> (unit, unit) Result.t Lwt.t
 val get_action_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetActionTypeInput.t ->
-        (GetActionTypeOutput.t,
-          [ `AWS of GetActionTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetActionTypeOutput.t, GetActionTypeOutput.error) Result.t Lwt.t
 val get_job_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobDetailsInput.t ->
-        (GetJobDetailsOutput.t,
-          [ `AWS of GetJobDetailsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetJobDetailsOutput.t, GetJobDetailsOutput.error) Result.t Lwt.t
 val get_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPipelineInput.t ->
-        (GetPipelineOutput.t,
-          [ `AWS of GetPipelineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPipelineOutput.t, GetPipelineOutput.error) Result.t Lwt.t
 val get_pipeline_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPipelineExecutionInput.t ->
-        (GetPipelineExecutionOutput.t,
-          [ `AWS of GetPipelineExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPipelineExecutionOutput.t, GetPipelineExecutionOutput.error)
+          Result.t Lwt.t
 val get_pipeline_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPipelineStateInput.t ->
-        (GetPipelineStateOutput.t,
-          [ `AWS of GetPipelineStateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPipelineStateOutput.t, GetPipelineStateOutput.error) Result.t
+          Lwt.t
 val get_third_party_job_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetThirdPartyJobDetailsInput.t ->
         (GetThirdPartyJobDetailsOutput.t,
-          [ `AWS of GetThirdPartyJobDetailsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetThirdPartyJobDetailsOutput.error) Result.t Lwt.t
 val list_action_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListActionExecutionsInput.t ->
-        (ListActionExecutionsOutput.t,
-          [ `AWS of ListActionExecutionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListActionExecutionsOutput.t, ListActionExecutionsOutput.error)
+          Result.t Lwt.t
 val list_action_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListActionTypesInput.t ->
-        (ListActionTypesOutput.t,
-          [ `AWS of ListActionTypesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListActionTypesOutput.t, ListActionTypesOutput.error) Result.t Lwt.t
 val list_pipeline_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPipelineExecutionsInput.t ->
-        (ListPipelineExecutionsOutput.t,
-          [ `AWS of ListPipelineExecutionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPipelineExecutionsOutput.t, ListPipelineExecutionsOutput.error)
+          Result.t Lwt.t
 val list_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPipelinesInput.t ->
-        (ListPipelinesOutput.t,
-          [ `AWS of ListPipelinesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPipelinesOutput.t, ListPipelinesOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val list_webhooks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWebhooksInput.t ->
-        (ListWebhooksOutput.t,
-          [ `AWS of ListWebhooksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWebhooksOutput.t, ListWebhooksOutput.error) Result.t Lwt.t
 val poll_for_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PollForJobsInput.t ->
-        (PollForJobsOutput.t,
-          [ `AWS of PollForJobsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PollForJobsOutput.t, PollForJobsOutput.error) Result.t Lwt.t
 val poll_for_third_party_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PollForThirdPartyJobsInput.t ->
-        (PollForThirdPartyJobsOutput.t,
-          [ `AWS of PollForThirdPartyJobsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PollForThirdPartyJobsOutput.t, PollForThirdPartyJobsOutput.error)
+          Result.t Lwt.t
 val put_action_revision :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutActionRevisionInput.t ->
-        (PutActionRevisionOutput.t,
-          [ `AWS of PutActionRevisionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutActionRevisionOutput.t, PutActionRevisionOutput.error) Result.t
+          Lwt.t
 val put_approval_result :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutApprovalResultInput.t ->
-        (PutApprovalResultOutput.t,
-          [ `AWS of PutApprovalResultOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutApprovalResultOutput.t, PutApprovalResultOutput.error) Result.t
+          Lwt.t
 val put_job_failure_result :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutJobFailureResultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutJobFailureResultInput.t -> (unit, unit) Result.t Lwt.t
 val put_job_success_result :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutJobSuccessResultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutJobSuccessResultInput.t -> (unit, unit) Result.t Lwt.t
 val put_third_party_job_failure_result :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutThirdPartyJobFailureResultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutThirdPartyJobFailureResultInput.t -> (unit, unit) Result.t Lwt.t
 val put_third_party_job_success_result :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutThirdPartyJobSuccessResultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutThirdPartyJobSuccessResultInput.t -> (unit, unit) Result.t Lwt.t
 val put_webhook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutWebhookInput.t ->
-        (PutWebhookOutput.t,
-          [ `AWS of PutWebhookOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutWebhookOutput.t, PutWebhookOutput.error) Result.t Lwt.t
 val register_webhook_with_third_party :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterWebhookWithThirdPartyInput.t ->
         (RegisterWebhookWithThirdPartyOutput.t,
-          [ `AWS of RegisterWebhookWithThirdPartyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterWebhookWithThirdPartyOutput.error) Result.t Lwt.t
 val retry_stage_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetryStageExecutionInput.t ->
-        (RetryStageExecutionOutput.t,
-          [ `AWS of RetryStageExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RetryStageExecutionOutput.t, RetryStageExecutionOutput.error)
+          Result.t Lwt.t
 val start_pipeline_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartPipelineExecutionInput.t ->
-        (StartPipelineExecutionOutput.t,
-          [ `AWS of StartPipelineExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartPipelineExecutionOutput.t, StartPipelineExecutionOutput.error)
+          Result.t Lwt.t
 val stop_pipeline_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopPipelineExecutionInput.t ->
-        (StopPipelineExecutionOutput.t,
-          [ `AWS of StopPipelineExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopPipelineExecutionOutput.t, StopPipelineExecutionOutput.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
 val update_action_type :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateActionTypeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UpdateActionTypeInput.t -> (unit, unit) Result.t Lwt.t
 val update_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePipelineInput.t ->
-        (UpdatePipelineOutput.t,
-          [ `AWS of UpdatePipelineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePipelineOutput.t, UpdatePipelineOutput.error) Result.t Lwt.t

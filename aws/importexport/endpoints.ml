@@ -97,70 +97,69 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CancelJob ->
-      (match resp with
-       | Error err -> handle_error err (Some CancelJobOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CancelJobOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CancelJobOutput.of_xml xml)
+      else Error (parse_aws_error (Some CancelJobOutput.error_of_xml))
   | CreateJob ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateJobOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateJobOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateJobOutput.of_xml xml)
+      else Error (parse_aws_error (Some CreateJobOutput.error_of_xml))
   | GetShippingLabel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetShippingLabelOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetShippingLabelOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetShippingLabelOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetShippingLabelOutput.error_of_xml))
   | GetStatus ->
-      (match resp with
-       | Error err -> handle_error err (Some GetStatusOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetStatusOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetStatusOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetStatusOutput.error_of_xml))
   | ListJobs ->
-      (match resp with
-       | Error err -> handle_error err (Some ListJobsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListJobsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListJobsOutput.of_xml xml)
+      else Error (parse_aws_error (Some ListJobsOutput.error_of_xml))
   | UpdateJob ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateJobOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateJobOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateJobOutput.of_xml xml)
+      else Error (parse_aws_error (Some UpdateJobOutput.error_of_xml))

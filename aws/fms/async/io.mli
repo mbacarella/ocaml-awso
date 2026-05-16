@@ -4,225 +4,173 @@ val associate_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateAdminAccountRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val associate_third_party_firewall :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateThirdPartyFirewallRequest.t ->
         (AssociateThirdPartyFirewallResponse.t,
-          [ `AWS of AssociateThirdPartyFirewallResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AssociateThirdPartyFirewallResponse.error) Result.t
           Async.Deferred.t
 val delete_apps_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAppsListRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteAppsListRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_notification_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNotificationChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeletePolicyRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_protocols_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteProtocolsListRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteProtocolsListRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val disassociate_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateAdminAccountRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val disassociate_third_party_firewall :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateThirdPartyFirewallRequest.t ->
         (DisassociateThirdPartyFirewallResponse.t,
-          [ `AWS of DisassociateThirdPartyFirewallResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateThirdPartyFirewallResponse.error) Result.t
           Async.Deferred.t
 val get_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAdminAccountRequest.t ->
-        (GetAdminAccountResponse.t,
-          [ `AWS of GetAdminAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAdminAccountResponse.t, GetAdminAccountResponse.error) Result.t
           Async.Deferred.t
 val get_apps_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppsListRequest.t ->
-        (GetAppsListResponse.t,
-          [ `AWS of GetAppsListResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAppsListResponse.t, GetAppsListResponse.error) Result.t
           Async.Deferred.t
 val get_compliance_detail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComplianceDetailRequest.t ->
-        (GetComplianceDetailResponse.t,
-          [ `AWS of GetComplianceDetailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetComplianceDetailResponse.t, GetComplianceDetailResponse.error)
+          Result.t Async.Deferred.t
 val get_notification_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNotificationChannelRequest.t ->
         (GetNotificationChannelResponse.t,
-          [ `AWS of GetNotificationChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetNotificationChannelResponse.error) Result.t Async.Deferred.t
 val get_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPolicyRequest.t ->
-        (GetPolicyResponse.t,
-          [ `AWS of GetPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPolicyResponse.t, GetPolicyResponse.error) Result.t
           Async.Deferred.t
 val get_protection_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProtectionStatusRequest.t ->
-        (GetProtectionStatusResponse.t,
-          [ `AWS of GetProtectionStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetProtectionStatusResponse.t, GetProtectionStatusResponse.error)
+          Result.t Async.Deferred.t
 val get_protocols_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProtocolsListRequest.t ->
-        (GetProtocolsListResponse.t,
-          [ `AWS of GetProtocolsListResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetProtocolsListResponse.t, GetProtocolsListResponse.error) Result.t
           Async.Deferred.t
 val get_third_party_firewall_association_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetThirdPartyFirewallAssociationStatusRequest.t ->
         (GetThirdPartyFirewallAssociationStatusResponse.t,
-          [ `AWS of GetThirdPartyFirewallAssociationStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetThirdPartyFirewallAssociationStatusResponse.error) Result.t
           Async.Deferred.t
 val get_violation_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetViolationDetailsRequest.t ->
-        (GetViolationDetailsResponse.t,
-          [ `AWS of GetViolationDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetViolationDetailsResponse.t, GetViolationDetailsResponse.error)
+          Result.t Async.Deferred.t
 val list_apps_lists :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppsListsRequest.t ->
-        (ListAppsListsResponse.t,
-          [ `AWS of ListAppsListsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAppsListsResponse.t, ListAppsListsResponse.error) Result.t
           Async.Deferred.t
 val list_compliance_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComplianceStatusRequest.t ->
-        (ListComplianceStatusResponse.t,
-          [ `AWS of ListComplianceStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListComplianceStatusResponse.t, ListComplianceStatusResponse.error)
+          Result.t Async.Deferred.t
 val list_member_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMemberAccountsRequest.t ->
-        (ListMemberAccountsResponse.t,
-          [ `AWS of ListMemberAccountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListMemberAccountsResponse.t, ListMemberAccountsResponse.error)
+          Result.t Async.Deferred.t
 val list_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPoliciesRequest.t ->
-        (ListPoliciesResponse.t,
-          [ `AWS of ListPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPoliciesResponse.t, ListPoliciesResponse.error) Result.t
           Async.Deferred.t
 val list_protocols_lists :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProtocolsListsRequest.t ->
-        (ListProtocolsListsResponse.t,
-          [ `AWS of ListProtocolsListsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListProtocolsListsResponse.t, ListProtocolsListsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_third_party_firewall_firewall_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListThirdPartyFirewallFirewallPoliciesRequest.t ->
         (ListThirdPartyFirewallFirewallPoliciesResponse.t,
-          [ `AWS of ListThirdPartyFirewallFirewallPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListThirdPartyFirewallFirewallPoliciesResponse.error) Result.t
           Async.Deferred.t
 val put_apps_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAppsListRequest.t ->
-        (PutAppsListResponse.t,
-          [ `AWS of PutAppsListResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutAppsListResponse.t, PutAppsListResponse.error) Result.t
           Async.Deferred.t
 val put_notification_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutNotificationChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val put_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPolicyRequest.t ->
-        (PutPolicyResponse.t,
-          [ `AWS of PutPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutPolicyResponse.t, PutPolicyResponse.error) Result.t
           Async.Deferred.t
 val put_protocols_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutProtocolsListRequest.t ->
-        (PutProtocolsListResponse.t,
-          [ `AWS of PutProtocolsListResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutProtocolsListResponse.t, PutProtocolsListResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

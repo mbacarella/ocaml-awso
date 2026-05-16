@@ -106,7 +106,7 @@ let to_value_converter_of_shape ?result_wrapper shape =
       fun xs ->
         xs
         |> List.map ~f:(fun (x, y) ->
-             [%e key_conv] x |> fun x -> [%e value_conv] y |> fun y -> x, y)
+          [%e key_conv] x |> fun x -> [%e value_conv] y |> fun y -> x, y)
         |> fun x -> `Map x]
 ;;
 
@@ -160,8 +160,8 @@ let of_string_converter_of_shape shape =
 ;;
 
 let of_header_converter_of_map_shape
-  (service : Botodata.service)
-  (ms : Botodata.map_shape)
+      (service : Botodata.service)
+      (ms : Botodata.map_shape)
   =
   let location_name_prefix = Option.value ms.locationName ~default:"x-amz-meta-" in
   let location_name_prefix_evar = Ast_convenience.str location_name_prefix in
@@ -194,8 +194,8 @@ let of_header_converter_of_map_shape
 ;;
 
 let of_header_converter_of_structure_shape
-  (service : Botodata.service)
-  (ss : Botodata.structure_shape)
+      (service : Botodata.service)
+      (ss : Botodata.structure_shape)
   =
   let loc = !Ast_helper.default_loc in
   let arguments =
@@ -342,7 +342,8 @@ let of_xml_converter_of_shape ?result_wrapper context_is_referenced service shap
                  | List_shape { member = { locationName; _ }; _ } ->
                    Option.first_some locationName member.locationName
                  | _ -> assert false))
-            |> (* The XML fields in a query protocol body all begin with an *
+            |>
+            (* The XML fields in a query protocol body all begin with an *
                   upper case letter *)
             fun field_id ->
             match service.metadata.protocol with
@@ -387,11 +388,11 @@ let of_xml_converter_of_shape ?result_wrapper context_is_referenced service shap
         [%expr
           Xml.all_children x
           |> List.filter ~f:(function
-               | `Data s -> (
-                 match Stdlib.String.trim s with
-                 | "" -> false
-                 | _ -> true)
-               | _ -> true)]
+            | `Data s -> (
+              match Stdlib.String.trim s with
+              | "" -> false
+              | _ -> true)
+            | _ -> true)]
     in
     [%expr fun x -> make (List.map [%e nodes_e] ~f:[%e constructor])]
   | Enum_shape _ ->
@@ -426,9 +427,7 @@ let of_json_converter_of_shape shape_name shape =
             Ast_convenience.evar (Shape.capitalized_id member.shape ^ ".of_json")
           in
           let field_map_e =
-            if argument_is_required
-            then [%expr field_map_exn]
-            else [%expr field_map]
+            if argument_is_required then [%expr field_map_exn] else [%expr field_map]
           in
           let arg_id = Shape.uncapitalized_id field_name in
           let pat = Ast_helper.Pat.var (Ast_convenience.mknoloc arg_id) in
@@ -641,17 +640,17 @@ let structure_of_shape (service : Botodata.service) sn shape =
            ; (if !context_is_referenced then Some context_value else None)
            ; Some make_function
            ]
-          @ Option.value ~default:[] error_functions
-          @ [ opt_to_string_function
-            ; opt_of_string_function
-            ; opt_of_header_or_of_header_and_body_function
-            ; Some to_value_function
-            ; Some to_query_function
-            ; opt_to_header_function
-            ; Some of_xml_function
-            ; Some of_json_function
-            ; Some to_json_function
-            ])))
+           @ Option.value ~default:[] error_functions
+           @ [ opt_to_string_function
+             ; opt_of_string_function
+             ; opt_of_header_or_of_header_and_body_function
+             ; Some to_value_function
+             ; Some to_query_function
+             ; opt_to_header_function
+             ; Some of_xml_function
+             ; Some of_json_function
+             ; Some to_json_function
+             ])))
 ;;
 
 let simple_module_type shape =
@@ -701,54 +700,54 @@ let composed_module_type (service : Botodata.service) sn shape =
          sig_rec_flag
          (Type_decl.type_declarations_of_shape ?result_wrapper ~priv shape)
      ]
-    @ [%sig:
-        val make : [%t Shape_structure.type_of_shape shape]
-        val to_value : t -> Botodata.value
-        val to_query : t -> Client.Query.t
+     @ [%sig:
+         val make : [%t Shape_structure.type_of_shape shape]
+         val to_value : t -> Botodata.value
+         val to_query : t -> Client.Query.t
 
-        val of_xml
-          :  [%t Shape_signature.xml_ty shape]
-          -> [%t Shape_signature.of_xml_return_ty shape]
+         val of_xml
+           :  [%t Shape_signature.xml_ty shape]
+           -> [%t Shape_signature.of_xml_return_ty shape]
 
-        val of_json : [%t Shape_signature.of_json_arg_ty shape] -> t
-        val to_json : t -> [%t Shape_signature.to_json_return_ty shape]]
-    @ List.filter_opt
-        [ (match shape with
-           | Structure_shape _ ->
-             (* FIXME(ashish): Is this dead code. In PR #315, I removed
+         val of_json : [%t Shape_signature.of_json_arg_ty shape] -> t
+         val to_json : t -> [%t Shape_signature.to_json_return_ty shape]]
+     @ List.filter_opt
+         [ (match shape with
+            | Structure_shape _ ->
+              (* FIXME(ashish): Is this dead code. In PR #315, I removed
                 Future.Pipe.Reader.t from below. However, leaving it in had no
                 consequence. *)
-             Option.some_if
-               (Shape.shape_is_header_structure service shape)
-               [%sigi:
-                 val of_header_and_body : (string, string) List.Assoc.t * string -> t]
-           | Map_shape ms ->
-             let module_t s =
-               let lid = ksprintf Ast_convenience.lid "%s.t" s in
-               Ast_helper.Typ.constr lid []
-             in
-             let return_type =
-               [%type: ([%t module_t ms.key], [%t module_t ms.value]) List.Assoc.t]
-             in
-             Some
-               [%sigi: val of_header : (string, string) List.Assoc.t -> [%t return_type]]
-           | (_ : Botodata.shape) -> None)
-        ; (match shape with
-           | String_shape _
-           | Enum_shape _
-           | Boolean_shape _
-           | Timestamp_shape _
-           | Long_shape _
-           | Integer_shape _ -> Some [%sigi: val of_string : string -> t]
-           | Double_shape _
-           | Float_shape _
-           | Blob_shape _
-           | List_shape _
-           | Structure_shape _
-           | Map_shape _ -> None)
-        ; Option.map (to_header_converter_of_shape shape) ~f:(fun _ ->
-            [%sigi: val to_header : t -> string])
-        ])
+              Option.some_if
+                (Shape.shape_is_header_structure service shape)
+                [%sigi:
+                  val of_header_and_body : (string, string) List.Assoc.t * string -> t]
+            | Map_shape ms ->
+              let module_t s =
+                let lid = ksprintf Ast_convenience.lid "%s.t" s in
+                Ast_helper.Typ.constr lid []
+              in
+              let return_type =
+                [%type: ([%t module_t ms.key], [%t module_t ms.value]) List.Assoc.t]
+              in
+              Some
+                [%sigi: val of_header : (string, string) List.Assoc.t -> [%t return_type]]
+            | (_ : Botodata.shape) -> None)
+         ; (match shape with
+            | String_shape _
+            | Enum_shape _
+            | Boolean_shape _
+            | Timestamp_shape _
+            | Long_shape _
+            | Integer_shape _ -> Some [%sigi: val of_string : string -> t]
+            | Double_shape _
+            | Float_shape _
+            | Blob_shape _
+            | List_shape _
+            | Structure_shape _
+            | Map_shape _ -> None)
+         ; Option.map (to_header_converter_of_shape shape) ~f:(fun _ ->
+             [%sigi: val to_header : t -> string])
+         ])
 ;;
 
 let module_type service sn shape =
@@ -781,6 +780,7 @@ let doc_for_shape (service : Botodata.service) sn shape =
       match input_match, output_match with
       | Some (), _ | _, Some () -> op.documentation
       | _ -> None)
+;;
 
 let module_binding service sn shape =
   Ast_helper.Str.module_
@@ -835,11 +835,11 @@ let module_declarations (service : Botodata.service) sg =
           ~attrs:(Type_decl.doc_attribute (doc_for_shape service sn shape))
           (Ast_convenience.mknoloc (Some (Shape.capitalized_id sn)))
           (if with_sig
-          then
-            Ast_helper.Mod.mk
-              (Pmod_constraint
-                 (structure_of_shape service sn shape, module_type service sn shape))
-          else structure_of_shape service sn shape)
+           then
+             Ast_helper.Mod.mk
+               (Pmod_constraint
+                  (structure_of_shape service sn shape, module_type service sn shape))
+           else structure_of_shape service sn shape)
       in
       module_ :: acc
     in
@@ -853,8 +853,8 @@ let module_declarations (service : Botodata.service) sg =
   else
     Shape.Graph.Topological.fold
       (fun sn acc ->
-        let shape = List.Assoc.find_exn service.shapes sn ~equal:String.equal in
-        module_binding service sn shape :: acc)
+         let shape = List.Assoc.find_exn service.shapes sn ~equal:String.equal in
+         module_binding service sn shape :: acc)
       sg
       []
 ;;

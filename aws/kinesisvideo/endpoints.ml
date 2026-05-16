@@ -577,173 +577,175 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateSignalingChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSignalingChannelOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateSignalingChannelOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSignalingChannelOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSignalingChannelOutput.error_of_json))
   | CreateStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateStreamOutput.error_of_json)
-       | Ok resp -> Ok (CreateStreamOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateStreamOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateStreamOutput.error_of_json))
   | DeleteSignalingChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSignalingChannelOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteSignalingChannelOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteSignalingChannelOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteSignalingChannelOutput.error_of_json))
   | DeleteStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteStreamOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteStreamOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteStreamOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteStreamOutput.error_of_json))
   | DescribeSignalingChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSignalingChannelOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeSignalingChannelOutput.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeSignalingChannelOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSignalingChannelOutput.error_of_json))
   | DescribeStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeStreamOutput.error_of_json)
-       | Ok resp -> Ok (DescribeStreamOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeStreamOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeStreamOutput.error_of_json))
   | GetDataEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDataEndpointOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetDataEndpointOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDataEndpointOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDataEndpointOutput.error_of_json))
   | GetSignalingChannelEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSignalingChannelEndpointOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetSignalingChannelEndpointOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetSignalingChannelEndpointOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSignalingChannelEndpointOutput.error_of_json))
   | ListSignalingChannels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSignalingChannelsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListSignalingChannelsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSignalingChannelsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSignalingChannelsOutput.error_of_json))
   | ListStreams ->
-      (match resp with
-       | Error err -> handle_error err (Some ListStreamsOutput.error_of_json)
-       | Ok resp -> Ok (ListStreamsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStreamsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListStreamsOutput.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
   | ListTagsForStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForStreamOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForStreamOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForStreamOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTagsForStreamOutput.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err -> handle_error err (Some TagResourceOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceOutput.error_of_json))
   | TagStream ->
-      (match resp with
-       | Error err -> handle_error err (Some TagStreamOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagStreamOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagStreamOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagStreamOutput.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceOutput.error_of_json))
   | UntagStream ->
-      (match resp with
-       | Error err -> handle_error err (Some UntagStreamOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagStreamOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagStreamOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagStreamOutput.error_of_json))
   | UpdateDataRetention ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDataRetentionOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateDataRetentionOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateDataRetentionOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateDataRetentionOutput.error_of_json))
   | UpdateSignalingChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSignalingChannelOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateSignalingChannelOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateSignalingChannelOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateSignalingChannelOutput.error_of_json))
   | UpdateStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateStreamOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateStreamOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateStreamOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UpdateStreamOutput.error_of_json))

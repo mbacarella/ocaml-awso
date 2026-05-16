@@ -4,97 +4,81 @@ val associate_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateRepositoryRequest.t ->
-        (AssociateRepositoryResponse.t,
-          [ `AWS of AssociateRepositoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateRepositoryResponse.t, AssociateRepositoryResponse.error)
+          Result.t Lwt.t
 val create_code_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCodeReviewRequest.t ->
-        (CreateCodeReviewResponse.t,
-          [ `AWS of CreateCodeReviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCodeReviewResponse.t, CreateCodeReviewResponse.error) Result.t
+          Lwt.t
 val describe_code_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCodeReviewRequest.t ->
-        (DescribeCodeReviewResponse.t,
-          [ `AWS of DescribeCodeReviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCodeReviewResponse.t, DescribeCodeReviewResponse.error)
+          Result.t Lwt.t
 val describe_recommendation_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecommendationFeedbackRequest.t ->
         (DescribeRecommendationFeedbackResponse.t,
-          [ `AWS of DescribeRecommendationFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRecommendationFeedbackResponse.error) Result.t Lwt.t
 val describe_repository_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRepositoryAssociationRequest.t ->
         (DescribeRepositoryAssociationResponse.t,
-          [ `AWS of DescribeRepositoryAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRepositoryAssociationResponse.error) Result.t Lwt.t
 val disassociate_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateRepositoryRequest.t ->
         (DisassociateRepositoryResponse.t,
-          [ `AWS of DisassociateRepositoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateRepositoryResponse.error) Result.t Lwt.t
 val list_code_reviews :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCodeReviewsRequest.t ->
-        (ListCodeReviewsResponse.t,
-          [ `AWS of ListCodeReviewsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCodeReviewsResponse.t, ListCodeReviewsResponse.error) Result.t
+          Lwt.t
 val list_recommendation_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecommendationFeedbackRequest.t ->
         (ListRecommendationFeedbackResponse.t,
-          [ `AWS of ListRecommendationFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRecommendationFeedbackResponse.error) Result.t Lwt.t
 val list_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecommendationsRequest.t ->
-        (ListRecommendationsResponse.t,
-          [ `AWS of ListRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRecommendationsResponse.t, ListRecommendationsResponse.error)
+          Result.t Lwt.t
 val list_repository_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoryAssociationsRequest.t ->
         (ListRepositoryAssociationsResponse.t,
-          [ `AWS of ListRepositoryAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRepositoryAssociationsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_recommendation_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRecommendationFeedbackRequest.t ->
         (PutRecommendationFeedbackResponse.t,
-          [ `AWS of PutRecommendationFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutRecommendationFeedbackResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t

@@ -486,192 +486,201 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let body = Option.map req.body ~f:Stream.to_header in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
-  | AbortMultipartUpload -> Ok ()
-  | AbortVaultLock -> Ok ()
-  | AddTagsToVault -> Ok ()
+  | AbortMultipartUpload ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AbortVaultLock ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AddTagsToVault ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CompleteMultipartUpload ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ArchiveCreationOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (ArchiveCreationOutput.of_header_and_body (headers, ())))
-  | CompleteVaultLock -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ArchiveCreationOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some ArchiveCreationOutput.error_of_json))
+  | CompleteVaultLock ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateVault ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateVaultOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CreateVaultOutput.of_header_and_body (headers, ())))
-  | DeleteArchive -> Ok ()
-  | DeleteVault -> Ok ()
-  | DeleteVaultAccessPolicy -> Ok ()
-  | DeleteVaultNotifications -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateVaultOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some CreateVaultOutput.error_of_json))
+  | DeleteArchive ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVault -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVaultAccessPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVaultNotifications ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GlacierJobDescription.error_of_json)
-       | Ok resp ->
-           Ok (GlacierJobDescription.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GlacierJobDescription.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GlacierJobDescription.error_of_json))
   | DescribeVault ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeVaultOutput.error_of_json)
-       | Ok resp -> Ok (DescribeVaultOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeVaultOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeVaultOutput.error_of_json))
   | GetDataRetrievalPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDataRetrievalPolicyOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetDataRetrievalPolicyOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDataRetrievalPolicyOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDataRetrievalPolicyOutput.error_of_json))
   | GetJobOutput ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetJobOutputOutput.error_of_json)
-       | Ok resp -> Ok (GetJobOutputOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetJobOutputOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetJobOutputOutput.error_of_json))
   | GetVaultAccessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetVaultAccessPolicyOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetVaultAccessPolicyOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetVaultAccessPolicyOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetVaultAccessPolicyOutput.error_of_json))
   | GetVaultLock ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetVaultLockOutput.error_of_json)
-       | Ok resp -> Ok (GetVaultLockOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetVaultLockOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetVaultLockOutput.error_of_json))
   | GetVaultNotifications ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetVaultNotificationsOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetVaultNotificationsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetVaultNotificationsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetVaultNotificationsOutput.error_of_json))
   | InitiateJob ->
-      (match resp with
-       | Error err -> handle_error err (Some InitiateJobOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (InitiateJobOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (InitiateJobOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some InitiateJobOutput.error_of_json))
   | InitiateMultipartUpload ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some InitiateMultipartUploadOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (InitiateMultipartUploadOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (InitiateMultipartUploadOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some InitiateMultipartUploadOutput.error_of_json))
   | InitiateVaultLock ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InitiateVaultLockOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (InitiateVaultLockOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (InitiateVaultLockOutput.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some InitiateVaultLockOutput.error_of_json))
   | ListJobs ->
-      (match resp with
-       | Error err -> handle_error err (Some ListJobsOutput.error_of_json)
-       | Ok resp -> Ok (ListJobsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListJobsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListJobsOutput.error_of_json))
   | ListMultipartUploads ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMultipartUploadsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListMultipartUploadsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMultipartUploadsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListMultipartUploadsOutput.error_of_json))
   | ListParts ->
-      (match resp with
-       | Error err -> handle_error err (Some ListPartsOutput.error_of_json)
-       | Ok resp -> Ok (ListPartsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPartsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPartsOutput.error_of_json))
   | ListProvisionedCapacity ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListProvisionedCapacityOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListProvisionedCapacityOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProvisionedCapacityOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListProvisionedCapacityOutput.error_of_json))
   | ListTagsForVault ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForVaultOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForVaultOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForVaultOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTagsForVaultOutput.error_of_json))
   | ListVaults ->
-      (match resp with
-       | Error err -> handle_error err (Some ListVaultsOutput.error_of_json)
-       | Ok resp -> Ok (ListVaultsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVaultsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListVaultsOutput.error_of_json))
   | PurchaseProvisionedCapacity ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PurchaseProvisionedCapacityOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (PurchaseProvisionedCapacityOutput.of_header_and_body
-                (headers, ())))
-  | RemoveTagsFromVault -> Ok ()
-  | SetDataRetrievalPolicy -> Ok ()
-  | SetVaultAccessPolicy -> Ok ()
-  | SetVaultNotifications -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PurchaseProvisionedCapacityOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PurchaseProvisionedCapacityOutput.error_of_json))
+  | RemoveTagsFromVault ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetDataRetrievalPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetVaultAccessPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetVaultNotifications ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UploadArchive ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ArchiveCreationOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (ArchiveCreationOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ArchiveCreationOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some ArchiveCreationOutput.error_of_json))
   | UploadMultipartPart ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UploadMultipartPartOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UploadMultipartPartOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UploadMultipartPartOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UploadMultipartPartOutput.error_of_json))

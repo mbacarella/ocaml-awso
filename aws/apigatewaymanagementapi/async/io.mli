@@ -3,20 +3,14 @@ open Awso_apigatewaymanagementapi.Values
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteConnectionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteConnectionRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val get_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectionRequest.t ->
-        (GetConnectionResponse.t,
-          [ `AWS of GetConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetConnectionResponse.t, GetConnectionResponse.error) Result.t
           Async.Deferred.t
 val post_to_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PostToConnectionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      PostToConnectionRequest.t -> (unit, unit) Result.t Async.Deferred.t

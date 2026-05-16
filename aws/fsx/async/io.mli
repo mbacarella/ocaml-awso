@@ -5,294 +5,231 @@ val associate_file_system_aliases :
     ?cfg:Awso.Cfg.t ->
       AssociateFileSystemAliasesRequest.t ->
         (AssociateFileSystemAliasesResponse.t,
-          [ `AWS of AssociateFileSystemAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateFileSystemAliasesResponse.error) Result.t Async.Deferred.t
 val cancel_data_repository_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelDataRepositoryTaskRequest.t ->
         (CancelDataRepositoryTaskResponse.t,
-          [ `AWS of CancelDataRepositoryTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CancelDataRepositoryTaskResponse.error) Result.t Async.Deferred.t
 val copy_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyBackupRequest.t ->
-        (CopyBackupResponse.t,
-          [ `AWS of CopyBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CopyBackupResponse.t, CopyBackupResponse.error) Result.t
           Async.Deferred.t
 val create_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackupRequest.t ->
-        (CreateBackupResponse.t,
-          [ `AWS of CreateBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateBackupResponse.t, CreateBackupResponse.error) Result.t
           Async.Deferred.t
 val create_data_repository_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataRepositoryAssociationRequest.t ->
         (CreateDataRepositoryAssociationResponse.t,
-          [ `AWS of CreateDataRepositoryAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateDataRepositoryAssociationResponse.error) Result.t
           Async.Deferred.t
 val create_data_repository_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataRepositoryTaskRequest.t ->
         (CreateDataRepositoryTaskResponse.t,
-          [ `AWS of CreateDataRepositoryTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateDataRepositoryTaskResponse.error) Result.t Async.Deferred.t
 val create_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFileSystemRequest.t ->
-        (CreateFileSystemResponse.t,
-          [ `AWS of CreateFileSystemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFileSystemResponse.t, CreateFileSystemResponse.error) Result.t
           Async.Deferred.t
 val create_file_system_from_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFileSystemFromBackupRequest.t ->
         (CreateFileSystemFromBackupResponse.t,
-          [ `AWS of CreateFileSystemFromBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateFileSystemFromBackupResponse.error) Result.t Async.Deferred.t
 val create_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotRequest.t ->
-        (CreateSnapshotResponse.t,
-          [ `AWS of CreateSnapshotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSnapshotResponse.t, CreateSnapshotResponse.error) Result.t
           Async.Deferred.t
 val create_storage_virtual_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStorageVirtualMachineRequest.t ->
         (CreateStorageVirtualMachineResponse.t,
-          [ `AWS of CreateStorageVirtualMachineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateStorageVirtualMachineResponse.error) Result.t
           Async.Deferred.t
 val create_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVolumeRequest.t ->
-        (CreateVolumeResponse.t,
-          [ `AWS of CreateVolumeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateVolumeResponse.t, CreateVolumeResponse.error) Result.t
           Async.Deferred.t
 val create_volume_from_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVolumeFromBackupRequest.t ->
         (CreateVolumeFromBackupResponse.t,
-          [ `AWS of CreateVolumeFromBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateVolumeFromBackupResponse.error) Result.t Async.Deferred.t
 val delete_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackupRequest.t ->
-        (DeleteBackupResponse.t,
-          [ `AWS of DeleteBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteBackupResponse.t, DeleteBackupResponse.error) Result.t
           Async.Deferred.t
 val delete_data_repository_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDataRepositoryAssociationRequest.t ->
         (DeleteDataRepositoryAssociationResponse.t,
-          [ `AWS of DeleteDataRepositoryAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteDataRepositoryAssociationResponse.error) Result.t
           Async.Deferred.t
 val delete_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFileSystemRequest.t ->
-        (DeleteFileSystemResponse.t,
-          [ `AWS of DeleteFileSystemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFileSystemResponse.t, DeleteFileSystemResponse.error) Result.t
           Async.Deferred.t
 val delete_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSnapshotRequest.t ->
-        (DeleteSnapshotResponse.t,
-          [ `AWS of DeleteSnapshotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSnapshotResponse.t, DeleteSnapshotResponse.error) Result.t
           Async.Deferred.t
 val delete_storage_virtual_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStorageVirtualMachineRequest.t ->
         (DeleteStorageVirtualMachineResponse.t,
-          [ `AWS of DeleteStorageVirtualMachineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteStorageVirtualMachineResponse.error) Result.t
           Async.Deferred.t
 val delete_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVolumeRequest.t ->
-        (DeleteVolumeResponse.t,
-          [ `AWS of DeleteVolumeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteVolumeResponse.t, DeleteVolumeResponse.error) Result.t
           Async.Deferred.t
 val describe_backups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBackupsRequest.t ->
-        (DescribeBackupsResponse.t,
-          [ `AWS of DescribeBackupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeBackupsResponse.t, DescribeBackupsResponse.error) Result.t
           Async.Deferred.t
 val describe_data_repository_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDataRepositoryAssociationsRequest.t ->
         (DescribeDataRepositoryAssociationsResponse.t,
-          [ `AWS of DescribeDataRepositoryAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDataRepositoryAssociationsResponse.error) Result.t
           Async.Deferred.t
 val describe_data_repository_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDataRepositoryTasksRequest.t ->
         (DescribeDataRepositoryTasksResponse.t,
-          [ `AWS of DescribeDataRepositoryTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDataRepositoryTasksResponse.error) Result.t
           Async.Deferred.t
 val describe_file_system_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFileSystemAliasesRequest.t ->
         (DescribeFileSystemAliasesResponse.t,
-          [ `AWS of DescribeFileSystemAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFileSystemAliasesResponse.error) Result.t Async.Deferred.t
 val describe_file_systems :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFileSystemsRequest.t ->
-        (DescribeFileSystemsResponse.t,
-          [ `AWS of DescribeFileSystemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeFileSystemsResponse.t, DescribeFileSystemsResponse.error)
+          Result.t Async.Deferred.t
 val describe_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotsRequest.t ->
-        (DescribeSnapshotsResponse.t,
-          [ `AWS of DescribeSnapshotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSnapshotsResponse.t, DescribeSnapshotsResponse.error)
+          Result.t Async.Deferred.t
 val describe_storage_virtual_machines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStorageVirtualMachinesRequest.t ->
         (DescribeStorageVirtualMachinesResponse.t,
-          [ `AWS of DescribeStorageVirtualMachinesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeStorageVirtualMachinesResponse.error) Result.t
           Async.Deferred.t
 val describe_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVolumesRequest.t ->
-        (DescribeVolumesResponse.t,
-          [ `AWS of DescribeVolumesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVolumesResponse.t, DescribeVolumesResponse.error) Result.t
           Async.Deferred.t
 val disassociate_file_system_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateFileSystemAliasesRequest.t ->
         (DisassociateFileSystemAliasesResponse.t,
-          [ `AWS of DisassociateFileSystemAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateFileSystemAliasesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val release_file_system_nfs_v3_locks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReleaseFileSystemNfsV3LocksRequest.t ->
         (ReleaseFileSystemNfsV3LocksResponse.t,
-          [ `AWS of ReleaseFileSystemNfsV3LocksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ReleaseFileSystemNfsV3LocksResponse.error) Result.t
           Async.Deferred.t
 val restore_volume_from_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreVolumeFromSnapshotRequest.t ->
         (RestoreVolumeFromSnapshotResponse.t,
-          [ `AWS of RestoreVolumeFromSnapshotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RestoreVolumeFromSnapshotResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_data_repository_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDataRepositoryAssociationRequest.t ->
         (UpdateDataRepositoryAssociationResponse.t,
-          [ `AWS of UpdateDataRepositoryAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateDataRepositoryAssociationResponse.error) Result.t
           Async.Deferred.t
 val update_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFileSystemRequest.t ->
-        (UpdateFileSystemResponse.t,
-          [ `AWS of UpdateFileSystemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateFileSystemResponse.t, UpdateFileSystemResponse.error) Result.t
           Async.Deferred.t
 val update_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSnapshotRequest.t ->
-        (UpdateSnapshotResponse.t,
-          [ `AWS of UpdateSnapshotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSnapshotResponse.t, UpdateSnapshotResponse.error) Result.t
           Async.Deferred.t
 val update_storage_virtual_machine :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStorageVirtualMachineRequest.t ->
         (UpdateStorageVirtualMachineResponse.t,
-          [ `AWS of UpdateStorageVirtualMachineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateStorageVirtualMachineResponse.error) Result.t
           Async.Deferred.t
 val update_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVolumeRequest.t ->
-        (UpdateVolumeResponse.t,
-          [ `AWS of UpdateVolumeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateVolumeResponse.t, UpdateVolumeResponse.error) Result.t
           Async.Deferred.t

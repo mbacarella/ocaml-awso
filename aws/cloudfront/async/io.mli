@@ -3,706 +3,550 @@ open Awso_cloudfront.Values
 val associate_alias2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssociateAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AssociateAliasRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val create_cache_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCachePolicyRequest.t ->
-        (CreateCachePolicyResult.t,
-          [ `AWS of CreateCachePolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCachePolicyResult.t, CreateCachePolicyResult.error) Result.t
           Async.Deferred.t
 val create_cloud_front_origin_access_identity2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCloudFrontOriginAccessIdentityRequest.t ->
         (CreateCloudFrontOriginAccessIdentityResult.t,
-          [ `AWS of CreateCloudFrontOriginAccessIdentityResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateCloudFrontOriginAccessIdentityResult.error) Result.t
           Async.Deferred.t
 val create_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDistributionRequest.t ->
-        (CreateDistributionResult.t,
-          [ `AWS of CreateDistributionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDistributionResult.t, CreateDistributionResult.error) Result.t
           Async.Deferred.t
 val create_distribution_with_tags2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDistributionWithTagsRequest.t ->
         (CreateDistributionWithTagsResult.t,
-          [ `AWS of CreateDistributionWithTagsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateDistributionWithTagsResult.error) Result.t Async.Deferred.t
 val create_field_level_encryption_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFieldLevelEncryptionConfigRequest.t ->
         (CreateFieldLevelEncryptionConfigResult.t,
-          [ `AWS of CreateFieldLevelEncryptionConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateFieldLevelEncryptionConfigResult.error) Result.t
           Async.Deferred.t
 val create_field_level_encryption_profile2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFieldLevelEncryptionProfileRequest.t ->
         (CreateFieldLevelEncryptionProfileResult.t,
-          [ `AWS of CreateFieldLevelEncryptionProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateFieldLevelEncryptionProfileResult.error) Result.t
           Async.Deferred.t
 val create_function2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFunctionRequest.t ->
-        (CreateFunctionResult.t,
-          [ `AWS of CreateFunctionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFunctionResult.t, CreateFunctionResult.error) Result.t
           Async.Deferred.t
 val create_invalidation2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInvalidationRequest.t ->
-        (CreateInvalidationResult.t,
-          [ `AWS of CreateInvalidationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateInvalidationResult.t, CreateInvalidationResult.error) Result.t
           Async.Deferred.t
 val create_key_group2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateKeyGroupRequest.t ->
-        (CreateKeyGroupResult.t,
-          [ `AWS of CreateKeyGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateKeyGroupResult.t, CreateKeyGroupResult.error) Result.t
           Async.Deferred.t
 val create_monitoring_subscription2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMonitoringSubscriptionRequest.t ->
         (CreateMonitoringSubscriptionResult.t,
-          [ `AWS of CreateMonitoringSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateMonitoringSubscriptionResult.error) Result.t Async.Deferred.t
 val create_origin_request_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOriginRequestPolicyRequest.t ->
         (CreateOriginRequestPolicyResult.t,
-          [ `AWS of CreateOriginRequestPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateOriginRequestPolicyResult.error) Result.t Async.Deferred.t
 val create_public_key2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePublicKeyRequest.t ->
-        (CreatePublicKeyResult.t,
-          [ `AWS of CreatePublicKeyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePublicKeyResult.t, CreatePublicKeyResult.error) Result.t
           Async.Deferred.t
 val create_realtime_log_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRealtimeLogConfigRequest.t ->
         (CreateRealtimeLogConfigResult.t,
-          [ `AWS of CreateRealtimeLogConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateRealtimeLogConfigResult.error) Result.t Async.Deferred.t
 val create_response_headers_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResponseHeadersPolicyRequest.t ->
         (CreateResponseHeadersPolicyResult.t,
-          [ `AWS of CreateResponseHeadersPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateResponseHeadersPolicyResult.error) Result.t Async.Deferred.t
 val create_streaming_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamingDistributionRequest.t ->
         (CreateStreamingDistributionResult.t,
-          [ `AWS of CreateStreamingDistributionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateStreamingDistributionResult.error) Result.t Async.Deferred.t
 val create_streaming_distribution_with_tags2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamingDistributionWithTagsRequest.t ->
         (CreateStreamingDistributionWithTagsResult.t,
-          [ `AWS of CreateStreamingDistributionWithTagsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateStreamingDistributionWithTagsResult.error) Result.t
           Async.Deferred.t
 val delete_cache_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCachePolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteCachePolicyRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_cloud_front_origin_access_identity2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCloudFrontOriginAccessIdentityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDistributionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteDistributionRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_field_level_encryption_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFieldLevelEncryptionConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_field_level_encryption_profile2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFieldLevelEncryptionProfileRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_function2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFunctionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteFunctionRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_key_group2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteKeyGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteKeyGroupRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_monitoring_subscription2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMonitoringSubscriptionRequest.t ->
         (DeleteMonitoringSubscriptionResult.t,
-          [ `AWS of DeleteMonitoringSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteMonitoringSubscriptionResult.error) Result.t Async.Deferred.t
 val delete_origin_request_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOriginRequestPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_public_key2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePublicKeyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeletePublicKeyRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_realtime_log_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRealtimeLogConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_response_headers_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResponseHeadersPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_streaming_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStreamingDistributionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val describe_function2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFunctionRequest.t ->
-        (DescribeFunctionResult.t,
-          [ `AWS of DescribeFunctionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFunctionResult.t, DescribeFunctionResult.error) Result.t
           Async.Deferred.t
 val get_cache_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCachePolicyRequest.t ->
-        (GetCachePolicyResult.t,
-          [ `AWS of GetCachePolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCachePolicyResult.t, GetCachePolicyResult.error) Result.t
           Async.Deferred.t
 val get_cache_policy_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCachePolicyConfigRequest.t ->
-        (GetCachePolicyConfigResult.t,
-          [ `AWS of GetCachePolicyConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetCachePolicyConfigResult.t, GetCachePolicyConfigResult.error)
+          Result.t Async.Deferred.t
 val get_cloud_front_origin_access_identity2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCloudFrontOriginAccessIdentityRequest.t ->
         (GetCloudFrontOriginAccessIdentityResult.t,
-          [ `AWS of GetCloudFrontOriginAccessIdentityResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetCloudFrontOriginAccessIdentityResult.error) Result.t
           Async.Deferred.t
 val get_cloud_front_origin_access_identity_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCloudFrontOriginAccessIdentityConfigRequest.t ->
         (GetCloudFrontOriginAccessIdentityConfigResult.t,
-          [ `AWS of GetCloudFrontOriginAccessIdentityConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetCloudFrontOriginAccessIdentityConfigResult.error) Result.t
           Async.Deferred.t
 val get_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDistributionRequest.t ->
-        (GetDistributionResult.t,
-          [ `AWS of GetDistributionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDistributionResult.t, GetDistributionResult.error) Result.t
           Async.Deferred.t
 val get_distribution_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDistributionConfigRequest.t ->
-        (GetDistributionConfigResult.t,
-          [ `AWS of GetDistributionConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetDistributionConfigResult.t, GetDistributionConfigResult.error)
+          Result.t Async.Deferred.t
 val get_field_level_encryption2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFieldLevelEncryptionRequest.t ->
         (GetFieldLevelEncryptionResult.t,
-          [ `AWS of GetFieldLevelEncryptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetFieldLevelEncryptionResult.error) Result.t Async.Deferred.t
 val get_field_level_encryption_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFieldLevelEncryptionConfigRequest.t ->
         (GetFieldLevelEncryptionConfigResult.t,
-          [ `AWS of GetFieldLevelEncryptionConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetFieldLevelEncryptionConfigResult.error) Result.t
           Async.Deferred.t
 val get_field_level_encryption_profile2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFieldLevelEncryptionProfileRequest.t ->
         (GetFieldLevelEncryptionProfileResult.t,
-          [ `AWS of GetFieldLevelEncryptionProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetFieldLevelEncryptionProfileResult.error) Result.t
           Async.Deferred.t
 val get_field_level_encryption_profile_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFieldLevelEncryptionProfileConfigRequest.t ->
         (GetFieldLevelEncryptionProfileConfigResult.t,
-          [ `AWS of GetFieldLevelEncryptionProfileConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetFieldLevelEncryptionProfileConfigResult.error) Result.t
           Async.Deferred.t
 val get_function2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionRequest.t ->
-        (GetFunctionResult.t,
-          [ `AWS of GetFunctionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetFunctionResult.t, GetFunctionResult.error) Result.t
           Async.Deferred.t
 val get_invalidation2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInvalidationRequest.t ->
-        (GetInvalidationResult.t,
-          [ `AWS of GetInvalidationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetInvalidationResult.t, GetInvalidationResult.error) Result.t
           Async.Deferred.t
 val get_key_group2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetKeyGroupRequest.t ->
-        (GetKeyGroupResult.t,
-          [ `AWS of GetKeyGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetKeyGroupResult.t, GetKeyGroupResult.error) Result.t
           Async.Deferred.t
 val get_key_group_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetKeyGroupConfigRequest.t ->
-        (GetKeyGroupConfigResult.t,
-          [ `AWS of GetKeyGroupConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetKeyGroupConfigResult.t, GetKeyGroupConfigResult.error) Result.t
           Async.Deferred.t
 val get_monitoring_subscription2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMonitoringSubscriptionRequest.t ->
         (GetMonitoringSubscriptionResult.t,
-          [ `AWS of GetMonitoringSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetMonitoringSubscriptionResult.error) Result.t Async.Deferred.t
 val get_origin_request_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOriginRequestPolicyRequest.t ->
-        (GetOriginRequestPolicyResult.t,
-          [ `AWS of GetOriginRequestPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetOriginRequestPolicyResult.t, GetOriginRequestPolicyResult.error)
+          Result.t Async.Deferred.t
 val get_origin_request_policy_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOriginRequestPolicyConfigRequest.t ->
         (GetOriginRequestPolicyConfigResult.t,
-          [ `AWS of GetOriginRequestPolicyConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetOriginRequestPolicyConfigResult.error) Result.t Async.Deferred.t
 val get_public_key2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPublicKeyRequest.t ->
-        (GetPublicKeyResult.t,
-          [ `AWS of GetPublicKeyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPublicKeyResult.t, GetPublicKeyResult.error) Result.t
           Async.Deferred.t
 val get_public_key_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPublicKeyConfigRequest.t ->
-        (GetPublicKeyConfigResult.t,
-          [ `AWS of GetPublicKeyConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPublicKeyConfigResult.t, GetPublicKeyConfigResult.error) Result.t
           Async.Deferred.t
 val get_realtime_log_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRealtimeLogConfigRequest.t ->
-        (GetRealtimeLogConfigResult.t,
-          [ `AWS of GetRealtimeLogConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRealtimeLogConfigResult.t, GetRealtimeLogConfigResult.error)
+          Result.t Async.Deferred.t
 val get_response_headers_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResponseHeadersPolicyRequest.t ->
         (GetResponseHeadersPolicyResult.t,
-          [ `AWS of GetResponseHeadersPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetResponseHeadersPolicyResult.error) Result.t Async.Deferred.t
 val get_response_headers_policy_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResponseHeadersPolicyConfigRequest.t ->
         (GetResponseHeadersPolicyConfigResult.t,
-          [ `AWS of GetResponseHeadersPolicyConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetResponseHeadersPolicyConfigResult.error) Result.t
           Async.Deferred.t
 val get_streaming_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamingDistributionRequest.t ->
         (GetStreamingDistributionResult.t,
-          [ `AWS of GetStreamingDistributionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetStreamingDistributionResult.error) Result.t Async.Deferred.t
 val get_streaming_distribution_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamingDistributionConfigRequest.t ->
         (GetStreamingDistributionConfigResult.t,
-          [ `AWS of GetStreamingDistributionConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetStreamingDistributionConfigResult.error) Result.t
           Async.Deferred.t
 val list_cache_policies2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCachePoliciesRequest.t ->
-        (ListCachePoliciesResult.t,
-          [ `AWS of ListCachePoliciesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCachePoliciesResult.t, ListCachePoliciesResult.error) Result.t
           Async.Deferred.t
 val list_cloud_front_origin_access_identities2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCloudFrontOriginAccessIdentitiesRequest.t ->
         (ListCloudFrontOriginAccessIdentitiesResult.t,
-          [ `AWS of ListCloudFrontOriginAccessIdentitiesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListCloudFrontOriginAccessIdentitiesResult.error) Result.t
           Async.Deferred.t
 val list_conflicting_aliases2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConflictingAliasesRequest.t ->
-        (ListConflictingAliasesResult.t,
-          [ `AWS of ListConflictingAliasesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListConflictingAliasesResult.t, ListConflictingAliasesResult.error)
+          Result.t Async.Deferred.t
 val list_distributions2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsRequest.t ->
-        (ListDistributionsResult.t,
-          [ `AWS of ListDistributionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDistributionsResult.t, ListDistributionsResult.error) Result.t
           Async.Deferred.t
 val list_distributions_by_cache_policy_id2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByCachePolicyIdRequest.t ->
         (ListDistributionsByCachePolicyIdResult.t,
-          [ `AWS of ListDistributionsByCachePolicyIdResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListDistributionsByCachePolicyIdResult.error) Result.t
           Async.Deferred.t
 val list_distributions_by_key_group2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByKeyGroupRequest.t ->
         (ListDistributionsByKeyGroupResult.t,
-          [ `AWS of ListDistributionsByKeyGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListDistributionsByKeyGroupResult.error) Result.t Async.Deferred.t
 val list_distributions_by_origin_request_policy_id2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByOriginRequestPolicyIdRequest.t ->
         (ListDistributionsByOriginRequestPolicyIdResult.t,
-          [ `AWS of ListDistributionsByOriginRequestPolicyIdResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListDistributionsByOriginRequestPolicyIdResult.error) Result.t
           Async.Deferred.t
 val list_distributions_by_realtime_log_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByRealtimeLogConfigRequest.t ->
         (ListDistributionsByRealtimeLogConfigResult.t,
-          [ `AWS of ListDistributionsByRealtimeLogConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListDistributionsByRealtimeLogConfigResult.error) Result.t
           Async.Deferred.t
 val list_distributions_by_response_headers_policy_id2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByResponseHeadersPolicyIdRequest.t ->
         (ListDistributionsByResponseHeadersPolicyIdResult.t,
-          [ `AWS of ListDistributionsByResponseHeadersPolicyIdResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListDistributionsByResponseHeadersPolicyIdResult.error) Result.t
           Async.Deferred.t
 val list_distributions_by_web_a_c_l_id2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributionsByWebACLIdRequest.t ->
         (ListDistributionsByWebACLIdResult.t,
-          [ `AWS of ListDistributionsByWebACLIdResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListDistributionsByWebACLIdResult.error) Result.t Async.Deferred.t
 val list_field_level_encryption_configs2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFieldLevelEncryptionConfigsRequest.t ->
         (ListFieldLevelEncryptionConfigsResult.t,
-          [ `AWS of ListFieldLevelEncryptionConfigsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListFieldLevelEncryptionConfigsResult.error) Result.t
           Async.Deferred.t
 val list_field_level_encryption_profiles2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFieldLevelEncryptionProfilesRequest.t ->
         (ListFieldLevelEncryptionProfilesResult.t,
-          [ `AWS of ListFieldLevelEncryptionProfilesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListFieldLevelEncryptionProfilesResult.error) Result.t
           Async.Deferred.t
 val list_functions2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFunctionsRequest.t ->
-        (ListFunctionsResult.t,
-          [ `AWS of ListFunctionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListFunctionsResult.t, ListFunctionsResult.error) Result.t
           Async.Deferred.t
 val list_invalidations2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInvalidationsRequest.t ->
-        (ListInvalidationsResult.t,
-          [ `AWS of ListInvalidationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListInvalidationsResult.t, ListInvalidationsResult.error) Result.t
           Async.Deferred.t
 val list_key_groups2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKeyGroupsRequest.t ->
-        (ListKeyGroupsResult.t,
-          [ `AWS of ListKeyGroupsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListKeyGroupsResult.t, ListKeyGroupsResult.error) Result.t
           Async.Deferred.t
 val list_origin_request_policies2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOriginRequestPoliciesRequest.t ->
         (ListOriginRequestPoliciesResult.t,
-          [ `AWS of ListOriginRequestPoliciesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListOriginRequestPoliciesResult.error) Result.t Async.Deferred.t
 val list_public_keys2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPublicKeysRequest.t ->
-        (ListPublicKeysResult.t,
-          [ `AWS of ListPublicKeysResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPublicKeysResult.t, ListPublicKeysResult.error) Result.t
           Async.Deferred.t
 val list_realtime_log_configs2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRealtimeLogConfigsRequest.t ->
-        (ListRealtimeLogConfigsResult.t,
-          [ `AWS of ListRealtimeLogConfigsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRealtimeLogConfigsResult.t, ListRealtimeLogConfigsResult.error)
+          Result.t Async.Deferred.t
 val list_response_headers_policies2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResponseHeadersPoliciesRequest.t ->
         (ListResponseHeadersPoliciesResult.t,
-          [ `AWS of ListResponseHeadersPoliciesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListResponseHeadersPoliciesResult.error) Result.t Async.Deferred.t
 val list_streaming_distributions2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamingDistributionsRequest.t ->
         (ListStreamingDistributionsResult.t,
-          [ `AWS of ListStreamingDistributionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListStreamingDistributionsResult.error) Result.t Async.Deferred.t
 val list_tags_for_resource2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Async.Deferred.t
 val publish_function2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishFunctionRequest.t ->
-        (PublishFunctionResult.t,
-          [ `AWS of PublishFunctionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PublishFunctionResult.t, PublishFunctionResult.error) Result.t
           Async.Deferred.t
 val tag_resource2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val test_function2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestFunctionRequest.t ->
-        (TestFunctionResult.t,
-          [ `AWS of TestFunctionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TestFunctionResult.t, TestFunctionResult.error) Result.t
           Async.Deferred.t
 val untag_resource2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_cache_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCachePolicyRequest.t ->
-        (UpdateCachePolicyResult.t,
-          [ `AWS of UpdateCachePolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateCachePolicyResult.t, UpdateCachePolicyResult.error) Result.t
           Async.Deferred.t
 val update_cloud_front_origin_access_identity2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCloudFrontOriginAccessIdentityRequest.t ->
         (UpdateCloudFrontOriginAccessIdentityResult.t,
-          [ `AWS of UpdateCloudFrontOriginAccessIdentityResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateCloudFrontOriginAccessIdentityResult.error) Result.t
           Async.Deferred.t
 val update_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDistributionRequest.t ->
-        (UpdateDistributionResult.t,
-          [ `AWS of UpdateDistributionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateDistributionResult.t, UpdateDistributionResult.error) Result.t
           Async.Deferred.t
 val update_field_level_encryption_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFieldLevelEncryptionConfigRequest.t ->
         (UpdateFieldLevelEncryptionConfigResult.t,
-          [ `AWS of UpdateFieldLevelEncryptionConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateFieldLevelEncryptionConfigResult.error) Result.t
           Async.Deferred.t
 val update_field_level_encryption_profile2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFieldLevelEncryptionProfileRequest.t ->
         (UpdateFieldLevelEncryptionProfileResult.t,
-          [ `AWS of UpdateFieldLevelEncryptionProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateFieldLevelEncryptionProfileResult.error) Result.t
           Async.Deferred.t
 val update_function2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFunctionRequest.t ->
-        (UpdateFunctionResult.t,
-          [ `AWS of UpdateFunctionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateFunctionResult.t, UpdateFunctionResult.error) Result.t
           Async.Deferred.t
 val update_key_group2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateKeyGroupRequest.t ->
-        (UpdateKeyGroupResult.t,
-          [ `AWS of UpdateKeyGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateKeyGroupResult.t, UpdateKeyGroupResult.error) Result.t
           Async.Deferred.t
 val update_origin_request_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOriginRequestPolicyRequest.t ->
         (UpdateOriginRequestPolicyResult.t,
-          [ `AWS of UpdateOriginRequestPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateOriginRequestPolicyResult.error) Result.t Async.Deferred.t
 val update_public_key2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePublicKeyRequest.t ->
-        (UpdatePublicKeyResult.t,
-          [ `AWS of UpdatePublicKeyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdatePublicKeyResult.t, UpdatePublicKeyResult.error) Result.t
           Async.Deferred.t
 val update_realtime_log_config2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRealtimeLogConfigRequest.t ->
         (UpdateRealtimeLogConfigResult.t,
-          [ `AWS of UpdateRealtimeLogConfigResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateRealtimeLogConfigResult.error) Result.t Async.Deferred.t
 val update_response_headers_policy2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResponseHeadersPolicyRequest.t ->
         (UpdateResponseHeadersPolicyResult.t,
-          [ `AWS of UpdateResponseHeadersPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateResponseHeadersPolicyResult.error) Result.t Async.Deferred.t
 val update_streaming_distribution2020_05_31 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStreamingDistributionRequest.t ->
         (UpdateStreamingDistributionResult.t,
-          [ `AWS of UpdateStreamingDistributionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateStreamingDistributionResult.error) Result.t Async.Deferred.t

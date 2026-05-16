@@ -4,132 +4,104 @@ val associate_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateNodeRequest.t ->
-        (AssociateNodeResponse.t,
-          [ `AWS of AssociateNodeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateNodeResponse.t, AssociateNodeResponse.error) Result.t Lwt.t
 val create_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBackupRequest.t ->
-        (CreateBackupResponse.t,
-          [ `AWS of CreateBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBackupResponse.t, CreateBackupResponse.error) Result.t Lwt.t
 val create_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServerRequest.t ->
-        (CreateServerResponse.t,
-          [ `AWS of CreateServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateServerResponse.t, CreateServerResponse.error) Result.t Lwt.t
 val delete_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackupRequest.t ->
-        (DeleteBackupResponse.t,
-          [ `AWS of DeleteBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBackupResponse.t, DeleteBackupResponse.error) Result.t Lwt.t
 val delete_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServerRequest.t ->
-        (DeleteServerResponse.t,
-          [ `AWS of DeleteServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteServerResponse.t, DeleteServerResponse.error) Result.t Lwt.t
 val describe_account_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountAttributesRequest.t ->
         (DescribeAccountAttributesResponse.t,
-          [ `AWS of DescribeAccountAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAccountAttributesResponse.error) Result.t Lwt.t
 val describe_backups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBackupsRequest.t ->
-        (DescribeBackupsResponse.t,
-          [ `AWS of DescribeBackupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeBackupsResponse.t, DescribeBackupsResponse.error) Result.t
+          Lwt.t
 val describe_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventsRequest.t ->
-        (DescribeEventsResponse.t,
-          [ `AWS of DescribeEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEventsResponse.t, DescribeEventsResponse.error) Result.t
+          Lwt.t
 val describe_node_association_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNodeAssociationStatusRequest.t ->
         (DescribeNodeAssociationStatusResponse.t,
-          [ `AWS of DescribeNodeAssociationStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeNodeAssociationStatusResponse.error) Result.t Lwt.t
 val describe_servers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServersRequest.t ->
-        (DescribeServersResponse.t,
-          [ `AWS of DescribeServersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeServersResponse.t, DescribeServersResponse.error) Result.t
+          Lwt.t
 val disassociate_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateNodeRequest.t ->
-        (DisassociateNodeResponse.t,
-          [ `AWS of DisassociateNodeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateNodeResponse.t, DisassociateNodeResponse.error) Result.t
+          Lwt.t
 val export_server_engine_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportServerEngineAttributeRequest.t ->
         (ExportServerEngineAttributeResponse.t,
-          [ `AWS of ExportServerEngineAttributeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ExportServerEngineAttributeResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val restore_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreServerRequest.t ->
-        (RestoreServerResponse.t,
-          [ `AWS of RestoreServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RestoreServerResponse.t, RestoreServerResponse.error) Result.t Lwt.t
 val start_maintenance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMaintenanceRequest.t ->
-        (StartMaintenanceResponse.t,
-          [ `AWS of StartMaintenanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartMaintenanceResponse.t, StartMaintenanceResponse.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServerRequest.t ->
-        (UpdateServerResponse.t,
-          [ `AWS of UpdateServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateServerResponse.t, UpdateServerResponse.error) Result.t Lwt.t
 val update_server_engine_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServerEngineAttributesRequest.t ->
         (UpdateServerEngineAttributesResponse.t,
-          [ `AWS of UpdateServerEngineAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateServerEngineAttributesResponse.error) Result.t Lwt.t

@@ -5,474 +5,390 @@ val associate_delegate_to_resource :
     ?cfg:Awso.Cfg.t ->
       AssociateDelegateToResourceRequest.t ->
         (AssociateDelegateToResourceResponse.t,
-          [ `AWS of AssociateDelegateToResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateDelegateToResourceResponse.error) Result.t Lwt.t
 val associate_member_to_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateMemberToGroupRequest.t ->
         (AssociateMemberToGroupResponse.t,
-          [ `AWS of AssociateMemberToGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateMemberToGroupResponse.error) Result.t Lwt.t
 val cancel_mailbox_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelMailboxExportJobRequest.t ->
         (CancelMailboxExportJobResponse.t,
-          [ `AWS of CancelMailboxExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelMailboxExportJobResponse.error) Result.t Lwt.t
 val create_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAliasRequest.t ->
-        (CreateAliasResponse.t,
-          [ `AWS of CreateAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAliasResponse.t, CreateAliasResponse.error) Result.t Lwt.t
 val create_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupRequest.t ->
-        (CreateGroupResponse.t,
-          [ `AWS of CreateGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGroupResponse.t, CreateGroupResponse.error) Result.t Lwt.t
 val create_mobile_device_access_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMobileDeviceAccessRuleRequest.t ->
         (CreateMobileDeviceAccessRuleResponse.t,
-          [ `AWS of CreateMobileDeviceAccessRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateMobileDeviceAccessRuleResponse.error) Result.t Lwt.t
 val create_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOrganizationRequest.t ->
-        (CreateOrganizationResponse.t,
-          [ `AWS of CreateOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateOrganizationResponse.t, CreateOrganizationResponse.error)
+          Result.t Lwt.t
 val create_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceRequest.t ->
-        (CreateResourceResponse.t,
-          [ `AWS of CreateResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateResourceResponse.t, CreateResourceResponse.error) Result.t
+          Lwt.t
 val create_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserRequest.t ->
-        (CreateUserResponse.t,
-          [ `AWS of CreateUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUserResponse.t, CreateUserResponse.error) Result.t Lwt.t
 val delete_access_control_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAccessControlRuleRequest.t ->
         (DeleteAccessControlRuleResponse.t,
-          [ `AWS of DeleteAccessControlRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAccessControlRuleResponse.error) Result.t Lwt.t
 val delete_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAliasRequest.t ->
-        (DeleteAliasResponse.t,
-          [ `AWS of DeleteAliasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAliasResponse.t, DeleteAliasResponse.error) Result.t Lwt.t
 val delete_email_monitoring_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEmailMonitoringConfigurationRequest.t ->
         (DeleteEmailMonitoringConfigurationResponse.t,
-          [ `AWS of DeleteEmailMonitoringConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEmailMonitoringConfigurationResponse.error) Result.t Lwt.t
 val delete_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGroupRequest.t ->
-        (DeleteGroupResponse.t,
-          [ `AWS of DeleteGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteGroupResponse.t, DeleteGroupResponse.error) Result.t Lwt.t
 val delete_mailbox_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMailboxPermissionsRequest.t ->
         (DeleteMailboxPermissionsResponse.t,
-          [ `AWS of DeleteMailboxPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteMailboxPermissionsResponse.error) Result.t Lwt.t
 val delete_mobile_device_access_override :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMobileDeviceAccessOverrideRequest.t ->
         (DeleteMobileDeviceAccessOverrideResponse.t,
-          [ `AWS of DeleteMobileDeviceAccessOverrideResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteMobileDeviceAccessOverrideResponse.error) Result.t Lwt.t
 val delete_mobile_device_access_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMobileDeviceAccessRuleRequest.t ->
         (DeleteMobileDeviceAccessRuleResponse.t,
-          [ `AWS of DeleteMobileDeviceAccessRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteMobileDeviceAccessRuleResponse.error) Result.t Lwt.t
 val delete_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOrganizationRequest.t ->
-        (DeleteOrganizationResponse.t,
-          [ `AWS of DeleteOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteOrganizationResponse.t, DeleteOrganizationResponse.error)
+          Result.t Lwt.t
 val delete_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourceRequest.t ->
-        (DeleteResourceResponse.t,
-          [ `AWS of DeleteResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourceResponse.t, DeleteResourceResponse.error) Result.t
+          Lwt.t
 val delete_retention_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRetentionPolicyRequest.t ->
         (DeleteRetentionPolicyResponse.t,
-          [ `AWS of DeleteRetentionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRetentionPolicyResponse.error) Result.t Lwt.t
 val delete_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserRequest.t ->
-        (DeleteUserResponse.t,
-          [ `AWS of DeleteUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteUserResponse.t, DeleteUserResponse.error) Result.t Lwt.t
 val deregister_from_work_mail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterFromWorkMailRequest.t ->
         (DeregisterFromWorkMailResponse.t,
-          [ `AWS of DeregisterFromWorkMailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterFromWorkMailResponse.error) Result.t Lwt.t
 val deregister_mail_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterMailDomainRequest.t ->
-        (DeregisterMailDomainResponse.t,
-          [ `AWS of DeregisterMailDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeregisterMailDomainResponse.t, DeregisterMailDomainResponse.error)
+          Result.t Lwt.t
 val describe_email_monitoring_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEmailMonitoringConfigurationRequest.t ->
         (DescribeEmailMonitoringConfigurationResponse.t,
-          [ `AWS of DescribeEmailMonitoringConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEmailMonitoringConfigurationResponse.error) Result.t Lwt.t
 val describe_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGroupRequest.t ->
-        (DescribeGroupResponse.t,
-          [ `AWS of DescribeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeGroupResponse.t, DescribeGroupResponse.error) Result.t Lwt.t
 val describe_inbound_dmarc_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInboundDmarcSettingsRequest.t ->
         (DescribeInboundDmarcSettingsResponse.t,
-          [ `AWS of DescribeInboundDmarcSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInboundDmarcSettingsResponse.error) Result.t Lwt.t
 val describe_mailbox_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMailboxExportJobRequest.t ->
         (DescribeMailboxExportJobResponse.t,
-          [ `AWS of DescribeMailboxExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMailboxExportJobResponse.error) Result.t Lwt.t
 val describe_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationRequest.t ->
-        (DescribeOrganizationResponse.t,
-          [ `AWS of DescribeOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeOrganizationResponse.t, DescribeOrganizationResponse.error)
+          Result.t Lwt.t
 val describe_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResourceRequest.t ->
-        (DescribeResourceResponse.t,
-          [ `AWS of DescribeResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeResourceResponse.t, DescribeResourceResponse.error) Result.t
+          Lwt.t
 val describe_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserRequest.t ->
-        (DescribeUserResponse.t,
-          [ `AWS of DescribeUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeUserResponse.t, DescribeUserResponse.error) Result.t Lwt.t
 val disassociate_delegate_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateDelegateFromResourceRequest.t ->
         (DisassociateDelegateFromResourceResponse.t,
-          [ `AWS of DisassociateDelegateFromResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateDelegateFromResourceResponse.error) Result.t Lwt.t
 val disassociate_member_from_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateMemberFromGroupRequest.t ->
         (DisassociateMemberFromGroupResponse.t,
-          [ `AWS of DisassociateMemberFromGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateMemberFromGroupResponse.error) Result.t Lwt.t
 val get_access_control_effect :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccessControlEffectRequest.t ->
         (GetAccessControlEffectResponse.t,
-          [ `AWS of GetAccessControlEffectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAccessControlEffectResponse.error) Result.t Lwt.t
 val get_default_retention_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDefaultRetentionPolicyRequest.t ->
         (GetDefaultRetentionPolicyResponse.t,
-          [ `AWS of GetDefaultRetentionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDefaultRetentionPolicyResponse.error) Result.t Lwt.t
 val get_mail_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMailDomainRequest.t ->
-        (GetMailDomainResponse.t,
-          [ `AWS of GetMailDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMailDomainResponse.t, GetMailDomainResponse.error) Result.t Lwt.t
 val get_mailbox_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMailboxDetailsRequest.t ->
-        (GetMailboxDetailsResponse.t,
-          [ `AWS of GetMailboxDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMailboxDetailsResponse.t, GetMailboxDetailsResponse.error)
+          Result.t Lwt.t
 val get_mobile_device_access_effect :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMobileDeviceAccessEffectRequest.t ->
         (GetMobileDeviceAccessEffectResponse.t,
-          [ `AWS of GetMobileDeviceAccessEffectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMobileDeviceAccessEffectResponse.error) Result.t Lwt.t
 val get_mobile_device_access_override :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMobileDeviceAccessOverrideRequest.t ->
         (GetMobileDeviceAccessOverrideResponse.t,
-          [ `AWS of GetMobileDeviceAccessOverrideResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMobileDeviceAccessOverrideResponse.error) Result.t Lwt.t
 val list_access_control_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccessControlRulesRequest.t ->
         (ListAccessControlRulesResponse.t,
-          [ `AWS of ListAccessControlRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAccessControlRulesResponse.error) Result.t Lwt.t
 val list_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAliasesRequest.t ->
-        (ListAliasesResponse.t,
-          [ `AWS of ListAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAliasesResponse.t, ListAliasesResponse.error) Result.t Lwt.t
 val list_group_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupMembersRequest.t ->
-        (ListGroupMembersResponse.t,
-          [ `AWS of ListGroupMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGroupMembersResponse.t, ListGroupMembersResponse.error) Result.t
+          Lwt.t
 val list_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupsRequest.t ->
-        (ListGroupsResponse.t,
-          [ `AWS of ListGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGroupsResponse.t, ListGroupsResponse.error) Result.t Lwt.t
 val list_mail_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMailDomainsRequest.t ->
-        (ListMailDomainsResponse.t,
-          [ `AWS of ListMailDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMailDomainsResponse.t, ListMailDomainsResponse.error) Result.t
+          Lwt.t
 val list_mailbox_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMailboxExportJobsRequest.t ->
         (ListMailboxExportJobsResponse.t,
-          [ `AWS of ListMailboxExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMailboxExportJobsResponse.error) Result.t Lwt.t
 val list_mailbox_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMailboxPermissionsRequest.t ->
         (ListMailboxPermissionsResponse.t,
-          [ `AWS of ListMailboxPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMailboxPermissionsResponse.error) Result.t Lwt.t
 val list_mobile_device_access_overrides :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMobileDeviceAccessOverridesRequest.t ->
         (ListMobileDeviceAccessOverridesResponse.t,
-          [ `AWS of ListMobileDeviceAccessOverridesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMobileDeviceAccessOverridesResponse.error) Result.t Lwt.t
 val list_mobile_device_access_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMobileDeviceAccessRulesRequest.t ->
         (ListMobileDeviceAccessRulesResponse.t,
-          [ `AWS of ListMobileDeviceAccessRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMobileDeviceAccessRulesResponse.error) Result.t Lwt.t
 val list_organizations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOrganizationsRequest.t ->
-        (ListOrganizationsResponse.t,
-          [ `AWS of ListOrganizationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListOrganizationsResponse.t, ListOrganizationsResponse.error)
+          Result.t Lwt.t
 val list_resource_delegates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceDelegatesRequest.t ->
         (ListResourceDelegatesResponse.t,
-          [ `AWS of ListResourceDelegatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourceDelegatesResponse.error) Result.t Lwt.t
 val list_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesRequest.t ->
-        (ListResourcesResponse.t,
-          [ `AWS of ListResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourcesResponse.t, ListResourcesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsersRequest.t ->
-        (ListUsersResponse.t,
-          [ `AWS of ListUsersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUsersResponse.t, ListUsersResponse.error) Result.t Lwt.t
 val put_access_control_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAccessControlRuleRequest.t ->
-        (PutAccessControlRuleResponse.t,
-          [ `AWS of PutAccessControlRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutAccessControlRuleResponse.t, PutAccessControlRuleResponse.error)
+          Result.t Lwt.t
 val put_email_monitoring_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEmailMonitoringConfigurationRequest.t ->
         (PutEmailMonitoringConfigurationResponse.t,
-          [ `AWS of PutEmailMonitoringConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutEmailMonitoringConfigurationResponse.error) Result.t Lwt.t
 val put_inbound_dmarc_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutInboundDmarcSettingsRequest.t ->
         (PutInboundDmarcSettingsResponse.t,
-          [ `AWS of PutInboundDmarcSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutInboundDmarcSettingsResponse.error) Result.t Lwt.t
 val put_mailbox_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMailboxPermissionsRequest.t ->
         (PutMailboxPermissionsResponse.t,
-          [ `AWS of PutMailboxPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutMailboxPermissionsResponse.error) Result.t Lwt.t
 val put_mobile_device_access_override :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMobileDeviceAccessOverrideRequest.t ->
         (PutMobileDeviceAccessOverrideResponse.t,
-          [ `AWS of PutMobileDeviceAccessOverrideResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutMobileDeviceAccessOverrideResponse.error) Result.t Lwt.t
 val put_retention_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRetentionPolicyRequest.t ->
-        (PutRetentionPolicyResponse.t,
-          [ `AWS of PutRetentionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutRetentionPolicyResponse.t, PutRetentionPolicyResponse.error)
+          Result.t Lwt.t
 val register_mail_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterMailDomainRequest.t ->
-        (RegisterMailDomainResponse.t,
-          [ `AWS of RegisterMailDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterMailDomainResponse.t, RegisterMailDomainResponse.error)
+          Result.t Lwt.t
 val register_to_work_mail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterToWorkMailRequest.t ->
-        (RegisterToWorkMailResponse.t,
-          [ `AWS of RegisterToWorkMailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterToWorkMailResponse.t, RegisterToWorkMailResponse.error)
+          Result.t Lwt.t
 val reset_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetPasswordRequest.t ->
-        (ResetPasswordResponse.t,
-          [ `AWS of ResetPasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResetPasswordResponse.t, ResetPasswordResponse.error) Result.t Lwt.t
 val start_mailbox_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMailboxExportJobRequest.t ->
         (StartMailboxExportJobResponse.t,
-          [ `AWS of StartMailboxExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartMailboxExportJobResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_default_mail_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDefaultMailDomainRequest.t ->
         (UpdateDefaultMailDomainResponse.t,
-          [ `AWS of UpdateDefaultMailDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDefaultMailDomainResponse.error) Result.t Lwt.t
 val update_mailbox_quota :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMailboxQuotaRequest.t ->
-        (UpdateMailboxQuotaResponse.t,
-          [ `AWS of UpdateMailboxQuotaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateMailboxQuotaResponse.t, UpdateMailboxQuotaResponse.error)
+          Result.t Lwt.t
 val update_mobile_device_access_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMobileDeviceAccessRuleRequest.t ->
         (UpdateMobileDeviceAccessRuleResponse.t,
-          [ `AWS of UpdateMobileDeviceAccessRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateMobileDeviceAccessRuleResponse.error) Result.t Lwt.t
 val update_primary_email_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePrimaryEmailAddressRequest.t ->
         (UpdatePrimaryEmailAddressResponse.t,
-          [ `AWS of UpdatePrimaryEmailAddressResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdatePrimaryEmailAddressResponse.error) Result.t Lwt.t
 val update_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceRequest.t ->
-        (UpdateResourceResponse.t,
-          [ `AWS of UpdateResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResourceResponse.t, UpdateResourceResponse.error) Result.t
+          Lwt.t

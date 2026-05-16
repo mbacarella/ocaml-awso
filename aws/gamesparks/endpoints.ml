@@ -515,226 +515,222 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateSnapshot -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateStage -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateGame ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateGameResult.error_of_json)
-       | Ok resp -> Ok (CreateGameResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGameResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateGameResult.error_of_json))
   | CreateSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSnapshotResult.error_of_json)
-       | Ok resp -> Ok (CreateSnapshotResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSnapshotResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateSnapshotResult.error_of_json))
   | CreateStage ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateStageResult.error_of_json)
-       | Ok resp -> Ok (CreateStageResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateStageResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateStageResult.error_of_json))
   | DeleteGame ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteGameResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteGameResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteGameResult.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteGameResult.error_of_json))
   | DeleteStage ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteStageResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteStageResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteStageResult.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteStageResult.error_of_json))
   | DisconnectPlayer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisconnectPlayerResult.error_of_json)
-       | Ok resp ->
-           Ok (DisconnectPlayerResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisconnectPlayerResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DisconnectPlayerResult.error_of_json))
   | ExportSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExportSnapshotResult.error_of_json)
-       | Ok resp -> Ok (ExportSnapshotResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExportSnapshotResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExportSnapshotResult.error_of_json))
   | GetExtension ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetExtensionResult.error_of_json)
-       | Ok resp -> Ok (GetExtensionResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetExtensionResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetExtensionResult.error_of_json))
   | GetExtensionVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetExtensionVersionResult.error_of_json)
-       | Ok resp ->
-           Ok (GetExtensionVersionResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetExtensionVersionResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetExtensionVersionResult.error_of_json))
   | GetGame ->
-      (match resp with
-       | Error err -> handle_error err (Some GetGameResult.error_of_json)
-       | Ok resp -> Ok (GetGameResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetGameResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetGameResult.error_of_json))
   | GetGameConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetGameConfigurationResult.error_of_json)
-       | Ok resp ->
-           Ok (GetGameConfigurationResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetGameConfigurationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetGameConfigurationResult.error_of_json))
   | GetGeneratedCodeJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetGeneratedCodeJobResult.error_of_json)
-       | Ok resp ->
-           Ok (GetGeneratedCodeJobResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetGeneratedCodeJobResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetGeneratedCodeJobResult.error_of_json))
   | GetPlayerConnectionStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPlayerConnectionStatusResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetPlayerConnectionStatusResult.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetPlayerConnectionStatusResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPlayerConnectionStatusResult.error_of_json))
   | GetSnapshot ->
-      (match resp with
-       | Error err -> handle_error err (Some GetSnapshotResult.error_of_json)
-       | Ok resp -> Ok (GetSnapshotResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSnapshotResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSnapshotResult.error_of_json))
   | GetStage ->
-      (match resp with
-       | Error err -> handle_error err (Some GetStageResult.error_of_json)
-       | Ok resp -> Ok (GetStageResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetStageResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetStageResult.error_of_json))
   | GetStageDeployment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetStageDeploymentResult.error_of_json)
-       | Ok resp ->
-           Ok (GetStageDeploymentResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetStageDeploymentResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetStageDeploymentResult.error_of_json))
   | ImportGameConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ImportGameConfigurationResult.error_of_json)
-       | Ok resp ->
-           Ok (ImportGameConfigurationResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ImportGameConfigurationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ImportGameConfigurationResult.error_of_json))
   | ListExtensionVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListExtensionVersionsResult.error_of_json)
-       | Ok resp ->
-           Ok (ListExtensionVersionsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListExtensionVersionsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListExtensionVersionsResult.error_of_json))
   | ListExtensions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListExtensionsResult.error_of_json)
-       | Ok resp -> Ok (ListExtensionsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListExtensionsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListExtensionsResult.error_of_json))
   | ListGames ->
-      (match resp with
-       | Error err -> handle_error err (Some ListGamesResult.error_of_json)
-       | Ok resp -> Ok (ListGamesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGamesResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListGamesResult.error_of_json))
   | ListGeneratedCodeJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGeneratedCodeJobsResult.error_of_json)
-       | Ok resp ->
-           Ok (ListGeneratedCodeJobsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGeneratedCodeJobsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListGeneratedCodeJobsResult.error_of_json))
   | ListSnapshots ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSnapshotsResult.error_of_json)
-       | Ok resp -> Ok (ListSnapshotsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSnapshotsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListSnapshotsResult.error_of_json))
   | ListStageDeployments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStageDeploymentsResult.error_of_json)
-       | Ok resp ->
-           Ok (ListStageDeploymentsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStageDeploymentsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListStageDeploymentsResult.error_of_json))
   | ListStages ->
-      (match resp with
-       | Error err -> handle_error err (Some ListStagesResult.error_of_json)
-       | Ok resp -> Ok (ListStagesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStagesResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListStagesResult.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResult.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResult.error_of_json))
   | StartGeneratedCodeJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartGeneratedCodeJobResult.error_of_json)
-       | Ok resp ->
-           Ok (StartGeneratedCodeJobResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartGeneratedCodeJobResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartGeneratedCodeJobResult.error_of_json))
   | StartStageDeployment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartStageDeploymentResult.error_of_json)
-       | Ok resp ->
-           Ok (StartStageDeploymentResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartStageDeploymentResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartStageDeploymentResult.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err -> handle_error err (Some TagResourceResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResult.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResult.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResult.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResult.error_of_json))
   | UpdateGame ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateGameResult.error_of_json)
-       | Ok resp -> Ok (UpdateGameResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateGameResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateGameResult.error_of_json))
   | UpdateGameConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateGameConfigurationResult.error_of_json)
-       | Ok resp ->
-           Ok (UpdateGameConfigurationResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateGameConfigurationResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateGameConfigurationResult.error_of_json))
   | UpdateSnapshot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSnapshotResult.error_of_json)
-       | Ok resp -> Ok (UpdateSnapshotResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSnapshotResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateSnapshotResult.error_of_json))
   | UpdateStage ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateStageResult.error_of_json)
-       | Ok resp -> Ok (UpdateStageResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateStageResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateStageResult.error_of_json))

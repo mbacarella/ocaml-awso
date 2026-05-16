@@ -4,405 +4,332 @@ val compare_faces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CompareFacesRequest.t ->
-        (CompareFacesResponse.t,
-          [ `AWS of CompareFacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CompareFacesResponse.t, CompareFacesResponse.error) Result.t Lwt.t
 val create_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCollectionRequest.t ->
-        (CreateCollectionResponse.t,
-          [ `AWS of CreateCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCollectionResponse.t, CreateCollectionResponse.error) Result.t
+          Lwt.t
 val create_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetRequest.t ->
-        (CreateDatasetResponse.t,
-          [ `AWS of CreateDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t Lwt.t
 val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectRequest.t ->
-        (CreateProjectResponse.t,
-          [ `AWS of CreateProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectResponse.t, CreateProjectResponse.error) Result.t Lwt.t
 val create_project_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectVersionRequest.t ->
-        (CreateProjectVersionResponse.t,
-          [ `AWS of CreateProjectVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectVersionResponse.t, CreateProjectVersionResponse.error)
+          Result.t Lwt.t
 val create_stream_processor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamProcessorRequest.t ->
         (CreateStreamProcessorResponse.t,
-          [ `AWS of CreateStreamProcessorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateStreamProcessorResponse.error) Result.t Lwt.t
 val delete_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCollectionRequest.t ->
-        (DeleteCollectionResponse.t,
-          [ `AWS of DeleteCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCollectionResponse.t, DeleteCollectionResponse.error) Result.t
+          Lwt.t
 val delete_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDatasetRequest.t ->
-        (DeleteDatasetResponse.t,
-          [ `AWS of DeleteDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDatasetResponse.t, DeleteDatasetResponse.error) Result.t Lwt.t
 val delete_faces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFacesRequest.t ->
-        (DeleteFacesResponse.t,
-          [ `AWS of DeleteFacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFacesResponse.t, DeleteFacesResponse.error) Result.t Lwt.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectRequest.t ->
-        (DeleteProjectResponse.t,
-          [ `AWS of DeleteProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectResponse.t, DeleteProjectResponse.error) Result.t Lwt.t
 val delete_project_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectVersionRequest.t ->
-        (DeleteProjectVersionResponse.t,
-          [ `AWS of DeleteProjectVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectVersionResponse.t, DeleteProjectVersionResponse.error)
+          Result.t Lwt.t
 val delete_stream_processor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStreamProcessorRequest.t ->
         (DeleteStreamProcessorResponse.t,
-          [ `AWS of DeleteStreamProcessorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteStreamProcessorResponse.error) Result.t Lwt.t
 val describe_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCollectionRequest.t ->
-        (DescribeCollectionResponse.t,
-          [ `AWS of DescribeCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCollectionResponse.t, DescribeCollectionResponse.error)
+          Result.t Lwt.t
 val describe_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetRequest.t ->
-        (DescribeDatasetResponse.t,
-          [ `AWS of DescribeDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
+          Lwt.t
 val describe_project_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProjectVersionsRequest.t ->
         (DescribeProjectVersionsResponse.t,
-          [ `AWS of DescribeProjectVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeProjectVersionsResponse.error) Result.t Lwt.t
 val describe_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProjectsRequest.t ->
-        (DescribeProjectsResponse.t,
-          [ `AWS of DescribeProjectsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProjectsResponse.t, DescribeProjectsResponse.error) Result.t
+          Lwt.t
 val describe_stream_processor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStreamProcessorRequest.t ->
         (DescribeStreamProcessorResponse.t,
-          [ `AWS of DescribeStreamProcessorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeStreamProcessorResponse.error) Result.t Lwt.t
 val detect_custom_labels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectCustomLabelsRequest.t ->
-        (DetectCustomLabelsResponse.t,
-          [ `AWS of DetectCustomLabelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectCustomLabelsResponse.t, DetectCustomLabelsResponse.error)
+          Result.t Lwt.t
 val detect_faces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectFacesRequest.t ->
-        (DetectFacesResponse.t,
-          [ `AWS of DetectFacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectFacesResponse.t, DetectFacesResponse.error) Result.t Lwt.t
 val detect_labels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectLabelsRequest.t ->
-        (DetectLabelsResponse.t,
-          [ `AWS of DetectLabelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectLabelsResponse.t, DetectLabelsResponse.error) Result.t Lwt.t
 val detect_moderation_labels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectModerationLabelsRequest.t ->
         (DetectModerationLabelsResponse.t,
-          [ `AWS of DetectModerationLabelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DetectModerationLabelsResponse.error) Result.t Lwt.t
 val detect_protective_equipment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectProtectiveEquipmentRequest.t ->
         (DetectProtectiveEquipmentResponse.t,
-          [ `AWS of DetectProtectiveEquipmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DetectProtectiveEquipmentResponse.error) Result.t Lwt.t
 val detect_text :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectTextRequest.t ->
-        (DetectTextResponse.t,
-          [ `AWS of DetectTextResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectTextResponse.t, DetectTextResponse.error) Result.t Lwt.t
 val distribute_dataset_entries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DistributeDatasetEntriesRequest.t ->
         (DistributeDatasetEntriesResponse.t,
-          [ `AWS of DistributeDatasetEntriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DistributeDatasetEntriesResponse.error) Result.t Lwt.t
 val get_celebrity_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCelebrityInfoRequest.t ->
-        (GetCelebrityInfoResponse.t,
-          [ `AWS of GetCelebrityInfoResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCelebrityInfoResponse.t, GetCelebrityInfoResponse.error) Result.t
+          Lwt.t
 val get_celebrity_recognition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCelebrityRecognitionRequest.t ->
         (GetCelebrityRecognitionResponse.t,
-          [ `AWS of GetCelebrityRecognitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCelebrityRecognitionResponse.error) Result.t Lwt.t
 val get_content_moderation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContentModerationRequest.t ->
-        (GetContentModerationResponse.t,
-          [ `AWS of GetContentModerationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContentModerationResponse.t, GetContentModerationResponse.error)
+          Result.t Lwt.t
 val get_face_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFaceDetectionRequest.t ->
-        (GetFaceDetectionResponse.t,
-          [ `AWS of GetFaceDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFaceDetectionResponse.t, GetFaceDetectionResponse.error) Result.t
+          Lwt.t
 val get_face_search :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFaceSearchRequest.t ->
-        (GetFaceSearchResponse.t,
-          [ `AWS of GetFaceSearchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFaceSearchResponse.t, GetFaceSearchResponse.error) Result.t Lwt.t
 val get_label_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLabelDetectionRequest.t ->
-        (GetLabelDetectionResponse.t,
-          [ `AWS of GetLabelDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLabelDetectionResponse.t, GetLabelDetectionResponse.error)
+          Result.t Lwt.t
 val get_person_tracking :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPersonTrackingRequest.t ->
-        (GetPersonTrackingResponse.t,
-          [ `AWS of GetPersonTrackingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPersonTrackingResponse.t, GetPersonTrackingResponse.error)
+          Result.t Lwt.t
 val get_segment_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSegmentDetectionRequest.t ->
-        (GetSegmentDetectionResponse.t,
-          [ `AWS of GetSegmentDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSegmentDetectionResponse.t, GetSegmentDetectionResponse.error)
+          Result.t Lwt.t
 val get_text_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTextDetectionRequest.t ->
-        (GetTextDetectionResponse.t,
-          [ `AWS of GetTextDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTextDetectionResponse.t, GetTextDetectionResponse.error) Result.t
+          Lwt.t
 val index_faces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       IndexFacesRequest.t ->
-        (IndexFacesResponse.t,
-          [ `AWS of IndexFacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (IndexFacesResponse.t, IndexFacesResponse.error) Result.t Lwt.t
 val list_collections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCollectionsRequest.t ->
-        (ListCollectionsResponse.t,
-          [ `AWS of ListCollectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCollectionsResponse.t, ListCollectionsResponse.error) Result.t
+          Lwt.t
 val list_dataset_entries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetEntriesRequest.t ->
-        (ListDatasetEntriesResponse.t,
-          [ `AWS of ListDatasetEntriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetEntriesResponse.t, ListDatasetEntriesResponse.error)
+          Result.t Lwt.t
 val list_dataset_labels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetLabelsRequest.t ->
-        (ListDatasetLabelsResponse.t,
-          [ `AWS of ListDatasetLabelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetLabelsResponse.t, ListDatasetLabelsResponse.error)
+          Result.t Lwt.t
 val list_faces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFacesRequest.t ->
-        (ListFacesResponse.t,
-          [ `AWS of ListFacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFacesResponse.t, ListFacesResponse.error) Result.t Lwt.t
 val list_stream_processors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamProcessorsRequest.t ->
-        (ListStreamProcessorsResponse.t,
-          [ `AWS of ListStreamProcessorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStreamProcessorsResponse.t, ListStreamProcessorsResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val recognize_celebrities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RecognizeCelebritiesRequest.t ->
-        (RecognizeCelebritiesResponse.t,
-          [ `AWS of RecognizeCelebritiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RecognizeCelebritiesResponse.t, RecognizeCelebritiesResponse.error)
+          Result.t Lwt.t
 val search_faces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchFacesRequest.t ->
-        (SearchFacesResponse.t,
-          [ `AWS of SearchFacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchFacesResponse.t, SearchFacesResponse.error) Result.t Lwt.t
 val search_faces_by_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchFacesByImageRequest.t ->
-        (SearchFacesByImageResponse.t,
-          [ `AWS of SearchFacesByImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchFacesByImageResponse.t, SearchFacesByImageResponse.error)
+          Result.t Lwt.t
 val start_celebrity_recognition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartCelebrityRecognitionRequest.t ->
         (StartCelebrityRecognitionResponse.t,
-          [ `AWS of StartCelebrityRecognitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartCelebrityRecognitionResponse.error) Result.t Lwt.t
 val start_content_moderation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartContentModerationRequest.t ->
         (StartContentModerationResponse.t,
-          [ `AWS of StartContentModerationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartContentModerationResponse.error) Result.t Lwt.t
 val start_face_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFaceDetectionRequest.t ->
-        (StartFaceDetectionResponse.t,
-          [ `AWS of StartFaceDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartFaceDetectionResponse.t, StartFaceDetectionResponse.error)
+          Result.t Lwt.t
 val start_face_search :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFaceSearchRequest.t ->
-        (StartFaceSearchResponse.t,
-          [ `AWS of StartFaceSearchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartFaceSearchResponse.t, StartFaceSearchResponse.error) Result.t
+          Lwt.t
 val start_label_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartLabelDetectionRequest.t ->
-        (StartLabelDetectionResponse.t,
-          [ `AWS of StartLabelDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartLabelDetectionResponse.t, StartLabelDetectionResponse.error)
+          Result.t Lwt.t
 val start_person_tracking :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartPersonTrackingRequest.t ->
-        (StartPersonTrackingResponse.t,
-          [ `AWS of StartPersonTrackingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartPersonTrackingResponse.t, StartPersonTrackingResponse.error)
+          Result.t Lwt.t
 val start_project_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartProjectVersionRequest.t ->
-        (StartProjectVersionResponse.t,
-          [ `AWS of StartProjectVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartProjectVersionResponse.t, StartProjectVersionResponse.error)
+          Result.t Lwt.t
 val start_segment_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSegmentDetectionRequest.t ->
         (StartSegmentDetectionResponse.t,
-          [ `AWS of StartSegmentDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartSegmentDetectionResponse.error) Result.t Lwt.t
 val start_stream_processor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartStreamProcessorRequest.t ->
-        (StartStreamProcessorResponse.t,
-          [ `AWS of StartStreamProcessorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartStreamProcessorResponse.t, StartStreamProcessorResponse.error)
+          Result.t Lwt.t
 val start_text_detection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTextDetectionRequest.t ->
-        (StartTextDetectionResponse.t,
-          [ `AWS of StartTextDetectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartTextDetectionResponse.t, StartTextDetectionResponse.error)
+          Result.t Lwt.t
 val stop_project_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopProjectVersionRequest.t ->
-        (StopProjectVersionResponse.t,
-          [ `AWS of StopProjectVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopProjectVersionResponse.t, StopProjectVersionResponse.error)
+          Result.t Lwt.t
 val stop_stream_processor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopStreamProcessorRequest.t ->
-        (StopStreamProcessorResponse.t,
-          [ `AWS of StopStreamProcessorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopStreamProcessorResponse.t, StopStreamProcessorResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_dataset_entries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDatasetEntriesRequest.t ->
-        (UpdateDatasetEntriesResponse.t,
-          [ `AWS of UpdateDatasetEntriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDatasetEntriesResponse.t, UpdateDatasetEntriesResponse.error)
+          Result.t Lwt.t

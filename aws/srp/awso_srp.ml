@@ -298,10 +298,10 @@ let ephemeral_a ?bits ?(g = default_g) ?small_a ?(modulo = default_modulo) () =
   let k =
     hex_hash
       (`Encoded_hex
-        (sprintf
-           "00%s%s"
-           (unwrap_encoded_hex (hex_of_bignum modulo))
-           (unwrap_encoded_hex (hex_of_bignum g))))
+          (sprintf
+             "00%s%s"
+             (unwrap_encoded_hex (hex_of_bignum modulo))
+             (unwrap_encoded_hex (hex_of_bignum g))))
     |> bignum_of_hex
   in
   let small_a =
@@ -401,17 +401,17 @@ let%expect_test "calculate_s" =
 ;;
 
 let get_password_authentication_key
-  ?modulo
-  ?g
-  ~username
-  ~password
-  ~user_pool_id
-  ~salt_hex
-  ~small_a
-  ~k
-  ~a_hex
-  ~b_hex
-  ()
+      ?modulo
+      ?g
+      ~username
+      ~password
+      ~user_pool_id
+      ~salt_hex
+      ~small_a
+      ~k
+      ~a_hex
+      ~b_hex
+      ()
   =
   let u_value = calculate_u ~a_hex ~b_hex in
   let x_value = calculate_x ~username ~password ~user_pool_id ~salt_hex in
@@ -445,19 +445,19 @@ let%expect_test "get_password_authentication_key" =
 ;;
 
 let signature
-  ?modulo
-  ?g
-  ~salt_hex
-  ~secret_block_base64
-  ~a_hex
-  ~b_hex
-  ~small_a
-  ~username
-  ~user_pool_id
-  ~k
-  ~password
-  ~timestamp
-  ()
+      ?modulo
+      ?g
+      ~salt_hex
+      ~secret_block_base64
+      ~a_hex
+      ~b_hex
+      ~small_a
+      ~username
+      ~user_pool_id
+      ~k
+      ~password
+      ~timestamp
+      ()
   =
   let a_hex = pad_hex a_hex in
   let b_hex = pad_hex b_hex in

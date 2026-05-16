@@ -932,371 +932,359 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateRegionSettings -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateReportPlan -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateBackupPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackupPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackupPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackupPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBackupPlanOutput.error_of_json))
   | CreateBackupSelection ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackupSelectionOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackupSelectionOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackupSelectionOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateBackupSelectionOutput.error_of_json))
   | CreateBackupVault ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBackupVaultOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateBackupVaultOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBackupVaultOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBackupVaultOutput.error_of_json))
   | CreateFramework ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFrameworkOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateFrameworkOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFrameworkOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateFrameworkOutput.error_of_json))
   | CreateReportPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateReportPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateReportPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateReportPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateReportPlanOutput.error_of_json))
   | DeleteBackupPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteBackupPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteBackupPlanOutput.of_json (response_to_json resp)))
-  | DeleteBackupSelection -> Ok ()
-  | DeleteBackupVault -> Ok ()
-  | DeleteBackupVaultAccessPolicy -> Ok ()
-  | DeleteBackupVaultLockConfiguration -> Ok ()
-  | DeleteBackupVaultNotifications -> Ok ()
-  | DeleteFramework -> Ok ()
-  | DeleteRecoveryPoint -> Ok ()
-  | DeleteReportPlan -> Ok ()
+      if is_success
+      then Ok (DeleteBackupPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteBackupPlanOutput.error_of_json))
+  | DeleteBackupSelection ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBackupVault ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBackupVaultAccessPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBackupVaultLockConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBackupVaultNotifications ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFramework ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRecoveryPoint ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteReportPlan ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeBackupJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeBackupJobOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeBackupJobOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeBackupJobOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeBackupJobOutput.error_of_json))
   | DescribeBackupVault ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeBackupVaultOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeBackupVaultOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeBackupVaultOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeBackupVaultOutput.error_of_json))
   | DescribeCopyJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeCopyJobOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeCopyJobOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeCopyJobOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeCopyJobOutput.error_of_json))
   | DescribeFramework ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeFrameworkOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeFrameworkOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeFrameworkOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeFrameworkOutput.error_of_json))
   | DescribeGlobalSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeGlobalSettingsOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeGlobalSettingsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeGlobalSettingsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeGlobalSettingsOutput.error_of_json))
   | DescribeProtectedResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeProtectedResourceOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeProtectedResourceOutput.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeProtectedResourceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeProtectedResourceOutput.error_of_json))
   | DescribeRecoveryPoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRecoveryPointOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRecoveryPointOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRecoveryPointOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeRecoveryPointOutput.error_of_json))
   | DescribeRegionSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRegionSettingsOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRegionSettingsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRegionSettingsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeRegionSettingsOutput.error_of_json))
   | DescribeReportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeReportJobOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeReportJobOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeReportJobOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeReportJobOutput.error_of_json))
   | DescribeReportPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeReportPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeReportPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeReportPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeReportPlanOutput.error_of_json))
   | DescribeRestoreJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRestoreJobOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRestoreJobOutput.of_json (response_to_json resp)))
-  | DisassociateRecoveryPoint -> Ok ()
+      if is_success
+      then Ok (DescribeRestoreJobOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeRestoreJobOutput.error_of_json))
+  | DisassociateRecoveryPoint ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ExportBackupPlanTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ExportBackupPlanTemplateOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ExportBackupPlanTemplateOutput.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ExportBackupPlanTemplateOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ExportBackupPlanTemplateOutput.error_of_json))
   | GetBackupPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackupPlanOutput.error_of_json)
-       | Ok resp -> Ok (GetBackupPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackupPlanOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBackupPlanOutput.error_of_json))
   | GetBackupPlanFromJSON ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackupPlanFromJSONOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetBackupPlanFromJSONOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackupPlanFromJSONOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBackupPlanFromJSONOutput.error_of_json))
   | GetBackupPlanFromTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetBackupPlanFromTemplateOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetBackupPlanFromTemplateOutput.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetBackupPlanFromTemplateOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetBackupPlanFromTemplateOutput.error_of_json))
   | GetBackupSelection ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBackupSelectionOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetBackupSelectionOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBackupSelectionOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetBackupSelectionOutput.error_of_json))
   | GetBackupVaultAccessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetBackupVaultAccessPolicyOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetBackupVaultAccessPolicyOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetBackupVaultAccessPolicyOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetBackupVaultAccessPolicyOutput.error_of_json))
   | GetBackupVaultNotifications ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetBackupVaultNotificationsOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetBackupVaultNotificationsOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetBackupVaultNotificationsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetBackupVaultNotificationsOutput.error_of_json))
   | GetRecoveryPointRestoreMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRecoveryPointRestoreMetadataOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetRecoveryPointRestoreMetadataOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetRecoveryPointRestoreMetadataOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRecoveryPointRestoreMetadataOutput.error_of_json))
   | GetSupportedResourceTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSupportedResourceTypesOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetSupportedResourceTypesOutput.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetSupportedResourceTypesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSupportedResourceTypesOutput.error_of_json))
   | ListBackupJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBackupJobsOutput.error_of_json)
-       | Ok resp -> Ok (ListBackupJobsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackupJobsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListBackupJobsOutput.error_of_json))
   | ListBackupPlanTemplates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListBackupPlanTemplatesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListBackupPlanTemplatesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackupPlanTemplatesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBackupPlanTemplatesOutput.error_of_json))
   | ListBackupPlanVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBackupPlanVersionsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListBackupPlanVersionsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackupPlanVersionsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBackupPlanVersionsOutput.error_of_json))
   | ListBackupPlans ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBackupPlansOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListBackupPlansOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackupPlansOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListBackupPlansOutput.error_of_json))
   | ListBackupSelections ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBackupSelectionsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListBackupSelectionsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackupSelectionsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBackupSelectionsOutput.error_of_json))
   | ListBackupVaults ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBackupVaultsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListBackupVaultsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBackupVaultsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListBackupVaultsOutput.error_of_json))
   | ListCopyJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCopyJobsOutput.error_of_json)
-       | Ok resp -> Ok (ListCopyJobsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCopyJobsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListCopyJobsOutput.error_of_json))
   | ListFrameworks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFrameworksOutput.error_of_json)
-       | Ok resp -> Ok (ListFrameworksOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFrameworksOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFrameworksOutput.error_of_json))
   | ListProtectedResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListProtectedResourcesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListProtectedResourcesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProtectedResourcesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListProtectedResourcesOutput.error_of_json))
   | ListRecoveryPointsByBackupVault ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListRecoveryPointsByBackupVaultOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListRecoveryPointsByBackupVaultOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListRecoveryPointsByBackupVaultOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecoveryPointsByBackupVaultOutput.error_of_json))
   | ListRecoveryPointsByResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListRecoveryPointsByResourceOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListRecoveryPointsByResourceOutput.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListRecoveryPointsByResourceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecoveryPointsByResourceOutput.error_of_json))
   | ListReportJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListReportJobsOutput.error_of_json)
-       | Ok resp -> Ok (ListReportJobsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListReportJobsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListReportJobsOutput.error_of_json))
   | ListReportPlans ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListReportPlansOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListReportPlansOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListReportPlansOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListReportPlansOutput.error_of_json))
   | ListRestoreJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRestoreJobsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListRestoreJobsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRestoreJobsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRestoreJobsOutput.error_of_json))
   | ListTags ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTagsOutput.error_of_json)
-       | Ok resp -> Ok (ListTagsOutput.of_json (response_to_json resp)))
-  | PutBackupVaultAccessPolicy -> Ok ()
-  | PutBackupVaultLockConfiguration -> Ok ()
-  | PutBackupVaultNotifications -> Ok ()
+      if is_success
+      then Ok (ListTagsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTagsOutput.error_of_json))
+  | PutBackupVaultAccessPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBackupVaultLockConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBackupVaultNotifications ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | StartBackupJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartBackupJobOutput.error_of_json)
-       | Ok resp -> Ok (StartBackupJobOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartBackupJobOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartBackupJobOutput.error_of_json))
   | StartCopyJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartCopyJobOutput.error_of_json)
-       | Ok resp -> Ok (StartCopyJobOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartCopyJobOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartCopyJobOutput.error_of_json))
   | StartReportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartReportJobOutput.error_of_json)
-       | Ok resp -> Ok (StartReportJobOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartReportJobOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartReportJobOutput.error_of_json))
   | StartRestoreJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartRestoreJobOutput.error_of_json)
-       | Ok resp ->
-           Ok (StartRestoreJobOutput.of_json (response_to_json resp)))
-  | StopBackupJob -> Ok ()
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then Ok (StartRestoreJobOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartRestoreJobOutput.error_of_json))
+  | StopBackupJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateBackupPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateBackupPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBackupPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBackupPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateBackupPlanOutput.error_of_json))
   | UpdateFramework ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateFrameworkOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateFrameworkOutput.of_json (response_to_json resp)))
-  | UpdateGlobalSettings -> Ok ()
+      if is_success
+      then Ok (UpdateFrameworkOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateFrameworkOutput.error_of_json))
+  | UpdateGlobalSettings ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateRecoveryPointLifecycle ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateRecoveryPointLifecycleOutput.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateRecoveryPointLifecycleOutput.of_json
-                (response_to_json resp)))
-  | UpdateRegionSettings -> Ok ()
+      if is_success
+      then
+        Ok
+          (UpdateRecoveryPointLifecycleOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRecoveryPointLifecycleOutput.error_of_json))
+  | UpdateRegionSettings ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateReportPlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateReportPlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateReportPlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateReportPlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateReportPlanOutput.error_of_json))

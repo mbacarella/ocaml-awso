@@ -8,8 +8,7 @@ let cognito_list_user_pools' cfg ?max_results () =
   Util.list_user_pools cfg ?max_results ()
   >>= fun l ->
   let s =
-    Util.user_pools_to_string
-      (Option.value ~default:[] l.ListUserPoolsResponse.userPools)
+    Util.user_pools_to_string (Option.value ~default:[] l.ListUserPoolsResponse.userPools)
   in
   Writer.write (force Writer.stdout) s;
   return ()

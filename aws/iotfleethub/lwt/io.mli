@@ -4,55 +4,45 @@ val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResponse.t,
-          [ `AWS of CreateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t Lwt.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationRequest.t ->
-        (DeleteApplicationResponse.t,
-          [ `AWS of DeleteApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteApplicationResponse.t, DeleteApplicationResponse.error)
+          Result.t Lwt.t
 val describe_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationRequest.t ->
-        (DescribeApplicationResponse.t,
-          [ `AWS of DescribeApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeApplicationResponse.t, DescribeApplicationResponse.error)
+          Result.t Lwt.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationsRequest.t ->
-        (ListApplicationsResponse.t,
-          [ `AWS of ListApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListApplicationsResponse.t, ListApplicationsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationRequest.t ->
-        (UpdateApplicationResponse.t,
-          [ `AWS of UpdateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateApplicationResponse.t, UpdateApplicationResponse.error)
+          Result.t Lwt.t

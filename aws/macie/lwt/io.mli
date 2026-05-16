@@ -3,47 +3,37 @@ open Awso_macie.Values
 val associate_member_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssociateMemberAccountRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AssociateMemberAccountRequest.t -> (unit, unit) Result.t Lwt.t
 val associate_s3_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateS3ResourcesRequest.t ->
-        (AssociateS3ResourcesResult.t,
-          [ `AWS of AssociateS3ResourcesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateS3ResourcesResult.t, AssociateS3ResourcesResult.error)
+          Result.t Lwt.t
 val disassociate_member_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisassociateMemberAccountRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisassociateMemberAccountRequest.t -> (unit, unit) Result.t Lwt.t
 val disassociate_s3_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateS3ResourcesRequest.t ->
         (DisassociateS3ResourcesResult.t,
-          [ `AWS of DisassociateS3ResourcesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateS3ResourcesResult.error) Result.t Lwt.t
 val list_member_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMemberAccountsRequest.t ->
-        (ListMemberAccountsResult.t,
-          [ `AWS of ListMemberAccountsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMemberAccountsResult.t, ListMemberAccountsResult.error) Result.t
+          Lwt.t
 val list_s3_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListS3ResourcesRequest.t ->
-        (ListS3ResourcesResult.t,
-          [ `AWS of ListS3ResourcesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListS3ResourcesResult.t, ListS3ResourcesResult.error) Result.t Lwt.t
 val update_s3_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateS3ResourcesRequest.t ->
-        (UpdateS3ResourcesResult.t,
-          [ `AWS of UpdateS3ResourcesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateS3ResourcesResult.t, UpdateS3ResourcesResult.error) Result.t
+          Lwt.t

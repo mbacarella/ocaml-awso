@@ -377,197 +377,197 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateRoutingControl -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSafetyRule -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateClusterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateClusterResponse.error_of_json))
   | CreateControlPanel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateControlPanelResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateControlPanelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateControlPanelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateControlPanelResponse.error_of_json))
   | CreateRoutingControl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRoutingControlResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateRoutingControlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRoutingControlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRoutingControlResponse.error_of_json))
   | CreateSafetyRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSafetyRuleResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateSafetyRuleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSafetyRuleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateSafetyRuleResponse.error_of_json))
   | DeleteCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteClusterResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteClusterResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteClusterResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
   | DeleteControlPanel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteControlPanelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteControlPanelResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteControlPanelResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteControlPanelResponse.error_of_json))
   | DeleteRoutingControl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRoutingControlResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteRoutingControlResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteRoutingControlResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteRoutingControlResponse.error_of_json))
   | DeleteSafetyRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSafetyRuleResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteSafetyRuleResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteSafetyRuleResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteSafetyRuleResponse.error_of_json))
   | DescribeCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeClusterResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeClusterResponse.error_of_json))
   | DescribeControlPanel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeControlPanelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeControlPanelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeControlPanelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeControlPanelResponse.error_of_json))
   | DescribeRoutingControl ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRoutingControlResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeRoutingControlResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeRoutingControlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRoutingControlResponse.error_of_json))
   | DescribeSafetyRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSafetyRuleResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeSafetyRuleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeSafetyRuleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeSafetyRuleResponse.error_of_json))
   | ListAssociatedRoute53HealthChecks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAssociatedRoute53HealthChecksResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAssociatedRoute53HealthChecksResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAssociatedRoute53HealthChecksResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssociatedRoute53HealthChecksResponse.error_of_json))
   | ListClusters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListClustersResponse.error_of_json)
-       | Ok resp -> Ok (ListClustersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListClustersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListClustersResponse.error_of_json))
   | ListControlPanels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListControlPanelsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListControlPanelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListControlPanelsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListControlPanelsResponse.error_of_json))
   | ListRoutingControls ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRoutingControlsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListRoutingControlsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRoutingControlsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRoutingControlsResponse.error_of_json))
   | ListSafetyRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSafetyRulesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSafetyRulesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSafetyRulesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListSafetyRulesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateControlPanel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateControlPanelResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateControlPanelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateControlPanelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateControlPanelResponse.error_of_json))
   | UpdateRoutingControl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRoutingControlResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRoutingControlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRoutingControlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRoutingControlResponse.error_of_json))
   | UpdateSafetyRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSafetyRuleResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateSafetyRuleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSafetyRuleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateSafetyRuleResponse.error_of_json))

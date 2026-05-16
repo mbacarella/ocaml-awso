@@ -4,118 +4,91 @@ val cancel_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobRequest.t ->
-        (CancelJobResponse.t,
-          [ `AWS of CancelJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelJobResponse.t, CancelJobResponse.error) Result.t Lwt.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobRequest.t ->
-        (CreateJobResponse.t,
-          [ `AWS of CreateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateJobResponse.t, CreateJobResponse.error) Result.t Lwt.t
 val create_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePipelineRequest.t ->
-        (CreatePipelineResponse.t,
-          [ `AWS of CreatePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePipelineResponse.t, CreatePipelineResponse.error) Result.t
+          Lwt.t
 val create_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePresetRequest.t ->
-        (CreatePresetResponse.t,
-          [ `AWS of CreatePresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePresetResponse.t, CreatePresetResponse.error) Result.t Lwt.t
 val delete_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePipelineRequest.t ->
-        (DeletePipelineResponse.t,
-          [ `AWS of DeletePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePipelineResponse.t, DeletePipelineResponse.error) Result.t
+          Lwt.t
 val delete_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePresetRequest.t ->
-        (DeletePresetResponse.t,
-          [ `AWS of DeletePresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePresetResponse.t, DeletePresetResponse.error) Result.t Lwt.t
 val list_jobs_by_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsByPipelineRequest.t ->
-        (ListJobsByPipelineResponse.t,
-          [ `AWS of ListJobsByPipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsByPipelineResponse.t, ListJobsByPipelineResponse.error)
+          Result.t Lwt.t
 val list_jobs_by_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsByStatusRequest.t ->
-        (ListJobsByStatusResponse.t,
-          [ `AWS of ListJobsByStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsByStatusResponse.t, ListJobsByStatusResponse.error) Result.t
+          Lwt.t
 val list_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPipelinesRequest.t ->
-        (ListPipelinesResponse.t,
-          [ `AWS of ListPipelinesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPipelinesResponse.t, ListPipelinesResponse.error) Result.t Lwt.t
 val list_presets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPresetsRequest.t ->
-        (ListPresetsResponse.t,
-          [ `AWS of ListPresetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPresetsResponse.t, ListPresetsResponse.error) Result.t Lwt.t
 val read_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReadJobRequest.t ->
-        (ReadJobResponse.t,
-          [ `AWS of ReadJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReadJobResponse.t, ReadJobResponse.error) Result.t Lwt.t
 val read_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReadPipelineRequest.t ->
-        (ReadPipelineResponse.t,
-          [ `AWS of ReadPipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReadPipelineResponse.t, ReadPipelineResponse.error) Result.t Lwt.t
 val read_preset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReadPresetRequest.t ->
-        (ReadPresetResponse.t,
-          [ `AWS of ReadPresetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReadPresetResponse.t, ReadPresetResponse.error) Result.t Lwt.t
 val test_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestRoleRequest.t ->
-        (TestRoleResponse.t,
-          [ `AWS of TestRoleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TestRoleResponse.t, TestRoleResponse.error) Result.t Lwt.t
 val update_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePipelineRequest.t ->
-        (UpdatePipelineResponse.t,
-          [ `AWS of UpdatePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePipelineResponse.t, UpdatePipelineResponse.error) Result.t
+          Lwt.t
 val update_pipeline_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePipelineNotificationsRequest.t ->
         (UpdatePipelineNotificationsResponse.t,
-          [ `AWS of UpdatePipelineNotificationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdatePipelineNotificationsResponse.error) Result.t Lwt.t
 val update_pipeline_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePipelineStatusRequest.t ->
-        (UpdatePipelineStatusResponse.t,
-          [ `AWS of UpdatePipelineStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePipelineStatusResponse.t, UpdatePipelineStatusResponse.error)
+          Result.t Lwt.t

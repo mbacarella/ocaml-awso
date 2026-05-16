@@ -299,126 +299,144 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "ACMPrivateCA.UpdateCertificateAuthority")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CreateCertificateAuthority ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCertificateAuthorityResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateCertificateAuthorityResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCertificateAuthorityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCertificateAuthorityResponse.error_of_json))
   | CreateCertificateAuthorityAuditReport ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCertificateAuthorityAuditReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                CreateCertificateAuthorityAuditReportResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateCertificateAuthorityAuditReportResponse.of_json json))
-  | CreatePermission -> Ok ()
-  | DeleteCertificateAuthority -> Ok ()
-  | DeletePermission -> Ok ()
-  | DeletePolicy -> Ok ()
+                CreateCertificateAuthorityAuditReportResponse.error_of_json))
+  | CreatePermission ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCertificateAuthority ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePermission ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeCertificateAuthority ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeCertificateAuthorityResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeCertificateAuthorityResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCertificateAuthorityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCertificateAuthorityResponse.error_of_json))
   | DescribeCertificateAuthorityAuditReport ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCertificateAuthorityAuditReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeCertificateAuthorityAuditReportResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeCertificateAuthorityAuditReportResponse.of_json json))
+                DescribeCertificateAuthorityAuditReportResponse.error_of_json))
   | GetCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCertificateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetCertificateResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCertificateResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetCertificateResponse.error_of_json))
   | GetCertificateAuthorityCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCertificateAuthorityCertificateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetCertificateAuthorityCertificateResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCertificateAuthorityCertificateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCertificateAuthorityCertificateResponse.error_of_json))
   | GetCertificateAuthorityCsr ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCertificateAuthorityCsrResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetCertificateAuthorityCsrResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCertificateAuthorityCsrResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCertificateAuthorityCsrResponse.error_of_json))
   | GetPolicy ->
-      (match resp with
-       | Error err -> handle_error err (Some GetPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetPolicyResponse.of_json json))
-  | ImportCertificateAuthorityCertificate -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPolicyResponse.of_json json)
+      else Error (parse_aws_error (Some GetPolicyResponse.error_of_json))
+  | ImportCertificateAuthorityCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | IssueCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some IssueCertificateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (IssueCertificateResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (IssueCertificateResponse.of_json json)
+      else
+        Error (parse_aws_error (Some IssueCertificateResponse.error_of_json))
   | ListCertificateAuthorities ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCertificateAuthoritiesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCertificateAuthoritiesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCertificateAuthoritiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCertificateAuthoritiesResponse.error_of_json))
   | ListPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPermissionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListPermissionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPermissionsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListPermissionsResponse.error_of_json))
   | ListTags ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTagsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsResponse.of_json json))
-  | PutPolicy -> Ok ()
-  | RestoreCertificateAuthority -> Ok ()
-  | RevokeCertificate -> Ok ()
-  | TagCertificateAuthority -> Ok ()
-  | UntagCertificateAuthority -> Ok ()
-  | UpdateCertificateAuthority -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsResponse.of_json json)
+      else Error (parse_aws_error (Some ListTagsResponse.error_of_json))
+  | PutPolicy -> if is_success then Ok () else Error (parse_aws_error None)
+  | RestoreCertificateAuthority ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RevokeCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagCertificateAuthority ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagCertificateAuthority ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateCertificateAuthority ->
+      if is_success then Ok () else Error (parse_aws_error None)

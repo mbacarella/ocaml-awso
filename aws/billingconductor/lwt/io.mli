@@ -4,209 +4,179 @@ val associate_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateAccountsInput.t ->
-        (AssociateAccountsOutput.t,
-          [ `AWS of AssociateAccountsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateAccountsOutput.t, AssociateAccountsOutput.error) Result.t
+          Lwt.t
 val associate_pricing_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociatePricingRulesInput.t ->
-        (AssociatePricingRulesOutput.t,
-          [ `AWS of AssociatePricingRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociatePricingRulesOutput.t, AssociatePricingRulesOutput.error)
+          Result.t Lwt.t
 val batch_associate_resources_to_custom_line_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchAssociateResourcesToCustomLineItemInput.t ->
         (BatchAssociateResourcesToCustomLineItemOutput.t,
-          [ `AWS of BatchAssociateResourcesToCustomLineItemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchAssociateResourcesToCustomLineItemOutput.error) Result.t Lwt.t
 val batch_disassociate_resources_from_custom_line_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateResourcesFromCustomLineItemInput.t ->
         (BatchDisassociateResourcesFromCustomLineItemOutput.t,
-          [ `AWS of BatchDisassociateResourcesFromCustomLineItemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDisassociateResourcesFromCustomLineItemOutput.error) Result.t
+          Lwt.t
 val create_billing_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBillingGroupInput.t ->
-        (CreateBillingGroupOutput.t,
-          [ `AWS of CreateBillingGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBillingGroupOutput.t, CreateBillingGroupOutput.error) Result.t
+          Lwt.t
 val create_custom_line_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomLineItemInput.t ->
-        (CreateCustomLineItemOutput.t,
-          [ `AWS of CreateCustomLineItemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCustomLineItemOutput.t, CreateCustomLineItemOutput.error)
+          Result.t Lwt.t
 val create_pricing_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePricingPlanInput.t ->
-        (CreatePricingPlanOutput.t,
-          [ `AWS of CreatePricingPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePricingPlanOutput.t, CreatePricingPlanOutput.error) Result.t
+          Lwt.t
 val create_pricing_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePricingRuleInput.t ->
-        (CreatePricingRuleOutput.t,
-          [ `AWS of CreatePricingRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePricingRuleOutput.t, CreatePricingRuleOutput.error) Result.t
+          Lwt.t
 val delete_billing_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBillingGroupInput.t ->
-        (DeleteBillingGroupOutput.t,
-          [ `AWS of DeleteBillingGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBillingGroupOutput.t, DeleteBillingGroupOutput.error) Result.t
+          Lwt.t
 val delete_custom_line_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCustomLineItemInput.t ->
-        (DeleteCustomLineItemOutput.t,
-          [ `AWS of DeleteCustomLineItemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCustomLineItemOutput.t, DeleteCustomLineItemOutput.error)
+          Result.t Lwt.t
 val delete_pricing_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePricingPlanInput.t ->
-        (DeletePricingPlanOutput.t,
-          [ `AWS of DeletePricingPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePricingPlanOutput.t, DeletePricingPlanOutput.error) Result.t
+          Lwt.t
 val delete_pricing_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePricingRuleInput.t ->
-        (DeletePricingRuleOutput.t,
-          [ `AWS of DeletePricingRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePricingRuleOutput.t, DeletePricingRuleOutput.error) Result.t
+          Lwt.t
 val disassociate_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateAccountsInput.t ->
-        (DisassociateAccountsOutput.t,
-          [ `AWS of DisassociateAccountsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateAccountsOutput.t, DisassociateAccountsOutput.error)
+          Result.t Lwt.t
 val disassociate_pricing_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociatePricingRulesInput.t ->
         (DisassociatePricingRulesOutput.t,
-          [ `AWS of DisassociatePricingRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociatePricingRulesOutput.error) Result.t Lwt.t
 val list_account_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountAssociationsInput.t ->
         (ListAccountAssociationsOutput.t,
-          [ `AWS of ListAccountAssociationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAccountAssociationsOutput.error) Result.t Lwt.t
 val list_billing_group_cost_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBillingGroupCostReportsInput.t ->
         (ListBillingGroupCostReportsOutput.t,
-          [ `AWS of ListBillingGroupCostReportsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBillingGroupCostReportsOutput.error) Result.t Lwt.t
 val list_billing_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBillingGroupsInput.t ->
-        (ListBillingGroupsOutput.t,
-          [ `AWS of ListBillingGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBillingGroupsOutput.t, ListBillingGroupsOutput.error) Result.t
+          Lwt.t
 val list_custom_line_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomLineItemsInput.t ->
-        (ListCustomLineItemsOutput.t,
-          [ `AWS of ListCustomLineItemsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCustomLineItemsOutput.t, ListCustomLineItemsOutput.error)
+          Result.t Lwt.t
 val list_pricing_plans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPricingPlansInput.t ->
-        (ListPricingPlansOutput.t,
-          [ `AWS of ListPricingPlansOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPricingPlansOutput.t, ListPricingPlansOutput.error) Result.t
+          Lwt.t
 val list_pricing_plans_associated_with_pricing_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPricingPlansAssociatedWithPricingRuleInput.t ->
         (ListPricingPlansAssociatedWithPricingRuleOutput.t,
-          [ `AWS of ListPricingPlansAssociatedWithPricingRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPricingPlansAssociatedWithPricingRuleOutput.error) Result.t
+          Lwt.t
 val list_pricing_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPricingRulesInput.t ->
-        (ListPricingRulesOutput.t,
-          [ `AWS of ListPricingRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPricingRulesOutput.t, ListPricingRulesOutput.error) Result.t
+          Lwt.t
 val list_pricing_rules_associated_to_pricing_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPricingRulesAssociatedToPricingPlanInput.t ->
         (ListPricingRulesAssociatedToPricingPlanOutput.t,
-          [ `AWS of ListPricingRulesAssociatedToPricingPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPricingRulesAssociatedToPricingPlanOutput.error) Result.t Lwt.t
 val list_resources_associated_to_custom_line_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesAssociatedToCustomLineItemInput.t ->
         (ListResourcesAssociatedToCustomLineItemOutput.t,
-          [ `AWS of ListResourcesAssociatedToCustomLineItemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourcesAssociatedToCustomLineItemOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_billing_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBillingGroupInput.t ->
-        (UpdateBillingGroupOutput.t,
-          [ `AWS of UpdateBillingGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateBillingGroupOutput.t, UpdateBillingGroupOutput.error) Result.t
+          Lwt.t
 val update_custom_line_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCustomLineItemInput.t ->
-        (UpdateCustomLineItemOutput.t,
-          [ `AWS of UpdateCustomLineItemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateCustomLineItemOutput.t, UpdateCustomLineItemOutput.error)
+          Result.t Lwt.t
 val update_pricing_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePricingPlanInput.t ->
-        (UpdatePricingPlanOutput.t,
-          [ `AWS of UpdatePricingPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePricingPlanOutput.t, UpdatePricingPlanOutput.error) Result.t
+          Lwt.t
 val update_pricing_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePricingRuleInput.t ->
-        (UpdatePricingRuleOutput.t,
-          [ `AWS of UpdatePricingRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePricingRuleOutput.t, UpdatePricingRuleOutput.error) Result.t
+          Lwt.t

@@ -233,100 +233,103 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CancelTask ->
-      (match resp with
-       | Error err -> handle_error err (Some CancelTaskOutput.error_of_json)
-       | Ok resp -> Ok (CancelTaskOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CancelTaskOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CancelTaskOutput.error_of_json))
   | CreateTask ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateTaskOutput.error_of_json)
-       | Ok resp -> Ok (CreateTaskOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateTaskOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateTaskOutput.error_of_json))
   | DescribeDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDeviceOutput.error_of_json)
-       | Ok resp -> Ok (DescribeDeviceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDeviceOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeDeviceOutput.error_of_json))
   | DescribeDeviceEc2Instances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDeviceEc2Output.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDeviceEc2Output.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDeviceEc2Output.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDeviceEc2Output.error_of_json))
   | DescribeExecution ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeExecutionOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeExecutionOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeExecutionOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeExecutionOutput.error_of_json))
   | DescribeTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeTaskOutput.error_of_json)
-       | Ok resp -> Ok (DescribeTaskOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeTaskOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeTaskOutput.error_of_json))
   | ListDeviceResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDeviceResourcesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListDeviceResourcesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDeviceResourcesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDeviceResourcesOutput.error_of_json))
   | ListDevices ->
-      (match resp with
-       | Error err -> handle_error err (Some ListDevicesOutput.error_of_json)
-       | Ok resp -> Ok (ListDevicesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDevicesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDevicesOutput.error_of_json))
   | ListExecutions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListExecutionsOutput.error_of_json)
-       | Ok resp -> Ok (ListExecutionsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListExecutionsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListExecutionsOutput.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
   | ListTasks ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTasksOutput.error_of_json)
-       | Ok resp -> Ok (ListTasksOutput.of_json (response_to_json resp)))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then Ok (ListTasksOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTasksOutput.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)

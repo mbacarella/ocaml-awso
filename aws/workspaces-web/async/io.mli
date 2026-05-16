@@ -5,350 +5,265 @@ val associate_browser_settings :
     ?cfg:Awso.Cfg.t ->
       AssociateBrowserSettingsRequest.t ->
         (AssociateBrowserSettingsResponse.t,
-          [ `AWS of AssociateBrowserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateBrowserSettingsResponse.error) Result.t Async.Deferred.t
 val associate_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateNetworkSettingsRequest.t ->
         (AssociateNetworkSettingsResponse.t,
-          [ `AWS of AssociateNetworkSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateNetworkSettingsResponse.error) Result.t Async.Deferred.t
 val associate_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTrustStoreRequest.t ->
-        (AssociateTrustStoreResponse.t,
-          [ `AWS of AssociateTrustStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AssociateTrustStoreResponse.t, AssociateTrustStoreResponse.error)
+          Result.t Async.Deferred.t
 val associate_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateUserSettingsRequest.t ->
         (AssociateUserSettingsResponse.t,
-          [ `AWS of AssociateUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateUserSettingsResponse.error) Result.t Async.Deferred.t
 val create_browser_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBrowserSettingsRequest.t ->
         (CreateBrowserSettingsResponse.t,
-          [ `AWS of CreateBrowserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateBrowserSettingsResponse.error) Result.t Async.Deferred.t
 val create_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIdentityProviderRequest.t ->
         (CreateIdentityProviderResponse.t,
-          [ `AWS of CreateIdentityProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateIdentityProviderResponse.error) Result.t Async.Deferred.t
 val create_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkSettingsRequest.t ->
         (CreateNetworkSettingsResponse.t,
-          [ `AWS of CreateNetworkSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateNetworkSettingsResponse.error) Result.t Async.Deferred.t
 val create_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePortalRequest.t ->
-        (CreatePortalResponse.t,
-          [ `AWS of CreatePortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePortalResponse.t, CreatePortalResponse.error) Result.t
           Async.Deferred.t
 val create_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrustStoreRequest.t ->
-        (CreateTrustStoreResponse.t,
-          [ `AWS of CreateTrustStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTrustStoreResponse.t, CreateTrustStoreResponse.error) Result.t
           Async.Deferred.t
 val create_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserSettingsRequest.t ->
-        (CreateUserSettingsResponse.t,
-          [ `AWS of CreateUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateUserSettingsResponse.t, CreateUserSettingsResponse.error)
+          Result.t Async.Deferred.t
 val delete_browser_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBrowserSettingsRequest.t ->
         (DeleteBrowserSettingsResponse.t,
-          [ `AWS of DeleteBrowserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteBrowserSettingsResponse.error) Result.t Async.Deferred.t
 val delete_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIdentityProviderRequest.t ->
         (DeleteIdentityProviderResponse.t,
-          [ `AWS of DeleteIdentityProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteIdentityProviderResponse.error) Result.t Async.Deferred.t
 val delete_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNetworkSettingsRequest.t ->
         (DeleteNetworkSettingsResponse.t,
-          [ `AWS of DeleteNetworkSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteNetworkSettingsResponse.error) Result.t Async.Deferred.t
 val delete_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePortalRequest.t ->
-        (DeletePortalResponse.t,
-          [ `AWS of DeletePortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeletePortalResponse.t, DeletePortalResponse.error) Result.t
           Async.Deferred.t
 val delete_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrustStoreRequest.t ->
-        (DeleteTrustStoreResponse.t,
-          [ `AWS of DeleteTrustStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTrustStoreResponse.t, DeleteTrustStoreResponse.error) Result.t
           Async.Deferred.t
 val delete_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserSettingsRequest.t ->
-        (DeleteUserSettingsResponse.t,
-          [ `AWS of DeleteUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteUserSettingsResponse.t, DeleteUserSettingsResponse.error)
+          Result.t Async.Deferred.t
 val disassociate_browser_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateBrowserSettingsRequest.t ->
         (DisassociateBrowserSettingsResponse.t,
-          [ `AWS of DisassociateBrowserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateBrowserSettingsResponse.error) Result.t
           Async.Deferred.t
 val disassociate_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateNetworkSettingsRequest.t ->
         (DisassociateNetworkSettingsResponse.t,
-          [ `AWS of DisassociateNetworkSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateNetworkSettingsResponse.error) Result.t
           Async.Deferred.t
 val disassociate_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTrustStoreRequest.t ->
         (DisassociateTrustStoreResponse.t,
-          [ `AWS of DisassociateTrustStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DisassociateTrustStoreResponse.error) Result.t Async.Deferred.t
 val disassociate_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateUserSettingsRequest.t ->
         (DisassociateUserSettingsResponse.t,
-          [ `AWS of DisassociateUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DisassociateUserSettingsResponse.error) Result.t Async.Deferred.t
 val get_browser_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBrowserSettingsRequest.t ->
-        (GetBrowserSettingsResponse.t,
-          [ `AWS of GetBrowserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBrowserSettingsResponse.t, GetBrowserSettingsResponse.error)
+          Result.t Async.Deferred.t
 val get_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityProviderRequest.t ->
-        (GetIdentityProviderResponse.t,
-          [ `AWS of GetIdentityProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetIdentityProviderResponse.t, GetIdentityProviderResponse.error)
+          Result.t Async.Deferred.t
 val get_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkSettingsRequest.t ->
-        (GetNetworkSettingsResponse.t,
-          [ `AWS of GetNetworkSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetNetworkSettingsResponse.t, GetNetworkSettingsResponse.error)
+          Result.t Async.Deferred.t
 val get_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPortalRequest.t ->
-        (GetPortalResponse.t,
-          [ `AWS of GetPortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPortalResponse.t, GetPortalResponse.error) Result.t
           Async.Deferred.t
 val get_portal_service_provider_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPortalServiceProviderMetadataRequest.t ->
         (GetPortalServiceProviderMetadataResponse.t,
-          [ `AWS of GetPortalServiceProviderMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetPortalServiceProviderMetadataResponse.error) Result.t
           Async.Deferred.t
 val get_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTrustStoreRequest.t ->
-        (GetTrustStoreResponse.t,
-          [ `AWS of GetTrustStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTrustStoreResponse.t, GetTrustStoreResponse.error) Result.t
           Async.Deferred.t
 val get_trust_store_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTrustStoreCertificateRequest.t ->
         (GetTrustStoreCertificateResponse.t,
-          [ `AWS of GetTrustStoreCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetTrustStoreCertificateResponse.error) Result.t Async.Deferred.t
 val get_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserSettingsRequest.t ->
-        (GetUserSettingsResponse.t,
-          [ `AWS of GetUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetUserSettingsResponse.t, GetUserSettingsResponse.error) Result.t
           Async.Deferred.t
 val list_browser_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBrowserSettingsRequest.t ->
-        (ListBrowserSettingsResponse.t,
-          [ `AWS of ListBrowserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListBrowserSettingsResponse.t, ListBrowserSettingsResponse.error)
+          Result.t Async.Deferred.t
 val list_identity_providers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentityProvidersRequest.t ->
         (ListIdentityProvidersResponse.t,
-          [ `AWS of ListIdentityProvidersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListIdentityProvidersResponse.error) Result.t Async.Deferred.t
 val list_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNetworkSettingsRequest.t ->
-        (ListNetworkSettingsResponse.t,
-          [ `AWS of ListNetworkSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListNetworkSettingsResponse.t, ListNetworkSettingsResponse.error)
+          Result.t Async.Deferred.t
 val list_portals :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPortalsRequest.t ->
-        (ListPortalsResponse.t,
-          [ `AWS of ListPortalsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPortalsResponse.t, ListPortalsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_trust_store_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTrustStoreCertificatesRequest.t ->
         (ListTrustStoreCertificatesResponse.t,
-          [ `AWS of ListTrustStoreCertificatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListTrustStoreCertificatesResponse.error) Result.t Async.Deferred.t
 val list_trust_stores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTrustStoresRequest.t ->
-        (ListTrustStoresResponse.t,
-          [ `AWS of ListTrustStoresResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTrustStoresResponse.t, ListTrustStoresResponse.error) Result.t
           Async.Deferred.t
 val list_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUserSettingsRequest.t ->
-        (ListUserSettingsResponse.t,
-          [ `AWS of ListUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListUserSettingsResponse.t, ListUserSettingsResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_browser_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBrowserSettingsRequest.t ->
         (UpdateBrowserSettingsResponse.t,
-          [ `AWS of UpdateBrowserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateBrowserSettingsResponse.error) Result.t Async.Deferred.t
 val update_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIdentityProviderRequest.t ->
         (UpdateIdentityProviderResponse.t,
-          [ `AWS of UpdateIdentityProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateIdentityProviderResponse.error) Result.t Async.Deferred.t
 val update_network_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNetworkSettingsRequest.t ->
         (UpdateNetworkSettingsResponse.t,
-          [ `AWS of UpdateNetworkSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateNetworkSettingsResponse.error) Result.t Async.Deferred.t
 val update_portal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePortalRequest.t ->
-        (UpdatePortalResponse.t,
-          [ `AWS of UpdatePortalResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdatePortalResponse.t, UpdatePortalResponse.error) Result.t
           Async.Deferred.t
 val update_trust_store :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTrustStoreRequest.t ->
-        (UpdateTrustStoreResponse.t,
-          [ `AWS of UpdateTrustStoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateTrustStoreResponse.t, UpdateTrustStoreResponse.error) Result.t
           Async.Deferred.t
 val update_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserSettingsRequest.t ->
-        (UpdateUserSettingsResponse.t,
-          [ `AWS of UpdateUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateUserSettingsResponse.t, UpdateUserSettingsResponse.error)
+          Result.t Async.Deferred.t

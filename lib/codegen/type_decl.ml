@@ -9,18 +9,22 @@ let strip_html s =
   let s = String.substr_replace_all s ~pattern:"&#39;" ~with_:"'" in
   let s = Re.replace_string (Re.Perl.compile_pat "\\s+") ~by:" " s in
   String.strip s
+;;
 
 let doc_attribute = function
   | None | Some "" -> []
   | Some html ->
     let text = strip_html html in
-    if String.is_empty text then []
-    else
+    if String.is_empty text
+    then []
+    else (
       let loc = !Ast_helper.default_loc in
-      [{ attr_name = { txt = "ocaml.doc"; loc }
-       ; attr_payload = PStr [%str [%e Ast_convenience.str text]]
-       ; attr_loc = loc
-       }]
+      [ { attr_name = { txt = "ocaml.doc"; loc }
+        ; attr_payload = PStr [%str [%e Ast_convenience.str text]]
+        ; attr_loc = loc
+        }
+      ])
+;;
 
 let documentation_of_shape = function
   | Botodata.Boolean_shape s -> s.documentation
@@ -35,8 +39,9 @@ let documentation_of_shape = function
   | Structure_shape s -> s.documentation
   | Timestamp_shape s -> s.documentation
   | Map_shape _ -> None
+;;
 
-let type_declaration ?kind ?manifest ?priv ?(attrs=[]) n =
+let type_declaration ?kind ?manifest ?priv ?(attrs = []) n =
   Ast_helper.Type.mk
     ~attrs
     (Ast_convenience.mknoloc (Shape.uncapitalized_id n))
@@ -59,7 +64,7 @@ let error_cases (op : Botodata.operation) =
     |> List.map ~f:(fun (e : Botodata.operation_error) -> e.shape)
     |> List.dedup_and_sort ~compare:String.compare
     |> List.map ~f:(fun shape ->
-         case (Shape.capitalized_id shape) (Shape.core_type_of_shape shape))
+      case (Shape.capitalized_id shape) (Shape.core_type_of_shape shape))
   in
   (*let name = sprintf "%s_error" (Shape.uncapitalized_id op.name) in*)
   let name = "error" in
@@ -87,22 +92,16 @@ let error_to_json_of_errors (op : Botodata.operation) =
   let cases =
     List.map error_shapes ~f:(fun shape ->
       let cap = Shape.capitalized_id shape in
-      let to_json =
-        sprintf "%s.to_json" cap |> Ast_convenience.evar
-      in
+      let to_json = sprintf "%s.to_json" cap |> Ast_convenience.evar in
       Ast_helper.Exp.case
         (Ast_helper.Pat.variant cap (Some (Ast_convenience.pvar "e")))
         [%expr
           `Assoc
-            [ "error", `String [%e Ast_convenience.str cap]
-            ; "details", [%e to_json] e
-            ]])
+            [ "error", `String [%e Ast_convenience.str cap]; "details", [%e to_json] e ]])
   in
   let catch_all =
     Ast_helper.Exp.case
-      (Ast_helper.Pat.variant
-         "Unknown_operation_error"
-         (Some [%pat? code, msg]))
+      (Ast_helper.Pat.variant "Unknown_operation_error" (Some [%pat? code, msg]))
       [%expr
         `Assoc
           (("error", `String code)
@@ -164,7 +163,7 @@ let%expect_test "type_declaration_of_errors" =
     |}]
 ;;
 
-let type_alias ?priv ?(attrs=[]) manifest = type_declaration ?priv ~attrs "t" ~manifest
+let type_alias ?priv ?(attrs = []) manifest = type_declaration ?priv ~attrs "t" ~manifest
 
 (** A field typed like its name, such as [t : t]. *)
 let self_typed_field raw_name =
@@ -192,7 +191,12 @@ let type_declarations_of_shape ?result_wrapper ?priv shape =
         Ast_helper.Type.constructor (Ast_convenience.mknoloc (Shape.capitalized_id case)))
     in
     let other_case = Enum_other.type_decl ~loc in
-    [ type_declaration ?priv ~attrs:doc_attrs "t" ~kind:(Ptype_variant (cases @ [ other_case ])) ]
+    [ type_declaration
+        ?priv
+        ~attrs:doc_attrs
+        "t"
+        ~kind:(Ptype_variant (cases @ [ other_case ]))
+    ]
   | List_shape ls ->
     let elem = Shape.core_type_of_shape ls.member.shape in
     [ type_alias ?priv ~attrs:doc_attrs [%type: [%t elem] list] ]
@@ -222,7 +226,8 @@ let type_declarations_of_shape ?result_wrapper ?priv shape =
             in
             Ast_helper.Type.field
               ~attrs:(doc_attribute sm.documentation)
-              (Ast_convenience.mknoloc (Shape.uncapitalized_id fn)) ty)
+              (Ast_convenience.mknoloc (Shape.uncapitalized_id fn))
+              ty)
         in
         type_declaration ?priv type_name ~kind:(Ptype_record fields)
     in

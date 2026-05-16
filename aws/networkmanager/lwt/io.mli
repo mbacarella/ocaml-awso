@@ -4,531 +4,441 @@ val accept_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptAttachmentRequest.t ->
-        (AcceptAttachmentResponse.t,
-          [ `AWS of AcceptAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AcceptAttachmentResponse.t, AcceptAttachmentResponse.error) Result.t
+          Lwt.t
 val associate_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateConnectPeerRequest.t ->
-        (AssociateConnectPeerResponse.t,
-          [ `AWS of AssociateConnectPeerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateConnectPeerResponse.t, AssociateConnectPeerResponse.error)
+          Result.t Lwt.t
 val associate_customer_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateCustomerGatewayRequest.t ->
         (AssociateCustomerGatewayResponse.t,
-          [ `AWS of AssociateCustomerGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateCustomerGatewayResponse.error) Result.t Lwt.t
 val associate_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateLinkRequest.t ->
-        (AssociateLinkResponse.t,
-          [ `AWS of AssociateLinkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateLinkResponse.t, AssociateLinkResponse.error) Result.t Lwt.t
 val associate_transit_gateway_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTransitGatewayConnectPeerRequest.t ->
         (AssociateTransitGatewayConnectPeerResponse.t,
-          [ `AWS of AssociateTransitGatewayConnectPeerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateTransitGatewayConnectPeerResponse.error) Result.t Lwt.t
 val create_connect_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectAttachmentRequest.t ->
         (CreateConnectAttachmentResponse.t,
-          [ `AWS of CreateConnectAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateConnectAttachmentResponse.error) Result.t Lwt.t
 val create_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectPeerRequest.t ->
-        (CreateConnectPeerResponse.t,
-          [ `AWS of CreateConnectPeerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateConnectPeerResponse.t, CreateConnectPeerResponse.error)
+          Result.t Lwt.t
 val create_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectionRequest.t ->
-        (CreateConnectionResponse.t,
-          [ `AWS of CreateConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateConnectionResponse.t, CreateConnectionResponse.error) Result.t
+          Lwt.t
 val create_core_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCoreNetworkRequest.t ->
-        (CreateCoreNetworkResponse.t,
-          [ `AWS of CreateCoreNetworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCoreNetworkResponse.t, CreateCoreNetworkResponse.error)
+          Result.t Lwt.t
 val create_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeviceRequest.t ->
-        (CreateDeviceResponse.t,
-          [ `AWS of CreateDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeviceResponse.t, CreateDeviceResponse.error) Result.t Lwt.t
 val create_global_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGlobalNetworkRequest.t ->
-        (CreateGlobalNetworkResponse.t,
-          [ `AWS of CreateGlobalNetworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGlobalNetworkResponse.t, CreateGlobalNetworkResponse.error)
+          Result.t Lwt.t
 val create_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLinkRequest.t ->
-        (CreateLinkResponse.t,
-          [ `AWS of CreateLinkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLinkResponse.t, CreateLinkResponse.error) Result.t Lwt.t
 val create_site :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSiteRequest.t ->
-        (CreateSiteResponse.t,
-          [ `AWS of CreateSiteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSiteResponse.t, CreateSiteResponse.error) Result.t Lwt.t
 val create_site_to_site_vpn_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSiteToSiteVpnAttachmentRequest.t ->
         (CreateSiteToSiteVpnAttachmentResponse.t,
-          [ `AWS of CreateSiteToSiteVpnAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSiteToSiteVpnAttachmentResponse.error) Result.t Lwt.t
 val create_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcAttachmentRequest.t ->
-        (CreateVpcAttachmentResponse.t,
-          [ `AWS of CreateVpcAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVpcAttachmentResponse.t, CreateVpcAttachmentResponse.error)
+          Result.t Lwt.t
 val delete_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAttachmentRequest.t ->
-        (DeleteAttachmentResponse.t,
-          [ `AWS of DeleteAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAttachmentResponse.t, DeleteAttachmentResponse.error) Result.t
+          Lwt.t
 val delete_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectPeerRequest.t ->
-        (DeleteConnectPeerResponse.t,
-          [ `AWS of DeleteConnectPeerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteConnectPeerResponse.t, DeleteConnectPeerResponse.error)
+          Result.t Lwt.t
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectionRequest.t ->
-        (DeleteConnectionResponse.t,
-          [ `AWS of DeleteConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteConnectionResponse.t, DeleteConnectionResponse.error) Result.t
+          Lwt.t
 val delete_core_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCoreNetworkRequest.t ->
-        (DeleteCoreNetworkResponse.t,
-          [ `AWS of DeleteCoreNetworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCoreNetworkResponse.t, DeleteCoreNetworkResponse.error)
+          Result.t Lwt.t
 val delete_core_network_policy_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCoreNetworkPolicyVersionRequest.t ->
         (DeleteCoreNetworkPolicyVersionResponse.t,
-          [ `AWS of DeleteCoreNetworkPolicyVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteCoreNetworkPolicyVersionResponse.error) Result.t Lwt.t
 val delete_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDeviceRequest.t ->
-        (DeleteDeviceResponse.t,
-          [ `AWS of DeleteDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDeviceResponse.t, DeleteDeviceResponse.error) Result.t Lwt.t
 val delete_global_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGlobalNetworkRequest.t ->
-        (DeleteGlobalNetworkResponse.t,
-          [ `AWS of DeleteGlobalNetworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteGlobalNetworkResponse.t, DeleteGlobalNetworkResponse.error)
+          Result.t Lwt.t
 val delete_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLinkRequest.t ->
-        (DeleteLinkResponse.t,
-          [ `AWS of DeleteLinkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLinkResponse.t, DeleteLinkResponse.error) Result.t Lwt.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyRequest.t ->
-        (DeleteResourcePolicyResponse.t,
-          [ `AWS of DeleteResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Lwt.t
 val delete_site :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSiteRequest.t ->
-        (DeleteSiteResponse.t,
-          [ `AWS of DeleteSiteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSiteResponse.t, DeleteSiteResponse.error) Result.t Lwt.t
 val deregister_transit_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterTransitGatewayRequest.t ->
         (DeregisterTransitGatewayResponse.t,
-          [ `AWS of DeregisterTransitGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterTransitGatewayResponse.error) Result.t Lwt.t
 val describe_global_networks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGlobalNetworksRequest.t ->
         (DescribeGlobalNetworksResponse.t,
-          [ `AWS of DescribeGlobalNetworksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeGlobalNetworksResponse.error) Result.t Lwt.t
 val disassociate_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateConnectPeerRequest.t ->
         (DisassociateConnectPeerResponse.t,
-          [ `AWS of DisassociateConnectPeerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateConnectPeerResponse.error) Result.t Lwt.t
 val disassociate_customer_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateCustomerGatewayRequest.t ->
         (DisassociateCustomerGatewayResponse.t,
-          [ `AWS of DisassociateCustomerGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateCustomerGatewayResponse.error) Result.t Lwt.t
 val disassociate_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateLinkRequest.t ->
-        (DisassociateLinkResponse.t,
-          [ `AWS of DisassociateLinkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateLinkResponse.t, DisassociateLinkResponse.error) Result.t
+          Lwt.t
 val disassociate_transit_gateway_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTransitGatewayConnectPeerRequest.t ->
         (DisassociateTransitGatewayConnectPeerResponse.t,
-          [ `AWS of DisassociateTransitGatewayConnectPeerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateTransitGatewayConnectPeerResponse.error) Result.t Lwt.t
 val execute_core_network_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExecuteCoreNetworkChangeSetRequest.t ->
         (ExecuteCoreNetworkChangeSetResponse.t,
-          [ `AWS of ExecuteCoreNetworkChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ExecuteCoreNetworkChangeSetResponse.error) Result.t Lwt.t
 val get_connect_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectAttachmentRequest.t ->
-        (GetConnectAttachmentResponse.t,
-          [ `AWS of GetConnectAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetConnectAttachmentResponse.t, GetConnectAttachmentResponse.error)
+          Result.t Lwt.t
 val get_connect_peer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectPeerRequest.t ->
-        (GetConnectPeerResponse.t,
-          [ `AWS of GetConnectPeerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetConnectPeerResponse.t, GetConnectPeerResponse.error) Result.t
+          Lwt.t
 val get_connect_peer_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectPeerAssociationsRequest.t ->
         (GetConnectPeerAssociationsResponse.t,
-          [ `AWS of GetConnectPeerAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetConnectPeerAssociationsResponse.error) Result.t Lwt.t
 val get_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectionsRequest.t ->
-        (GetConnectionsResponse.t,
-          [ `AWS of GetConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetConnectionsResponse.t, GetConnectionsResponse.error) Result.t
+          Lwt.t
 val get_core_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCoreNetworkRequest.t ->
-        (GetCoreNetworkResponse.t,
-          [ `AWS of GetCoreNetworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCoreNetworkResponse.t, GetCoreNetworkResponse.error) Result.t
+          Lwt.t
 val get_core_network_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCoreNetworkChangeSetRequest.t ->
         (GetCoreNetworkChangeSetResponse.t,
-          [ `AWS of GetCoreNetworkChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCoreNetworkChangeSetResponse.error) Result.t Lwt.t
 val get_core_network_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCoreNetworkPolicyRequest.t ->
-        (GetCoreNetworkPolicyResponse.t,
-          [ `AWS of GetCoreNetworkPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCoreNetworkPolicyResponse.t, GetCoreNetworkPolicyResponse.error)
+          Result.t Lwt.t
 val get_customer_gateway_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCustomerGatewayAssociationsRequest.t ->
         (GetCustomerGatewayAssociationsResponse.t,
-          [ `AWS of GetCustomerGatewayAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCustomerGatewayAssociationsResponse.error) Result.t Lwt.t
 val get_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicesRequest.t ->
-        (GetDevicesResponse.t,
-          [ `AWS of GetDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDevicesResponse.t, GetDevicesResponse.error) Result.t Lwt.t
 val get_link_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLinkAssociationsRequest.t ->
-        (GetLinkAssociationsResponse.t,
-          [ `AWS of GetLinkAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLinkAssociationsResponse.t, GetLinkAssociationsResponse.error)
+          Result.t Lwt.t
 val get_links :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLinksRequest.t ->
-        (GetLinksResponse.t,
-          [ `AWS of GetLinksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLinksResponse.t, GetLinksResponse.error) Result.t Lwt.t
 val get_network_resource_counts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkResourceCountsRequest.t ->
         (GetNetworkResourceCountsResponse.t,
-          [ `AWS of GetNetworkResourceCountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetNetworkResourceCountsResponse.error) Result.t Lwt.t
 val get_network_resource_relationships :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkResourceRelationshipsRequest.t ->
         (GetNetworkResourceRelationshipsResponse.t,
-          [ `AWS of GetNetworkResourceRelationshipsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetNetworkResourceRelationshipsResponse.error) Result.t Lwt.t
 val get_network_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkResourcesRequest.t ->
-        (GetNetworkResourcesResponse.t,
-          [ `AWS of GetNetworkResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetNetworkResourcesResponse.t, GetNetworkResourcesResponse.error)
+          Result.t Lwt.t
 val get_network_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkRoutesRequest.t ->
-        (GetNetworkRoutesResponse.t,
-          [ `AWS of GetNetworkRoutesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetNetworkRoutesResponse.t, GetNetworkRoutesResponse.error) Result.t
+          Lwt.t
 val get_network_telemetry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkTelemetryRequest.t ->
-        (GetNetworkTelemetryResponse.t,
-          [ `AWS of GetNetworkTelemetryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetNetworkTelemetryResponse.t, GetNetworkTelemetryResponse.error)
+          Result.t Lwt.t
 val get_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePolicyRequest.t ->
-        (GetResourcePolicyResponse.t,
-          [ `AWS of GetResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Lwt.t
 val get_route_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRouteAnalysisRequest.t ->
-        (GetRouteAnalysisResponse.t,
-          [ `AWS of GetRouteAnalysisResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRouteAnalysisResponse.t, GetRouteAnalysisResponse.error) Result.t
+          Lwt.t
 val get_site_to_site_vpn_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSiteToSiteVpnAttachmentRequest.t ->
         (GetSiteToSiteVpnAttachmentResponse.t,
-          [ `AWS of GetSiteToSiteVpnAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSiteToSiteVpnAttachmentResponse.error) Result.t Lwt.t
 val get_sites :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSitesRequest.t ->
-        (GetSitesResponse.t,
-          [ `AWS of GetSitesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSitesResponse.t, GetSitesResponse.error) Result.t Lwt.t
 val get_transit_gateway_connect_peer_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayConnectPeerAssociationsRequest.t ->
         (GetTransitGatewayConnectPeerAssociationsResponse.t,
-          [ `AWS of GetTransitGatewayConnectPeerAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetTransitGatewayConnectPeerAssociationsResponse.error) Result.t
+          Lwt.t
 val get_transit_gateway_registrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTransitGatewayRegistrationsRequest.t ->
         (GetTransitGatewayRegistrationsResponse.t,
-          [ `AWS of GetTransitGatewayRegistrationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetTransitGatewayRegistrationsResponse.error) Result.t Lwt.t
 val get_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVpcAttachmentRequest.t ->
-        (GetVpcAttachmentResponse.t,
-          [ `AWS of GetVpcAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVpcAttachmentResponse.t, GetVpcAttachmentResponse.error) Result.t
+          Lwt.t
 val list_attachments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAttachmentsRequest.t ->
-        (ListAttachmentsResponse.t,
-          [ `AWS of ListAttachmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAttachmentsResponse.t, ListAttachmentsResponse.error) Result.t
+          Lwt.t
 val list_connect_peers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectPeersRequest.t ->
-        (ListConnectPeersResponse.t,
-          [ `AWS of ListConnectPeersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListConnectPeersResponse.t, ListConnectPeersResponse.error) Result.t
+          Lwt.t
 val list_core_network_policy_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoreNetworkPolicyVersionsRequest.t ->
         (ListCoreNetworkPolicyVersionsResponse.t,
-          [ `AWS of ListCoreNetworkPolicyVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCoreNetworkPolicyVersionsResponse.error) Result.t Lwt.t
 val list_core_networks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoreNetworksRequest.t ->
-        (ListCoreNetworksResponse.t,
-          [ `AWS of ListCoreNetworksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCoreNetworksResponse.t, ListCoreNetworksResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_core_network_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutCoreNetworkPolicyRequest.t ->
-        (PutCoreNetworkPolicyResponse.t,
-          [ `AWS of PutCoreNetworkPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutCoreNetworkPolicyResponse.t, PutCoreNetworkPolicyResponse.error)
+          Result.t Lwt.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyRequest.t ->
-        (PutResourcePolicyResponse.t,
-          [ `AWS of PutResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Lwt.t
 val register_transit_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterTransitGatewayRequest.t ->
         (RegisterTransitGatewayResponse.t,
-          [ `AWS of RegisterTransitGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterTransitGatewayResponse.error) Result.t Lwt.t
 val reject_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectAttachmentRequest.t ->
-        (RejectAttachmentResponse.t,
-          [ `AWS of RejectAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RejectAttachmentResponse.t, RejectAttachmentResponse.error) Result.t
+          Lwt.t
 val restore_core_network_policy_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreCoreNetworkPolicyVersionRequest.t ->
         (RestoreCoreNetworkPolicyVersionResponse.t,
-          [ `AWS of RestoreCoreNetworkPolicyVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RestoreCoreNetworkPolicyVersionResponse.error) Result.t Lwt.t
 val start_route_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartRouteAnalysisRequest.t ->
-        (StartRouteAnalysisResponse.t,
-          [ `AWS of StartRouteAnalysisResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartRouteAnalysisResponse.t, StartRouteAnalysisResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectionRequest.t ->
-        (UpdateConnectionResponse.t,
-          [ `AWS of UpdateConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateConnectionResponse.t, UpdateConnectionResponse.error) Result.t
+          Lwt.t
 val update_core_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCoreNetworkRequest.t ->
-        (UpdateCoreNetworkResponse.t,
-          [ `AWS of UpdateCoreNetworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateCoreNetworkResponse.t, UpdateCoreNetworkResponse.error)
+          Result.t Lwt.t
 val update_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDeviceRequest.t ->
-        (UpdateDeviceResponse.t,
-          [ `AWS of UpdateDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDeviceResponse.t, UpdateDeviceResponse.error) Result.t Lwt.t
 val update_global_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGlobalNetworkRequest.t ->
-        (UpdateGlobalNetworkResponse.t,
-          [ `AWS of UpdateGlobalNetworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateGlobalNetworkResponse.t, UpdateGlobalNetworkResponse.error)
+          Result.t Lwt.t
 val update_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLinkRequest.t ->
-        (UpdateLinkResponse.t,
-          [ `AWS of UpdateLinkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLinkResponse.t, UpdateLinkResponse.error) Result.t Lwt.t
 val update_network_resource_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNetworkResourceMetadataRequest.t ->
         (UpdateNetworkResourceMetadataResponse.t,
-          [ `AWS of UpdateNetworkResourceMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateNetworkResourceMetadataResponse.error) Result.t Lwt.t
 val update_site :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSiteRequest.t ->
-        (UpdateSiteResponse.t,
-          [ `AWS of UpdateSiteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSiteResponse.t, UpdateSiteResponse.error) Result.t Lwt.t
 val update_vpc_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVpcAttachmentRequest.t ->
-        (UpdateVpcAttachmentResponse.t,
-          [ `AWS of UpdateVpcAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVpcAttachmentResponse.t, UpdateVpcAttachmentResponse.error)
+          Result.t Lwt.t

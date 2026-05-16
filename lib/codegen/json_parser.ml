@@ -109,9 +109,11 @@ let float =
 let result_to_yojson ok_to_yojson = function
   | Ok v -> `List [ `String "Ok"; ok_to_yojson v ]
   | Error s -> `List [ `String "Error"; `String s ]
+;;
 
 let print_result ok_to_yojson r =
   print_endline (Yojson.Safe.to_string (result_to_yojson ok_to_yojson r))
+;;
 
 let%expect_test "string" =
   let test j = print_result (fun s -> `String s) (run string j) in
@@ -201,7 +203,9 @@ let%expect_test "exactly" =
 let list (T f) = T (Json_path.list ~f)
 
 let%expect_test "list" =
-  let test j = print_result (fun l -> `List (Stdlib.List.map (fun i -> `Int i) l)) (run (list int) j) in
+  let test j =
+    print_result (fun l -> `List (Stdlib.List.map (fun i -> `Int i) l)) (run (list int) j)
+  in
   test (`List [ `Int 1; `Int 2; `Int 3 ]);
   [%expect {| ["Ok",[1,2,3]] |}];
   test (`List [ `Int 1; `String "s"; `Int 3 ]);
@@ -271,9 +275,17 @@ let%expect_test "record" =
          and y = field_opt "y" string in
          x, y)
     in
-    print_result (fun (i, s) ->
-        `List [ (match i with Some i -> `Int i | None -> `Null);
-                (match s with Some s -> `String s | None -> `Null) ]) (run r j)
+    print_result
+      (fun (i, s) ->
+         `List
+           [ (match i with
+              | Some i -> `Int i
+              | None -> `Null)
+           ; (match s with
+              | Some s -> `String s
+              | None -> `Null)
+           ])
+      (run r j)
   in
   test (`Assoc [ "x", `Int 1; "y", `String "s" ]);
   [%expect {| ["Ok",[1,"s"]] |}];
@@ -359,7 +371,9 @@ let%expect_test "record_or_list_of" =
          and y = field "y" int in
          x, y)
     in
-    print_result (fun l -> `List (Stdlib.List.map (fun (a, b) -> `List [ `Int a; `Int b ]) l)) (run r j)
+    print_result
+      (fun l -> `List (Stdlib.List.map (fun (a, b) -> `List [ `Int a; `Int b ]) l))
+      (run r j)
   in
   test (`Assoc [ "x", `Int 1; "y", `Int 2 ]);
   [%expect {| ["Ok",[[1,2]]] |}];
@@ -461,7 +475,9 @@ let dict (T parse) = T (Json_path.dict parse)
 let%expect_test "dict" =
   let test j =
     let r = dict int in
-    print_result (fun l -> `List (Stdlib.List.map (fun (s, i) -> `List [ `String s; `Int i ]) l)) (run r j)
+    print_result
+      (fun l -> `List (Stdlib.List.map (fun (s, i) -> `List [ `String s; `Int i ]) l))
+      (run r j)
   in
   test (`Assoc [ "x", `Int 1; "y", `Int 2; "z", `Int 3 ]);
   [%expect {| ["Ok",[["x",1],["y",2],["z",3]]] |}];

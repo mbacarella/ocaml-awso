@@ -4,103 +4,76 @@ val cancel_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobRequest.t ->
-        (CancelJobResponse.t,
-          [ `AWS of CancelJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelJobResponse.t, CancelJobResponse.error) Result.t
           Async.Deferred.t
 val cancel_quantum_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelQuantumTaskRequest.t ->
-        (CancelQuantumTaskResponse.t,
-          [ `AWS of CancelQuantumTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CancelQuantumTaskResponse.t, CancelQuantumTaskResponse.error)
+          Result.t Async.Deferred.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobRequest.t ->
-        (CreateJobResponse.t,
-          [ `AWS of CreateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateJobResponse.t, CreateJobResponse.error) Result.t
           Async.Deferred.t
 val create_quantum_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateQuantumTaskRequest.t ->
-        (CreateQuantumTaskResponse.t,
-          [ `AWS of CreateQuantumTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateQuantumTaskResponse.t, CreateQuantumTaskResponse.error)
+          Result.t Async.Deferred.t
 val get_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceRequest.t ->
-        (GetDeviceResponse.t,
-          [ `AWS of GetDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDeviceResponse.t, GetDeviceResponse.error) Result.t
           Async.Deferred.t
 val get_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobRequest.t ->
-        (GetJobResponse.t,
-          [ `AWS of GetJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetJobResponse.t, GetJobResponse.error) Result.t Async.Deferred.t
 val get_quantum_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQuantumTaskRequest.t ->
-        (GetQuantumTaskResponse.t,
-          [ `AWS of GetQuantumTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetQuantumTaskResponse.t, GetQuantumTaskResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val search_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchDevicesRequest.t ->
-        (SearchDevicesResponse.t,
-          [ `AWS of SearchDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchDevicesResponse.t, SearchDevicesResponse.error) Result.t
           Async.Deferred.t
 val search_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchJobsRequest.t ->
-        (SearchJobsResponse.t,
-          [ `AWS of SearchJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchJobsResponse.t, SearchJobsResponse.error) Result.t
           Async.Deferred.t
 val search_quantum_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchQuantumTasksRequest.t ->
-        (SearchQuantumTasksResponse.t,
-          [ `AWS of SearchQuantumTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SearchQuantumTasksResponse.t, SearchQuantumTasksResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

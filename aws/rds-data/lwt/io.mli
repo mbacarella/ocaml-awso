@@ -5,40 +5,33 @@ val batch_execute_statement :
     ?cfg:Awso.Cfg.t ->
       BatchExecuteStatementRequest.t ->
         (BatchExecuteStatementResponse.t,
-          [ `AWS of BatchExecuteStatementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchExecuteStatementResponse.error) Result.t Lwt.t
 val begin_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BeginTransactionRequest.t ->
-        (BeginTransactionResponse.t,
-          [ `AWS of BeginTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BeginTransactionResponse.t, BeginTransactionResponse.error) Result.t
+          Lwt.t
 val commit_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CommitTransactionRequest.t ->
-        (CommitTransactionResponse.t,
-          [ `AWS of CommitTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CommitTransactionResponse.t, CommitTransactionResponse.error)
+          Result.t Lwt.t
 val execute_sql :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExecuteSqlRequest.t ->
-        (ExecuteSqlResponse.t,
-          [ `AWS of ExecuteSqlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExecuteSqlResponse.t, ExecuteSqlResponse.error) Result.t Lwt.t
 val execute_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExecuteStatementRequest.t ->
-        (ExecuteStatementResponse.t,
-          [ `AWS of ExecuteStatementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExecuteStatementResponse.t, ExecuteStatementResponse.error) Result.t
+          Lwt.t
 val rollback_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RollbackTransactionRequest.t ->
-        (RollbackTransactionResponse.t,
-          [ `AWS of RollbackTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RollbackTransactionResponse.t, RollbackTransactionResponse.error)
+          Result.t Lwt.t

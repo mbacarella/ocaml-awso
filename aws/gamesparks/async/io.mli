@@ -4,263 +4,194 @@ val create_game :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGameRequest.t ->
-        (CreateGameResult.t,
-          [ `AWS of CreateGameResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateGameResult.t, CreateGameResult.error) Result.t
           Async.Deferred.t
 val create_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotRequest.t ->
-        (CreateSnapshotResult.t,
-          [ `AWS of CreateSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSnapshotResult.t, CreateSnapshotResult.error) Result.t
           Async.Deferred.t
 val create_stage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStageRequest.t ->
-        (CreateStageResult.t,
-          [ `AWS of CreateStageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateStageResult.t, CreateStageResult.error) Result.t
           Async.Deferred.t
 val delete_game :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGameRequest.t ->
-        (DeleteGameResult.t,
-          [ `AWS of DeleteGameResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteGameResult.t, DeleteGameResult.error) Result.t
           Async.Deferred.t
 val delete_stage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStageRequest.t ->
-        (DeleteStageResult.t,
-          [ `AWS of DeleteStageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteStageResult.t, DeleteStageResult.error) Result.t
           Async.Deferred.t
 val disconnect_player :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisconnectPlayerRequest.t ->
-        (DisconnectPlayerResult.t,
-          [ `AWS of DisconnectPlayerResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisconnectPlayerResult.t, DisconnectPlayerResult.error) Result.t
           Async.Deferred.t
 val export_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportSnapshotRequest.t ->
-        (ExportSnapshotResult.t,
-          [ `AWS of ExportSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ExportSnapshotResult.t, ExportSnapshotResult.error) Result.t
           Async.Deferred.t
 val get_extension :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExtensionRequest.t ->
-        (GetExtensionResult.t,
-          [ `AWS of GetExtensionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetExtensionResult.t, GetExtensionResult.error) Result.t
           Async.Deferred.t
 val get_extension_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExtensionVersionRequest.t ->
-        (GetExtensionVersionResult.t,
-          [ `AWS of GetExtensionVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetExtensionVersionResult.t, GetExtensionVersionResult.error)
+          Result.t Async.Deferred.t
 val get_game :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGameRequest.t ->
-        (GetGameResult.t,
-          [ `AWS of GetGameResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetGameResult.t, GetGameResult.error) Result.t Async.Deferred.t
 val get_game_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGameConfigurationRequest.t ->
-        (GetGameConfigurationResult.t,
-          [ `AWS of GetGameConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetGameConfigurationResult.t, GetGameConfigurationResult.error)
+          Result.t Async.Deferred.t
 val get_generated_code_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGeneratedCodeJobRequest.t ->
-        (GetGeneratedCodeJobResult.t,
-          [ `AWS of GetGeneratedCodeJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetGeneratedCodeJobResult.t, GetGeneratedCodeJobResult.error)
+          Result.t Async.Deferred.t
 val get_player_connection_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPlayerConnectionStatusRequest.t ->
         (GetPlayerConnectionStatusResult.t,
-          [ `AWS of GetPlayerConnectionStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetPlayerConnectionStatusResult.error) Result.t Async.Deferred.t
 val get_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSnapshotRequest.t ->
-        (GetSnapshotResult.t,
-          [ `AWS of GetSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSnapshotResult.t, GetSnapshotResult.error) Result.t
           Async.Deferred.t
 val get_stage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStageRequest.t ->
-        (GetStageResult.t,
-          [ `AWS of GetStageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetStageResult.t, GetStageResult.error) Result.t Async.Deferred.t
 val get_stage_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStageDeploymentRequest.t ->
-        (GetStageDeploymentResult.t,
-          [ `AWS of GetStageDeploymentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetStageDeploymentResult.t, GetStageDeploymentResult.error) Result.t
           Async.Deferred.t
 val import_game_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportGameConfigurationRequest.t ->
         (ImportGameConfigurationResult.t,
-          [ `AWS of ImportGameConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ImportGameConfigurationResult.error) Result.t Async.Deferred.t
 val list_extension_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExtensionVersionsRequest.t ->
-        (ListExtensionVersionsResult.t,
-          [ `AWS of ListExtensionVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListExtensionVersionsResult.t, ListExtensionVersionsResult.error)
+          Result.t Async.Deferred.t
 val list_extensions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExtensionsRequest.t ->
-        (ListExtensionsResult.t,
-          [ `AWS of ListExtensionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListExtensionsResult.t, ListExtensionsResult.error) Result.t
           Async.Deferred.t
 val list_games :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGamesRequest.t ->
-        (ListGamesResult.t,
-          [ `AWS of ListGamesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListGamesResult.t, ListGamesResult.error) Result.t Async.Deferred.t
 val list_generated_code_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGeneratedCodeJobsRequest.t ->
-        (ListGeneratedCodeJobsResult.t,
-          [ `AWS of ListGeneratedCodeJobsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListGeneratedCodeJobsResult.t, ListGeneratedCodeJobsResult.error)
+          Result.t Async.Deferred.t
 val list_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSnapshotsRequest.t ->
-        (ListSnapshotsResult.t,
-          [ `AWS of ListSnapshotsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListSnapshotsResult.t, ListSnapshotsResult.error) Result.t
           Async.Deferred.t
 val list_stage_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStageDeploymentsRequest.t ->
-        (ListStageDeploymentsResult.t,
-          [ `AWS of ListStageDeploymentsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListStageDeploymentsResult.t, ListStageDeploymentsResult.error)
+          Result.t Async.Deferred.t
 val list_stages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStagesRequest.t ->
-        (ListStagesResult.t,
-          [ `AWS of ListStagesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStagesResult.t, ListStagesResult.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Async.Deferred.t
 val start_generated_code_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartGeneratedCodeJobRequest.t ->
-        (StartGeneratedCodeJobResult.t,
-          [ `AWS of StartGeneratedCodeJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartGeneratedCodeJobResult.t, StartGeneratedCodeJobResult.error)
+          Result.t Async.Deferred.t
 val start_stage_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartStageDeploymentRequest.t ->
-        (StartStageDeploymentResult.t,
-          [ `AWS of StartStageDeploymentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartStageDeploymentResult.t, StartStageDeploymentResult.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t
           Async.Deferred.t
 val update_game :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGameRequest.t ->
-        (UpdateGameResult.t,
-          [ `AWS of UpdateGameResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateGameResult.t, UpdateGameResult.error) Result.t
           Async.Deferred.t
 val update_game_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGameConfigurationRequest.t ->
         (UpdateGameConfigurationResult.t,
-          [ `AWS of UpdateGameConfigurationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateGameConfigurationResult.error) Result.t Async.Deferred.t
 val update_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSnapshotRequest.t ->
-        (UpdateSnapshotResult.t,
-          [ `AWS of UpdateSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSnapshotResult.t, UpdateSnapshotResult.error) Result.t
           Async.Deferred.t
 val update_stage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStageRequest.t ->
-        (UpdateStageResult.t,
-          [ `AWS of UpdateStageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateStageResult.t, UpdateStageResult.error) Result.t
           Async.Deferred.t

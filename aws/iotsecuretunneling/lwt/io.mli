@@ -4,48 +4,36 @@ val close_tunnel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CloseTunnelRequest.t ->
-        (CloseTunnelResponse.t,
-          [ `AWS of CloseTunnelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CloseTunnelResponse.t, CloseTunnelResponse.error) Result.t Lwt.t
 val describe_tunnel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTunnelRequest.t ->
-        (DescribeTunnelResponse.t,
-          [ `AWS of DescribeTunnelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTunnelResponse.t, DescribeTunnelResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_tunnels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTunnelsRequest.t ->
-        (ListTunnelsResponse.t,
-          [ `AWS of ListTunnelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTunnelsResponse.t, ListTunnelsResponse.error) Result.t Lwt.t
 val open_tunnel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       OpenTunnelRequest.t ->
-        (OpenTunnelResponse.t,
-          [ `AWS of OpenTunnelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (OpenTunnelResponse.t, OpenTunnelResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t

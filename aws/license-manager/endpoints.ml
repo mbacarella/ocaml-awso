@@ -640,388 +640,401 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "AWSLicenseManager.UpdateServiceSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AcceptGrant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AcceptGrantResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AcceptGrantResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AcceptGrantResponse.of_json json)
+      else Error (parse_aws_error (Some AcceptGrantResponse.error_of_json))
   | CheckInLicense ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CheckInLicenseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CheckInLicenseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CheckInLicenseResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CheckInLicenseResponse.error_of_json))
   | CheckoutBorrowLicense ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CheckoutBorrowLicenseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CheckoutBorrowLicenseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CheckoutBorrowLicenseResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CheckoutBorrowLicenseResponse.error_of_json))
   | CheckoutLicense ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CheckoutLicenseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CheckoutLicenseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CheckoutLicenseResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CheckoutLicenseResponse.error_of_json))
   | CreateGrant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGrantResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateGrantResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGrantResponse.of_json json)
+      else Error (parse_aws_error (Some CreateGrantResponse.error_of_json))
   | CreateGrantVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGrantVersionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateGrantVersionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGrantVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateGrantVersionResponse.error_of_json))
   | CreateLicense ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLicenseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateLicenseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLicenseResponse.of_json json)
+      else Error (parse_aws_error (Some CreateLicenseResponse.error_of_json))
   | CreateLicenseConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateLicenseConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateLicenseConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLicenseConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLicenseConfigurationResponse.error_of_json))
   | CreateLicenseConversionTaskForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLicenseConversionTaskForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                CreateLicenseConversionTaskForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateLicenseConversionTaskForResourceResponse.of_json json))
+                CreateLicenseConversionTaskForResourceResponse.error_of_json))
   | CreateLicenseManagerReportGenerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateLicenseManagerReportGeneratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateLicenseManagerReportGeneratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLicenseManagerReportGeneratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLicenseManagerReportGeneratorResponse.error_of_json))
   | CreateLicenseVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLicenseVersionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateLicenseVersionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLicenseVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateLicenseVersionResponse.error_of_json))
   | CreateToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTokenResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateTokenResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateTokenResponse.of_json json)
+      else Error (parse_aws_error (Some CreateTokenResponse.error_of_json))
   | DeleteGrant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteGrantResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteGrantResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteGrantResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteGrantResponse.error_of_json))
   | DeleteLicense ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteLicenseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteLicenseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLicenseResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteLicenseResponse.error_of_json))
   | DeleteLicenseConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteLicenseConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteLicenseConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLicenseConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLicenseConfigurationResponse.error_of_json))
   | DeleteLicenseManagerReportGenerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteLicenseManagerReportGeneratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteLicenseManagerReportGeneratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLicenseManagerReportGeneratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLicenseManagerReportGeneratorResponse.error_of_json))
   | DeleteToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTokenResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteTokenResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteTokenResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteTokenResponse.error_of_json))
   | ExtendLicenseConsumption ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ExtendLicenseConsumptionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ExtendLicenseConsumptionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExtendLicenseConsumptionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExtendLicenseConsumptionResponse.error_of_json))
   | GetAccessToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccessTokenResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAccessTokenResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAccessTokenResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetAccessTokenResponse.error_of_json))
   | GetGrant ->
-      (match resp with
-       | Error err -> handle_error err (Some GetGrantResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetGrantResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetGrantResponse.of_json json)
+      else Error (parse_aws_error (Some GetGrantResponse.error_of_json))
   | GetLicense ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLicenseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLicenseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseResponse.of_json json)
+      else Error (parse_aws_error (Some GetLicenseResponse.error_of_json))
   | GetLicenseConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLicenseConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLicenseConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLicenseConfigurationResponse.error_of_json))
   | GetLicenseConversionTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLicenseConversionTaskResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLicenseConversionTaskResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseConversionTaskResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLicenseConversionTaskResponse.error_of_json))
   | GetLicenseManagerReportGenerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLicenseManagerReportGeneratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLicenseManagerReportGeneratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseManagerReportGeneratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLicenseManagerReportGeneratorResponse.error_of_json))
   | GetLicenseUsage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLicenseUsageResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLicenseUsageResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseUsageResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetLicenseUsageResponse.error_of_json))
   | GetServiceSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServiceSettingsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetServiceSettingsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetServiceSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetServiceSettingsResponse.error_of_json))
   | ListAssociationsForLicenseConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAssociationsForLicenseConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListAssociationsForLicenseConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAssociationsForLicenseConfigurationResponse.of_json json))
+                ListAssociationsForLicenseConfigurationResponse.error_of_json))
   | ListDistributedGrants ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDistributedGrantsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListDistributedGrantsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDistributedGrantsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListDistributedGrantsResponse.error_of_json))
   | ListFailuresForLicenseConfigurationOperations ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (ListFailuresForLicenseConfigurationOperationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListFailuresForLicenseConfigurationOperationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (ListFailuresForLicenseConfigurationOperationsResponse.of_json
-                json))
+                ListFailuresForLicenseConfigurationOperationsResponse.error_of_json))
   | ListLicenseConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListLicenseConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLicenseConfigurationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLicenseConfigurationsResponse.error_of_json))
   | ListLicenseConversionTasks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListLicenseConversionTasksResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLicenseConversionTasksResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseConversionTasksResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLicenseConversionTasksResponse.error_of_json))
   | ListLicenseManagerReportGenerators ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListLicenseManagerReportGeneratorsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLicenseManagerReportGeneratorsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseManagerReportGeneratorsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLicenseManagerReportGeneratorsResponse.error_of_json))
   | ListLicenseSpecificationsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListLicenseSpecificationsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLicenseSpecificationsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseSpecificationsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLicenseSpecificationsForResourceResponse.error_of_json))
   | ListLicenseVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLicenseVersionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLicenseVersionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseVersionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListLicenseVersionsResponse.error_of_json))
   | ListLicenses ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLicensesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLicensesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicensesResponse.of_json json)
+      else Error (parse_aws_error (Some ListLicensesResponse.error_of_json))
   | ListReceivedGrants ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListReceivedGrantsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListReceivedGrantsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListReceivedGrantsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListReceivedGrantsResponse.error_of_json))
   | ListReceivedLicenses ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListReceivedLicensesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListReceivedLicensesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListReceivedLicensesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListReceivedLicensesResponse.error_of_json))
   | ListResourceInventory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListResourceInventoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListResourceInventoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourceInventoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListResourceInventoryResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTokens ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTokensResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTokensResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTokensResponse.of_json json)
+      else Error (parse_aws_error (Some ListTokensResponse.error_of_json))
   | ListUsageForLicenseConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListUsageForLicenseConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListUsageForLicenseConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListUsageForLicenseConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListUsageForLicenseConfigurationResponse.error_of_json))
   | RejectGrant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RejectGrantResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RejectGrantResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RejectGrantResponse.of_json json)
+      else Error (parse_aws_error (Some RejectGrantResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateLicenseConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateLicenseConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateLicenseConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLicenseConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLicenseConfigurationResponse.error_of_json))
   | UpdateLicenseManagerReportGenerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateLicenseManagerReportGeneratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateLicenseManagerReportGeneratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLicenseManagerReportGeneratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLicenseManagerReportGeneratorResponse.error_of_json))
   | UpdateLicenseSpecificationsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLicenseSpecificationsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                UpdateLicenseSpecificationsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateLicenseSpecificationsForResourceResponse.of_json json))
+                UpdateLicenseSpecificationsForResourceResponse.error_of_json))
   | UpdateServiceSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateServiceSettingsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateServiceSettingsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateServiceSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateServiceSettingsResponse.error_of_json))

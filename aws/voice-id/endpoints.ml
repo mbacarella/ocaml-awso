@@ -268,159 +268,164 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "VoiceID.UpdateDomain")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CreateDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateDomainResponse.of_json json))
-  | DeleteDomain -> Ok ()
-  | DeleteFraudster -> Ok ()
-  | DeleteSpeaker -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDomainResponse.of_json json)
+      else Error (parse_aws_error (Some CreateDomainResponse.error_of_json))
+  | DeleteDomain ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFraudster ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSpeaker ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDomainResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeDomainResponse.error_of_json))
   | DescribeFraudster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeFraudsterResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeFraudsterResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFraudsterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeFraudsterResponse.error_of_json))
   | DescribeFraudsterRegistrationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeFraudsterRegistrationJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeFraudsterRegistrationJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFraudsterRegistrationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFraudsterRegistrationJobResponse.error_of_json))
   | DescribeSpeaker ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSpeakerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeSpeakerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSpeakerResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeSpeakerResponse.error_of_json))
   | DescribeSpeakerEnrollmentJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSpeakerEnrollmentJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeSpeakerEnrollmentJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSpeakerEnrollmentJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSpeakerEnrollmentJobResponse.error_of_json))
   | EvaluateSession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EvaluateSessionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (EvaluateSessionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EvaluateSessionResponse.of_json json)
+      else
+        Error (parse_aws_error (Some EvaluateSessionResponse.error_of_json))
   | ListDomains ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDomainsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListDomainsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDomainsResponse.of_json json)
+      else Error (parse_aws_error (Some ListDomainsResponse.error_of_json))
   | ListFraudsterRegistrationJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListFraudsterRegistrationJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListFraudsterRegistrationJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFraudsterRegistrationJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListFraudsterRegistrationJobsResponse.error_of_json))
   | ListSpeakerEnrollmentJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSpeakerEnrollmentJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSpeakerEnrollmentJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSpeakerEnrollmentJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSpeakerEnrollmentJobsResponse.error_of_json))
   | ListSpeakers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSpeakersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSpeakersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSpeakersResponse.of_json json)
+      else Error (parse_aws_error (Some ListSpeakersResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | OptOutSpeaker ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some OptOutSpeakerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (OptOutSpeakerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (OptOutSpeakerResponse.of_json json)
+      else Error (parse_aws_error (Some OptOutSpeakerResponse.error_of_json))
   | StartFraudsterRegistrationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartFraudsterRegistrationJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartFraudsterRegistrationJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartFraudsterRegistrationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartFraudsterRegistrationJobResponse.error_of_json))
   | StartSpeakerEnrollmentJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartSpeakerEnrollmentJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartSpeakerEnrollmentJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartSpeakerEnrollmentJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartSpeakerEnrollmentJobResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDomainResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateDomainResponse.error_of_json))

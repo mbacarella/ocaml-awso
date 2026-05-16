@@ -543,247 +543,266 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AddTags ->
-      (match resp with
-       | Error err -> handle_error err (Some AddTagsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AddTagsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AddTagsOutput.of_xml xml)
+      else Error (parse_aws_error (Some AddTagsOutput.error_of_xml))
   | ApplySecurityGroupsToLoadBalancer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ApplySecurityGroupsToLoadBalancerOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplySecurityGroupsToLoadBalancerOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplySecurityGroupsToLoadBalancerOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ApplySecurityGroupsToLoadBalancerOutput.error_of_xml))
   | AttachLoadBalancerToSubnets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AttachLoadBalancerToSubnetsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AttachLoadBalancerToSubnetsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AttachLoadBalancerToSubnetsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some AttachLoadBalancerToSubnetsOutput.error_of_xml))
   | ConfigureHealthCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ConfigureHealthCheckOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ConfigureHealthCheckOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ConfigureHealthCheckOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ConfigureHealthCheckOutput.error_of_xml))
   | CreateAppCookieStickinessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAppCookieStickinessPolicyOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateAppCookieStickinessPolicyOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateAppCookieStickinessPolicyOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAppCookieStickinessPolicyOutput.error_of_xml))
   | CreateLBCookieStickinessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateLBCookieStickinessPolicyOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateLBCookieStickinessPolicyOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateLBCookieStickinessPolicyOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLBCookieStickinessPolicyOutput.error_of_xml))
   | CreateLoadBalancer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAccessPointOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateAccessPointOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateAccessPointOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some CreateAccessPointOutput.error_of_xml))
   | CreateLoadBalancerListeners ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateLoadBalancerListenerOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateLoadBalancerListenerOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateLoadBalancerListenerOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLoadBalancerListenerOutput.error_of_xml))
   | CreateLoadBalancerPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateLoadBalancerPolicyOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateLoadBalancerPolicyOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateLoadBalancerPolicyOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateLoadBalancerPolicyOutput.error_of_xml))
   | DeleteLoadBalancer ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteAccessPointOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteAccessPointOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DeleteLoadBalancerListeners ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteLoadBalancerListenerOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteLoadBalancerListenerOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteLoadBalancerListenerOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLoadBalancerListenerOutput.error_of_xml))
   | DeleteLoadBalancerPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteLoadBalancerPolicyOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteLoadBalancerPolicyOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteLoadBalancerPolicyOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteLoadBalancerPolicyOutput.error_of_xml))
   | DeregisterInstancesFromLoadBalancer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeregisterEndPointsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeregisterEndPointsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeregisterEndPointsOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeregisterEndPointsOutput.error_of_xml))
   | DescribeAccountLimits ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAccountLimitsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountLimitsOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeInstanceHealth ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeEndPointStateOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeEndPointStateOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeEndPointStateOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeEndPointStateOutput.error_of_xml))
   | DescribeLoadBalancerAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLoadBalancerAttributesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeLoadBalancerAttributesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeLoadBalancerAttributesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLoadBalancerAttributesOutput.error_of_xml))
   | DescribeLoadBalancerPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLoadBalancerPoliciesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeLoadBalancerPoliciesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeLoadBalancerPoliciesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLoadBalancerPoliciesOutput.error_of_xml))
   | DescribeLoadBalancerPolicyTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLoadBalancerPolicyTypesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeLoadBalancerPolicyTypesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeLoadBalancerPolicyTypesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLoadBalancerPolicyTypesOutput.error_of_xml))
   | DescribeLoadBalancers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAccessPointsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAccessPointsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAccessPointsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeAccessPointsOutput.error_of_xml))
   | DescribeTags ->
-      (match resp with
-       | Error err -> handle_error err (Some DescribeTagsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeTagsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTagsOutput.of_xml xml)
+      else Error (parse_aws_error (Some DescribeTagsOutput.error_of_xml))
   | DetachLoadBalancerFromSubnets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DetachLoadBalancerFromSubnetsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DetachLoadBalancerFromSubnetsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetachLoadBalancerFromSubnetsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DetachLoadBalancerFromSubnetsOutput.error_of_xml))
   | DisableAvailabilityZonesForLoadBalancer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RemoveAvailabilityZonesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RemoveAvailabilityZonesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RemoveAvailabilityZonesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some RemoveAvailabilityZonesOutput.error_of_xml))
   | EnableAvailabilityZonesForLoadBalancer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AddAvailabilityZonesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AddAvailabilityZonesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AddAvailabilityZonesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some AddAvailabilityZonesOutput.error_of_xml))
   | ModifyLoadBalancerAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ModifyLoadBalancerAttributesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ModifyLoadBalancerAttributesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyLoadBalancerAttributesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ModifyLoadBalancerAttributesOutput.error_of_xml))
   | RegisterInstancesWithLoadBalancer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterEndPointsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RegisterEndPointsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RegisterEndPointsOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some RegisterEndPointsOutput.error_of_xml))
   | RemoveTags ->
-      (match resp with
-       | Error err -> handle_error err (Some RemoveTagsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RemoveTagsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RemoveTagsOutput.of_xml xml)
+      else Error (parse_aws_error (Some RemoveTagsOutput.error_of_xml))
   | SetLoadBalancerListenerSSLCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SetLoadBalancerListenerSSLCertificateOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetLoadBalancerListenerSSLCertificateOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetLoadBalancerListenerSSLCertificateOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some SetLoadBalancerListenerSSLCertificateOutput.error_of_xml))
   | SetLoadBalancerPoliciesForBackendServer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SetLoadBalancerPoliciesForBackendServerOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetLoadBalancerPoliciesForBackendServerOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetLoadBalancerPoliciesForBackendServerOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some SetLoadBalancerPoliciesForBackendServerOutput.error_of_xml))
   | SetLoadBalancerPoliciesOfListener ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SetLoadBalancerPoliciesOfListenerOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetLoadBalancerPoliciesOfListenerOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetLoadBalancerPoliciesOfListenerOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some SetLoadBalancerPoliciesOfListenerOutput.error_of_xml))

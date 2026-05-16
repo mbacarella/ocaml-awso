@@ -4,215 +4,162 @@ val batch_get_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetChannelRequest.t ->
-        (BatchGetChannelResponse.t,
-          [ `AWS of BatchGetChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchGetChannelResponse.t, BatchGetChannelResponse.error) Result.t
           Async.Deferred.t
 val batch_get_stream_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetStreamKeyRequest.t ->
-        (BatchGetStreamKeyResponse.t,
-          [ `AWS of BatchGetStreamKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchGetStreamKeyResponse.t, BatchGetStreamKeyResponse.error)
+          Result.t Async.Deferred.t
 val create_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelRequest.t ->
-        (CreateChannelResponse.t,
-          [ `AWS of CreateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateChannelResponse.t, CreateChannelResponse.error) Result.t
           Async.Deferred.t
 val create_recording_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRecordingConfigurationRequest.t ->
         (CreateRecordingConfigurationResponse.t,
-          [ `AWS of CreateRecordingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateRecordingConfigurationResponse.error) Result.t
           Async.Deferred.t
 val create_stream_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamKeyRequest.t ->
-        (CreateStreamKeyResponse.t,
-          [ `AWS of CreateStreamKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateStreamKeyResponse.t, CreateStreamKeyResponse.error) Result.t
           Async.Deferred.t
 val delete_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteChannelRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_playback_key_pair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePlaybackKeyPairRequest.t ->
         (DeletePlaybackKeyPairResponse.t,
-          [ `AWS of DeletePlaybackKeyPairResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeletePlaybackKeyPairResponse.error) Result.t Async.Deferred.t
 val delete_recording_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRecordingConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_stream_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteStreamKeyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteStreamKeyRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val get_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChannelRequest.t ->
-        (GetChannelResponse.t,
-          [ `AWS of GetChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetChannelResponse.t, GetChannelResponse.error) Result.t
           Async.Deferred.t
 val get_playback_key_pair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPlaybackKeyPairRequest.t ->
-        (GetPlaybackKeyPairResponse.t,
-          [ `AWS of GetPlaybackKeyPairResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPlaybackKeyPairResponse.t, GetPlaybackKeyPairResponse.error)
+          Result.t Async.Deferred.t
 val get_recording_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecordingConfigurationRequest.t ->
         (GetRecordingConfigurationResponse.t,
-          [ `AWS of GetRecordingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetRecordingConfigurationResponse.error) Result.t Async.Deferred.t
 val get_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamRequest.t ->
-        (GetStreamResponse.t,
-          [ `AWS of GetStreamResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetStreamResponse.t, GetStreamResponse.error) Result.t
           Async.Deferred.t
 val get_stream_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamKeyRequest.t ->
-        (GetStreamKeyResponse.t,
-          [ `AWS of GetStreamKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetStreamKeyResponse.t, GetStreamKeyResponse.error) Result.t
           Async.Deferred.t
 val get_stream_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamSessionRequest.t ->
-        (GetStreamSessionResponse.t,
-          [ `AWS of GetStreamSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetStreamSessionResponse.t, GetStreamSessionResponse.error) Result.t
           Async.Deferred.t
 val import_playback_key_pair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportPlaybackKeyPairRequest.t ->
         (ImportPlaybackKeyPairResponse.t,
-          [ `AWS of ImportPlaybackKeyPairResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ImportPlaybackKeyPairResponse.error) Result.t Async.Deferred.t
 val list_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelsRequest.t ->
-        (ListChannelsResponse.t,
-          [ `AWS of ListChannelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListChannelsResponse.t, ListChannelsResponse.error) Result.t
           Async.Deferred.t
 val list_playback_key_pairs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlaybackKeyPairsRequest.t ->
-        (ListPlaybackKeyPairsResponse.t,
-          [ `AWS of ListPlaybackKeyPairsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPlaybackKeyPairsResponse.t, ListPlaybackKeyPairsResponse.error)
+          Result.t Async.Deferred.t
 val list_recording_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecordingConfigurationsRequest.t ->
         (ListRecordingConfigurationsResponse.t,
-          [ `AWS of ListRecordingConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListRecordingConfigurationsResponse.error) Result.t
           Async.Deferred.t
 val list_stream_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamKeysRequest.t ->
-        (ListStreamKeysResponse.t,
-          [ `AWS of ListStreamKeysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStreamKeysResponse.t, ListStreamKeysResponse.error) Result.t
           Async.Deferred.t
 val list_stream_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamSessionsRequest.t ->
-        (ListStreamSessionsResponse.t,
-          [ `AWS of ListStreamSessionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListStreamSessionsResponse.t, ListStreamSessionsResponse.error)
+          Result.t Async.Deferred.t
 val list_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamsRequest.t ->
-        (ListStreamsResponse.t,
-          [ `AWS of ListStreamsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStreamsResponse.t, ListStreamsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutMetadataRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      PutMetadataRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val stop_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopStreamRequest.t ->
-        (StopStreamResponse.t,
-          [ `AWS of StopStreamResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopStreamResponse.t, StopStreamResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChannelRequest.t ->
-        (UpdateChannelResponse.t,
-          [ `AWS of UpdateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateChannelResponse.t, UpdateChannelResponse.error) Result.t
           Async.Deferred.t

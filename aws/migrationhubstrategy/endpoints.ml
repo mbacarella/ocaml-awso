@@ -463,193 +463,199 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | GetApplicationComponentDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetApplicationComponentDetailsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetApplicationComponentDetailsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetApplicationComponentDetailsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetApplicationComponentDetailsResponse.error_of_json))
   | GetApplicationComponentStrategies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetApplicationComponentStrategiesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetApplicationComponentStrategiesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetApplicationComponentStrategiesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetApplicationComponentStrategiesResponse.error_of_json))
   | GetAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAssessmentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAssessmentResponse.error_of_json))
   | GetImportFileTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetImportFileTaskResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetImportFileTaskResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetImportFileTaskResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetImportFileTaskResponse.error_of_json))
   | GetPortfolioPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPortfolioPreferencesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetPortfolioPreferencesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetPortfolioPreferencesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPortfolioPreferencesResponse.error_of_json))
   | GetPortfolioSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPortfolioSummaryResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetPortfolioSummaryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPortfolioSummaryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetPortfolioSummaryResponse.error_of_json))
   | GetRecommendationReportDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRecommendationReportDetailsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetRecommendationReportDetailsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetRecommendationReportDetailsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRecommendationReportDetailsResponse.error_of_json))
   | GetServerDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServerDetailsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetServerDetailsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetServerDetailsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetServerDetailsResponse.error_of_json))
   | GetServerStrategies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServerStrategiesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetServerStrategiesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetServerStrategiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetServerStrategiesResponse.error_of_json))
   | ListApplicationComponents ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListApplicationComponentsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListApplicationComponentsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListApplicationComponentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationComponentsResponse.error_of_json))
   | ListCollectors ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCollectorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListCollectorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCollectorsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCollectorsResponse.error_of_json))
   | ListImportFileTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListImportFileTaskResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListImportFileTaskResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListImportFileTaskResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListImportFileTaskResponse.error_of_json))
   | ListServers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListServersResponse.error_of_json)
-       | Ok resp -> Ok (ListServersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListServersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListServersResponse.error_of_json))
   | PutPortfolioPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutPortfolioPreferencesResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (PutPortfolioPreferencesResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutPortfolioPreferencesResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutPortfolioPreferencesResponse.error_of_json))
   | StartAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartAssessmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartAssessmentResponse.error_of_json))
   | StartImportFileTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartImportFileTaskResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartImportFileTaskResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartImportFileTaskResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartImportFileTaskResponse.error_of_json))
   | StartRecommendationReportGeneration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartRecommendationReportGenerationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartRecommendationReportGenerationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (StartRecommendationReportGenerationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartRecommendationReportGenerationResponse.error_of_json))
   | StopAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopAssessmentResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (StopAssessmentResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StopAssessmentResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some StopAssessmentResponse.error_of_json))
   | UpdateApplicationComponentConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateApplicationComponentConfigResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateApplicationComponentConfigResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateApplicationComponentConfigResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateApplicationComponentConfigResponse.error_of_json))
   | UpdateServerConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateServerConfigResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateServerConfigResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateServerConfigResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateServerConfigResponse.error_of_json))

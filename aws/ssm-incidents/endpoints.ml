@@ -806,244 +806,245 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateReplicationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateReplicationSetOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateReplicationSetOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateReplicationSetOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateReplicationSetOutput.error_of_json))
   | CreateResponsePlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateResponsePlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateResponsePlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateResponsePlanOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateResponsePlanOutput.error_of_json))
   | CreateTimelineEvent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTimelineEventOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateTimelineEventOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateTimelineEventOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateTimelineEventOutput.error_of_json))
   | DeleteIncidentRecord ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteIncidentRecordOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteIncidentRecordOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteIncidentRecordOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteIncidentRecordOutput.error_of_json))
   | DeleteReplicationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteReplicationSetOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteReplicationSetOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteReplicationSetOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteReplicationSetOutput.error_of_json))
   | DeleteResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteResourcePolicyOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteResourcePolicyOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteResourcePolicyOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyOutput.error_of_json))
   | DeleteResponsePlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteResponsePlanOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteResponsePlanOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteResponsePlanOutput.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteResponsePlanOutput.error_of_json))
   | DeleteTimelineEvent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTimelineEventOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteTimelineEventOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTimelineEventOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteTimelineEventOutput.error_of_json))
   | GetIncidentRecord ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetIncidentRecordOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetIncidentRecordOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetIncidentRecordOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetIncidentRecordOutput.error_of_json))
   | GetReplicationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetReplicationSetOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetReplicationSetOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetReplicationSetOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetReplicationSetOutput.error_of_json))
   | GetResourcePolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourcePoliciesOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetResourcePoliciesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourcePoliciesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePoliciesOutput.error_of_json))
   | GetResponsePlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResponsePlanOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetResponsePlanOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResponsePlanOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetResponsePlanOutput.error_of_json))
   | GetTimelineEvent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTimelineEventOutput.error_of_json)
-       | Ok resp ->
-           Ok (GetTimelineEventOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetTimelineEventOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetTimelineEventOutput.error_of_json))
   | ListIncidentRecords ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListIncidentRecordsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListIncidentRecordsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListIncidentRecordsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListIncidentRecordsOutput.error_of_json))
   | ListRelatedItems ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRelatedItemsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListRelatedItemsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRelatedItemsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListRelatedItemsOutput.error_of_json))
   | ListReplicationSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListReplicationSetsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListReplicationSetsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListReplicationSetsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListReplicationSetsOutput.error_of_json))
   | ListResponsePlans ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListResponsePlansOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListResponsePlansOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListResponsePlansOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListResponsePlansOutput.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTimelineEvents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTimelineEventsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListTimelineEventsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTimelineEventsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTimelineEventsOutput.error_of_json))
   | PutResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutResourcePolicyOutput.error_of_json)
-       | Ok resp ->
-           Ok (PutResourcePolicyOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutResourcePolicyOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some PutResourcePolicyOutput.error_of_json))
   | StartIncident ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartIncidentOutput.error_of_json)
-       | Ok resp -> Ok (StartIncidentOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartIncidentOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartIncidentOutput.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateDeletionProtection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDeletionProtectionOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateDeletionProtectionOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateDeletionProtectionOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDeletionProtectionOutput.error_of_json))
   | UpdateIncidentRecord ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateIncidentRecordOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateIncidentRecordOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateIncidentRecordOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateIncidentRecordOutput.error_of_json))
   | UpdateRelatedItems ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRelatedItemsOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateRelatedItemsOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateRelatedItemsOutput.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdateRelatedItemsOutput.error_of_json))
   | UpdateReplicationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateReplicationSetOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateReplicationSetOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateReplicationSetOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateReplicationSetOutput.error_of_json))
   | UpdateResponsePlan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateResponsePlanOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateResponsePlanOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateResponsePlanOutput.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdateResponsePlanOutput.error_of_json))
   | UpdateTimelineEvent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTimelineEventOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateTimelineEventOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateTimelineEventOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateTimelineEventOutput.error_of_json))

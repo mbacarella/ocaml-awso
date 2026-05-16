@@ -4,47 +4,38 @@ val delete_thing_shadow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteThingShadowRequest.t ->
-        (DeleteThingShadowResponse.t,
-          [ `AWS of DeleteThingShadowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteThingShadowResponse.t, DeleteThingShadowResponse.error)
+          Result.t Lwt.t
 val get_retained_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRetainedMessageRequest.t ->
-        (GetRetainedMessageResponse.t,
-          [ `AWS of GetRetainedMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRetainedMessageResponse.t, GetRetainedMessageResponse.error)
+          Result.t Lwt.t
 val get_thing_shadow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetThingShadowRequest.t ->
-        (GetThingShadowResponse.t,
-          [ `AWS of GetThingShadowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetThingShadowResponse.t, GetThingShadowResponse.error) Result.t
+          Lwt.t
 val list_named_shadows_for_thing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNamedShadowsForThingRequest.t ->
         (ListNamedShadowsForThingResponse.t,
-          [ `AWS of ListNamedShadowsForThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListNamedShadowsForThingResponse.error) Result.t Lwt.t
 val list_retained_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRetainedMessagesRequest.t ->
-        (ListRetainedMessagesResponse.t,
-          [ `AWS of ListRetainedMessagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRetainedMessagesResponse.t, ListRetainedMessagesResponse.error)
+          Result.t Lwt.t
 val publish :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PublishRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PublishRequest.t -> (unit, unit) Result.t Lwt.t
 val update_thing_shadow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateThingShadowRequest.t ->
-        (UpdateThingShadowResponse.t,
-          [ `AWS of UpdateThingShadowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateThingShadowResponse.t, UpdateThingShadowResponse.error)
+          Result.t Lwt.t

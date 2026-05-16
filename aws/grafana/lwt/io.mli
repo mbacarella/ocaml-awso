@@ -4,97 +4,81 @@ val associate_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateLicenseRequest.t ->
-        (AssociateLicenseResponse.t,
-          [ `AWS of AssociateLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateLicenseResponse.t, AssociateLicenseResponse.error) Result.t
+          Lwt.t
 val create_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkspaceRequest.t ->
-        (CreateWorkspaceResponse.t,
-          [ `AWS of CreateWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWorkspaceResponse.t, CreateWorkspaceResponse.error) Result.t
+          Lwt.t
 val delete_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkspaceRequest.t ->
-        (DeleteWorkspaceResponse.t,
-          [ `AWS of DeleteWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWorkspaceResponse.t, DeleteWorkspaceResponse.error) Result.t
+          Lwt.t
 val describe_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceRequest.t ->
-        (DescribeWorkspaceResponse.t,
-          [ `AWS of DescribeWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeWorkspaceResponse.t, DescribeWorkspaceResponse.error)
+          Result.t Lwt.t
 val describe_workspace_authentication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceAuthenticationRequest.t ->
         (DescribeWorkspaceAuthenticationResponse.t,
-          [ `AWS of DescribeWorkspaceAuthenticationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeWorkspaceAuthenticationResponse.error) Result.t Lwt.t
 val disassociate_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateLicenseRequest.t ->
-        (DisassociateLicenseResponse.t,
-          [ `AWS of DisassociateLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateLicenseResponse.t, DisassociateLicenseResponse.error)
+          Result.t Lwt.t
 val list_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionsRequest.t ->
-        (ListPermissionsResponse.t,
-          [ `AWS of ListPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPermissionsResponse.t, ListPermissionsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkspacesRequest.t ->
-        (ListWorkspacesResponse.t,
-          [ `AWS of ListWorkspacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWorkspacesResponse.t, ListWorkspacesResponse.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePermissionsRequest.t ->
-        (UpdatePermissionsResponse.t,
-          [ `AWS of UpdatePermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePermissionsResponse.t, UpdatePermissionsResponse.error)
+          Result.t Lwt.t
 val update_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkspaceRequest.t ->
-        (UpdateWorkspaceResponse.t,
-          [ `AWS of UpdateWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateWorkspaceResponse.t, UpdateWorkspaceResponse.error) Result.t
+          Lwt.t
 val update_workspace_authentication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkspaceAuthenticationRequest.t ->
         (UpdateWorkspaceAuthenticationResponse.t,
-          [ `AWS of UpdateWorkspaceAuthenticationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateWorkspaceAuthenticationResponse.error) Result.t Lwt.t

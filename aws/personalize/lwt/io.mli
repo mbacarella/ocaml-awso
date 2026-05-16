@@ -5,395 +5,312 @@ val create_batch_inference_job :
     ?cfg:Awso.Cfg.t ->
       CreateBatchInferenceJobRequest.t ->
         (CreateBatchInferenceJobResponse.t,
-          [ `AWS of CreateBatchInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateBatchInferenceJobResponse.error) Result.t Lwt.t
 val create_batch_segment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBatchSegmentJobRequest.t ->
         (CreateBatchSegmentJobResponse.t,
-          [ `AWS of CreateBatchSegmentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateBatchSegmentJobResponse.error) Result.t Lwt.t
 val create_campaign :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCampaignRequest.t ->
-        (CreateCampaignResponse.t,
-          [ `AWS of CreateCampaignResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCampaignResponse.t, CreateCampaignResponse.error) Result.t
+          Lwt.t
 val create_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetRequest.t ->
-        (CreateDatasetResponse.t,
-          [ `AWS of CreateDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t Lwt.t
 val create_dataset_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetExportJobRequest.t ->
         (CreateDatasetExportJobResponse.t,
-          [ `AWS of CreateDatasetExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDatasetExportJobResponse.error) Result.t Lwt.t
 val create_dataset_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetGroupRequest.t ->
-        (CreateDatasetGroupResponse.t,
-          [ `AWS of CreateDatasetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetGroupResponse.t, CreateDatasetGroupResponse.error)
+          Result.t Lwt.t
 val create_dataset_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetImportJobRequest.t ->
         (CreateDatasetImportJobResponse.t,
-          [ `AWS of CreateDatasetImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDatasetImportJobResponse.error) Result.t Lwt.t
 val create_event_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEventTrackerRequest.t ->
-        (CreateEventTrackerResponse.t,
-          [ `AWS of CreateEventTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEventTrackerResponse.t, CreateEventTrackerResponse.error)
+          Result.t Lwt.t
 val create_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFilterRequest.t ->
-        (CreateFilterResponse.t,
-          [ `AWS of CreateFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFilterResponse.t, CreateFilterResponse.error) Result.t Lwt.t
 val create_recommender :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRecommenderRequest.t ->
-        (CreateRecommenderResponse.t,
-          [ `AWS of CreateRecommenderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRecommenderResponse.t, CreateRecommenderResponse.error)
+          Result.t Lwt.t
 val create_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSchemaRequest.t ->
-        (CreateSchemaResponse.t,
-          [ `AWS of CreateSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSchemaResponse.t, CreateSchemaResponse.error) Result.t Lwt.t
 val create_solution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSolutionRequest.t ->
-        (CreateSolutionResponse.t,
-          [ `AWS of CreateSolutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSolutionResponse.t, CreateSolutionResponse.error) Result.t
+          Lwt.t
 val create_solution_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSolutionVersionRequest.t ->
         (CreateSolutionVersionResponse.t,
-          [ `AWS of CreateSolutionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSolutionVersionResponse.error) Result.t Lwt.t
 val delete_campaign :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteCampaignRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteCampaignRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_dataset :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteDatasetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteDatasetRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_dataset_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDatasetGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDatasetGroupRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_event_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteEventTrackerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteEventTrackerRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_filter :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteFilterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteFilterRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_recommender :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRecommenderRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteRecommenderRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_schema :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteSchemaRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteSchemaRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_solution :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteSolutionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteSolutionRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_algorithm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlgorithmRequest.t ->
-        (DescribeAlgorithmResponse.t,
-          [ `AWS of DescribeAlgorithmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAlgorithmResponse.t, DescribeAlgorithmResponse.error)
+          Result.t Lwt.t
 val describe_batch_inference_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBatchInferenceJobRequest.t ->
         (DescribeBatchInferenceJobResponse.t,
-          [ `AWS of DescribeBatchInferenceJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeBatchInferenceJobResponse.error) Result.t Lwt.t
 val describe_batch_segment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBatchSegmentJobRequest.t ->
         (DescribeBatchSegmentJobResponse.t,
-          [ `AWS of DescribeBatchSegmentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeBatchSegmentJobResponse.error) Result.t Lwt.t
 val describe_campaign :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCampaignRequest.t ->
-        (DescribeCampaignResponse.t,
-          [ `AWS of DescribeCampaignResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCampaignResponse.t, DescribeCampaignResponse.error) Result.t
+          Lwt.t
 val describe_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetRequest.t ->
-        (DescribeDatasetResponse.t,
-          [ `AWS of DescribeDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
+          Lwt.t
 val describe_dataset_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetExportJobRequest.t ->
         (DescribeDatasetExportJobResponse.t,
-          [ `AWS of DescribeDatasetExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDatasetExportJobResponse.error) Result.t Lwt.t
 val describe_dataset_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetGroupRequest.t ->
-        (DescribeDatasetGroupResponse.t,
-          [ `AWS of DescribeDatasetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDatasetGroupResponse.t, DescribeDatasetGroupResponse.error)
+          Result.t Lwt.t
 val describe_dataset_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetImportJobRequest.t ->
         (DescribeDatasetImportJobResponse.t,
-          [ `AWS of DescribeDatasetImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDatasetImportJobResponse.error) Result.t Lwt.t
 val describe_event_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventTrackerRequest.t ->
-        (DescribeEventTrackerResponse.t,
-          [ `AWS of DescribeEventTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEventTrackerResponse.t, DescribeEventTrackerResponse.error)
+          Result.t Lwt.t
 val describe_feature_transformation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFeatureTransformationRequest.t ->
         (DescribeFeatureTransformationResponse.t,
-          [ `AWS of DescribeFeatureTransformationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeFeatureTransformationResponse.error) Result.t Lwt.t
 val describe_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFilterRequest.t ->
-        (DescribeFilterResponse.t,
-          [ `AWS of DescribeFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeFilterResponse.t, DescribeFilterResponse.error) Result.t
+          Lwt.t
 val describe_recipe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecipeRequest.t ->
-        (DescribeRecipeResponse.t,
-          [ `AWS of DescribeRecipeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRecipeResponse.t, DescribeRecipeResponse.error) Result.t
+          Lwt.t
 val describe_recommender :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecommenderRequest.t ->
-        (DescribeRecommenderResponse.t,
-          [ `AWS of DescribeRecommenderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRecommenderResponse.t, DescribeRecommenderResponse.error)
+          Result.t Lwt.t
 val describe_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSchemaRequest.t ->
-        (DescribeSchemaResponse.t,
-          [ `AWS of DescribeSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSchemaResponse.t, DescribeSchemaResponse.error) Result.t
+          Lwt.t
 val describe_solution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSolutionRequest.t ->
-        (DescribeSolutionResponse.t,
-          [ `AWS of DescribeSolutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSolutionResponse.t, DescribeSolutionResponse.error) Result.t
+          Lwt.t
 val describe_solution_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSolutionVersionRequest.t ->
         (DescribeSolutionVersionResponse.t,
-          [ `AWS of DescribeSolutionVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSolutionVersionResponse.error) Result.t Lwt.t
 val get_solution_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSolutionMetricsRequest.t ->
-        (GetSolutionMetricsResponse.t,
-          [ `AWS of GetSolutionMetricsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSolutionMetricsResponse.t, GetSolutionMetricsResponse.error)
+          Result.t Lwt.t
 val list_batch_inference_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBatchInferenceJobsRequest.t ->
         (ListBatchInferenceJobsResponse.t,
-          [ `AWS of ListBatchInferenceJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBatchInferenceJobsResponse.error) Result.t Lwt.t
 val list_batch_segment_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBatchSegmentJobsRequest.t ->
-        (ListBatchSegmentJobsResponse.t,
-          [ `AWS of ListBatchSegmentJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBatchSegmentJobsResponse.t, ListBatchSegmentJobsResponse.error)
+          Result.t Lwt.t
 val list_campaigns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCampaignsRequest.t ->
-        (ListCampaignsResponse.t,
-          [ `AWS of ListCampaignsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCampaignsResponse.t, ListCampaignsResponse.error) Result.t Lwt.t
 val list_dataset_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetExportJobsRequest.t ->
         (ListDatasetExportJobsResponse.t,
-          [ `AWS of ListDatasetExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDatasetExportJobsResponse.error) Result.t Lwt.t
 val list_dataset_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetGroupsRequest.t ->
-        (ListDatasetGroupsResponse.t,
-          [ `AWS of ListDatasetGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetGroupsResponse.t, ListDatasetGroupsResponse.error)
+          Result.t Lwt.t
 val list_dataset_import_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetImportJobsRequest.t ->
         (ListDatasetImportJobsResponse.t,
-          [ `AWS of ListDatasetImportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDatasetImportJobsResponse.error) Result.t Lwt.t
 val list_datasets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetsRequest.t ->
-        (ListDatasetsResponse.t,
-          [ `AWS of ListDatasetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t Lwt.t
 val list_event_trackers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventTrackersRequest.t ->
-        (ListEventTrackersResponse.t,
-          [ `AWS of ListEventTrackersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEventTrackersResponse.t, ListEventTrackersResponse.error)
+          Result.t Lwt.t
 val list_filters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFiltersRequest.t ->
-        (ListFiltersResponse.t,
-          [ `AWS of ListFiltersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFiltersResponse.t, ListFiltersResponse.error) Result.t Lwt.t
 val list_recipes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecipesRequest.t ->
-        (ListRecipesResponse.t,
-          [ `AWS of ListRecipesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRecipesResponse.t, ListRecipesResponse.error) Result.t Lwt.t
 val list_recommenders :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecommendersRequest.t ->
-        (ListRecommendersResponse.t,
-          [ `AWS of ListRecommendersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRecommendersResponse.t, ListRecommendersResponse.error) Result.t
+          Lwt.t
 val list_schemas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchemasRequest.t ->
-        (ListSchemasResponse.t,
-          [ `AWS of ListSchemasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSchemasResponse.t, ListSchemasResponse.error) Result.t Lwt.t
 val list_solution_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSolutionVersionsRequest.t ->
-        (ListSolutionVersionsResponse.t,
-          [ `AWS of ListSolutionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSolutionVersionsResponse.t, ListSolutionVersionsResponse.error)
+          Result.t Lwt.t
 val list_solutions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSolutionsRequest.t ->
-        (ListSolutionsResponse.t,
-          [ `AWS of ListSolutionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSolutionsResponse.t, ListSolutionsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val stop_solution_version_creation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StopSolutionVersionCreationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StopSolutionVersionCreationRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_campaign :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCampaignRequest.t ->
-        (UpdateCampaignResponse.t,
-          [ `AWS of UpdateCampaignResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateCampaignResponse.t, UpdateCampaignResponse.error) Result.t
+          Lwt.t
 val update_recommender :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRecommenderRequest.t ->
-        (UpdateRecommenderResponse.t,
-          [ `AWS of UpdateRecommenderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRecommenderResponse.t, UpdateRecommenderResponse.error)
+          Result.t Lwt.t

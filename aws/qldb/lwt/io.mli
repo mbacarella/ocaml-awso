@@ -5,137 +5,107 @@ val cancel_journal_kinesis_stream :
     ?cfg:Awso.Cfg.t ->
       CancelJournalKinesisStreamRequest.t ->
         (CancelJournalKinesisStreamResponse.t,
-          [ `AWS of CancelJournalKinesisStreamResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelJournalKinesisStreamResponse.error) Result.t Lwt.t
 val create_ledger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLedgerRequest.t ->
-        (CreateLedgerResponse.t,
-          [ `AWS of CreateLedgerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLedgerResponse.t, CreateLedgerResponse.error) Result.t Lwt.t
 val delete_ledger :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteLedgerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteLedgerRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_journal_kinesis_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJournalKinesisStreamRequest.t ->
         (DescribeJournalKinesisStreamResponse.t,
-          [ `AWS of DescribeJournalKinesisStreamResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeJournalKinesisStreamResponse.error) Result.t Lwt.t
 val describe_journal_s3_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJournalS3ExportRequest.t ->
         (DescribeJournalS3ExportResponse.t,
-          [ `AWS of DescribeJournalS3ExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeJournalS3ExportResponse.error) Result.t Lwt.t
 val describe_ledger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLedgerRequest.t ->
-        (DescribeLedgerResponse.t,
-          [ `AWS of DescribeLedgerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLedgerResponse.t, DescribeLedgerResponse.error) Result.t
+          Lwt.t
 val export_journal_to_s3 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportJournalToS3Request.t ->
-        (ExportJournalToS3Response.t,
-          [ `AWS of ExportJournalToS3Response.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExportJournalToS3Response.t, ExportJournalToS3Response.error)
+          Result.t Lwt.t
 val get_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBlockRequest.t ->
-        (GetBlockResponse.t,
-          [ `AWS of GetBlockResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBlockResponse.t, GetBlockResponse.error) Result.t Lwt.t
 val get_digest :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDigestRequest.t ->
-        (GetDigestResponse.t,
-          [ `AWS of GetDigestResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDigestResponse.t, GetDigestResponse.error) Result.t Lwt.t
 val get_revision :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRevisionRequest.t ->
-        (GetRevisionResponse.t,
-          [ `AWS of GetRevisionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRevisionResponse.t, GetRevisionResponse.error) Result.t Lwt.t
 val list_journal_kinesis_streams_for_ledger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJournalKinesisStreamsForLedgerRequest.t ->
         (ListJournalKinesisStreamsForLedgerResponse.t,
-          [ `AWS of ListJournalKinesisStreamsForLedgerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListJournalKinesisStreamsForLedgerResponse.error) Result.t Lwt.t
 val list_journal_s3_exports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJournalS3ExportsRequest.t ->
-        (ListJournalS3ExportsResponse.t,
-          [ `AWS of ListJournalS3ExportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJournalS3ExportsResponse.t, ListJournalS3ExportsResponse.error)
+          Result.t Lwt.t
 val list_journal_s3_exports_for_ledger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJournalS3ExportsForLedgerRequest.t ->
         (ListJournalS3ExportsForLedgerResponse.t,
-          [ `AWS of ListJournalS3ExportsForLedgerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListJournalS3ExportsForLedgerResponse.error) Result.t Lwt.t
 val list_ledgers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLedgersRequest.t ->
-        (ListLedgersResponse.t,
-          [ `AWS of ListLedgersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLedgersResponse.t, ListLedgersResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val stream_journal_to_kinesis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StreamJournalToKinesisRequest.t ->
         (StreamJournalToKinesisResponse.t,
-          [ `AWS of StreamJournalToKinesisResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StreamJournalToKinesisResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_ledger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLedgerRequest.t ->
-        (UpdateLedgerResponse.t,
-          [ `AWS of UpdateLedgerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLedgerResponse.t, UpdateLedgerResponse.error) Result.t Lwt.t
 val update_ledger_permissions_mode :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLedgerPermissionsModeRequest.t ->
         (UpdateLedgerPermissionsModeResponse.t,
-          [ `AWS of UpdateLedgerPermissionsModeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateLedgerPermissionsModeResponse.error) Result.t Lwt.t

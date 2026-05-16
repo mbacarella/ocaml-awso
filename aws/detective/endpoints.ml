@@ -472,129 +472,134 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
-  | AcceptInvitation -> Ok ()
+  | AcceptInvitation ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateGraph ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGraphResponse.error_of_json)
-       | Ok resp -> Ok (CreateGraphResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGraphResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateGraphResponse.error_of_json))
   | CreateMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateMembersResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateMembersResponse.of_json (response_to_json resp)))
-  | DeleteGraph -> Ok ()
+      if is_success
+      then Ok (CreateMembersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateMembersResponse.error_of_json))
+  | DeleteGraph -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteMembersResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteMembersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteMembersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteMembersResponse.error_of_json))
   | DescribeOrganizationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeOrganizationConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeOrganizationConfigurationResponse.of_json
-                (response_to_json resp)))
-  | DisableOrganizationAdminAccount -> Ok ()
-  | DisassociateMembership -> Ok ()
-  | EnableOrganizationAdminAccount -> Ok ()
+      if is_success
+      then
+        Ok
+          (DescribeOrganizationConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOrganizationConfigurationResponse.error_of_json))
+  | DisableOrganizationAdminAccount ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateMembership ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | EnableOrganizationAdminAccount ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GetMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMembersResponse.error_of_json)
-       | Ok resp -> Ok (GetMembersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMembersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMembersResponse.error_of_json))
   | ListGraphs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGraphsResponse.error_of_json)
-       | Ok resp -> Ok (ListGraphsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGraphsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListGraphsResponse.error_of_json))
   | ListInvitations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListInvitationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListInvitationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListInvitationsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListInvitationsResponse.error_of_json))
   | ListMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMembersResponse.error_of_json)
-       | Ok resp -> Ok (ListMembersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMembersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMembersResponse.error_of_json))
   | ListOrganizationAdminAccounts ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListOrganizationAdminAccountsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListOrganizationAdminAccountsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListOrganizationAdminAccountsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListOrganizationAdminAccountsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
-  | RejectInvitation -> Ok ()
-  | StartMonitoringMember -> Ok ()
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | RejectInvitation ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | StartMonitoringMember ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
-  | UpdateOrganizationConfiguration -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateOrganizationConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)

@@ -3684,1211 +3684,1233 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateVoiceConnectorGroup ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociatePhoneNumberWithUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociatePhoneNumberWithUserResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociatePhoneNumberWithUserResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociatePhoneNumberWithUserResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociatePhoneNumberWithUserResponse.error_of_json))
   | AssociatePhoneNumbersWithVoiceConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (AssociatePhoneNumbersWithVoiceConnectorResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociatePhoneNumbersWithVoiceConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociatePhoneNumbersWithVoiceConnectorResponse.of_json
-                (response_to_json resp)))
+                AssociatePhoneNumbersWithVoiceConnectorResponse.error_of_json))
   | AssociatePhoneNumbersWithVoiceConnectorGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (AssociatePhoneNumbersWithVoiceConnectorGroupResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociatePhoneNumbersWithVoiceConnectorGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociatePhoneNumbersWithVoiceConnectorGroupResponse.of_json
-                (response_to_json resp)))
+                AssociatePhoneNumbersWithVoiceConnectorGroupResponse.error_of_json))
   | AssociateSigninDelegateGroupsWithAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateSigninDelegateGroupsWithAccountResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociateSigninDelegateGroupsWithAccountResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateSigninDelegateGroupsWithAccountResponse.of_header_and_body
-                (headers, ())))
+                AssociateSigninDelegateGroupsWithAccountResponse.error_of_json))
   | BatchCreateAttendee ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchCreateAttendeeResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchCreateAttendeeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchCreateAttendeeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchCreateAttendeeResponse.error_of_json))
   | BatchCreateChannelMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchCreateChannelMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchCreateChannelMembershipResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchCreateChannelMembershipResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateChannelMembershipResponse.error_of_json))
   | BatchCreateRoomMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchCreateRoomMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchCreateRoomMembershipResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchCreateRoomMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateRoomMembershipResponse.error_of_json))
   | BatchDeletePhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDeletePhoneNumberResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDeletePhoneNumberResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (BatchDeletePhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeletePhoneNumberResponse.error_of_json))
   | BatchSuspendUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchSuspendUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchSuspendUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchSuspendUserResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchSuspendUserResponse.error_of_json))
   | BatchUnsuspendUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchUnsuspendUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchUnsuspendUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchUnsuspendUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchUnsuspendUserResponse.error_of_json))
   | BatchUpdatePhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchUpdatePhoneNumberResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchUpdatePhoneNumberResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (BatchUpdatePhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchUpdatePhoneNumberResponse.error_of_json))
   | BatchUpdateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchUpdateUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchUpdateUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchUpdateUserResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchUpdateUserResponse.error_of_json))
   | CreateAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAccountResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAccountResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateAccountResponse.error_of_json))
   | CreateAppInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAppInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAppInstanceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAppInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAppInstanceResponse.error_of_json))
   | CreateAppInstanceAdmin ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAppInstanceAdminResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateAppInstanceAdminResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateAppInstanceAdminResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAppInstanceAdminResponse.error_of_json))
   | CreateAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAppInstanceUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAppInstanceUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAppInstanceUserResponse.error_of_json))
   | CreateAttendee ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAttendeeResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAttendeeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAttendeeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateAttendeeResponse.error_of_json))
   | CreateBot ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateBotResponse.error_of_json)
-       | Ok resp -> Ok (CreateBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateBotResponse.error_of_json))
   | CreateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
   | CreateChannelBan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelBanResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelBanResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelBanResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateChannelBanResponse.error_of_json))
   | CreateChannelMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateChannelMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateChannelMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateChannelMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateChannelMembershipResponse.error_of_json))
   | CreateChannelModerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateChannelModeratorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateChannelModeratorResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateChannelModeratorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateChannelModeratorResponse.error_of_json))
   | CreateMediaCapturePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateMediaCapturePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateMediaCapturePipelineResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateMediaCapturePipelineResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMediaCapturePipelineResponse.error_of_json))
   | CreateMeeting ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateMeetingResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateMeetingResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMeetingResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateMeetingResponse.error_of_json))
   | CreateMeetingDialOut ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateMeetingDialOutResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateMeetingDialOutResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMeetingDialOutResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateMeetingDialOutResponse.error_of_json))
   | CreateMeetingWithAttendees ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateMeetingWithAttendeesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateMeetingWithAttendeesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateMeetingWithAttendeesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMeetingWithAttendeesResponse.error_of_json))
   | CreatePhoneNumberOrder ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreatePhoneNumberOrderResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreatePhoneNumberOrderResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreatePhoneNumberOrderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePhoneNumberOrderResponse.error_of_json))
   | CreateProxySession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateProxySessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateProxySessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateProxySessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateProxySessionResponse.error_of_json))
   | CreateRoom ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRoomResponse.error_of_json)
-       | Ok resp -> Ok (CreateRoomResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRoomResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateRoomResponse.error_of_json))
   | CreateRoomMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRoomMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateRoomMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRoomMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRoomMembershipResponse.error_of_json))
   | CreateSipMediaApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSipMediaApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateSipMediaApplicationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateSipMediaApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSipMediaApplicationResponse.error_of_json))
   | CreateSipMediaApplicationCall ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSipMediaApplicationCallResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateSipMediaApplicationCallResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateSipMediaApplicationCallResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSipMediaApplicationCallResponse.error_of_json))
   | CreateSipRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSipRuleResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateSipRuleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSipRuleResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateSipRuleResponse.error_of_json))
   | CreateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateUserResponse.error_of_json)
-       | Ok resp -> Ok (CreateUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
   | CreateVoiceConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVoiceConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateVoiceConnectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateVoiceConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVoiceConnectorResponse.error_of_json))
   | CreateVoiceConnectorGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateVoiceConnectorGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateVoiceConnectorGroupResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateVoiceConnectorGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateVoiceConnectorGroupResponse.error_of_json))
   | DeleteAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAccountResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteAccountResponse.of_header_and_body (headers, ())))
-  | DeleteAppInstance -> Ok ()
-  | DeleteAppInstanceAdmin -> Ok ()
-  | DeleteAppInstanceStreamingConfigurations -> Ok ()
-  | DeleteAppInstanceUser -> Ok ()
-  | DeleteAttendee -> Ok ()
-  | DeleteChannel -> Ok ()
-  | DeleteChannelBan -> Ok ()
-  | DeleteChannelMembership -> Ok ()
-  | DeleteChannelMessage -> Ok ()
-  | DeleteChannelModerator -> Ok ()
-  | DeleteEventsConfiguration -> Ok ()
-  | DeleteMediaCapturePipeline -> Ok ()
-  | DeleteMeeting -> Ok ()
-  | DeletePhoneNumber -> Ok ()
-  | DeleteProxySession -> Ok ()
-  | DeleteRoom -> Ok ()
-  | DeleteRoomMembership -> Ok ()
-  | DeleteSipMediaApplication -> Ok ()
-  | DeleteSipRule -> Ok ()
-  | DeleteVoiceConnector -> Ok ()
-  | DeleteVoiceConnectorEmergencyCallingConfiguration -> Ok ()
-  | DeleteVoiceConnectorGroup -> Ok ()
-  | DeleteVoiceConnectorOrigination -> Ok ()
-  | DeleteVoiceConnectorProxy -> Ok ()
-  | DeleteVoiceConnectorStreamingConfiguration -> Ok ()
-  | DeleteVoiceConnectorTermination -> Ok ()
-  | DeleteVoiceConnectorTerminationCredentials -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAccountResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteAccountResponse.error_of_json))
+  | DeleteAppInstance ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAppInstanceAdmin ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAppInstanceStreamingConfigurations ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAppInstanceUser ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAttendee ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannel ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelBan ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelMembership ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelMessage ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelModerator ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteEventsConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMediaCapturePipeline ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMeeting ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePhoneNumber ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteProxySession ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRoom -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRoomMembership ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSipMediaApplication ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSipRule ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnector ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnectorEmergencyCallingConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnectorGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnectorOrigination ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnectorProxy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnectorStreamingConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnectorTermination ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVoiceConnectorTerminationCredentials ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAppInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAppInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAppInstanceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAppInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAppInstanceResponse.error_of_json))
   | DescribeAppInstanceAdmin ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAppInstanceAdminResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAppInstanceAdminResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeAppInstanceAdminResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppInstanceAdminResponse.error_of_json))
   | DescribeAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAppInstanceUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeAppInstanceUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppInstanceUserResponse.error_of_json))
   | DescribeChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeChannelResponse.error_of_json))
   | DescribeChannelBan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelBanResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelBanResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelBanResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeChannelBanResponse.error_of_json))
   | DescribeChannelMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeChannelMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelMembershipResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeChannelMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeChannelMembershipResponse.error_of_json))
   | DescribeChannelMembershipForAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeChannelMembershipForAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeChannelMembershipForAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelMembershipForAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                DescribeChannelMembershipForAppInstanceUserResponse.error_of_json))
   | DescribeChannelModeratedByAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeChannelModeratedByAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeChannelModeratedByAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelModeratedByAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                DescribeChannelModeratedByAppInstanceUserResponse.error_of_json))
   | DescribeChannelModerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeChannelModeratorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelModeratorResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeChannelModeratorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeChannelModeratorResponse.error_of_json))
   | DisassociatePhoneNumberFromUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociatePhoneNumberFromUserResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociatePhoneNumberFromUserResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociatePhoneNumberFromUserResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociatePhoneNumberFromUserResponse.error_of_json))
   | DisassociatePhoneNumbersFromVoiceConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DisassociatePhoneNumbersFromVoiceConnectorResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociatePhoneNumbersFromVoiceConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociatePhoneNumbersFromVoiceConnectorResponse.of_json
-                (response_to_json resp)))
+                DisassociatePhoneNumbersFromVoiceConnectorResponse.error_of_json))
   | DisassociatePhoneNumbersFromVoiceConnectorGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.of_json
-                (response_to_json resp)))
+                DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.error_of_json))
   | DisassociateSigninDelegateGroupsFromAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateSigninDelegateGroupsFromAccountResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateSigninDelegateGroupsFromAccountResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateSigninDelegateGroupsFromAccountResponse.of_header_and_body
-                (headers, ())))
+                DisassociateSigninDelegateGroupsFromAccountResponse.error_of_json))
   | GetAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccountResponse.error_of_json)
-       | Ok resp -> Ok (GetAccountResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAccountResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAccountResponse.error_of_json))
   | GetAccountSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccountSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetAccountSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAccountSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAccountSettingsResponse.error_of_json))
   | GetAppInstanceRetentionSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAppInstanceRetentionSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAppInstanceRetentionSettingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetAppInstanceRetentionSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAppInstanceRetentionSettingsResponse.error_of_json))
   | GetAppInstanceStreamingConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetAppInstanceStreamingConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetAppInstanceStreamingConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAppInstanceStreamingConfigurationsResponse.of_json
-                (response_to_json resp)))
+                GetAppInstanceStreamingConfigurationsResponse.error_of_json))
   | GetAttendee ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAttendeeResponse.error_of_json)
-       | Ok resp -> Ok (GetAttendeeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAttendeeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAttendeeResponse.error_of_json))
   | GetBot ->
-      (match resp with
-       | Error err -> handle_error err (Some GetBotResponse.error_of_json)
-       | Ok resp -> Ok (GetBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBotResponse.error_of_json))
   | GetChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetChannelMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetChannelMessageResponse.error_of_json))
   | GetEventsConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEventsConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetEventsConfigurationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetEventsConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEventsConfigurationResponse.error_of_json))
   | GetGlobalSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetGlobalSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetGlobalSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetGlobalSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetGlobalSettingsResponse.error_of_json))
   | GetMediaCapturePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMediaCapturePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetMediaCapturePipelineResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetMediaCapturePipelineResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMediaCapturePipelineResponse.error_of_json))
   | GetMeeting ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMeetingResponse.error_of_json)
-       | Ok resp -> Ok (GetMeetingResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMeetingResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMeetingResponse.error_of_json))
   | GetMessagingSessionEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMessagingSessionEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetMessagingSessionEndpointResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetMessagingSessionEndpointResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMessagingSessionEndpointResponse.error_of_json))
   | GetPhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPhoneNumberResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetPhoneNumberResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetPhoneNumberResponse.error_of_json))
   | GetPhoneNumberOrder ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPhoneNumberOrderResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetPhoneNumberOrderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPhoneNumberOrderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetPhoneNumberOrderResponse.error_of_json))
   | GetPhoneNumberSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPhoneNumberSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetPhoneNumberSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetPhoneNumberSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPhoneNumberSettingsResponse.error_of_json))
   | GetProxySession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetProxySessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetProxySessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetProxySessionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetProxySessionResponse.error_of_json))
   | GetRetentionSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRetentionSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetRetentionSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetRetentionSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRetentionSettingsResponse.error_of_json))
   | GetRoom ->
-      (match resp with
-       | Error err -> handle_error err (Some GetRoomResponse.error_of_json)
-       | Ok resp -> Ok (GetRoomResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetRoomResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetRoomResponse.error_of_json))
   | GetSipMediaApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSipMediaApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetSipMediaApplicationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetSipMediaApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSipMediaApplicationResponse.error_of_json))
   | GetSipMediaApplicationLoggingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetSipMediaApplicationLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetSipMediaApplicationLoggingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetSipMediaApplicationLoggingConfigurationResponse.of_json
-                (response_to_json resp)))
+                GetSipMediaApplicationLoggingConfigurationResponse.error_of_json))
   | GetSipRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSipRuleResponse.error_of_json)
-       | Ok resp -> Ok (GetSipRuleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSipRuleResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSipRuleResponse.error_of_json))
   | GetUser ->
-      (match resp with
-       | Error err -> handle_error err (Some GetUserResponse.error_of_json)
-       | Ok resp -> Ok (GetUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetUserResponse.error_of_json))
   | GetUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetUserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetUserSettingsResponse.error_of_json))
   | GetVoiceConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetVoiceConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetVoiceConnectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetVoiceConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetVoiceConnectorResponse.error_of_json))
   | GetVoiceConnectorEmergencyCallingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetVoiceConnectorEmergencyCallingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetVoiceConnectorEmergencyCallingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorEmergencyCallingConfigurationResponse.of_json
-                (response_to_json resp)))
+                GetVoiceConnectorEmergencyCallingConfigurationResponse.error_of_json))
   | GetVoiceConnectorGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetVoiceConnectorGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetVoiceConnectorGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetVoiceConnectorGroupResponse.error_of_json))
   | GetVoiceConnectorLoggingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetVoiceConnectorLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetVoiceConnectorLoggingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorLoggingConfigurationResponse.of_json
-                (response_to_json resp)))
+                GetVoiceConnectorLoggingConfigurationResponse.error_of_json))
   | GetVoiceConnectorOrigination ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetVoiceConnectorOriginationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorOriginationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetVoiceConnectorOriginationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetVoiceConnectorOriginationResponse.error_of_json))
   | GetVoiceConnectorProxy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetVoiceConnectorProxyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorProxyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetVoiceConnectorProxyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetVoiceConnectorProxyResponse.error_of_json))
   | GetVoiceConnectorStreamingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetVoiceConnectorStreamingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetVoiceConnectorStreamingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorStreamingConfigurationResponse.of_json
-                (response_to_json resp)))
+                GetVoiceConnectorStreamingConfigurationResponse.error_of_json))
   | GetVoiceConnectorTermination ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetVoiceConnectorTerminationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorTerminationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetVoiceConnectorTerminationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetVoiceConnectorTerminationResponse.error_of_json))
   | GetVoiceConnectorTerminationHealth ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetVoiceConnectorTerminationHealthResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetVoiceConnectorTerminationHealthResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetVoiceConnectorTerminationHealthResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetVoiceConnectorTerminationHealthResponse.error_of_json))
   | InviteUsers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InviteUsersResponse.error_of_json)
-       | Ok resp -> Ok (InviteUsersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (InviteUsersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some InviteUsersResponse.error_of_json))
   | ListAccounts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAccountsResponse.error_of_json)
-       | Ok resp -> Ok (ListAccountsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAccountsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAccountsResponse.error_of_json))
   | ListAppInstanceAdmins ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppInstanceAdminsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppInstanceAdminsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppInstanceAdminsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppInstanceAdminsResponse.error_of_json))
   | ListAppInstanceUsers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAppInstanceUsersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppInstanceUsersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppInstanceUsersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppInstanceUsersResponse.error_of_json))
   | ListAppInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAppInstancesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppInstancesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppInstancesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAppInstancesResponse.error_of_json))
   | ListAttendeeTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAttendeeTagsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAttendeeTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAttendeeTagsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAttendeeTagsResponse.error_of_json))
   | ListAttendees ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAttendeesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAttendeesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAttendeesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAttendeesResponse.error_of_json))
   | ListBots ->
-      (match resp with
-       | Error err -> handle_error err (Some ListBotsResponse.error_of_json)
-       | Ok resp -> Ok (ListBotsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBotsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListBotsResponse.error_of_json))
   | ListChannelBans ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelBansResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChannelBansResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelBansResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListChannelBansResponse.error_of_json))
   | ListChannelMemberships ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListChannelMembershipsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListChannelMembershipsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListChannelMembershipsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListChannelMembershipsResponse.error_of_json))
   | ListChannelMembershipsForAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListChannelMembershipsForAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListChannelMembershipsForAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListChannelMembershipsForAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                ListChannelMembershipsForAppInstanceUserResponse.error_of_json))
   | ListChannelMessages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelMessagesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChannelMessagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelMessagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListChannelMessagesResponse.error_of_json))
   | ListChannelModerators ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListChannelModeratorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChannelModeratorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelModeratorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListChannelModeratorsResponse.error_of_json))
   | ListChannels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelsResponse.error_of_json)
-       | Ok resp -> Ok (ListChannelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
   | ListChannelsModeratedByAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListChannelsModeratedByAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListChannelsModeratedByAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListChannelsModeratedByAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                ListChannelsModeratedByAppInstanceUserResponse.error_of_json))
   | ListMediaCapturePipelines ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMediaCapturePipelinesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListMediaCapturePipelinesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListMediaCapturePipelinesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListMediaCapturePipelinesResponse.error_of_json))
   | ListMeetingTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMeetingTagsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListMeetingTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMeetingTagsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListMeetingTagsResponse.error_of_json))
   | ListMeetings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMeetingsResponse.error_of_json)
-       | Ok resp -> Ok (ListMeetingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMeetingsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMeetingsResponse.error_of_json))
   | ListPhoneNumberOrders ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPhoneNumberOrdersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPhoneNumberOrdersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPhoneNumberOrdersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPhoneNumberOrdersResponse.error_of_json))
   | ListPhoneNumbers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPhoneNumbersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPhoneNumbersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPhoneNumbersResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPhoneNumbersResponse.error_of_json))
   | ListProxySessions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListProxySessionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListProxySessionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProxySessionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListProxySessionsResponse.error_of_json))
   | ListRoomMemberships ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRoomMembershipsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListRoomMembershipsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRoomMembershipsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRoomMembershipsResponse.error_of_json))
   | ListRooms ->
-      (match resp with
-       | Error err -> handle_error err (Some ListRoomsResponse.error_of_json)
-       | Ok resp -> Ok (ListRoomsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRoomsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRoomsResponse.error_of_json))
   | ListSipMediaApplications ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSipMediaApplicationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListSipMediaApplicationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListSipMediaApplicationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSipMediaApplicationsResponse.error_of_json))
   | ListSipRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSipRulesResponse.error_of_json)
-       | Ok resp -> Ok (ListSipRulesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSipRulesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListSipRulesResponse.error_of_json))
   | ListSupportedPhoneNumberCountries ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSupportedPhoneNumberCountriesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListSupportedPhoneNumberCountriesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListSupportedPhoneNumberCountriesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSupportedPhoneNumberCountriesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListUsers ->
-      (match resp with
-       | Error err -> handle_error err (Some ListUsersResponse.error_of_json)
-       | Ok resp -> Ok (ListUsersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListUsersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
   | ListVoiceConnectorGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListVoiceConnectorGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListVoiceConnectorGroupsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListVoiceConnectorGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListVoiceConnectorGroupsResponse.error_of_json))
   | ListVoiceConnectorTerminationCredentials ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListVoiceConnectorTerminationCredentialsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListVoiceConnectorTerminationCredentialsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListVoiceConnectorTerminationCredentialsResponse.of_json
-                (response_to_json resp)))
+                ListVoiceConnectorTerminationCredentialsResponse.error_of_json))
   | ListVoiceConnectors ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVoiceConnectorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListVoiceConnectorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVoiceConnectorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListVoiceConnectorsResponse.error_of_json))
   | LogoutUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some LogoutUserResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (LogoutUserResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (LogoutUserResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some LogoutUserResponse.error_of_json))
   | PutAppInstanceRetentionSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutAppInstanceRetentionSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutAppInstanceRetentionSettingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutAppInstanceRetentionSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutAppInstanceRetentionSettingsResponse.error_of_json))
   | PutAppInstanceStreamingConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (PutAppInstanceStreamingConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                PutAppInstanceStreamingConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutAppInstanceStreamingConfigurationsResponse.of_json
-                (response_to_json resp)))
+                PutAppInstanceStreamingConfigurationsResponse.error_of_json))
   | PutEventsConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutEventsConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutEventsConfigurationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (PutEventsConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutEventsConfigurationResponse.error_of_json))
   | PutRetentionSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutRetentionSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutRetentionSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutRetentionSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutRetentionSettingsResponse.error_of_json))
   | PutSipMediaApplicationLoggingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (PutSipMediaApplicationLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                PutSipMediaApplicationLoggingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutSipMediaApplicationLoggingConfigurationResponse.of_json
-                (response_to_json resp)))
+                PutSipMediaApplicationLoggingConfigurationResponse.error_of_json))
   | PutVoiceConnectorEmergencyCallingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (PutVoiceConnectorEmergencyCallingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                PutVoiceConnectorEmergencyCallingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutVoiceConnectorEmergencyCallingConfigurationResponse.of_json
-                (response_to_json resp)))
+                PutVoiceConnectorEmergencyCallingConfigurationResponse.error_of_json))
   | PutVoiceConnectorLoggingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (PutVoiceConnectorLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                PutVoiceConnectorLoggingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutVoiceConnectorLoggingConfigurationResponse.of_json
-                (response_to_json resp)))
+                PutVoiceConnectorLoggingConfigurationResponse.error_of_json))
   | PutVoiceConnectorOrigination ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutVoiceConnectorOriginationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutVoiceConnectorOriginationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutVoiceConnectorOriginationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutVoiceConnectorOriginationResponse.error_of_json))
   | PutVoiceConnectorProxy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutVoiceConnectorProxyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutVoiceConnectorProxyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (PutVoiceConnectorProxyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutVoiceConnectorProxyResponse.error_of_json))
   | PutVoiceConnectorStreamingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (PutVoiceConnectorStreamingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                PutVoiceConnectorStreamingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutVoiceConnectorStreamingConfigurationResponse.of_json
-                (response_to_json resp)))
+                PutVoiceConnectorStreamingConfigurationResponse.error_of_json))
   | PutVoiceConnectorTermination ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutVoiceConnectorTerminationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutVoiceConnectorTerminationResponse.of_json
-                (response_to_json resp)))
-  | PutVoiceConnectorTerminationCredentials -> Ok ()
+      if is_success
+      then
+        Ok
+          (PutVoiceConnectorTerminationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutVoiceConnectorTerminationResponse.error_of_json))
+  | PutVoiceConnectorTerminationCredentials ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RedactChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RedactChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (RedactChannelMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RedactChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RedactChannelMessageResponse.error_of_json))
   | RedactConversationMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RedactConversationMessageResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (RedactConversationMessageResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (RedactConversationMessageResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RedactConversationMessageResponse.error_of_json))
   | RedactRoomMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RedactRoomMessageResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RedactRoomMessageResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RedactRoomMessageResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some RedactRoomMessageResponse.error_of_json))
   | RegenerateSecurityToken ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegenerateSecurityTokenResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RegenerateSecurityTokenResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (RegenerateSecurityTokenResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RegenerateSecurityTokenResponse.error_of_json))
   | ResetPersonalPIN ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ResetPersonalPINResponse.error_of_json)
-       | Ok resp ->
-           Ok (ResetPersonalPINResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ResetPersonalPINResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ResetPersonalPINResponse.error_of_json))
   | RestorePhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestorePhoneNumberResponse.error_of_json)
-       | Ok resp ->
-           Ok (RestorePhoneNumberResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RestorePhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RestorePhoneNumberResponse.error_of_json))
   | SearchAvailablePhoneNumbers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SearchAvailablePhoneNumbersResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SearchAvailablePhoneNumbersResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (SearchAvailablePhoneNumbersResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchAvailablePhoneNumbersResponse.error_of_json))
   | SendChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SendChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (SendChannelMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SendChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SendChannelMessageResponse.error_of_json))
   | StartMeetingTranscription ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartMeetingTranscriptionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (StartMeetingTranscriptionResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartMeetingTranscriptionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some StartMeetingTranscriptionResponse.error_of_json))
   | StopMeetingTranscription ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopMeetingTranscriptionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (StopMeetingTranscriptionResponse.of_header_and_body
-                (headers, ())))
-  | TagAttendee -> Ok ()
-  | TagMeeting -> Ok ()
-  | TagResource -> Ok ()
-  | UntagAttendee -> Ok ()
-  | UntagMeeting -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StopMeetingTranscriptionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some StopMeetingTranscriptionResponse.error_of_json))
+  | TagAttendee -> if is_success then Ok () else Error (parse_aws_error None)
+  | TagMeeting -> if is_success then Ok () else Error (parse_aws_error None)
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagAttendee ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagMeeting ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAccountResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAccountResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateAccountResponse.error_of_json))
   | UpdateAccountSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAccountSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateAccountSettingsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateAccountSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateAccountSettingsResponse.error_of_json))
   | UpdateAppInstance ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAppInstanceResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAppInstanceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAppInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAppInstanceResponse.error_of_json))
   | UpdateAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAppInstanceUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAppInstanceUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAppInstanceUserResponse.error_of_json))
   | UpdateBot ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateBotResponse.error_of_json)
-       | Ok resp -> Ok (UpdateBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateBotResponse.error_of_json))
   | UpdateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
   | UpdateChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChannelMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateChannelMessageResponse.error_of_json))
   | UpdateChannelReadMarker ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateChannelReadMarkerResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateChannelReadMarkerResponse.of_json (response_to_json resp)))
-  | UpdateGlobalSettings -> Ok ()
+      if is_success
+      then
+        Ok (UpdateChannelReadMarkerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateChannelReadMarkerResponse.error_of_json))
+  | UpdateGlobalSettings ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdatePhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePhoneNumberResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdatePhoneNumberResponse.of_json (response_to_json resp)))
-  | UpdatePhoneNumberSettings -> Ok ()
+      if is_success
+      then Ok (UpdatePhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdatePhoneNumberResponse.error_of_json))
+  | UpdatePhoneNumberSettings ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateProxySession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateProxySessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateProxySessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateProxySessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateProxySessionResponse.error_of_json))
   | UpdateRoom ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRoomResponse.error_of_json)
-       | Ok resp -> Ok (UpdateRoomResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRoomResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateRoomResponse.error_of_json))
   | UpdateRoomMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRoomMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRoomMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRoomMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRoomMembershipResponse.error_of_json))
   | UpdateSipMediaApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateSipMediaApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateSipMediaApplicationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateSipMediaApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSipMediaApplicationResponse.error_of_json))
   | UpdateSipMediaApplicationCall ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateSipMediaApplicationCallResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateSipMediaApplicationCallResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateSipMediaApplicationCallResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSipMediaApplicationCallResponse.error_of_json))
   | UpdateSipRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSipRuleResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateSipRuleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSipRuleResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateSipRuleResponse.error_of_json))
   | UpdateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateUserResponse.error_of_json)
-       | Ok resp -> Ok (UpdateUserResponse.of_json (response_to_json resp)))
-  | UpdateUserSettings -> Ok ()
+      if is_success
+      then Ok (UpdateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))
+  | UpdateUserSettings ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateVoiceConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVoiceConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateVoiceConnectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateVoiceConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVoiceConnectorResponse.error_of_json))
   | UpdateVoiceConnectorGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateVoiceConnectorGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateVoiceConnectorGroupResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateVoiceConnectorGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateVoiceConnectorGroupResponse.error_of_json))

@@ -5,126 +5,94 @@ val create_experiment_template :
     ?cfg:Awso.Cfg.t ->
       CreateExperimentTemplateRequest.t ->
         (CreateExperimentTemplateResponse.t,
-          [ `AWS of CreateExperimentTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateExperimentTemplateResponse.error) Result.t Async.Deferred.t
 val delete_experiment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteExperimentTemplateRequest.t ->
         (DeleteExperimentTemplateResponse.t,
-          [ `AWS of DeleteExperimentTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteExperimentTemplateResponse.error) Result.t Async.Deferred.t
 val get_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetActionRequest.t ->
-        (GetActionResponse.t,
-          [ `AWS of GetActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetActionResponse.t, GetActionResponse.error) Result.t
           Async.Deferred.t
 val get_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExperimentRequest.t ->
-        (GetExperimentResponse.t,
-          [ `AWS of GetExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetExperimentResponse.t, GetExperimentResponse.error) Result.t
           Async.Deferred.t
 val get_experiment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExperimentTemplateRequest.t ->
         (GetExperimentTemplateResponse.t,
-          [ `AWS of GetExperimentTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetExperimentTemplateResponse.error) Result.t Async.Deferred.t
 val get_target_resource_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTargetResourceTypeRequest.t ->
         (GetTargetResourceTypeResponse.t,
-          [ `AWS of GetTargetResourceTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetTargetResourceTypeResponse.error) Result.t Async.Deferred.t
 val list_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListActionsRequest.t ->
-        (ListActionsResponse.t,
-          [ `AWS of ListActionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListActionsResponse.t, ListActionsResponse.error) Result.t
           Async.Deferred.t
 val list_experiment_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExperimentTemplatesRequest.t ->
         (ListExperimentTemplatesResponse.t,
-          [ `AWS of ListExperimentTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListExperimentTemplatesResponse.error) Result.t Async.Deferred.t
 val list_experiments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExperimentsRequest.t ->
-        (ListExperimentsResponse.t,
-          [ `AWS of ListExperimentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListExperimentsResponse.t, ListExperimentsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_target_resource_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTargetResourceTypesRequest.t ->
         (ListTargetResourceTypesResponse.t,
-          [ `AWS of ListTargetResourceTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListTargetResourceTypesResponse.error) Result.t Async.Deferred.t
 val start_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartExperimentRequest.t ->
-        (StartExperimentResponse.t,
-          [ `AWS of StartExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartExperimentResponse.t, StartExperimentResponse.error) Result.t
           Async.Deferred.t
 val stop_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopExperimentRequest.t ->
-        (StopExperimentResponse.t,
-          [ `AWS of StopExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopExperimentResponse.t, StopExperimentResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_experiment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateExperimentTemplateRequest.t ->
         (UpdateExperimentTemplateResponse.t,
-          [ `AWS of UpdateExperimentTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateExperimentTemplateResponse.error) Result.t Async.Deferred.t

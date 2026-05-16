@@ -5,174 +5,131 @@ val create_connector_profile :
     ?cfg:Awso.Cfg.t ->
       CreateConnectorProfileRequest.t ->
         (CreateConnectorProfileResponse.t,
-          [ `AWS of CreateConnectorProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateConnectorProfileResponse.error) Result.t Async.Deferred.t
 val create_flow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFlowRequest.t ->
-        (CreateFlowResponse.t,
-          [ `AWS of CreateFlowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFlowResponse.t, CreateFlowResponse.error) Result.t
           Async.Deferred.t
 val delete_connector_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectorProfileRequest.t ->
         (DeleteConnectorProfileResponse.t,
-          [ `AWS of DeleteConnectorProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteConnectorProfileResponse.error) Result.t Async.Deferred.t
 val delete_flow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFlowRequest.t ->
-        (DeleteFlowResponse.t,
-          [ `AWS of DeleteFlowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFlowResponse.t, DeleteFlowResponse.error) Result.t
           Async.Deferred.t
 val describe_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectorRequest.t ->
-        (DescribeConnectorResponse.t,
-          [ `AWS of DescribeConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeConnectorResponse.t, DescribeConnectorResponse.error)
+          Result.t Async.Deferred.t
 val describe_connector_entity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectorEntityRequest.t ->
         (DescribeConnectorEntityResponse.t,
-          [ `AWS of DescribeConnectorEntityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeConnectorEntityResponse.error) Result.t Async.Deferred.t
 val describe_connector_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectorProfilesRequest.t ->
         (DescribeConnectorProfilesResponse.t,
-          [ `AWS of DescribeConnectorProfilesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeConnectorProfilesResponse.error) Result.t Async.Deferred.t
 val describe_connectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectorsRequest.t ->
-        (DescribeConnectorsResponse.t,
-          [ `AWS of DescribeConnectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeConnectorsResponse.t, DescribeConnectorsResponse.error)
+          Result.t Async.Deferred.t
 val describe_flow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFlowRequest.t ->
-        (DescribeFlowResponse.t,
-          [ `AWS of DescribeFlowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeFlowResponse.t, DescribeFlowResponse.error) Result.t
           Async.Deferred.t
 val describe_flow_execution_records :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFlowExecutionRecordsRequest.t ->
         (DescribeFlowExecutionRecordsResponse.t,
-          [ `AWS of DescribeFlowExecutionRecordsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeFlowExecutionRecordsResponse.error) Result.t
           Async.Deferred.t
 val list_connector_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectorEntitiesRequest.t ->
         (ListConnectorEntitiesResponse.t,
-          [ `AWS of ListConnectorEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListConnectorEntitiesResponse.error) Result.t Async.Deferred.t
 val list_connectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectorsRequest.t ->
-        (ListConnectorsResponse.t,
-          [ `AWS of ListConnectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListConnectorsResponse.t, ListConnectorsResponse.error) Result.t
           Async.Deferred.t
 val list_flows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFlowsRequest.t ->
-        (ListFlowsResponse.t,
-          [ `AWS of ListFlowsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListFlowsResponse.t, ListFlowsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val register_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterConnectorRequest.t ->
-        (RegisterConnectorResponse.t,
-          [ `AWS of RegisterConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RegisterConnectorResponse.t, RegisterConnectorResponse.error)
+          Result.t Async.Deferred.t
 val start_flow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFlowRequest.t ->
-        (StartFlowResponse.t,
-          [ `AWS of StartFlowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartFlowResponse.t, StartFlowResponse.error) Result.t
           Async.Deferred.t
 val stop_flow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopFlowRequest.t ->
-        (StopFlowResponse.t,
-          [ `AWS of StopFlowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopFlowResponse.t, StopFlowResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val unregister_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnregisterConnectorRequest.t ->
-        (UnregisterConnectorResponse.t,
-          [ `AWS of UnregisterConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UnregisterConnectorResponse.t, UnregisterConnectorResponse.error)
+          Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_connector_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectorProfileRequest.t ->
         (UpdateConnectorProfileResponse.t,
-          [ `AWS of UpdateConnectorProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateConnectorProfileResponse.error) Result.t Async.Deferred.t
 val update_flow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFlowRequest.t ->
-        (UpdateFlowResponse.t,
-          [ `AWS of UpdateFlowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateFlowResponse.t, UpdateFlowResponse.error) Result.t
           Async.Deferred.t

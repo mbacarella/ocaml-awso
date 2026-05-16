@@ -4,617 +4,512 @@ val accept_portfolio_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptPortfolioShareInput.t ->
-        (AcceptPortfolioShareOutput.t,
-          [ `AWS of AcceptPortfolioShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AcceptPortfolioShareOutput.t, AcceptPortfolioShareOutput.error)
+          Result.t Lwt.t
 val associate_budget_with_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateBudgetWithResourceInput.t ->
         (AssociateBudgetWithResourceOutput.t,
-          [ `AWS of AssociateBudgetWithResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateBudgetWithResourceOutput.error) Result.t Lwt.t
 val associate_principal_with_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociatePrincipalWithPortfolioInput.t ->
         (AssociatePrincipalWithPortfolioOutput.t,
-          [ `AWS of AssociatePrincipalWithPortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociatePrincipalWithPortfolioOutput.error) Result.t Lwt.t
 val associate_product_with_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateProductWithPortfolioInput.t ->
         (AssociateProductWithPortfolioOutput.t,
-          [ `AWS of AssociateProductWithPortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateProductWithPortfolioOutput.error) Result.t Lwt.t
 val associate_service_action_with_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateServiceActionWithProvisioningArtifactInput.t ->
         (AssociateServiceActionWithProvisioningArtifactOutput.t,
-          [
-            `AWS of
-              AssociateServiceActionWithProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateServiceActionWithProvisioningArtifactOutput.error)
+          Result.t Lwt.t
 val associate_tag_option_with_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTagOptionWithResourceInput.t ->
         (AssociateTagOptionWithResourceOutput.t,
-          [ `AWS of AssociateTagOptionWithResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateTagOptionWithResourceOutput.error) Result.t Lwt.t
 val batch_associate_service_action_with_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchAssociateServiceActionWithProvisioningArtifactInput.t ->
         (BatchAssociateServiceActionWithProvisioningArtifactOutput.t,
-          [
-            `AWS of
-              BatchAssociateServiceActionWithProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchAssociateServiceActionWithProvisioningArtifactOutput.error)
+          Result.t Lwt.t
 val batch_disassociate_service_action_from_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateServiceActionFromProvisioningArtifactInput.t ->
         (BatchDisassociateServiceActionFromProvisioningArtifactOutput.t,
-          [
-            `AWS of
-              BatchDisassociateServiceActionFromProvisioningArtifactOutput.error
-               | `Transport of Awso.Http.Io.Error.call ])
+          BatchDisassociateServiceActionFromProvisioningArtifactOutput.error)
           Result.t Lwt.t
 val copy_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyProductInput.t ->
-        (CopyProductOutput.t,
-          [ `AWS of CopyProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CopyProductOutput.t, CopyProductOutput.error) Result.t Lwt.t
 val create_constraint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConstraintInput.t ->
-        (CreateConstraintOutput.t,
-          [ `AWS of CreateConstraintOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateConstraintOutput.t, CreateConstraintOutput.error) Result.t
+          Lwt.t
 val create_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePortfolioInput.t ->
-        (CreatePortfolioOutput.t,
-          [ `AWS of CreatePortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePortfolioOutput.t, CreatePortfolioOutput.error) Result.t Lwt.t
 val create_portfolio_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePortfolioShareInput.t ->
-        (CreatePortfolioShareOutput.t,
-          [ `AWS of CreatePortfolioShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePortfolioShareOutput.t, CreatePortfolioShareOutput.error)
+          Result.t Lwt.t
 val create_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProductInput.t ->
-        (CreateProductOutput.t,
-          [ `AWS of CreateProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProductOutput.t, CreateProductOutput.error) Result.t Lwt.t
 val create_provisioned_product_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProvisionedProductPlanInput.t ->
         (CreateProvisionedProductPlanOutput.t,
-          [ `AWS of CreateProvisionedProductPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateProvisionedProductPlanOutput.error) Result.t Lwt.t
 val create_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProvisioningArtifactInput.t ->
         (CreateProvisioningArtifactOutput.t,
-          [ `AWS of CreateProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateProvisioningArtifactOutput.error) Result.t Lwt.t
 val create_service_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceActionInput.t ->
-        (CreateServiceActionOutput.t,
-          [ `AWS of CreateServiceActionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateServiceActionOutput.t, CreateServiceActionOutput.error)
+          Result.t Lwt.t
 val create_tag_option :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTagOptionInput.t ->
-        (CreateTagOptionOutput.t,
-          [ `AWS of CreateTagOptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTagOptionOutput.t, CreateTagOptionOutput.error) Result.t Lwt.t
 val delete_constraint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConstraintInput.t ->
-        (DeleteConstraintOutput.t,
-          [ `AWS of DeleteConstraintOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteConstraintOutput.t, DeleteConstraintOutput.error) Result.t
+          Lwt.t
 val delete_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePortfolioInput.t ->
-        (DeletePortfolioOutput.t,
-          [ `AWS of DeletePortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePortfolioOutput.t, DeletePortfolioOutput.error) Result.t Lwt.t
 val delete_portfolio_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePortfolioShareInput.t ->
-        (DeletePortfolioShareOutput.t,
-          [ `AWS of DeletePortfolioShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePortfolioShareOutput.t, DeletePortfolioShareOutput.error)
+          Result.t Lwt.t
 val delete_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProductInput.t ->
-        (DeleteProductOutput.t,
-          [ `AWS of DeleteProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProductOutput.t, DeleteProductOutput.error) Result.t Lwt.t
 val delete_provisioned_product_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProvisionedProductPlanInput.t ->
         (DeleteProvisionedProductPlanOutput.t,
-          [ `AWS of DeleteProvisionedProductPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteProvisionedProductPlanOutput.error) Result.t Lwt.t
 val delete_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProvisioningArtifactInput.t ->
         (DeleteProvisioningArtifactOutput.t,
-          [ `AWS of DeleteProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteProvisioningArtifactOutput.error) Result.t Lwt.t
 val delete_service_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceActionInput.t ->
-        (DeleteServiceActionOutput.t,
-          [ `AWS of DeleteServiceActionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteServiceActionOutput.t, DeleteServiceActionOutput.error)
+          Result.t Lwt.t
 val delete_tag_option :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTagOptionInput.t ->
-        (DeleteTagOptionOutput.t,
-          [ `AWS of DeleteTagOptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTagOptionOutput.t, DeleteTagOptionOutput.error) Result.t Lwt.t
 val describe_constraint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConstraintInput.t ->
-        (DescribeConstraintOutput.t,
-          [ `AWS of DescribeConstraintOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeConstraintOutput.t, DescribeConstraintOutput.error) Result.t
+          Lwt.t
 val describe_copy_product_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCopyProductStatusInput.t ->
         (DescribeCopyProductStatusOutput.t,
-          [ `AWS of DescribeCopyProductStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCopyProductStatusOutput.error) Result.t Lwt.t
 val describe_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePortfolioInput.t ->
-        (DescribePortfolioOutput.t,
-          [ `AWS of DescribePortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePortfolioOutput.t, DescribePortfolioOutput.error) Result.t
+          Lwt.t
 val describe_portfolio_share_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePortfolioShareStatusInput.t ->
         (DescribePortfolioShareStatusOutput.t,
-          [ `AWS of DescribePortfolioShareStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePortfolioShareStatusOutput.error) Result.t Lwt.t
 val describe_portfolio_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePortfolioSharesInput.t ->
         (DescribePortfolioSharesOutput.t,
-          [ `AWS of DescribePortfolioSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePortfolioSharesOutput.error) Result.t Lwt.t
 val describe_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProductInput.t ->
-        (DescribeProductOutput.t,
-          [ `AWS of DescribeProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProductOutput.t, DescribeProductOutput.error) Result.t Lwt.t
 val describe_product_as_admin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProductAsAdminInput.t ->
-        (DescribeProductAsAdminOutput.t,
-          [ `AWS of DescribeProductAsAdminOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProductAsAdminOutput.t, DescribeProductAsAdminOutput.error)
+          Result.t Lwt.t
 val describe_product_view :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProductViewInput.t ->
-        (DescribeProductViewOutput.t,
-          [ `AWS of DescribeProductViewOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProductViewOutput.t, DescribeProductViewOutput.error)
+          Result.t Lwt.t
 val describe_provisioned_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProvisionedProductInput.t ->
         (DescribeProvisionedProductOutput.t,
-          [ `AWS of DescribeProvisionedProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeProvisionedProductOutput.error) Result.t Lwt.t
 val describe_provisioned_product_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProvisionedProductPlanInput.t ->
         (DescribeProvisionedProductPlanOutput.t,
-          [ `AWS of DescribeProvisionedProductPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeProvisionedProductPlanOutput.error) Result.t Lwt.t
 val describe_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProvisioningArtifactInput.t ->
         (DescribeProvisioningArtifactOutput.t,
-          [ `AWS of DescribeProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeProvisioningArtifactOutput.error) Result.t Lwt.t
 val describe_provisioning_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProvisioningParametersInput.t ->
         (DescribeProvisioningParametersOutput.t,
-          [ `AWS of DescribeProvisioningParametersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeProvisioningParametersOutput.error) Result.t Lwt.t
 val describe_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecordInput.t ->
-        (DescribeRecordOutput.t,
-          [ `AWS of DescribeRecordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRecordOutput.t, DescribeRecordOutput.error) Result.t Lwt.t
 val describe_service_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServiceActionInput.t ->
-        (DescribeServiceActionOutput.t,
-          [ `AWS of DescribeServiceActionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeServiceActionOutput.t, DescribeServiceActionOutput.error)
+          Result.t Lwt.t
 val describe_service_action_execution_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServiceActionExecutionParametersInput.t ->
         (DescribeServiceActionExecutionParametersOutput.t,
-          [ `AWS of DescribeServiceActionExecutionParametersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeServiceActionExecutionParametersOutput.error) Result.t
+          Lwt.t
 val describe_tag_option :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagOptionInput.t ->
-        (DescribeTagOptionOutput.t,
-          [ `AWS of DescribeTagOptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTagOptionOutput.t, DescribeTagOptionOutput.error) Result.t
+          Lwt.t
 val disable_a_w_s_organizations_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableAWSOrganizationsAccessInput.t ->
         (DisableAWSOrganizationsAccessOutput.t,
-          [ `AWS of DisableAWSOrganizationsAccessOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisableAWSOrganizationsAccessOutput.error) Result.t Lwt.t
 val disassociate_budget_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateBudgetFromResourceInput.t ->
         (DisassociateBudgetFromResourceOutput.t,
-          [ `AWS of DisassociateBudgetFromResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateBudgetFromResourceOutput.error) Result.t Lwt.t
 val disassociate_principal_from_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociatePrincipalFromPortfolioInput.t ->
         (DisassociatePrincipalFromPortfolioOutput.t,
-          [ `AWS of DisassociatePrincipalFromPortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociatePrincipalFromPortfolioOutput.error) Result.t Lwt.t
 val disassociate_product_from_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateProductFromPortfolioInput.t ->
         (DisassociateProductFromPortfolioOutput.t,
-          [ `AWS of DisassociateProductFromPortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateProductFromPortfolioOutput.error) Result.t Lwt.t
 val disassociate_service_action_from_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateServiceActionFromProvisioningArtifactInput.t ->
         (DisassociateServiceActionFromProvisioningArtifactOutput.t,
-          [
-            `AWS of
-              DisassociateServiceActionFromProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateServiceActionFromProvisioningArtifactOutput.error)
+          Result.t Lwt.t
 val disassociate_tag_option_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTagOptionFromResourceInput.t ->
         (DisassociateTagOptionFromResourceOutput.t,
-          [ `AWS of DisassociateTagOptionFromResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateTagOptionFromResourceOutput.error) Result.t Lwt.t
 val enable_a_w_s_organizations_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableAWSOrganizationsAccessInput.t ->
         (EnableAWSOrganizationsAccessOutput.t,
-          [ `AWS of EnableAWSOrganizationsAccessOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableAWSOrganizationsAccessOutput.error) Result.t Lwt.t
 val execute_provisioned_product_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExecuteProvisionedProductPlanInput.t ->
         (ExecuteProvisionedProductPlanOutput.t,
-          [ `AWS of ExecuteProvisionedProductPlanOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ExecuteProvisionedProductPlanOutput.error) Result.t Lwt.t
 val execute_provisioned_product_service_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExecuteProvisionedProductServiceActionInput.t ->
         (ExecuteProvisionedProductServiceActionOutput.t,
-          [ `AWS of ExecuteProvisionedProductServiceActionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ExecuteProvisionedProductServiceActionOutput.error) Result.t Lwt.t
 val get_a_w_s_organizations_access_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAWSOrganizationsAccessStatusInput.t ->
         (GetAWSOrganizationsAccessStatusOutput.t,
-          [ `AWS of GetAWSOrganizationsAccessStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAWSOrganizationsAccessStatusOutput.error) Result.t Lwt.t
 val get_provisioned_product_outputs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProvisionedProductOutputsInput.t ->
         (GetProvisionedProductOutputsOutput.t,
-          [ `AWS of GetProvisionedProductOutputsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetProvisionedProductOutputsOutput.error) Result.t Lwt.t
 val import_as_provisioned_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportAsProvisionedProductInput.t ->
         (ImportAsProvisionedProductOutput.t,
-          [ `AWS of ImportAsProvisionedProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ImportAsProvisionedProductOutput.error) Result.t Lwt.t
 val list_accepted_portfolio_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAcceptedPortfolioSharesInput.t ->
         (ListAcceptedPortfolioSharesOutput.t,
-          [ `AWS of ListAcceptedPortfolioSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAcceptedPortfolioSharesOutput.error) Result.t Lwt.t
 val list_budgets_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBudgetsForResourceInput.t ->
-        (ListBudgetsForResourceOutput.t,
-          [ `AWS of ListBudgetsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBudgetsForResourceOutput.t, ListBudgetsForResourceOutput.error)
+          Result.t Lwt.t
 val list_constraints_for_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConstraintsForPortfolioInput.t ->
         (ListConstraintsForPortfolioOutput.t,
-          [ `AWS of ListConstraintsForPortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListConstraintsForPortfolioOutput.error) Result.t Lwt.t
 val list_launch_paths :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLaunchPathsInput.t ->
-        (ListLaunchPathsOutput.t,
-          [ `AWS of ListLaunchPathsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLaunchPathsOutput.t, ListLaunchPathsOutput.error) Result.t Lwt.t
 val list_organization_portfolio_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOrganizationPortfolioAccessInput.t ->
         (ListOrganizationPortfolioAccessOutput.t,
-          [ `AWS of ListOrganizationPortfolioAccessOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListOrganizationPortfolioAccessOutput.error) Result.t Lwt.t
 val list_portfolio_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPortfolioAccessInput.t ->
-        (ListPortfolioAccessOutput.t,
-          [ `AWS of ListPortfolioAccessOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPortfolioAccessOutput.t, ListPortfolioAccessOutput.error)
+          Result.t Lwt.t
 val list_portfolios :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPortfoliosInput.t ->
-        (ListPortfoliosOutput.t,
-          [ `AWS of ListPortfoliosOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPortfoliosOutput.t, ListPortfoliosOutput.error) Result.t Lwt.t
 val list_portfolios_for_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPortfoliosForProductInput.t ->
         (ListPortfoliosForProductOutput.t,
-          [ `AWS of ListPortfoliosForProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPortfoliosForProductOutput.error) Result.t Lwt.t
 val list_principals_for_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPrincipalsForPortfolioInput.t ->
         (ListPrincipalsForPortfolioOutput.t,
-          [ `AWS of ListPrincipalsForPortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPrincipalsForPortfolioOutput.error) Result.t Lwt.t
 val list_provisioned_product_plans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProvisionedProductPlansInput.t ->
         (ListProvisionedProductPlansOutput.t,
-          [ `AWS of ListProvisionedProductPlansOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListProvisionedProductPlansOutput.error) Result.t Lwt.t
 val list_provisioning_artifacts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProvisioningArtifactsInput.t ->
         (ListProvisioningArtifactsOutput.t,
-          [ `AWS of ListProvisioningArtifactsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListProvisioningArtifactsOutput.error) Result.t Lwt.t
 val list_provisioning_artifacts_for_service_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProvisioningArtifactsForServiceActionInput.t ->
         (ListProvisioningArtifactsForServiceActionOutput.t,
-          [ `AWS of ListProvisioningArtifactsForServiceActionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListProvisioningArtifactsForServiceActionOutput.error) Result.t
+          Lwt.t
 val list_record_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecordHistoryInput.t ->
-        (ListRecordHistoryOutput.t,
-          [ `AWS of ListRecordHistoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRecordHistoryOutput.t, ListRecordHistoryOutput.error) Result.t
+          Lwt.t
 val list_resources_for_tag_option :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesForTagOptionInput.t ->
         (ListResourcesForTagOptionOutput.t,
-          [ `AWS of ListResourcesForTagOptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourcesForTagOptionOutput.error) Result.t Lwt.t
 val list_service_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceActionsInput.t ->
-        (ListServiceActionsOutput.t,
-          [ `AWS of ListServiceActionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListServiceActionsOutput.t, ListServiceActionsOutput.error) Result.t
+          Lwt.t
 val list_service_actions_for_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceActionsForProvisioningArtifactInput.t ->
         (ListServiceActionsForProvisioningArtifactOutput.t,
-          [ `AWS of ListServiceActionsForProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListServiceActionsForProvisioningArtifactOutput.error) Result.t
+          Lwt.t
 val list_stack_instances_for_provisioned_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStackInstancesForProvisionedProductInput.t ->
         (ListStackInstancesForProvisionedProductOutput.t,
-          [ `AWS of ListStackInstancesForProvisionedProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListStackInstancesForProvisionedProductOutput.error) Result.t Lwt.t
 val list_tag_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagOptionsInput.t ->
-        (ListTagOptionsOutput.t,
-          [ `AWS of ListTagOptionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagOptionsOutput.t, ListTagOptionsOutput.error) Result.t Lwt.t
 val provision_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ProvisionProductInput.t ->
-        (ProvisionProductOutput.t,
-          [ `AWS of ProvisionProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ProvisionProductOutput.t, ProvisionProductOutput.error) Result.t
+          Lwt.t
 val reject_portfolio_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectPortfolioShareInput.t ->
-        (RejectPortfolioShareOutput.t,
-          [ `AWS of RejectPortfolioShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RejectPortfolioShareOutput.t, RejectPortfolioShareOutput.error)
+          Result.t Lwt.t
 val scan_provisioned_products :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ScanProvisionedProductsInput.t ->
         (ScanProvisionedProductsOutput.t,
-          [ `AWS of ScanProvisionedProductsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ScanProvisionedProductsOutput.error) Result.t Lwt.t
 val search_products :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchProductsInput.t ->
-        (SearchProductsOutput.t,
-          [ `AWS of SearchProductsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchProductsOutput.t, SearchProductsOutput.error) Result.t Lwt.t
 val search_products_as_admin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchProductsAsAdminInput.t ->
-        (SearchProductsAsAdminOutput.t,
-          [ `AWS of SearchProductsAsAdminOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchProductsAsAdminOutput.t, SearchProductsAsAdminOutput.error)
+          Result.t Lwt.t
 val search_provisioned_products :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchProvisionedProductsInput.t ->
         (SearchProvisionedProductsOutput.t,
-          [ `AWS of SearchProvisionedProductsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchProvisionedProductsOutput.error) Result.t Lwt.t
 val terminate_provisioned_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateProvisionedProductInput.t ->
         (TerminateProvisionedProductOutput.t,
-          [ `AWS of TerminateProvisionedProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          TerminateProvisionedProductOutput.error) Result.t Lwt.t
 val update_constraint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConstraintInput.t ->
-        (UpdateConstraintOutput.t,
-          [ `AWS of UpdateConstraintOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateConstraintOutput.t, UpdateConstraintOutput.error) Result.t
+          Lwt.t
 val update_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePortfolioInput.t ->
-        (UpdatePortfolioOutput.t,
-          [ `AWS of UpdatePortfolioOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePortfolioOutput.t, UpdatePortfolioOutput.error) Result.t Lwt.t
 val update_portfolio_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePortfolioShareInput.t ->
-        (UpdatePortfolioShareOutput.t,
-          [ `AWS of UpdatePortfolioShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePortfolioShareOutput.t, UpdatePortfolioShareOutput.error)
+          Result.t Lwt.t
 val update_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProductInput.t ->
-        (UpdateProductOutput.t,
-          [ `AWS of UpdateProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProductOutput.t, UpdateProductOutput.error) Result.t Lwt.t
 val update_provisioned_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProvisionedProductInput.t ->
         (UpdateProvisionedProductOutput.t,
-          [ `AWS of UpdateProvisionedProductOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateProvisionedProductOutput.error) Result.t Lwt.t
 val update_provisioned_product_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProvisionedProductPropertiesInput.t ->
         (UpdateProvisionedProductPropertiesOutput.t,
-          [ `AWS of UpdateProvisionedProductPropertiesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateProvisionedProductPropertiesOutput.error) Result.t Lwt.t
 val update_provisioning_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProvisioningArtifactInput.t ->
         (UpdateProvisioningArtifactOutput.t,
-          [ `AWS of UpdateProvisioningArtifactOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateProvisioningArtifactOutput.error) Result.t Lwt.t
 val update_service_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceActionInput.t ->
-        (UpdateServiceActionOutput.t,
-          [ `AWS of UpdateServiceActionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateServiceActionOutput.t, UpdateServiceActionOutput.error)
+          Result.t Lwt.t
 val update_tag_option :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTagOptionInput.t ->
-        (UpdateTagOptionOutput.t,
-          [ `AWS of UpdateTagOptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTagOptionOutput.t, UpdateTagOptionOutput.error) Result.t Lwt.t

@@ -5,26 +5,22 @@ val delete_report_definition :
     ?cfg:Awso.Cfg.t ->
       DeleteReportDefinitionRequest.t ->
         (DeleteReportDefinitionResponse.t,
-          [ `AWS of DeleteReportDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteReportDefinitionResponse.error) Result.t Lwt.t
 val describe_report_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReportDefinitionsRequest.t ->
         (DescribeReportDefinitionsResponse.t,
-          [ `AWS of DescribeReportDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReportDefinitionsResponse.error) Result.t Lwt.t
 val modify_report_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyReportDefinitionRequest.t ->
         (ModifyReportDefinitionResponse.t,
-          [ `AWS of ModifyReportDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyReportDefinitionResponse.error) Result.t Lwt.t
 val put_report_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutReportDefinitionRequest.t ->
-        (PutReportDefinitionResponse.t,
-          [ `AWS of PutReportDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutReportDefinitionResponse.t, PutReportDefinitionResponse.error)
+          Result.t Lwt.t

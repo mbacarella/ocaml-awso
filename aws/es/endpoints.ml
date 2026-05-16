@@ -982,364 +982,379 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AcceptInboundCrossClusterSearchConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (AcceptInboundCrossClusterSearchConnectionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AcceptInboundCrossClusterSearchConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AcceptInboundCrossClusterSearchConnectionResponse.of_json
-                (response_to_json resp)))
-  | AddTags -> Ok ()
+                AcceptInboundCrossClusterSearchConnectionResponse.error_of_json))
+  | AddTags -> if is_success then Ok () else Error (parse_aws_error None)
   | AssociatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (AssociatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociatePackageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some AssociatePackageResponse.error_of_json))
   | CancelElasticsearchServiceSoftwareUpdate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (CancelElasticsearchServiceSoftwareUpdateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                CancelElasticsearchServiceSoftwareUpdateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CancelElasticsearchServiceSoftwareUpdateResponse.of_json
-                (response_to_json resp)))
+                CancelElasticsearchServiceSoftwareUpdateResponse.error_of_json))
   | CreateElasticsearchDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateElasticsearchDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateElasticsearchDomainResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateElasticsearchDomainResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateElasticsearchDomainResponse.error_of_json))
   | CreateOutboundCrossClusterSearchConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (CreateOutboundCrossClusterSearchConnectionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                CreateOutboundCrossClusterSearchConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateOutboundCrossClusterSearchConnectionResponse.of_json
-                (response_to_json resp)))
+                CreateOutboundCrossClusterSearchConnectionResponse.error_of_json))
   | CreatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreatePackageResponse.error_of_json))
   | DeleteElasticsearchDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteElasticsearchDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteElasticsearchDomainResponse.of_json
-                (response_to_json resp)))
-  | DeleteElasticsearchServiceRole -> Ok ()
+      if is_success
+      then
+        Ok
+          (DeleteElasticsearchDomainResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteElasticsearchDomainResponse.error_of_json))
+  | DeleteElasticsearchServiceRole ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteInboundCrossClusterSearchConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DeleteInboundCrossClusterSearchConnectionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DeleteInboundCrossClusterSearchConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteInboundCrossClusterSearchConnectionResponse.of_json
-                (response_to_json resp)))
+                DeleteInboundCrossClusterSearchConnectionResponse.error_of_json))
   | DeleteOutboundCrossClusterSearchConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DeleteOutboundCrossClusterSearchConnectionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DeleteOutboundCrossClusterSearchConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteOutboundCrossClusterSearchConnectionResponse.of_json
-                (response_to_json resp)))
+                DeleteOutboundCrossClusterSearchConnectionResponse.error_of_json))
   | DeletePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeletePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeletePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeletePackageResponse.error_of_json))
   | DescribeDomainAutoTunes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDomainAutoTunesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDomainAutoTunesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeDomainAutoTunesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDomainAutoTunesResponse.error_of_json))
   | DescribeDomainChangeProgress ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDomainChangeProgressResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDomainChangeProgressResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeDomainChangeProgressResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDomainChangeProgressResponse.error_of_json))
   | DescribeElasticsearchDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeElasticsearchDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeElasticsearchDomainResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeElasticsearchDomainResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeElasticsearchDomainResponse.error_of_json))
   | DescribeElasticsearchDomainConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeElasticsearchDomainConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeElasticsearchDomainConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeElasticsearchDomainConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeElasticsearchDomainConfigResponse.error_of_json))
   | DescribeElasticsearchDomains ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeElasticsearchDomainsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeElasticsearchDomainsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeElasticsearchDomainsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeElasticsearchDomainsResponse.error_of_json))
   | DescribeElasticsearchInstanceTypeLimits ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeElasticsearchInstanceTypeLimitsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeElasticsearchInstanceTypeLimitsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeElasticsearchInstanceTypeLimitsResponse.of_json
-                (response_to_json resp)))
+                DescribeElasticsearchInstanceTypeLimitsResponse.error_of_json))
   | DescribeInboundCrossClusterSearchConnections ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeInboundCrossClusterSearchConnectionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeInboundCrossClusterSearchConnectionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeInboundCrossClusterSearchConnectionsResponse.of_json
-                (response_to_json resp)))
+                DescribeInboundCrossClusterSearchConnectionsResponse.error_of_json))
   | DescribeOutboundCrossClusterSearchConnections ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeOutboundCrossClusterSearchConnectionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeOutboundCrossClusterSearchConnectionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeOutboundCrossClusterSearchConnectionsResponse.of_json
-                (response_to_json resp)))
+                DescribeOutboundCrossClusterSearchConnectionsResponse.error_of_json))
   | DescribePackages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePackagesResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribePackagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribePackagesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribePackagesResponse.error_of_json))
   | DescribeReservedElasticsearchInstanceOfferings ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeReservedElasticsearchInstanceOfferingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeReservedElasticsearchInstanceOfferingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeReservedElasticsearchInstanceOfferingsResponse.of_json
-                (response_to_json resp)))
+                DescribeReservedElasticsearchInstanceOfferingsResponse.error_of_json))
   | DescribeReservedElasticsearchInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeReservedElasticsearchInstancesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeReservedElasticsearchInstancesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeReservedElasticsearchInstancesResponse.of_json
-                (response_to_json resp)))
+                DescribeReservedElasticsearchInstancesResponse.error_of_json))
   | DissociatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DissociatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DissociatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DissociatePackageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DissociatePackageResponse.error_of_json))
   | GetCompatibleElasticsearchVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCompatibleElasticsearchVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetCompatibleElasticsearchVersionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetCompatibleElasticsearchVersionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCompatibleElasticsearchVersionsResponse.error_of_json))
   | GetPackageVersionHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPackageVersionHistoryResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetPackageVersionHistoryResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetPackageVersionHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPackageVersionHistoryResponse.error_of_json))
   | GetUpgradeHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUpgradeHistoryResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetUpgradeHistoryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUpgradeHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetUpgradeHistoryResponse.error_of_json))
   | GetUpgradeStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUpgradeStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetUpgradeStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUpgradeStatusResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetUpgradeStatusResponse.error_of_json))
   | ListDomainNames ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDomainNamesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDomainNamesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDomainNamesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDomainNamesResponse.error_of_json))
   | ListDomainsForPackage ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDomainsForPackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDomainsForPackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDomainsForPackageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDomainsForPackageResponse.error_of_json))
   | ListElasticsearchInstanceTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListElasticsearchInstanceTypesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListElasticsearchInstanceTypesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListElasticsearchInstanceTypesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListElasticsearchInstanceTypesResponse.error_of_json))
   | ListElasticsearchVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListElasticsearchVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListElasticsearchVersionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListElasticsearchVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListElasticsearchVersionsResponse.error_of_json))
   | ListPackagesForDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPackagesForDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPackagesForDomainResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPackagesForDomainResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPackagesForDomainResponse.error_of_json))
   | ListTags ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTagsResponse.error_of_json)
-       | Ok resp -> Ok (ListTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTagsResponse.error_of_json))
   | PurchaseReservedElasticsearchInstanceOffering ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (PurchaseReservedElasticsearchInstanceOfferingResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                PurchaseReservedElasticsearchInstanceOfferingResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PurchaseReservedElasticsearchInstanceOfferingResponse.of_json
-                (response_to_json resp)))
+                PurchaseReservedElasticsearchInstanceOfferingResponse.error_of_json))
   | RejectInboundCrossClusterSearchConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (RejectInboundCrossClusterSearchConnectionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                RejectInboundCrossClusterSearchConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RejectInboundCrossClusterSearchConnectionResponse.of_json
-                (response_to_json resp)))
-  | RemoveTags -> Ok ()
+                RejectInboundCrossClusterSearchConnectionResponse.error_of_json))
+  | RemoveTags -> if is_success then Ok () else Error (parse_aws_error None)
   | StartElasticsearchServiceSoftwareUpdate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (StartElasticsearchServiceSoftwareUpdateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                StartElasticsearchServiceSoftwareUpdateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartElasticsearchServiceSoftwareUpdateResponse.of_json
-                (response_to_json resp)))
+                StartElasticsearchServiceSoftwareUpdateResponse.error_of_json))
   | UpdateElasticsearchDomainConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateElasticsearchDomainConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateElasticsearchDomainConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateElasticsearchDomainConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateElasticsearchDomainConfigResponse.error_of_json))
   | UpdatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdatePackageResponse.error_of_json))
   | UpgradeElasticsearchDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpgradeElasticsearchDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpgradeElasticsearchDomainResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpgradeElasticsearchDomainResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpgradeElasticsearchDomainResponse.error_of_json))

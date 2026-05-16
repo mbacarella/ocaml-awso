@@ -4,104 +4,79 @@ val copy_backup_to_region :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyBackupToRegionRequest.t ->
-        (CopyBackupToRegionResponse.t,
-          [ `AWS of CopyBackupToRegionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CopyBackupToRegionResponse.t, CopyBackupToRegionResponse.error)
+          Result.t Lwt.t
 val create_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterRequest.t ->
-        (CreateClusterResponse.t,
-          [ `AWS of CreateClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateClusterResponse.t, CreateClusterResponse.error) Result.t Lwt.t
 val create_hsm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateHsmRequest.t ->
-        (CreateHsmResponse.t,
-          [ `AWS of CreateHsmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateHsmResponse.t, CreateHsmResponse.error) Result.t Lwt.t
 val delete_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBackupRequest.t ->
-        (DeleteBackupResponse.t,
-          [ `AWS of DeleteBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBackupResponse.t, DeleteBackupResponse.error) Result.t Lwt.t
 val delete_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterRequest.t ->
-        (DeleteClusterResponse.t,
-          [ `AWS of DeleteClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t Lwt.t
 val delete_hsm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHsmRequest.t ->
-        (DeleteHsmResponse.t,
-          [ `AWS of DeleteHsmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteHsmResponse.t, DeleteHsmResponse.error) Result.t Lwt.t
 val describe_backups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBackupsRequest.t ->
-        (DescribeBackupsResponse.t,
-          [ `AWS of DescribeBackupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeBackupsResponse.t, DescribeBackupsResponse.error) Result.t
+          Lwt.t
 val describe_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClustersRequest.t ->
-        (DescribeClustersResponse.t,
-          [ `AWS of DescribeClustersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeClustersResponse.t, DescribeClustersResponse.error) Result.t
+          Lwt.t
 val initialize_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitializeClusterRequest.t ->
-        (InitializeClusterResponse.t,
-          [ `AWS of InitializeClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InitializeClusterResponse.t, InitializeClusterResponse.error)
+          Result.t Lwt.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResponse.t,
-          [ `AWS of ListTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsResponse.t, ListTagsResponse.error) Result.t Lwt.t
 val modify_backup_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyBackupAttributesRequest.t ->
         (ModifyBackupAttributesResponse.t,
-          [ `AWS of ModifyBackupAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyBackupAttributesResponse.error) Result.t Lwt.t
 val modify_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClusterRequest.t ->
-        (ModifyClusterResponse.t,
-          [ `AWS of ModifyClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ModifyClusterResponse.t, ModifyClusterResponse.error) Result.t Lwt.t
 val restore_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreBackupRequest.t ->
-        (RestoreBackupResponse.t,
-          [ `AWS of RestoreBackupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RestoreBackupResponse.t, RestoreBackupResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t

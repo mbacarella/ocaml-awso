@@ -5,362 +5,293 @@ val associate_tracker_consumer :
     ?cfg:Awso.Cfg.t ->
       AssociateTrackerConsumerRequest.t ->
         (AssociateTrackerConsumerResponse.t,
-          [ `AWS of AssociateTrackerConsumerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateTrackerConsumerResponse.error) Result.t Lwt.t
 val batch_delete_device_position_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteDevicePositionHistoryRequest.t ->
         (BatchDeleteDevicePositionHistoryResponse.t,
-          [ `AWS of BatchDeleteDevicePositionHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDeleteDevicePositionHistoryResponse.error) Result.t Lwt.t
 val batch_delete_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteGeofenceRequest.t ->
-        (BatchDeleteGeofenceResponse.t,
-          [ `AWS of BatchDeleteGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDeleteGeofenceResponse.t, BatchDeleteGeofenceResponse.error)
+          Result.t Lwt.t
 val batch_evaluate_geofences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchEvaluateGeofencesRequest.t ->
         (BatchEvaluateGeofencesResponse.t,
-          [ `AWS of BatchEvaluateGeofencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchEvaluateGeofencesResponse.error) Result.t Lwt.t
 val batch_get_device_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetDevicePositionRequest.t ->
         (BatchGetDevicePositionResponse.t,
-          [ `AWS of BatchGetDevicePositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetDevicePositionResponse.error) Result.t Lwt.t
 val batch_put_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchPutGeofenceRequest.t ->
-        (BatchPutGeofenceResponse.t,
-          [ `AWS of BatchPutGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchPutGeofenceResponse.t, BatchPutGeofenceResponse.error) Result.t
+          Lwt.t
 val batch_update_device_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdateDevicePositionRequest.t ->
         (BatchUpdateDevicePositionResponse.t,
-          [ `AWS of BatchUpdateDevicePositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchUpdateDevicePositionResponse.error) Result.t Lwt.t
 val calculate_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CalculateRouteRequest.t ->
-        (CalculateRouteResponse.t,
-          [ `AWS of CalculateRouteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CalculateRouteResponse.t, CalculateRouteResponse.error) Result.t
+          Lwt.t
 val calculate_route_matrix :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CalculateRouteMatrixRequest.t ->
-        (CalculateRouteMatrixResponse.t,
-          [ `AWS of CalculateRouteMatrixResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CalculateRouteMatrixResponse.t, CalculateRouteMatrixResponse.error)
+          Result.t Lwt.t
 val create_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGeofenceCollectionRequest.t ->
         (CreateGeofenceCollectionResponse.t,
-          [ `AWS of CreateGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateGeofenceCollectionResponse.error) Result.t Lwt.t
 val create_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMapRequest.t ->
-        (CreateMapResponse.t,
-          [ `AWS of CreateMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMapResponse.t, CreateMapResponse.error) Result.t Lwt.t
 val create_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlaceIndexRequest.t ->
-        (CreatePlaceIndexResponse.t,
-          [ `AWS of CreatePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePlaceIndexResponse.t, CreatePlaceIndexResponse.error) Result.t
+          Lwt.t
 val create_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRouteCalculatorRequest.t ->
         (CreateRouteCalculatorResponse.t,
-          [ `AWS of CreateRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateRouteCalculatorResponse.error) Result.t Lwt.t
 val create_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrackerRequest.t ->
-        (CreateTrackerResponse.t,
-          [ `AWS of CreateTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTrackerResponse.t, CreateTrackerResponse.error) Result.t Lwt.t
 val delete_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGeofenceCollectionRequest.t ->
         (DeleteGeofenceCollectionResponse.t,
-          [ `AWS of DeleteGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteGeofenceCollectionResponse.error) Result.t Lwt.t
 val delete_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMapRequest.t ->
-        (DeleteMapResponse.t,
-          [ `AWS of DeleteMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMapResponse.t, DeleteMapResponse.error) Result.t Lwt.t
 val delete_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePlaceIndexRequest.t ->
-        (DeletePlaceIndexResponse.t,
-          [ `AWS of DeletePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePlaceIndexResponse.t, DeletePlaceIndexResponse.error) Result.t
+          Lwt.t
 val delete_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRouteCalculatorRequest.t ->
         (DeleteRouteCalculatorResponse.t,
-          [ `AWS of DeleteRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRouteCalculatorResponse.error) Result.t Lwt.t
 val delete_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrackerRequest.t ->
-        (DeleteTrackerResponse.t,
-          [ `AWS of DeleteTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTrackerResponse.t, DeleteTrackerResponse.error) Result.t Lwt.t
 val describe_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGeofenceCollectionRequest.t ->
         (DescribeGeofenceCollectionResponse.t,
-          [ `AWS of DescribeGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeGeofenceCollectionResponse.error) Result.t Lwt.t
 val describe_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMapRequest.t ->
-        (DescribeMapResponse.t,
-          [ `AWS of DescribeMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeMapResponse.t, DescribeMapResponse.error) Result.t Lwt.t
 val describe_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePlaceIndexRequest.t ->
-        (DescribePlaceIndexResponse.t,
-          [ `AWS of DescribePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePlaceIndexResponse.t, DescribePlaceIndexResponse.error)
+          Result.t Lwt.t
 val describe_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRouteCalculatorRequest.t ->
         (DescribeRouteCalculatorResponse.t,
-          [ `AWS of DescribeRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRouteCalculatorResponse.error) Result.t Lwt.t
 val describe_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrackerRequest.t ->
-        (DescribeTrackerResponse.t,
-          [ `AWS of DescribeTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTrackerResponse.t, DescribeTrackerResponse.error) Result.t
+          Lwt.t
 val disassociate_tracker_consumer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTrackerConsumerRequest.t ->
         (DisassociateTrackerConsumerResponse.t,
-          [ `AWS of DisassociateTrackerConsumerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateTrackerConsumerResponse.error) Result.t Lwt.t
 val get_device_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicePositionRequest.t ->
-        (GetDevicePositionResponse.t,
-          [ `AWS of GetDevicePositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDevicePositionResponse.t, GetDevicePositionResponse.error)
+          Result.t Lwt.t
 val get_device_position_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicePositionHistoryRequest.t ->
         (GetDevicePositionHistoryResponse.t,
-          [ `AWS of GetDevicePositionHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDevicePositionHistoryResponse.error) Result.t Lwt.t
 val get_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGeofenceRequest.t ->
-        (GetGeofenceResponse.t,
-          [ `AWS of GetGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGeofenceResponse.t, GetGeofenceResponse.error) Result.t Lwt.t
 val get_map_glyphs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapGlyphsRequest.t ->
-        (GetMapGlyphsResponse.t,
-          [ `AWS of GetMapGlyphsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMapGlyphsResponse.t, GetMapGlyphsResponse.error) Result.t Lwt.t
 val get_map_sprites :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapSpritesRequest.t ->
-        (GetMapSpritesResponse.t,
-          [ `AWS of GetMapSpritesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMapSpritesResponse.t, GetMapSpritesResponse.error) Result.t Lwt.t
 val get_map_style_descriptor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapStyleDescriptorRequest.t ->
         (GetMapStyleDescriptorResponse.t,
-          [ `AWS of GetMapStyleDescriptorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMapStyleDescriptorResponse.error) Result.t Lwt.t
 val get_map_tile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapTileRequest.t ->
-        (GetMapTileResponse.t,
-          [ `AWS of GetMapTileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMapTileResponse.t, GetMapTileResponse.error) Result.t Lwt.t
 val list_device_positions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicePositionsRequest.t ->
-        (ListDevicePositionsResponse.t,
-          [ `AWS of ListDevicePositionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDevicePositionsResponse.t, ListDevicePositionsResponse.error)
+          Result.t Lwt.t
 val list_geofence_collections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGeofenceCollectionsRequest.t ->
         (ListGeofenceCollectionsResponse.t,
-          [ `AWS of ListGeofenceCollectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListGeofenceCollectionsResponse.error) Result.t Lwt.t
 val list_geofences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGeofencesRequest.t ->
-        (ListGeofencesResponse.t,
-          [ `AWS of ListGeofencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGeofencesResponse.t, ListGeofencesResponse.error) Result.t Lwt.t
 val list_maps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMapsRequest.t ->
-        (ListMapsResponse.t,
-          [ `AWS of ListMapsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMapsResponse.t, ListMapsResponse.error) Result.t Lwt.t
 val list_place_indexes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlaceIndexesRequest.t ->
-        (ListPlaceIndexesResponse.t,
-          [ `AWS of ListPlaceIndexesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPlaceIndexesResponse.t, ListPlaceIndexesResponse.error) Result.t
+          Lwt.t
 val list_route_calculators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRouteCalculatorsRequest.t ->
-        (ListRouteCalculatorsResponse.t,
-          [ `AWS of ListRouteCalculatorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRouteCalculatorsResponse.t, ListRouteCalculatorsResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_tracker_consumers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTrackerConsumersRequest.t ->
-        (ListTrackerConsumersResponse.t,
-          [ `AWS of ListTrackerConsumersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTrackerConsumersResponse.t, ListTrackerConsumersResponse.error)
+          Result.t Lwt.t
 val list_trackers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTrackersRequest.t ->
-        (ListTrackersResponse.t,
-          [ `AWS of ListTrackersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTrackersResponse.t, ListTrackersResponse.error) Result.t Lwt.t
 val put_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutGeofenceRequest.t ->
-        (PutGeofenceResponse.t,
-          [ `AWS of PutGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutGeofenceResponse.t, PutGeofenceResponse.error) Result.t Lwt.t
 val search_place_index_for_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchPlaceIndexForPositionRequest.t ->
         (SearchPlaceIndexForPositionResponse.t,
-          [ `AWS of SearchPlaceIndexForPositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchPlaceIndexForPositionResponse.error) Result.t Lwt.t
 val search_place_index_for_suggestions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchPlaceIndexForSuggestionsRequest.t ->
         (SearchPlaceIndexForSuggestionsResponse.t,
-          [ `AWS of SearchPlaceIndexForSuggestionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchPlaceIndexForSuggestionsResponse.error) Result.t Lwt.t
 val search_place_index_for_text :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchPlaceIndexForTextRequest.t ->
         (SearchPlaceIndexForTextResponse.t,
-          [ `AWS of SearchPlaceIndexForTextResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchPlaceIndexForTextResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGeofenceCollectionRequest.t ->
         (UpdateGeofenceCollectionResponse.t,
-          [ `AWS of UpdateGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateGeofenceCollectionResponse.error) Result.t Lwt.t
 val update_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMapRequest.t ->
-        (UpdateMapResponse.t,
-          [ `AWS of UpdateMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateMapResponse.t, UpdateMapResponse.error) Result.t Lwt.t
 val update_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePlaceIndexRequest.t ->
-        (UpdatePlaceIndexResponse.t,
-          [ `AWS of UpdatePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePlaceIndexResponse.t, UpdatePlaceIndexResponse.error) Result.t
+          Lwt.t
 val update_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRouteCalculatorRequest.t ->
         (UpdateRouteCalculatorResponse.t,
-          [ `AWS of UpdateRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateRouteCalculatorResponse.error) Result.t Lwt.t
 val update_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTrackerRequest.t ->
-        (UpdateTrackerResponse.t,
-          [ `AWS of UpdateTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTrackerResponse.t, UpdateTrackerResponse.error) Result.t Lwt.t

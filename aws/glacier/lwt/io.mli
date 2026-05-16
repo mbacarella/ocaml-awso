@@ -3,219 +3,159 @@ open Awso_glacier.Values
 val abort_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AbortMultipartUploadInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AbortMultipartUploadInput.t -> (unit, unit) Result.t Lwt.t
 val abort_vault_lock :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AbortVaultLockInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> AbortVaultLockInput.t -> (unit, unit) Result.t Lwt.t
 val add_tags_to_vault :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AddTagsToVaultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> AddTagsToVaultInput.t -> (unit, unit) Result.t Lwt.t
 val complete_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CompleteMultipartUploadInput.t ->
-        (ArchiveCreationOutput.t,
-          [ `AWS of ArchiveCreationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ArchiveCreationOutput.t, ArchiveCreationOutput.error) Result.t Lwt.t
 val complete_vault_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CompleteVaultLockInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CompleteVaultLockInput.t -> (unit, unit) Result.t Lwt.t
 val create_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVaultInput.t ->
-        (CreateVaultOutput.t,
-          [ `AWS of CreateVaultOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVaultOutput.t, CreateVaultOutput.error) Result.t Lwt.t
 val delete_archive :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteArchiveInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteArchiveInput.t -> (unit, unit) Result.t Lwt.t
 val delete_vault :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVaultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteVaultInput.t -> (unit, unit) Result.t Lwt.t
 val delete_vault_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVaultAccessPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVaultAccessPolicyInput.t -> (unit, unit) Result.t Lwt.t
 val delete_vault_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVaultNotificationsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVaultNotificationsInput.t -> (unit, unit) Result.t Lwt.t
 val describe_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobInput.t ->
-        (GlacierJobDescription.t,
-          [ `AWS of GlacierJobDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GlacierJobDescription.t, GlacierJobDescription.error) Result.t Lwt.t
 val describe_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVaultInput.t ->
-        (DescribeVaultOutput.t,
-          [ `AWS of DescribeVaultOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeVaultOutput.t, DescribeVaultOutput.error) Result.t Lwt.t
 val get_data_retrieval_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataRetrievalPolicyInput.t ->
-        (GetDataRetrievalPolicyOutput.t,
-          [ `AWS of GetDataRetrievalPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDataRetrievalPolicyOutput.t, GetDataRetrievalPolicyOutput.error)
+          Result.t Lwt.t
 val get_job_output :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobOutputInput.t ->
-        (GetJobOutputOutput.t,
-          [ `AWS of GetJobOutputOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetJobOutputOutput.t, GetJobOutputOutput.error) Result.t Lwt.t
 val get_vault_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVaultAccessPolicyInput.t ->
-        (GetVaultAccessPolicyOutput.t,
-          [ `AWS of GetVaultAccessPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVaultAccessPolicyOutput.t, GetVaultAccessPolicyOutput.error)
+          Result.t Lwt.t
 val get_vault_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVaultLockInput.t ->
-        (GetVaultLockOutput.t,
-          [ `AWS of GetVaultLockOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVaultLockOutput.t, GetVaultLockOutput.error) Result.t Lwt.t
 val get_vault_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVaultNotificationsInput.t ->
-        (GetVaultNotificationsOutput.t,
-          [ `AWS of GetVaultNotificationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVaultNotificationsOutput.t, GetVaultNotificationsOutput.error)
+          Result.t Lwt.t
 val initiate_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateJobInput.t ->
-        (InitiateJobOutput.t,
-          [ `AWS of InitiateJobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InitiateJobOutput.t, InitiateJobOutput.error) Result.t Lwt.t
 val initiate_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateMultipartUploadInput.t ->
         (InitiateMultipartUploadOutput.t,
-          [ `AWS of InitiateMultipartUploadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          InitiateMultipartUploadOutput.error) Result.t Lwt.t
 val initiate_vault_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateVaultLockInput.t ->
-        (InitiateVaultLockOutput.t,
-          [ `AWS of InitiateVaultLockOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InitiateVaultLockOutput.t, InitiateVaultLockOutput.error) Result.t
+          Lwt.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsInput.t ->
-        (ListJobsOutput.t,
-          [ `AWS of ListJobsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsOutput.t, ListJobsOutput.error) Result.t Lwt.t
 val list_multipart_uploads :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMultipartUploadsInput.t ->
-        (ListMultipartUploadsOutput.t,
-          [ `AWS of ListMultipartUploadsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMultipartUploadsOutput.t, ListMultipartUploadsOutput.error)
+          Result.t Lwt.t
 val list_parts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPartsInput.t ->
-        (ListPartsOutput.t,
-          [ `AWS of ListPartsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPartsOutput.t, ListPartsOutput.error) Result.t Lwt.t
 val list_provisioned_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProvisionedCapacityInput.t ->
         (ListProvisionedCapacityOutput.t,
-          [ `AWS of ListProvisionedCapacityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListProvisionedCapacityOutput.error) Result.t Lwt.t
 val list_tags_for_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForVaultInput.t ->
-        (ListTagsForVaultOutput.t,
-          [ `AWS of ListTagsForVaultOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForVaultOutput.t, ListTagsForVaultOutput.error) Result.t
+          Lwt.t
 val list_vaults :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVaultsInput.t ->
-        (ListVaultsOutput.t,
-          [ `AWS of ListVaultsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVaultsOutput.t, ListVaultsOutput.error) Result.t Lwt.t
 val purchase_provisioned_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseProvisionedCapacityInput.t ->
         (PurchaseProvisionedCapacityOutput.t,
-          [ `AWS of PurchaseProvisionedCapacityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PurchaseProvisionedCapacityOutput.error) Result.t Lwt.t
 val remove_tags_from_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveTagsFromVaultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveTagsFromVaultInput.t -> (unit, unit) Result.t Lwt.t
 val set_data_retrieval_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetDataRetrievalPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetDataRetrievalPolicyInput.t -> (unit, unit) Result.t Lwt.t
 val set_vault_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetVaultAccessPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetVaultAccessPolicyInput.t -> (unit, unit) Result.t Lwt.t
 val set_vault_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetVaultNotificationsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetVaultNotificationsInput.t -> (unit, unit) Result.t Lwt.t
 val upload_archive :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadArchiveInput.t ->
-        (ArchiveCreationOutput.t,
-          [ `AWS of ArchiveCreationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ArchiveCreationOutput.t, ArchiveCreationOutput.error) Result.t Lwt.t
 val upload_multipart_part :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadMultipartPartInput.t ->
-        (UploadMultipartPartOutput.t,
-          [ `AWS of UploadMultipartPartOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UploadMultipartPartOutput.t, UploadMultipartPartOutput.error)
+          Result.t Lwt.t

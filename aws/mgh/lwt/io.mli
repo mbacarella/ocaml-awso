@@ -5,117 +5,100 @@ val associate_created_artifact :
     ?cfg:Awso.Cfg.t ->
       AssociateCreatedArtifactRequest.t ->
         (AssociateCreatedArtifactResult.t,
-          [ `AWS of AssociateCreatedArtifactResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateCreatedArtifactResult.error) Result.t Lwt.t
 val associate_discovered_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateDiscoveredResourceRequest.t ->
         (AssociateDiscoveredResourceResult.t,
-          [ `AWS of AssociateDiscoveredResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateDiscoveredResourceResult.error) Result.t Lwt.t
 val create_progress_update_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProgressUpdateStreamRequest.t ->
         (CreateProgressUpdateStreamResult.t,
-          [ `AWS of CreateProgressUpdateStreamResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateProgressUpdateStreamResult.error) Result.t Lwt.t
 val delete_progress_update_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProgressUpdateStreamRequest.t ->
         (DeleteProgressUpdateStreamResult.t,
-          [ `AWS of DeleteProgressUpdateStreamResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteProgressUpdateStreamResult.error) Result.t Lwt.t
 val describe_application_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationStateRequest.t ->
         (DescribeApplicationStateResult.t,
-          [ `AWS of DescribeApplicationStateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeApplicationStateResult.error) Result.t Lwt.t
 val describe_migration_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMigrationTaskRequest.t ->
-        (DescribeMigrationTaskResult.t,
-          [ `AWS of DescribeMigrationTaskResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeMigrationTaskResult.t, DescribeMigrationTaskResult.error)
+          Result.t Lwt.t
 val disassociate_created_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateCreatedArtifactRequest.t ->
         (DisassociateCreatedArtifactResult.t,
-          [ `AWS of DisassociateCreatedArtifactResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateCreatedArtifactResult.error) Result.t Lwt.t
 val disassociate_discovered_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateDiscoveredResourceRequest.t ->
         (DisassociateDiscoveredResourceResult.t,
-          [ `AWS of DisassociateDiscoveredResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateDiscoveredResourceResult.error) Result.t Lwt.t
 val import_migration_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportMigrationTaskRequest.t ->
-        (ImportMigrationTaskResult.t,
-          [ `AWS of ImportMigrationTaskResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportMigrationTaskResult.t, ImportMigrationTaskResult.error)
+          Result.t Lwt.t
 val list_application_states :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationStatesRequest.t ->
-        (ListApplicationStatesResult.t,
-          [ `AWS of ListApplicationStatesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListApplicationStatesResult.t, ListApplicationStatesResult.error)
+          Result.t Lwt.t
 val list_created_artifacts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCreatedArtifactsRequest.t ->
-        (ListCreatedArtifactsResult.t,
-          [ `AWS of ListCreatedArtifactsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCreatedArtifactsResult.t, ListCreatedArtifactsResult.error)
+          Result.t Lwt.t
 val list_discovered_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDiscoveredResourcesRequest.t ->
         (ListDiscoveredResourcesResult.t,
-          [ `AWS of ListDiscoveredResourcesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDiscoveredResourcesResult.error) Result.t Lwt.t
 val list_migration_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMigrationTasksRequest.t ->
-        (ListMigrationTasksResult.t,
-          [ `AWS of ListMigrationTasksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMigrationTasksResult.t, ListMigrationTasksResult.error) Result.t
+          Lwt.t
 val list_progress_update_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProgressUpdateStreamsRequest.t ->
         (ListProgressUpdateStreamsResult.t,
-          [ `AWS of ListProgressUpdateStreamsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListProgressUpdateStreamsResult.error) Result.t Lwt.t
 val notify_application_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       NotifyApplicationStateRequest.t ->
-        (NotifyApplicationStateResult.t,
-          [ `AWS of NotifyApplicationStateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (NotifyApplicationStateResult.t, NotifyApplicationStateResult.error)
+          Result.t Lwt.t
 val notify_migration_task_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       NotifyMigrationTaskStateRequest.t ->
         (NotifyMigrationTaskStateResult.t,
-          [ `AWS of NotifyMigrationTaskStateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          NotifyMigrationTaskStateResult.error) Result.t Lwt.t
 val put_resource_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourceAttributesRequest.t ->
-        (PutResourceAttributesResult.t,
-          [ `AWS of PutResourceAttributesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutResourceAttributesResult.t, PutResourceAttributesResult.error)
+          Result.t Lwt.t

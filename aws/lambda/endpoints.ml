@@ -1293,403 +1293,401 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateFunctionUrlConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AddLayerVersionPermission ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AddLayerVersionPermissionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AddLayerVersionPermissionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AddLayerVersionPermissionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AddLayerVersionPermissionResponse.error_of_json))
   | AddPermission ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AddPermissionResponse.error_of_json)
-       | Ok resp ->
-           Ok (AddPermissionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AddPermissionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AddPermissionResponse.error_of_json))
   | CreateAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AliasConfiguration.error_of_json)
-       | Ok resp -> Ok (AliasConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AliasConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AliasConfiguration.error_of_json))
   | CreateCodeSigningConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCodeSigningConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateCodeSigningConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateCodeSigningConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCodeSigningConfigResponse.error_of_json))
   | CreateEventSourceMapping ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EventSourceMappingConfiguration.error_of_json)
-       | Ok resp ->
-           Ok
-             (EventSourceMappingConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (EventSourceMappingConfiguration.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some EventSourceMappingConfiguration.error_of_json))
   | CreateFunction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionConfiguration.error_of_json)
-       | Ok resp ->
-           Ok (FunctionConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some FunctionConfiguration.error_of_json))
   | CreateFunctionUrlConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateFunctionUrlConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateFunctionUrlConfigResponse.of_json (response_to_json resp)))
-  | DeleteAlias -> Ok ()
+      if is_success
+      then
+        Ok (CreateFunctionUrlConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateFunctionUrlConfigResponse.error_of_json))
+  | DeleteAlias -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCodeSigningConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteCodeSigningConfigResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteCodeSigningConfigResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteCodeSigningConfigResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCodeSigningConfigResponse.error_of_json))
   | DeleteEventSourceMapping ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EventSourceMappingConfiguration.error_of_json)
-       | Ok resp ->
-           Ok
-             (EventSourceMappingConfiguration.of_json (response_to_json resp)))
-  | DeleteFunction -> Ok ()
-  | DeleteFunctionCodeSigningConfig -> Ok ()
-  | DeleteFunctionConcurrency -> Ok ()
-  | DeleteFunctionEventInvokeConfig -> Ok ()
-  | DeleteFunctionUrlConfig -> Ok ()
-  | DeleteLayerVersion -> Ok ()
-  | DeleteProvisionedConcurrencyConfig -> Ok ()
+      if is_success
+      then
+        Ok (EventSourceMappingConfiguration.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some EventSourceMappingConfiguration.error_of_json))
+  | DeleteFunction ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFunctionCodeSigningConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFunctionConcurrency ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFunctionEventInvokeConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFunctionUrlConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLayerVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteProvisionedConcurrencyConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GetAccountSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccountSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetAccountSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAccountSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAccountSettingsResponse.error_of_json))
   | GetAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AliasConfiguration.error_of_json)
-       | Ok resp -> Ok (AliasConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AliasConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AliasConfiguration.error_of_json))
   | GetCodeSigningConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCodeSigningConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetCodeSigningConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCodeSigningConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCodeSigningConfigResponse.error_of_json))
   | GetEventSourceMapping ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EventSourceMappingConfiguration.error_of_json)
-       | Ok resp ->
-           Ok
-             (EventSourceMappingConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (EventSourceMappingConfiguration.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some EventSourceMappingConfiguration.error_of_json))
   | GetFunction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetFunctionResponse.error_of_json)
-       | Ok resp -> Ok (GetFunctionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetFunctionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFunctionResponse.error_of_json))
   | GetFunctionCodeSigningConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetFunctionCodeSigningConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetFunctionCodeSigningConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetFunctionCodeSigningConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFunctionCodeSigningConfigResponse.error_of_json))
   | GetFunctionConcurrency ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetFunctionConcurrencyResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetFunctionConcurrencyResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetFunctionConcurrencyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFunctionConcurrencyResponse.error_of_json))
   | GetFunctionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionConfiguration.error_of_json)
-       | Ok resp ->
-           Ok (FunctionConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some FunctionConfiguration.error_of_json))
   | GetFunctionEventInvokeConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionEventInvokeConfig.error_of_json)
-       | Ok resp ->
-           Ok (FunctionEventInvokeConfig.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionEventInvokeConfig.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some FunctionEventInvokeConfig.error_of_json))
   | GetFunctionUrlConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetFunctionUrlConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetFunctionUrlConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetFunctionUrlConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetFunctionUrlConfigResponse.error_of_json))
   | GetLayerVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLayerVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetLayerVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLayerVersionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetLayerVersionResponse.error_of_json))
   | GetLayerVersionByArn ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLayerVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetLayerVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLayerVersionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetLayerVersionResponse.error_of_json))
   | GetLayerVersionPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLayerVersionPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetLayerVersionPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLayerVersionPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLayerVersionPolicyResponse.error_of_json))
   | GetPolicy ->
-      (match resp with
-       | Error err -> handle_error err (Some GetPolicyResponse.error_of_json)
-       | Ok resp -> Ok (GetPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPolicyResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetPolicyResponse.error_of_json))
   | GetProvisionedConcurrencyConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetProvisionedConcurrencyConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetProvisionedConcurrencyConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetProvisionedConcurrencyConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetProvisionedConcurrencyConfigResponse.error_of_json))
   | Invoke ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InvocationResponse.error_of_json)
-       | Ok resp -> Ok (InvocationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (InvocationResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some InvocationResponse.error_of_json))
   | InvokeAsync ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InvokeAsyncResponse.error_of_json)
-       | Ok resp -> Ok (InvokeAsyncResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (InvokeAsyncResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some InvokeAsyncResponse.error_of_json))
   | ListAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAliasesResponse.error_of_json)
-       | Ok resp -> Ok (ListAliasesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAliasesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAliasesResponse.error_of_json))
   | ListCodeSigningConfigs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCodeSigningConfigsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListCodeSigningConfigsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListCodeSigningConfigsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCodeSigningConfigsResponse.error_of_json))
   | ListEventSourceMappings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListEventSourceMappingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListEventSourceMappingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListEventSourceMappingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListEventSourceMappingsResponse.error_of_json))
   | ListFunctionEventInvokeConfigs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListFunctionEventInvokeConfigsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListFunctionEventInvokeConfigsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListFunctionEventInvokeConfigsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListFunctionEventInvokeConfigsResponse.error_of_json))
   | ListFunctionUrlConfigs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListFunctionUrlConfigsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListFunctionUrlConfigsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListFunctionUrlConfigsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListFunctionUrlConfigsResponse.error_of_json))
   | ListFunctions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFunctionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListFunctionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFunctionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFunctionsResponse.error_of_json))
   | ListFunctionsByCodeSigningConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListFunctionsByCodeSigningConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListFunctionsByCodeSigningConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListFunctionsByCodeSigningConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListFunctionsByCodeSigningConfigResponse.error_of_json))
   | ListLayerVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLayerVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListLayerVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListLayerVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListLayerVersionsResponse.error_of_json))
   | ListLayers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLayersResponse.error_of_json)
-       | Ok resp -> Ok (ListLayersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListLayersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListLayersResponse.error_of_json))
   | ListProvisionedConcurrencyConfigs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListProvisionedConcurrencyConfigsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListProvisionedConcurrencyConfigsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListProvisionedConcurrencyConfigsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListProvisionedConcurrencyConfigsResponse.error_of_json))
   | ListTags ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTagsResponse.error_of_json)
-       | Ok resp -> Ok (ListTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTagsResponse.error_of_json))
   | ListVersionsByFunction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListVersionsByFunctionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListVersionsByFunctionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListVersionsByFunctionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListVersionsByFunctionResponse.error_of_json))
   | PublishLayerVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PublishLayerVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (PublishLayerVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PublishLayerVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PublishLayerVersionResponse.error_of_json))
   | PublishVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionConfiguration.error_of_json)
-       | Ok resp ->
-           Ok (FunctionConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some FunctionConfiguration.error_of_json))
   | PutFunctionCodeSigningConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutFunctionCodeSigningConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutFunctionCodeSigningConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutFunctionCodeSigningConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutFunctionCodeSigningConfigResponse.error_of_json))
   | PutFunctionConcurrency ->
-      (match resp with
-       | Error err -> handle_error err (Some Concurrency.error_of_json)
-       | Ok resp -> Ok (Concurrency.of_json (response_to_json resp)))
+      if is_success
+      then Ok (Concurrency.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some Concurrency.error_of_json))
   | PutFunctionEventInvokeConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionEventInvokeConfig.error_of_json)
-       | Ok resp ->
-           Ok (FunctionEventInvokeConfig.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionEventInvokeConfig.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some FunctionEventInvokeConfig.error_of_json))
   | PutProvisionedConcurrencyConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutProvisionedConcurrencyConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutProvisionedConcurrencyConfigResponse.of_json
-                (response_to_json resp)))
-  | RemoveLayerVersionPermission -> Ok ()
-  | RemovePermission -> Ok ()
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        Ok
+          (PutProvisionedConcurrencyConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutProvisionedConcurrencyConfigResponse.error_of_json))
+  | RemoveLayerVersionPermission ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RemovePermission ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AliasConfiguration.error_of_json)
-       | Ok resp -> Ok (AliasConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AliasConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AliasConfiguration.error_of_json))
   | UpdateCodeSigningConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateCodeSigningConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateCodeSigningConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateCodeSigningConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCodeSigningConfigResponse.error_of_json))
   | UpdateEventSourceMapping ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EventSourceMappingConfiguration.error_of_json)
-       | Ok resp ->
-           Ok
-             (EventSourceMappingConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (EventSourceMappingConfiguration.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some EventSourceMappingConfiguration.error_of_json))
   | UpdateFunctionCode ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionConfiguration.error_of_json)
-       | Ok resp ->
-           Ok (FunctionConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some FunctionConfiguration.error_of_json))
   | UpdateFunctionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionConfiguration.error_of_json)
-       | Ok resp ->
-           Ok (FunctionConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some FunctionConfiguration.error_of_json))
   | UpdateFunctionEventInvokeConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some FunctionEventInvokeConfig.error_of_json)
-       | Ok resp ->
-           Ok (FunctionEventInvokeConfig.of_json (response_to_json resp)))
+      if is_success
+      then Ok (FunctionEventInvokeConfig.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some FunctionEventInvokeConfig.error_of_json))
   | UpdateFunctionUrlConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateFunctionUrlConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateFunctionUrlConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateFunctionUrlConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateFunctionUrlConfigResponse.error_of_json))

@@ -5,62 +5,46 @@ val create_lifecycle_policy :
     ?cfg:Awso.Cfg.t ->
       CreateLifecyclePolicyRequest.t ->
         (CreateLifecyclePolicyResponse.t,
-          [ `AWS of CreateLifecyclePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateLifecyclePolicyResponse.error) Result.t Async.Deferred.t
 val delete_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLifecyclePolicyRequest.t ->
         (DeleteLifecyclePolicyResponse.t,
-          [ `AWS of DeleteLifecyclePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteLifecyclePolicyResponse.error) Result.t Async.Deferred.t
 val get_lifecycle_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLifecyclePoliciesRequest.t ->
-        (GetLifecyclePoliciesResponse.t,
-          [ `AWS of GetLifecyclePoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetLifecyclePoliciesResponse.t, GetLifecyclePoliciesResponse.error)
+          Result.t Async.Deferred.t
 val get_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLifecyclePolicyRequest.t ->
-        (GetLifecyclePolicyResponse.t,
-          [ `AWS of GetLifecyclePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetLifecyclePolicyResponse.t, GetLifecyclePolicyResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLifecyclePolicyRequest.t ->
         (UpdateLifecyclePolicyResponse.t,
-          [ `AWS of UpdateLifecyclePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateLifecyclePolicyResponse.error) Result.t Async.Deferred.t

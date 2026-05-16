@@ -12,7 +12,6 @@
 (* Mirror Core/Base: enable exception backtraces at module load time so users
    of Jane_compat get tracebacks without needing OCAMLRUNPARAM=b. *)
 let () = Printexc.record_backtrace true
-
 let sprintf = Printf.sprintf
 let printf = Printf.printf
 let eprintf = Printf.eprintf
@@ -73,6 +72,7 @@ module List = struct
     | Some x -> x
     | None -> failwith "List.find_exn: not found"
   ;;
+
   let find_map l ~f = Stdlib.List.find_map f l
   let for_all l ~f = Stdlib.List.for_all f l
   let concat_map l ~f = Stdlib.List.concat_map f l
@@ -159,8 +159,16 @@ module List = struct
   ;;
 
   let range ?(start = `inclusive) ?(stop = `exclusive) a b =
-    let lo = match start with `inclusive -> a | `exclusive -> a + 1 in
-    let hi = match stop with `exclusive -> b | `inclusive -> b + 1 in
+    let lo =
+      match start with
+      | `inclusive -> a
+      | `exclusive -> a + 1
+    in
+    let hi =
+      match stop with
+      | `exclusive -> b
+      | `inclusive -> b + 1
+    in
     let rec aux acc i = if i < lo then acc else aux (i :: acc) (i - 1) in
     aux [] (hi - 1)
   ;;
@@ -207,9 +215,7 @@ module String = struct
   let is_prefix s ~prefix = Stdlib.String.starts_with ~prefix s
   let is_suffix s ~suffix = Stdlib.String.ends_with ~suffix s
   let of_char c = Stdlib.String.make 1 c
-
   let init n ~f = Stdlib.String.init n f
-
   let is_empty s = Stdlib.String.length s = 0
 
   let for_all s ~f =
@@ -240,8 +246,7 @@ module String = struct
   let lsplit2_exn s ~on =
     match Stdlib.String.index_opt s on with
     | Some i ->
-      ( Stdlib.String.sub s 0 i
-      , Stdlib.String.sub s (i + 1) (Stdlib.String.length s - i - 1) )
+      Stdlib.String.sub s 0 i, Stdlib.String.sub s (i + 1) (Stdlib.String.length s - i - 1)
     | None -> failwithf "String.lsplit2_exn: %C not found in %S" on s ()
   ;;
 
@@ -289,7 +294,8 @@ module String = struct
 
   let chop_suffix s ~suffix =
     if Stdlib.String.ends_with ~suffix s
-    then Some (Stdlib.String.sub s 0 (Stdlib.String.length s - Stdlib.String.length suffix))
+    then
+      Some (Stdlib.String.sub s 0 (Stdlib.String.length s - Stdlib.String.length suffix))
     else None
   ;;
 
@@ -302,8 +308,10 @@ module String = struct
   let lfindi s ~f =
     let len = Stdlib.String.length s in
     let rec aux i =
-      if i >= len then None
-      else if f i (Stdlib.String.get s i) then Some i
+      if i >= len
+      then None
+      else if f i (Stdlib.String.get s i)
+      then Some i
       else aux (i + 1)
     in
     aux 0
@@ -317,7 +325,6 @@ module String = struct
   ;;
 
   let to_list s = Stdlib.List.init (Stdlib.String.length s) (Stdlib.String.get s)
-
   let split s ~on = Stdlib.String.split_on_char on s
 
   let substr_replace_all s ~pattern ~with_ =
@@ -380,19 +387,22 @@ module String = struct
 
     module Map = struct
       module M = Stdlib.Map.Make (struct
-        type t = string
+          type t = string
 
-        let compare a b =
-          Stdlib.String.compare (lowercase_ascii a) (lowercase_ascii b)
-        ;;
-      end)
+          let compare a b = Stdlib.String.compare (lowercase_ascii a) (lowercase_ascii b)
+        end)
 
       include M
 
       let of_alist_multi l =
         Stdlib.List.fold_left
           (fun m (k, v) ->
-            M.update k (function None -> Some [ v ] | Some vs -> Some (vs @ [ v ])) m)
+             M.update
+               k
+               (function
+                 | None -> Some [ v ]
+                 | Some vs -> Some (vs @ [ v ]))
+               m)
           M.empty
           l
       ;;
@@ -640,9 +650,11 @@ module Int64 = struct
   let ( - ) = Stdlib.Int64.sub
   let ( / ) = Stdlib.Int64.div
   let rem = Stdlib.Int64.rem
+
   let to_int_exn x =
-    if Stdlib.( > ) (Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.max_int)) 0
-       || Stdlib.( < ) (Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.min_int)) 0
+    if
+      Stdlib.( > ) (Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.max_int)) 0
+      || Stdlib.( < ) (Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.min_int)) 0
     then failwith "Int64.to_int_exn: overflow"
     else Stdlib.Int64.to_int x
   ;;

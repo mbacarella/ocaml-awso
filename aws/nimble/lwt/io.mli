@@ -4,328 +4,271 @@ val accept_eulas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptEulasRequest.t ->
-        (AcceptEulasResponse.t,
-          [ `AWS of AcceptEulasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AcceptEulasResponse.t, AcceptEulasResponse.error) Result.t Lwt.t
 val create_launch_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLaunchProfileRequest.t ->
-        (CreateLaunchProfileResponse.t,
-          [ `AWS of CreateLaunchProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLaunchProfileResponse.t, CreateLaunchProfileResponse.error)
+          Result.t Lwt.t
 val create_streaming_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamingImageRequest.t ->
-        (CreateStreamingImageResponse.t,
-          [ `AWS of CreateStreamingImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateStreamingImageResponse.t, CreateStreamingImageResponse.error)
+          Result.t Lwt.t
 val create_streaming_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamingSessionRequest.t ->
         (CreateStreamingSessionResponse.t,
-          [ `AWS of CreateStreamingSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateStreamingSessionResponse.error) Result.t Lwt.t
 val create_streaming_session_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStreamingSessionStreamRequest.t ->
         (CreateStreamingSessionStreamResponse.t,
-          [ `AWS of CreateStreamingSessionStreamResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateStreamingSessionStreamResponse.error) Result.t Lwt.t
 val create_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStudioRequest.t ->
-        (CreateStudioResponse.t,
-          [ `AWS of CreateStudioResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateStudioResponse.t, CreateStudioResponse.error) Result.t Lwt.t
 val create_studio_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStudioComponentRequest.t ->
         (CreateStudioComponentResponse.t,
-          [ `AWS of CreateStudioComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateStudioComponentResponse.error) Result.t Lwt.t
 val delete_launch_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLaunchProfileRequest.t ->
-        (DeleteLaunchProfileResponse.t,
-          [ `AWS of DeleteLaunchProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLaunchProfileResponse.t, DeleteLaunchProfileResponse.error)
+          Result.t Lwt.t
 val delete_launch_profile_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLaunchProfileMemberRequest.t ->
         (DeleteLaunchProfileMemberResponse.t,
-          [ `AWS of DeleteLaunchProfileMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteLaunchProfileMemberResponse.error) Result.t Lwt.t
 val delete_streaming_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStreamingImageRequest.t ->
-        (DeleteStreamingImageResponse.t,
-          [ `AWS of DeleteStreamingImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteStreamingImageResponse.t, DeleteStreamingImageResponse.error)
+          Result.t Lwt.t
 val delete_streaming_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStreamingSessionRequest.t ->
         (DeleteStreamingSessionResponse.t,
-          [ `AWS of DeleteStreamingSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteStreamingSessionResponse.error) Result.t Lwt.t
 val delete_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStudioRequest.t ->
-        (DeleteStudioResponse.t,
-          [ `AWS of DeleteStudioResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteStudioResponse.t, DeleteStudioResponse.error) Result.t Lwt.t
 val delete_studio_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStudioComponentRequest.t ->
         (DeleteStudioComponentResponse.t,
-          [ `AWS of DeleteStudioComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteStudioComponentResponse.error) Result.t Lwt.t
 val delete_studio_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStudioMemberRequest.t ->
-        (DeleteStudioMemberResponse.t,
-          [ `AWS of DeleteStudioMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteStudioMemberResponse.t, DeleteStudioMemberResponse.error)
+          Result.t Lwt.t
 val get_eula :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEulaRequest.t ->
-        (GetEulaResponse.t,
-          [ `AWS of GetEulaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEulaResponse.t, GetEulaResponse.error) Result.t Lwt.t
 val get_launch_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLaunchProfileRequest.t ->
-        (GetLaunchProfileResponse.t,
-          [ `AWS of GetLaunchProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLaunchProfileResponse.t, GetLaunchProfileResponse.error) Result.t
+          Lwt.t
 val get_launch_profile_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLaunchProfileDetailsRequest.t ->
         (GetLaunchProfileDetailsResponse.t,
-          [ `AWS of GetLaunchProfileDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLaunchProfileDetailsResponse.error) Result.t Lwt.t
 val get_launch_profile_initialization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLaunchProfileInitializationRequest.t ->
         (GetLaunchProfileInitializationResponse.t,
-          [ `AWS of GetLaunchProfileInitializationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLaunchProfileInitializationResponse.error) Result.t Lwt.t
 val get_launch_profile_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLaunchProfileMemberRequest.t ->
         (GetLaunchProfileMemberResponse.t,
-          [ `AWS of GetLaunchProfileMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLaunchProfileMemberResponse.error) Result.t Lwt.t
 val get_streaming_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamingImageRequest.t ->
-        (GetStreamingImageResponse.t,
-          [ `AWS of GetStreamingImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetStreamingImageResponse.t, GetStreamingImageResponse.error)
+          Result.t Lwt.t
 val get_streaming_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamingSessionRequest.t ->
-        (GetStreamingSessionResponse.t,
-          [ `AWS of GetStreamingSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetStreamingSessionResponse.t, GetStreamingSessionResponse.error)
+          Result.t Lwt.t
 val get_streaming_session_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStreamingSessionStreamRequest.t ->
         (GetStreamingSessionStreamResponse.t,
-          [ `AWS of GetStreamingSessionStreamResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetStreamingSessionStreamResponse.error) Result.t Lwt.t
 val get_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStudioRequest.t ->
-        (GetStudioResponse.t,
-          [ `AWS of GetStudioResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetStudioResponse.t, GetStudioResponse.error) Result.t Lwt.t
 val get_studio_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStudioComponentRequest.t ->
-        (GetStudioComponentResponse.t,
-          [ `AWS of GetStudioComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetStudioComponentResponse.t, GetStudioComponentResponse.error)
+          Result.t Lwt.t
 val get_studio_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStudioMemberRequest.t ->
-        (GetStudioMemberResponse.t,
-          [ `AWS of GetStudioMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetStudioMemberResponse.t, GetStudioMemberResponse.error) Result.t
+          Lwt.t
 val list_eula_acceptances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEulaAcceptancesRequest.t ->
-        (ListEulaAcceptancesResponse.t,
-          [ `AWS of ListEulaAcceptancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEulaAcceptancesResponse.t, ListEulaAcceptancesResponse.error)
+          Result.t Lwt.t
 val list_eulas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEulasRequest.t ->
-        (ListEulasResponse.t,
-          [ `AWS of ListEulasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEulasResponse.t, ListEulasResponse.error) Result.t Lwt.t
 val list_launch_profile_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLaunchProfileMembersRequest.t ->
         (ListLaunchProfileMembersResponse.t,
-          [ `AWS of ListLaunchProfileMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListLaunchProfileMembersResponse.error) Result.t Lwt.t
 val list_launch_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLaunchProfilesRequest.t ->
-        (ListLaunchProfilesResponse.t,
-          [ `AWS of ListLaunchProfilesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLaunchProfilesResponse.t, ListLaunchProfilesResponse.error)
+          Result.t Lwt.t
 val list_streaming_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamingImagesRequest.t ->
-        (ListStreamingImagesResponse.t,
-          [ `AWS of ListStreamingImagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStreamingImagesResponse.t, ListStreamingImagesResponse.error)
+          Result.t Lwt.t
 val list_streaming_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStreamingSessionsRequest.t ->
         (ListStreamingSessionsResponse.t,
-          [ `AWS of ListStreamingSessionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListStreamingSessionsResponse.error) Result.t Lwt.t
 val list_studio_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStudioComponentsRequest.t ->
-        (ListStudioComponentsResponse.t,
-          [ `AWS of ListStudioComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStudioComponentsResponse.t, ListStudioComponentsResponse.error)
+          Result.t Lwt.t
 val list_studio_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStudioMembersRequest.t ->
-        (ListStudioMembersResponse.t,
-          [ `AWS of ListStudioMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStudioMembersResponse.t, ListStudioMembersResponse.error)
+          Result.t Lwt.t
 val list_studios :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStudiosRequest.t ->
-        (ListStudiosResponse.t,
-          [ `AWS of ListStudiosResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStudiosResponse.t, ListStudiosResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_launch_profile_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLaunchProfileMembersRequest.t ->
         (PutLaunchProfileMembersResponse.t,
-          [ `AWS of PutLaunchProfileMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutLaunchProfileMembersResponse.error) Result.t Lwt.t
 val put_studio_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutStudioMembersRequest.t ->
-        (PutStudioMembersResponse.t,
-          [ `AWS of PutStudioMembersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutStudioMembersResponse.t, PutStudioMembersResponse.error) Result.t
+          Lwt.t
 val start_streaming_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartStreamingSessionRequest.t ->
         (StartStreamingSessionResponse.t,
-          [ `AWS of StartStreamingSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartStreamingSessionResponse.error) Result.t Lwt.t
 val start_studio_s_s_o_configuration_repair :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartStudioSSOConfigurationRepairRequest.t ->
         (StartStudioSSOConfigurationRepairResponse.t,
-          [ `AWS of StartStudioSSOConfigurationRepairResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartStudioSSOConfigurationRepairResponse.error) Result.t Lwt.t
 val stop_streaming_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopStreamingSessionRequest.t ->
-        (StopStreamingSessionResponse.t,
-          [ `AWS of StopStreamingSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopStreamingSessionResponse.t, StopStreamingSessionResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_launch_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLaunchProfileRequest.t ->
-        (UpdateLaunchProfileResponse.t,
-          [ `AWS of UpdateLaunchProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLaunchProfileResponse.t, UpdateLaunchProfileResponse.error)
+          Result.t Lwt.t
 val update_launch_profile_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLaunchProfileMemberRequest.t ->
         (UpdateLaunchProfileMemberResponse.t,
-          [ `AWS of UpdateLaunchProfileMemberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateLaunchProfileMemberResponse.error) Result.t Lwt.t
 val update_streaming_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStreamingImageRequest.t ->
-        (UpdateStreamingImageResponse.t,
-          [ `AWS of UpdateStreamingImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateStreamingImageResponse.t, UpdateStreamingImageResponse.error)
+          Result.t Lwt.t
 val update_studio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStudioRequest.t ->
-        (UpdateStudioResponse.t,
-          [ `AWS of UpdateStudioResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateStudioResponse.t, UpdateStudioResponse.error) Result.t Lwt.t
 val update_studio_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStudioComponentRequest.t ->
         (UpdateStudioComponentResponse.t,
-          [ `AWS of UpdateStudioComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateStudioComponentResponse.error) Result.t Lwt.t

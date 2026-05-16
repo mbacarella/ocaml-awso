@@ -5,142 +5,121 @@ val delete_recommendation_preferences :
     ?cfg:Awso.Cfg.t ->
       DeleteRecommendationPreferencesRequest.t ->
         (DeleteRecommendationPreferencesResponse.t,
-          [ `AWS of DeleteRecommendationPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteRecommendationPreferencesResponse.error) Result.t
           Async.Deferred.t
 val describe_recommendation_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecommendationExportJobsRequest.t ->
         (DescribeRecommendationExportJobsResponse.t,
-          [ `AWS of DescribeRecommendationExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeRecommendationExportJobsResponse.error) Result.t
           Async.Deferred.t
 val export_auto_scaling_group_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportAutoScalingGroupRecommendationsRequest.t ->
         (ExportAutoScalingGroupRecommendationsResponse.t,
-          [ `AWS of ExportAutoScalingGroupRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ExportAutoScalingGroupRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val export_e_b_s_volume_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportEBSVolumeRecommendationsRequest.t ->
         (ExportEBSVolumeRecommendationsResponse.t,
-          [ `AWS of ExportEBSVolumeRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ExportEBSVolumeRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val export_e_c2_instance_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportEC2InstanceRecommendationsRequest.t ->
         (ExportEC2InstanceRecommendationsResponse.t,
-          [ `AWS of ExportEC2InstanceRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ExportEC2InstanceRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val export_lambda_function_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportLambdaFunctionRecommendationsRequest.t ->
         (ExportLambdaFunctionRecommendationsResponse.t,
-          [ `AWS of ExportLambdaFunctionRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ExportLambdaFunctionRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_auto_scaling_group_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAutoScalingGroupRecommendationsRequest.t ->
         (GetAutoScalingGroupRecommendationsResponse.t,
-          [ `AWS of GetAutoScalingGroupRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetAutoScalingGroupRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_e_b_s_volume_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEBSVolumeRecommendationsRequest.t ->
         (GetEBSVolumeRecommendationsResponse.t,
-          [ `AWS of GetEBSVolumeRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEBSVolumeRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_e_c2_instance_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEC2InstanceRecommendationsRequest.t ->
         (GetEC2InstanceRecommendationsResponse.t,
-          [ `AWS of GetEC2InstanceRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEC2InstanceRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_e_c2_recommendation_projected_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEC2RecommendationProjectedMetricsRequest.t ->
         (GetEC2RecommendationProjectedMetricsResponse.t,
-          [ `AWS of GetEC2RecommendationProjectedMetricsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEC2RecommendationProjectedMetricsResponse.error) Result.t
           Async.Deferred.t
 val get_effective_recommendation_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEffectiveRecommendationPreferencesRequest.t ->
         (GetEffectiveRecommendationPreferencesResponse.t,
-          [ `AWS of GetEffectiveRecommendationPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEffectiveRecommendationPreferencesResponse.error) Result.t
           Async.Deferred.t
 val get_enrollment_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnrollmentStatusRequest.t ->
-        (GetEnrollmentStatusResponse.t,
-          [ `AWS of GetEnrollmentStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetEnrollmentStatusResponse.t, GetEnrollmentStatusResponse.error)
+          Result.t Async.Deferred.t
 val get_enrollment_statuses_for_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnrollmentStatusesForOrganizationRequest.t ->
         (GetEnrollmentStatusesForOrganizationResponse.t,
-          [ `AWS of GetEnrollmentStatusesForOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEnrollmentStatusesForOrganizationResponse.error) Result.t
           Async.Deferred.t
 val get_lambda_function_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLambdaFunctionRecommendationsRequest.t ->
         (GetLambdaFunctionRecommendationsResponse.t,
-          [ `AWS of GetLambdaFunctionRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetLambdaFunctionRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_recommendation_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecommendationPreferencesRequest.t ->
         (GetRecommendationPreferencesResponse.t,
-          [ `AWS of GetRecommendationPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetRecommendationPreferencesResponse.error) Result.t
           Async.Deferred.t
 val get_recommendation_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecommendationSummariesRequest.t ->
         (GetRecommendationSummariesResponse.t,
-          [ `AWS of GetRecommendationSummariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetRecommendationSummariesResponse.error) Result.t Async.Deferred.t
 val put_recommendation_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRecommendationPreferencesRequest.t ->
         (PutRecommendationPreferencesResponse.t,
-          [ `AWS of PutRecommendationPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutRecommendationPreferencesResponse.error) Result.t
           Async.Deferred.t
 val update_enrollment_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnrollmentStatusRequest.t ->
         (UpdateEnrollmentStatusResponse.t,
-          [ `AWS of UpdateEnrollmentStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateEnrollmentStatusResponse.error) Result.t Async.Deferred.t

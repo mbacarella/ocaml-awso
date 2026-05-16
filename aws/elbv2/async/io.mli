@@ -5,270 +5,203 @@ val add_listener_certificates :
     ?cfg:Awso.Cfg.t ->
       AddListenerCertificatesInput.t ->
         (AddListenerCertificatesOutput.t,
-          [ `AWS of AddListenerCertificatesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AddListenerCertificatesOutput.error) Result.t Async.Deferred.t
 val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsInput.t ->
-        (AddTagsOutput.t,
-          [ `AWS of AddTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AddTagsOutput.t, AddTagsOutput.error) Result.t Async.Deferred.t
 val create_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateListenerInput.t ->
-        (CreateListenerOutput.t,
-          [ `AWS of CreateListenerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateListenerOutput.t, CreateListenerOutput.error) Result.t
           Async.Deferred.t
 val create_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLoadBalancerInput.t ->
-        (CreateLoadBalancerOutput.t,
-          [ `AWS of CreateLoadBalancerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLoadBalancerOutput.t, CreateLoadBalancerOutput.error) Result.t
           Async.Deferred.t
 val create_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleInput.t ->
-        (CreateRuleOutput.t,
-          [ `AWS of CreateRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRuleOutput.t, CreateRuleOutput.error) Result.t
           Async.Deferred.t
 val create_target_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTargetGroupInput.t ->
-        (CreateTargetGroupOutput.t,
-          [ `AWS of CreateTargetGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTargetGroupOutput.t, CreateTargetGroupOutput.error) Result.t
           Async.Deferred.t
 val delete_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteListenerInput.t ->
-        (DeleteListenerOutput.t,
-          [ `AWS of DeleteListenerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteListenerOutput.t, DeleteListenerOutput.error) Result.t
           Async.Deferred.t
 val delete_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLoadBalancerInput.t ->
-        (DeleteLoadBalancerOutput.t,
-          [ `AWS of DeleteLoadBalancerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLoadBalancerOutput.t, DeleteLoadBalancerOutput.error) Result.t
           Async.Deferred.t
 val delete_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleInput.t ->
-        (DeleteRuleOutput.t,
-          [ `AWS of DeleteRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteRuleOutput.t, DeleteRuleOutput.error) Result.t
           Async.Deferred.t
 val delete_target_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTargetGroupInput.t ->
-        (DeleteTargetGroupOutput.t,
-          [ `AWS of DeleteTargetGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTargetGroupOutput.t, DeleteTargetGroupOutput.error) Result.t
           Async.Deferred.t
 val deregister_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterTargetsInput.t ->
-        (DeregisterTargetsOutput.t,
-          [ `AWS of DeregisterTargetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeregisterTargetsOutput.t, DeregisterTargetsOutput.error) Result.t
           Async.Deferred.t
 val describe_account_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountLimitsInput.t ->
-        (DescribeAccountLimitsOutput.t,
-          [ `AWS of DescribeAccountLimitsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeAccountLimitsOutput.t, DescribeAccountLimitsOutput.error)
+          Result.t Async.Deferred.t
 val describe_listener_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeListenerCertificatesInput.t ->
         (DescribeListenerCertificatesOutput.t,
-          [ `AWS of DescribeListenerCertificatesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeListenerCertificatesOutput.error) Result.t Async.Deferred.t
 val describe_listeners :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeListenersInput.t ->
-        (DescribeListenersOutput.t,
-          [ `AWS of DescribeListenersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeListenersOutput.t, DescribeListenersOutput.error) Result.t
           Async.Deferred.t
 val describe_load_balancer_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBalancerAttributesInput.t ->
         (DescribeLoadBalancerAttributesOutput.t,
-          [ `AWS of DescribeLoadBalancerAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeLoadBalancerAttributesOutput.error) Result.t
           Async.Deferred.t
 val describe_load_balancers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBalancersInput.t ->
-        (DescribeLoadBalancersOutput.t,
-          [ `AWS of DescribeLoadBalancersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeLoadBalancersOutput.t, DescribeLoadBalancersOutput.error)
+          Result.t Async.Deferred.t
 val describe_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRulesInput.t ->
-        (DescribeRulesOutput.t,
-          [ `AWS of DescribeRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeRulesOutput.t, DescribeRulesOutput.error) Result.t
           Async.Deferred.t
 val describe_s_s_l_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSSLPoliciesInput.t ->
-        (DescribeSSLPoliciesOutput.t,
-          [ `AWS of DescribeSSLPoliciesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSSLPoliciesOutput.t, DescribeSSLPoliciesOutput.error)
+          Result.t Async.Deferred.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsInput.t ->
-        (DescribeTagsOutput.t,
-          [ `AWS of DescribeTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTagsOutput.t, DescribeTagsOutput.error) Result.t
           Async.Deferred.t
 val describe_target_group_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTargetGroupAttributesInput.t ->
         (DescribeTargetGroupAttributesOutput.t,
-          [ `AWS of DescribeTargetGroupAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeTargetGroupAttributesOutput.error) Result.t
           Async.Deferred.t
 val describe_target_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTargetGroupsInput.t ->
-        (DescribeTargetGroupsOutput.t,
-          [ `AWS of DescribeTargetGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTargetGroupsOutput.t, DescribeTargetGroupsOutput.error)
+          Result.t Async.Deferred.t
 val describe_target_health :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTargetHealthInput.t ->
-        (DescribeTargetHealthOutput.t,
-          [ `AWS of DescribeTargetHealthOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTargetHealthOutput.t, DescribeTargetHealthOutput.error)
+          Result.t Async.Deferred.t
 val modify_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyListenerInput.t ->
-        (ModifyListenerOutput.t,
-          [ `AWS of ModifyListenerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyListenerOutput.t, ModifyListenerOutput.error) Result.t
           Async.Deferred.t
 val modify_load_balancer_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyLoadBalancerAttributesInput.t ->
         (ModifyLoadBalancerAttributesOutput.t,
-          [ `AWS of ModifyLoadBalancerAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyLoadBalancerAttributesOutput.error) Result.t Async.Deferred.t
 val modify_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyRuleInput.t ->
-        (ModifyRuleOutput.t,
-          [ `AWS of ModifyRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyRuleOutput.t, ModifyRuleOutput.error) Result.t
           Async.Deferred.t
 val modify_target_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTargetGroupInput.t ->
-        (ModifyTargetGroupOutput.t,
-          [ `AWS of ModifyTargetGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyTargetGroupOutput.t, ModifyTargetGroupOutput.error) Result.t
           Async.Deferred.t
 val modify_target_group_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyTargetGroupAttributesInput.t ->
         (ModifyTargetGroupAttributesOutput.t,
-          [ `AWS of ModifyTargetGroupAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyTargetGroupAttributesOutput.error) Result.t Async.Deferred.t
 val register_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterTargetsInput.t ->
-        (RegisterTargetsOutput.t,
-          [ `AWS of RegisterTargetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterTargetsOutput.t, RegisterTargetsOutput.error) Result.t
           Async.Deferred.t
 val remove_listener_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveListenerCertificatesInput.t ->
         (RemoveListenerCertificatesOutput.t,
-          [ `AWS of RemoveListenerCertificatesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RemoveListenerCertificatesOutput.error) Result.t Async.Deferred.t
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsInput.t ->
-        (RemoveTagsOutput.t,
-          [ `AWS of RemoveTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RemoveTagsOutput.t, RemoveTagsOutput.error) Result.t
           Async.Deferred.t
 val set_ip_address_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetIpAddressTypeInput.t ->
-        (SetIpAddressTypeOutput.t,
-          [ `AWS of SetIpAddressTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SetIpAddressTypeOutput.t, SetIpAddressTypeOutput.error) Result.t
           Async.Deferred.t
 val set_rule_priorities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetRulePrioritiesInput.t ->
-        (SetRulePrioritiesOutput.t,
-          [ `AWS of SetRulePrioritiesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SetRulePrioritiesOutput.t, SetRulePrioritiesOutput.error) Result.t
           Async.Deferred.t
 val set_security_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetSecurityGroupsInput.t ->
-        (SetSecurityGroupsOutput.t,
-          [ `AWS of SetSecurityGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SetSecurityGroupsOutput.t, SetSecurityGroupsOutput.error) Result.t
           Async.Deferred.t
 val set_subnets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetSubnetsInput.t ->
-        (SetSubnetsOutput.t,
-          [ `AWS of SetSubnetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SetSubnetsOutput.t, SetSubnetsOutput.error) Result.t
           Async.Deferred.t

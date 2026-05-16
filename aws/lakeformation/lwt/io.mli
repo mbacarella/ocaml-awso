@@ -4,307 +4,255 @@ val add_l_f_tags_to_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddLFTagsToResourceRequest.t ->
-        (AddLFTagsToResourceResponse.t,
-          [ `AWS of AddLFTagsToResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddLFTagsToResourceResponse.t, AddLFTagsToResourceResponse.error)
+          Result.t Lwt.t
 val batch_grant_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGrantPermissionsRequest.t ->
         (BatchGrantPermissionsResponse.t,
-          [ `AWS of BatchGrantPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGrantPermissionsResponse.error) Result.t Lwt.t
 val batch_revoke_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchRevokePermissionsRequest.t ->
         (BatchRevokePermissionsResponse.t,
-          [ `AWS of BatchRevokePermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchRevokePermissionsResponse.error) Result.t Lwt.t
 val cancel_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelTransactionRequest.t ->
-        (CancelTransactionResponse.t,
-          [ `AWS of CancelTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelTransactionResponse.t, CancelTransactionResponse.error)
+          Result.t Lwt.t
 val commit_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CommitTransactionRequest.t ->
-        (CommitTransactionResponse.t,
-          [ `AWS of CommitTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CommitTransactionResponse.t, CommitTransactionResponse.error)
+          Result.t Lwt.t
 val create_data_cells_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataCellsFilterRequest.t ->
         (CreateDataCellsFilterResponse.t,
-          [ `AWS of CreateDataCellsFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDataCellsFilterResponse.error) Result.t Lwt.t
 val create_l_f_tag :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLFTagRequest.t ->
-        (CreateLFTagResponse.t,
-          [ `AWS of CreateLFTagResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLFTagResponse.t, CreateLFTagResponse.error) Result.t Lwt.t
 val delete_data_cells_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDataCellsFilterRequest.t ->
         (DeleteDataCellsFilterResponse.t,
-          [ `AWS of DeleteDataCellsFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDataCellsFilterResponse.error) Result.t Lwt.t
 val delete_l_f_tag :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLFTagRequest.t ->
-        (DeleteLFTagResponse.t,
-          [ `AWS of DeleteLFTagResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLFTagResponse.t, DeleteLFTagResponse.error) Result.t Lwt.t
 val delete_objects_on_cancel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteObjectsOnCancelRequest.t ->
         (DeleteObjectsOnCancelResponse.t,
-          [ `AWS of DeleteObjectsOnCancelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteObjectsOnCancelResponse.error) Result.t Lwt.t
 val deregister_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterResourceRequest.t ->
-        (DeregisterResourceResponse.t,
-          [ `AWS of DeregisterResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeregisterResourceResponse.t, DeregisterResourceResponse.error)
+          Result.t Lwt.t
 val describe_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResourceRequest.t ->
-        (DescribeResourceResponse.t,
-          [ `AWS of DescribeResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeResourceResponse.t, DescribeResourceResponse.error) Result.t
+          Lwt.t
 val describe_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTransactionRequest.t ->
-        (DescribeTransactionResponse.t,
-          [ `AWS of DescribeTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTransactionResponse.t, DescribeTransactionResponse.error)
+          Result.t Lwt.t
 val extend_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExtendTransactionRequest.t ->
-        (ExtendTransactionResponse.t,
-          [ `AWS of ExtendTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExtendTransactionResponse.t, ExtendTransactionResponse.error)
+          Result.t Lwt.t
 val get_data_lake_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataLakeSettingsRequest.t ->
-        (GetDataLakeSettingsResponse.t,
-          [ `AWS of GetDataLakeSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDataLakeSettingsResponse.t, GetDataLakeSettingsResponse.error)
+          Result.t Lwt.t
 val get_effective_permissions_for_path :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEffectivePermissionsForPathRequest.t ->
         (GetEffectivePermissionsForPathResponse.t,
-          [ `AWS of GetEffectivePermissionsForPathResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetEffectivePermissionsForPathResponse.error) Result.t Lwt.t
 val get_l_f_tag :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLFTagRequest.t ->
-        (GetLFTagResponse.t,
-          [ `AWS of GetLFTagResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLFTagResponse.t, GetLFTagResponse.error) Result.t Lwt.t
 val get_query_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueryStateRequest.t ->
-        (GetQueryStateResponse.t,
-          [ `AWS of GetQueryStateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetQueryStateResponse.t, GetQueryStateResponse.error) Result.t Lwt.t
 val get_query_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueryStatisticsRequest.t ->
-        (GetQueryStatisticsResponse.t,
-          [ `AWS of GetQueryStatisticsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetQueryStatisticsResponse.t, GetQueryStatisticsResponse.error)
+          Result.t Lwt.t
 val get_resource_l_f_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceLFTagsRequest.t ->
-        (GetResourceLFTagsResponse.t,
-          [ `AWS of GetResourceLFTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourceLFTagsResponse.t, GetResourceLFTagsResponse.error)
+          Result.t Lwt.t
 val get_table_objects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTableObjectsRequest.t ->
-        (GetTableObjectsResponse.t,
-          [ `AWS of GetTableObjectsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTableObjectsResponse.t, GetTableObjectsResponse.error) Result.t
+          Lwt.t
 val get_temporary_glue_partition_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTemporaryGluePartitionCredentialsRequest.t ->
         (GetTemporaryGluePartitionCredentialsResponse.t,
-          [ `AWS of GetTemporaryGluePartitionCredentialsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetTemporaryGluePartitionCredentialsResponse.error) Result.t Lwt.t
 val get_temporary_glue_table_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTemporaryGlueTableCredentialsRequest.t ->
         (GetTemporaryGlueTableCredentialsResponse.t,
-          [ `AWS of GetTemporaryGlueTableCredentialsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetTemporaryGlueTableCredentialsResponse.error) Result.t Lwt.t
 val get_work_unit_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkUnitResultsRequest.t ->
-        (GetWorkUnitResultsResponse.t,
-          [ `AWS of GetWorkUnitResultsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWorkUnitResultsResponse.t, GetWorkUnitResultsResponse.error)
+          Result.t Lwt.t
 val get_work_units :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkUnitsRequest.t ->
-        (GetWorkUnitsResponse.t,
-          [ `AWS of GetWorkUnitsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWorkUnitsResponse.t, GetWorkUnitsResponse.error) Result.t Lwt.t
 val grant_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GrantPermissionsRequest.t ->
-        (GrantPermissionsResponse.t,
-          [ `AWS of GrantPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GrantPermissionsResponse.t, GrantPermissionsResponse.error) Result.t
+          Lwt.t
 val list_data_cells_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDataCellsFilterRequest.t ->
-        (ListDataCellsFilterResponse.t,
-          [ `AWS of ListDataCellsFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDataCellsFilterResponse.t, ListDataCellsFilterResponse.error)
+          Result.t Lwt.t
 val list_l_f_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLFTagsRequest.t ->
-        (ListLFTagsResponse.t,
-          [ `AWS of ListLFTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLFTagsResponse.t, ListLFTagsResponse.error) Result.t Lwt.t
 val list_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionsRequest.t ->
-        (ListPermissionsResponse.t,
-          [ `AWS of ListPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPermissionsResponse.t, ListPermissionsResponse.error) Result.t
+          Lwt.t
 val list_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesRequest.t ->
-        (ListResourcesResponse.t,
-          [ `AWS of ListResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourcesResponse.t, ListResourcesResponse.error) Result.t Lwt.t
 val list_table_storage_optimizers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTableStorageOptimizersRequest.t ->
         (ListTableStorageOptimizersResponse.t,
-          [ `AWS of ListTableStorageOptimizersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTableStorageOptimizersResponse.error) Result.t Lwt.t
 val list_transactions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTransactionsRequest.t ->
-        (ListTransactionsResponse.t,
-          [ `AWS of ListTransactionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTransactionsResponse.t, ListTransactionsResponse.error) Result.t
+          Lwt.t
 val put_data_lake_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDataLakeSettingsRequest.t ->
-        (PutDataLakeSettingsResponse.t,
-          [ `AWS of PutDataLakeSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutDataLakeSettingsResponse.t, PutDataLakeSettingsResponse.error)
+          Result.t Lwt.t
 val register_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterResourceRequest.t ->
-        (RegisterResourceResponse.t,
-          [ `AWS of RegisterResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterResourceResponse.t, RegisterResourceResponse.error) Result.t
+          Lwt.t
 val remove_l_f_tags_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveLFTagsFromResourceRequest.t ->
         (RemoveLFTagsFromResourceResponse.t,
-          [ `AWS of RemoveLFTagsFromResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveLFTagsFromResourceResponse.error) Result.t Lwt.t
 val revoke_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokePermissionsRequest.t ->
-        (RevokePermissionsResponse.t,
-          [ `AWS of RevokePermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RevokePermissionsResponse.t, RevokePermissionsResponse.error)
+          Result.t Lwt.t
 val search_databases_by_l_f_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchDatabasesByLFTagsRequest.t ->
         (SearchDatabasesByLFTagsResponse.t,
-          [ `AWS of SearchDatabasesByLFTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchDatabasesByLFTagsResponse.error) Result.t Lwt.t
 val search_tables_by_l_f_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchTablesByLFTagsRequest.t ->
-        (SearchTablesByLFTagsResponse.t,
-          [ `AWS of SearchTablesByLFTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchTablesByLFTagsResponse.t, SearchTablesByLFTagsResponse.error)
+          Result.t Lwt.t
 val start_query_planning :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartQueryPlanningRequest.t ->
-        (StartQueryPlanningResponse.t,
-          [ `AWS of StartQueryPlanningResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartQueryPlanningResponse.t, StartQueryPlanningResponse.error)
+          Result.t Lwt.t
 val start_transaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTransactionRequest.t ->
-        (StartTransactionResponse.t,
-          [ `AWS of StartTransactionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartTransactionResponse.t, StartTransactionResponse.error) Result.t
+          Lwt.t
 val update_l_f_tag :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLFTagRequest.t ->
-        (UpdateLFTagResponse.t,
-          [ `AWS of UpdateLFTagResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLFTagResponse.t, UpdateLFTagResponse.error) Result.t Lwt.t
 val update_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceRequest.t ->
-        (UpdateResourceResponse.t,
-          [ `AWS of UpdateResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResourceResponse.t, UpdateResourceResponse.error) Result.t
+          Lwt.t
 val update_table_objects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTableObjectsRequest.t ->
-        (UpdateTableObjectsResponse.t,
-          [ `AWS of UpdateTableObjectsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTableObjectsResponse.t, UpdateTableObjectsResponse.error)
+          Result.t Lwt.t
 val update_table_storage_optimizer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTableStorageOptimizerRequest.t ->
         (UpdateTableStorageOptimizerResponse.t,
-          [ `AWS of UpdateTableStorageOptimizerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateTableStorageOptimizerResponse.error) Result.t Lwt.t

@@ -1132,311 +1132,325 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateChannelReadMarker ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
-  | AssociateChannelFlow -> Ok ()
+  | AssociateChannelFlow ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | BatchCreateChannelMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchCreateChannelMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchCreateChannelMembershipResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchCreateChannelMembershipResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateChannelMembershipResponse.error_of_json))
   | ChannelFlowCallback ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ChannelFlowCallbackResponse.error_of_json)
-       | Ok resp ->
-           Ok (ChannelFlowCallbackResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ChannelFlowCallbackResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ChannelFlowCallbackResponse.error_of_json))
   | CreateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
   | CreateChannelBan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelBanResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelBanResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelBanResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateChannelBanResponse.error_of_json))
   | CreateChannelFlow ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelFlowResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelFlowResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelFlowResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateChannelFlowResponse.error_of_json))
   | CreateChannelMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateChannelMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateChannelMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateChannelMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateChannelMembershipResponse.error_of_json))
   | CreateChannelModerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateChannelModeratorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateChannelModeratorResponse.of_json (response_to_json resp)))
-  | DeleteChannel -> Ok ()
-  | DeleteChannelBan -> Ok ()
-  | DeleteChannelFlow -> Ok ()
-  | DeleteChannelMembership -> Ok ()
-  | DeleteChannelMessage -> Ok ()
-  | DeleteChannelModerator -> Ok ()
+      if is_success
+      then
+        Ok (CreateChannelModeratorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateChannelModeratorResponse.error_of_json))
+  | DeleteChannel ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelBan ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelFlow ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelMembership ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelMessage ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteChannelModerator ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeChannelResponse.error_of_json))
   | DescribeChannelBan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelBanResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelBanResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelBanResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeChannelBanResponse.error_of_json))
   | DescribeChannelFlow ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelFlowResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelFlowResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelFlowResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeChannelFlowResponse.error_of_json))
   | DescribeChannelMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeChannelMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelMembershipResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeChannelMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeChannelMembershipResponse.error_of_json))
   | DescribeChannelMembershipForAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeChannelMembershipForAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeChannelMembershipForAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelMembershipForAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                DescribeChannelMembershipForAppInstanceUserResponse.error_of_json))
   | DescribeChannelModeratedByAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeChannelModeratedByAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeChannelModeratedByAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelModeratedByAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                DescribeChannelModeratedByAppInstanceUserResponse.error_of_json))
   | DescribeChannelModerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeChannelModeratorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeChannelModeratorResponse.of_json
-                (response_to_json resp)))
-  | DisassociateChannelFlow -> Ok ()
+      if is_success
+      then
+        Ok (DescribeChannelModeratorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeChannelModeratorResponse.error_of_json))
+  | DisassociateChannelFlow ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GetChannelMembershipPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetChannelMembershipPreferencesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetChannelMembershipPreferencesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetChannelMembershipPreferencesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetChannelMembershipPreferencesResponse.error_of_json))
   | GetChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetChannelMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetChannelMessageResponse.error_of_json))
   | GetChannelMessageStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetChannelMessageStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetChannelMessageStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetChannelMessageStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetChannelMessageStatusResponse.error_of_json))
   | GetMessagingSessionEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMessagingSessionEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetMessagingSessionEndpointResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetMessagingSessionEndpointResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMessagingSessionEndpointResponse.error_of_json))
   | ListChannelBans ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelBansResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChannelBansResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelBansResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListChannelBansResponse.error_of_json))
   | ListChannelFlows ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelFlowsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChannelFlowsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelFlowsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListChannelFlowsResponse.error_of_json))
   | ListChannelMemberships ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListChannelMembershipsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListChannelMembershipsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListChannelMembershipsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListChannelMembershipsResponse.error_of_json))
   | ListChannelMembershipsForAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListChannelMembershipsForAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListChannelMembershipsForAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListChannelMembershipsForAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                ListChannelMembershipsForAppInstanceUserResponse.error_of_json))
   | ListChannelMessages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelMessagesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChannelMessagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelMessagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListChannelMessagesResponse.error_of_json))
   | ListChannelModerators ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListChannelModeratorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChannelModeratorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelModeratorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListChannelModeratorsResponse.error_of_json))
   | ListChannels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelsResponse.error_of_json)
-       | Ok resp -> Ok (ListChannelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
   | ListChannelsAssociatedWithChannelFlow ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListChannelsAssociatedWithChannelFlowResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListChannelsAssociatedWithChannelFlowResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListChannelsAssociatedWithChannelFlowResponse.of_json
-                (response_to_json resp)))
+                ListChannelsAssociatedWithChannelFlowResponse.error_of_json))
   | ListChannelsModeratedByAppInstanceUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListChannelsModeratedByAppInstanceUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListChannelsModeratedByAppInstanceUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListChannelsModeratedByAppInstanceUserResponse.of_json
-                (response_to_json resp)))
+                ListChannelsModeratedByAppInstanceUserResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutChannelMembershipPreferences ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutChannelMembershipPreferencesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutChannelMembershipPreferencesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutChannelMembershipPreferencesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutChannelMembershipPreferencesResponse.error_of_json))
   | RedactChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RedactChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (RedactChannelMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RedactChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RedactChannelMessageResponse.error_of_json))
   | SendChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SendChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (SendChannelMessageResponse.of_json (response_to_json resp)))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then Ok (SendChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SendChannelMessageResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
   | UpdateChannelFlow ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChannelFlowResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChannelFlowResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChannelFlowResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateChannelFlowResponse.error_of_json))
   | UpdateChannelMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChannelMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChannelMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChannelMessageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateChannelMessageResponse.error_of_json))
   | UpdateChannelReadMarker ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateChannelReadMarkerResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateChannelReadMarkerResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateChannelReadMarkerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateChannelReadMarkerResponse.error_of_json))

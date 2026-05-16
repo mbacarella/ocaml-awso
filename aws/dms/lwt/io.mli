@@ -4,386 +4,331 @@ val add_tags_to_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsToResourceMessage.t ->
-        (AddTagsToResourceResponse.t,
-          [ `AWS of AddTagsToResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddTagsToResourceResponse.t, AddTagsToResourceResponse.error)
+          Result.t Lwt.t
 val apply_pending_maintenance_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ApplyPendingMaintenanceActionMessage.t ->
         (ApplyPendingMaintenanceActionResponse.t,
-          [ `AWS of ApplyPendingMaintenanceActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ApplyPendingMaintenanceActionResponse.error) Result.t Lwt.t
 val cancel_replication_task_assessment_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelReplicationTaskAssessmentRunMessage.t ->
         (CancelReplicationTaskAssessmentRunResponse.t,
-          [ `AWS of CancelReplicationTaskAssessmentRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelReplicationTaskAssessmentRunResponse.error) Result.t Lwt.t
 val create_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEndpointMessage.t ->
-        (CreateEndpointResponse.t,
-          [ `AWS of CreateEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEndpointResponse.t, CreateEndpointResponse.error) Result.t
+          Lwt.t
 val create_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEventSubscriptionMessage.t ->
         (CreateEventSubscriptionResponse.t,
-          [ `AWS of CreateEventSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateEventSubscriptionResponse.error) Result.t Lwt.t
 val create_replication_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReplicationInstanceMessage.t ->
         (CreateReplicationInstanceResponse.t,
-          [ `AWS of CreateReplicationInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateReplicationInstanceResponse.error) Result.t Lwt.t
 val create_replication_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReplicationSubnetGroupMessage.t ->
         (CreateReplicationSubnetGroupResponse.t,
-          [ `AWS of CreateReplicationSubnetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateReplicationSubnetGroupResponse.error) Result.t Lwt.t
 val create_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReplicationTaskMessage.t ->
         (CreateReplicationTaskResponse.t,
-          [ `AWS of CreateReplicationTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateReplicationTaskResponse.error) Result.t Lwt.t
 val delete_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCertificateMessage.t ->
-        (DeleteCertificateResponse.t,
-          [ `AWS of DeleteCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCertificateResponse.t, DeleteCertificateResponse.error)
+          Result.t Lwt.t
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectionMessage.t ->
-        (DeleteConnectionResponse.t,
-          [ `AWS of DeleteConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteConnectionResponse.t, DeleteConnectionResponse.error) Result.t
+          Lwt.t
 val delete_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEndpointMessage.t ->
-        (DeleteEndpointResponse.t,
-          [ `AWS of DeleteEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEndpointResponse.t, DeleteEndpointResponse.error) Result.t
+          Lwt.t
 val delete_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventSubscriptionMessage.t ->
         (DeleteEventSubscriptionResponse.t,
-          [ `AWS of DeleteEventSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEventSubscriptionResponse.error) Result.t Lwt.t
 val delete_replication_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReplicationInstanceMessage.t ->
         (DeleteReplicationInstanceResponse.t,
-          [ `AWS of DeleteReplicationInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteReplicationInstanceResponse.error) Result.t Lwt.t
 val delete_replication_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReplicationSubnetGroupMessage.t ->
         (DeleteReplicationSubnetGroupResponse.t,
-          [ `AWS of DeleteReplicationSubnetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteReplicationSubnetGroupResponse.error) Result.t Lwt.t
 val delete_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReplicationTaskMessage.t ->
         (DeleteReplicationTaskResponse.t,
-          [ `AWS of DeleteReplicationTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteReplicationTaskResponse.error) Result.t Lwt.t
 val delete_replication_task_assessment_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReplicationTaskAssessmentRunMessage.t ->
         (DeleteReplicationTaskAssessmentRunResponse.t,
-          [ `AWS of DeleteReplicationTaskAssessmentRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteReplicationTaskAssessmentRunResponse.error) Result.t Lwt.t
 val describe_account_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountAttributesMessage.t ->
         (DescribeAccountAttributesResponse.t,
-          [ `AWS of DescribeAccountAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAccountAttributesResponse.error) Result.t Lwt.t
 val describe_applicable_individual_assessments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicableIndividualAssessmentsMessage.t ->
         (DescribeApplicableIndividualAssessmentsResponse.t,
-          [ `AWS of DescribeApplicableIndividualAssessmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeApplicableIndividualAssessmentsResponse.error) Result.t
+          Lwt.t
 val describe_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCertificatesMessage.t ->
-        (DescribeCertificatesResponse.t,
-          [ `AWS of DescribeCertificatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCertificatesResponse.t, DescribeCertificatesResponse.error)
+          Result.t Lwt.t
 val describe_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectionsMessage.t ->
-        (DescribeConnectionsResponse.t,
-          [ `AWS of DescribeConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeConnectionsResponse.t, DescribeConnectionsResponse.error)
+          Result.t Lwt.t
 val describe_endpoint_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointSettingsMessage.t ->
         (DescribeEndpointSettingsResponse.t,
-          [ `AWS of DescribeEndpointSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEndpointSettingsResponse.error) Result.t Lwt.t
 val describe_endpoint_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointTypesMessage.t ->
         (DescribeEndpointTypesResponse.t,
-          [ `AWS of DescribeEndpointTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEndpointTypesResponse.error) Result.t Lwt.t
 val describe_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointsMessage.t ->
-        (DescribeEndpointsResponse.t,
-          [ `AWS of DescribeEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEndpointsResponse.t, DescribeEndpointsResponse.error)
+          Result.t Lwt.t
 val describe_event_categories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventCategoriesMessage.t ->
         (DescribeEventCategoriesResponse.t,
-          [ `AWS of DescribeEventCategoriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEventCategoriesResponse.error) Result.t Lwt.t
 val describe_event_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventSubscriptionsMessage.t ->
         (DescribeEventSubscriptionsResponse.t,
-          [ `AWS of DescribeEventSubscriptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEventSubscriptionsResponse.error) Result.t Lwt.t
 val describe_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventsMessage.t ->
-        (DescribeEventsResponse.t,
-          [ `AWS of DescribeEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEventsResponse.t, DescribeEventsResponse.error) Result.t
+          Lwt.t
 val describe_orderable_replication_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrderableReplicationInstancesMessage.t ->
         (DescribeOrderableReplicationInstancesResponse.t,
-          [ `AWS of DescribeOrderableReplicationInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOrderableReplicationInstancesResponse.error) Result.t Lwt.t
 val describe_pending_maintenance_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePendingMaintenanceActionsMessage.t ->
         (DescribePendingMaintenanceActionsResponse.t,
-          [ `AWS of DescribePendingMaintenanceActionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePendingMaintenanceActionsResponse.error) Result.t Lwt.t
 val describe_refresh_schemas_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRefreshSchemasStatusMessage.t ->
         (DescribeRefreshSchemasStatusResponse.t,
-          [ `AWS of DescribeRefreshSchemasStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRefreshSchemasStatusResponse.error) Result.t Lwt.t
 val describe_replication_instance_task_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationInstanceTaskLogsMessage.t ->
         (DescribeReplicationInstanceTaskLogsResponse.t,
-          [ `AWS of DescribeReplicationInstanceTaskLogsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationInstanceTaskLogsResponse.error) Result.t Lwt.t
 val describe_replication_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationInstancesMessage.t ->
         (DescribeReplicationInstancesResponse.t,
-          [ `AWS of DescribeReplicationInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationInstancesResponse.error) Result.t Lwt.t
 val describe_replication_subnet_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationSubnetGroupsMessage.t ->
         (DescribeReplicationSubnetGroupsResponse.t,
-          [ `AWS of DescribeReplicationSubnetGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationSubnetGroupsResponse.error) Result.t Lwt.t
 val describe_replication_task_assessment_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationTaskAssessmentResultsMessage.t ->
         (DescribeReplicationTaskAssessmentResultsResponse.t,
-          [ `AWS of DescribeReplicationTaskAssessmentResultsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationTaskAssessmentResultsResponse.error) Result.t
+          Lwt.t
 val describe_replication_task_assessment_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationTaskAssessmentRunsMessage.t ->
         (DescribeReplicationTaskAssessmentRunsResponse.t,
-          [ `AWS of DescribeReplicationTaskAssessmentRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationTaskAssessmentRunsResponse.error) Result.t Lwt.t
 val describe_replication_task_individual_assessments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationTaskIndividualAssessmentsMessage.t ->
         (DescribeReplicationTaskIndividualAssessmentsResponse.t,
-          [
-            `AWS of
-              DescribeReplicationTaskIndividualAssessmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationTaskIndividualAssessmentsResponse.error)
+          Result.t Lwt.t
 val describe_replication_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationTasksMessage.t ->
         (DescribeReplicationTasksResponse.t,
-          [ `AWS of DescribeReplicationTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationTasksResponse.error) Result.t Lwt.t
 val describe_schemas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSchemasMessage.t ->
-        (DescribeSchemasResponse.t,
-          [ `AWS of DescribeSchemasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSchemasResponse.t, DescribeSchemasResponse.error) Result.t
+          Lwt.t
 val describe_table_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTableStatisticsMessage.t ->
         (DescribeTableStatisticsResponse.t,
-          [ `AWS of DescribeTableStatisticsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTableStatisticsResponse.error) Result.t Lwt.t
 val import_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportCertificateMessage.t ->
-        (ImportCertificateResponse.t,
-          [ `AWS of ImportCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportCertificateResponse.t, ImportCertificateResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceMessage.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val modify_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyEndpointMessage.t ->
-        (ModifyEndpointResponse.t,
-          [ `AWS of ModifyEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ModifyEndpointResponse.t, ModifyEndpointResponse.error) Result.t
+          Lwt.t
 val modify_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyEventSubscriptionMessage.t ->
         (ModifyEventSubscriptionResponse.t,
-          [ `AWS of ModifyEventSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyEventSubscriptionResponse.error) Result.t Lwt.t
 val modify_replication_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyReplicationInstanceMessage.t ->
         (ModifyReplicationInstanceResponse.t,
-          [ `AWS of ModifyReplicationInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyReplicationInstanceResponse.error) Result.t Lwt.t
 val modify_replication_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyReplicationSubnetGroupMessage.t ->
         (ModifyReplicationSubnetGroupResponse.t,
-          [ `AWS of ModifyReplicationSubnetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyReplicationSubnetGroupResponse.error) Result.t Lwt.t
 val modify_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyReplicationTaskMessage.t ->
         (ModifyReplicationTaskResponse.t,
-          [ `AWS of ModifyReplicationTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyReplicationTaskResponse.error) Result.t Lwt.t
 val move_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MoveReplicationTaskMessage.t ->
-        (MoveReplicationTaskResponse.t,
-          [ `AWS of MoveReplicationTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (MoveReplicationTaskResponse.t, MoveReplicationTaskResponse.error)
+          Result.t Lwt.t
 val reboot_replication_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootReplicationInstanceMessage.t ->
         (RebootReplicationInstanceResponse.t,
-          [ `AWS of RebootReplicationInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RebootReplicationInstanceResponse.error) Result.t Lwt.t
 val refresh_schemas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RefreshSchemasMessage.t ->
-        (RefreshSchemasResponse.t,
-          [ `AWS of RefreshSchemasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RefreshSchemasResponse.t, RefreshSchemasResponse.error) Result.t
+          Lwt.t
 val reload_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReloadTablesMessage.t ->
-        (ReloadTablesResponse.t,
-          [ `AWS of ReloadTablesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReloadTablesResponse.t, ReloadTablesResponse.error) Result.t Lwt.t
 val remove_tags_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsFromResourceMessage.t ->
         (RemoveTagsFromResourceResponse.t,
-          [ `AWS of RemoveTagsFromResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveTagsFromResourceResponse.error) Result.t Lwt.t
 val start_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartReplicationTaskMessage.t ->
-        (StartReplicationTaskResponse.t,
-          [ `AWS of StartReplicationTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartReplicationTaskResponse.t, StartReplicationTaskResponse.error)
+          Result.t Lwt.t
 val start_replication_task_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartReplicationTaskAssessmentMessage.t ->
         (StartReplicationTaskAssessmentResponse.t,
-          [ `AWS of StartReplicationTaskAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartReplicationTaskAssessmentResponse.error) Result.t Lwt.t
 val start_replication_task_assessment_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartReplicationTaskAssessmentRunMessage.t ->
         (StartReplicationTaskAssessmentRunResponse.t,
-          [ `AWS of StartReplicationTaskAssessmentRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartReplicationTaskAssessmentRunResponse.error) Result.t Lwt.t
 val stop_replication_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopReplicationTaskMessage.t ->
-        (StopReplicationTaskResponse.t,
-          [ `AWS of StopReplicationTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopReplicationTaskResponse.t, StopReplicationTaskResponse.error)
+          Result.t Lwt.t
 val test_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestConnectionMessage.t ->
-        (TestConnectionResponse.t,
-          [ `AWS of TestConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TestConnectionResponse.t, TestConnectionResponse.error) Result.t
+          Lwt.t

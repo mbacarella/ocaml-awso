@@ -7,7 +7,6 @@ val bprintf : Buffer.t -> ('a, Buffer.t, unit) format -> 'a
 val failwithf : ('a, unit, string, 'b) format4 -> 'a
 val ksprintf : (string -> 'a) -> ('b, unit, string, 'a) format4 -> 'b
 val ( ^/ ) : string -> string -> string
-
 val ( = ) : int -> int -> bool
 val ( <> ) : int -> int -> bool
 val ( < ) : int -> int -> bool
@@ -73,8 +72,20 @@ module List : sig
   val chunks_of : 'a list -> length:int -> 'a list list
   val reduce_exn : 'a list -> f:('a -> 'a -> 'a) -> 'a
   val zip_exn : 'a list -> 'b list -> ('a * 'b) list
-  val fold_until : 'a list -> init:'acc -> f:('acc -> 'a -> ('acc, 'final) continue_or_stop) -> finish:('acc -> 'final) -> 'final
-  val range : ?start:[ `inclusive | `exclusive ] -> ?stop:[ `inclusive | `exclusive ] -> int -> int -> int list
+
+  val fold_until
+    :  'a list
+    -> init:'acc
+    -> f:('acc -> 'a -> ('acc, 'final) continue_or_stop)
+    -> finish:('acc -> 'final)
+    -> 'final
+
+  val range
+    :  ?start:[ `inclusive | `exclusive ]
+    -> ?stop:[ `inclusive | `exclusive ]
+    -> int
+    -> int
+    -> int list
 
   module Assoc : sig
     type ('k, 'v) t = ('k * 'v) list

@@ -4,216 +4,174 @@ val create_assistant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssistantRequest.t ->
-        (CreateAssistantResponse.t,
-          [ `AWS of CreateAssistantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAssistantResponse.t, CreateAssistantResponse.error) Result.t
+          Lwt.t
 val create_assistant_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssistantAssociationRequest.t ->
         (CreateAssistantAssociationResponse.t,
-          [ `AWS of CreateAssistantAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAssistantAssociationResponse.error) Result.t Lwt.t
 val create_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateContentRequest.t ->
-        (CreateContentResponse.t,
-          [ `AWS of CreateContentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateContentResponse.t, CreateContentResponse.error) Result.t Lwt.t
 val create_knowledge_base :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateKnowledgeBaseRequest.t ->
-        (CreateKnowledgeBaseResponse.t,
-          [ `AWS of CreateKnowledgeBaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateKnowledgeBaseResponse.t, CreateKnowledgeBaseResponse.error)
+          Result.t Lwt.t
 val create_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSessionRequest.t ->
-        (CreateSessionResponse.t,
-          [ `AWS of CreateSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSessionResponse.t, CreateSessionResponse.error) Result.t Lwt.t
 val delete_assistant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssistantRequest.t ->
-        (DeleteAssistantResponse.t,
-          [ `AWS of DeleteAssistantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAssistantResponse.t, DeleteAssistantResponse.error) Result.t
+          Lwt.t
 val delete_assistant_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssistantAssociationRequest.t ->
         (DeleteAssistantAssociationResponse.t,
-          [ `AWS of DeleteAssistantAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAssistantAssociationResponse.error) Result.t Lwt.t
 val delete_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContentRequest.t ->
-        (DeleteContentResponse.t,
-          [ `AWS of DeleteContentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteContentResponse.t, DeleteContentResponse.error) Result.t Lwt.t
 val delete_knowledge_base :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteKnowledgeBaseRequest.t ->
-        (DeleteKnowledgeBaseResponse.t,
-          [ `AWS of DeleteKnowledgeBaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteKnowledgeBaseResponse.t, DeleteKnowledgeBaseResponse.error)
+          Result.t Lwt.t
 val get_assistant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssistantRequest.t ->
-        (GetAssistantResponse.t,
-          [ `AWS of GetAssistantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAssistantResponse.t, GetAssistantResponse.error) Result.t Lwt.t
 val get_assistant_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssistantAssociationRequest.t ->
         (GetAssistantAssociationResponse.t,
-          [ `AWS of GetAssistantAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAssistantAssociationResponse.error) Result.t Lwt.t
 val get_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContentRequest.t ->
-        (GetContentResponse.t,
-          [ `AWS of GetContentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContentResponse.t, GetContentResponse.error) Result.t Lwt.t
 val get_content_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContentSummaryRequest.t ->
-        (GetContentSummaryResponse.t,
-          [ `AWS of GetContentSummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContentSummaryResponse.t, GetContentSummaryResponse.error)
+          Result.t Lwt.t
 val get_knowledge_base :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetKnowledgeBaseRequest.t ->
-        (GetKnowledgeBaseResponse.t,
-          [ `AWS of GetKnowledgeBaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetKnowledgeBaseResponse.t, GetKnowledgeBaseResponse.error) Result.t
+          Lwt.t
 val get_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecommendationsRequest.t ->
-        (GetRecommendationsResponse.t,
-          [ `AWS of GetRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRecommendationsResponse.t, GetRecommendationsResponse.error)
+          Result.t Lwt.t
 val get_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSessionRequest.t ->
-        (GetSessionResponse.t,
-          [ `AWS of GetSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSessionResponse.t, GetSessionResponse.error) Result.t Lwt.t
 val list_assistant_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssistantAssociationsRequest.t ->
         (ListAssistantAssociationsResponse.t,
-          [ `AWS of ListAssistantAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssistantAssociationsResponse.error) Result.t Lwt.t
 val list_assistants :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssistantsRequest.t ->
-        (ListAssistantsResponse.t,
-          [ `AWS of ListAssistantsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssistantsResponse.t, ListAssistantsResponse.error) Result.t
+          Lwt.t
 val list_contents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListContentsRequest.t ->
-        (ListContentsResponse.t,
-          [ `AWS of ListContentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListContentsResponse.t, ListContentsResponse.error) Result.t Lwt.t
 val list_knowledge_bases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKnowledgeBasesRequest.t ->
-        (ListKnowledgeBasesResponse.t,
-          [ `AWS of ListKnowledgeBasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListKnowledgeBasesResponse.t, ListKnowledgeBasesResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val notify_recommendations_received :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       NotifyRecommendationsReceivedRequest.t ->
         (NotifyRecommendationsReceivedResponse.t,
-          [ `AWS of NotifyRecommendationsReceivedResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          NotifyRecommendationsReceivedResponse.error) Result.t Lwt.t
 val query_assistant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       QueryAssistantRequest.t ->
-        (QueryAssistantResponse.t,
-          [ `AWS of QueryAssistantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (QueryAssistantResponse.t, QueryAssistantResponse.error) Result.t
+          Lwt.t
 val remove_knowledge_base_template_uri :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveKnowledgeBaseTemplateUriRequest.t ->
         (RemoveKnowledgeBaseTemplateUriResponse.t,
-          [ `AWS of RemoveKnowledgeBaseTemplateUriResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveKnowledgeBaseTemplateUriResponse.error) Result.t Lwt.t
 val search_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchContentRequest.t ->
-        (SearchContentResponse.t,
-          [ `AWS of SearchContentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchContentResponse.t, SearchContentResponse.error) Result.t Lwt.t
 val search_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchSessionsRequest.t ->
-        (SearchSessionsResponse.t,
-          [ `AWS of SearchSessionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchSessionsResponse.t, SearchSessionsResponse.error) Result.t
+          Lwt.t
 val start_content_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartContentUploadRequest.t ->
-        (StartContentUploadResponse.t,
-          [ `AWS of StartContentUploadResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartContentUploadResponse.t, StartContentUploadResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateContentRequest.t ->
-        (UpdateContentResponse.t,
-          [ `AWS of UpdateContentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateContentResponse.t, UpdateContentResponse.error) Result.t Lwt.t
 val update_knowledge_base_template_uri :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateKnowledgeBaseTemplateUriRequest.t ->
         (UpdateKnowledgeBaseTemplateUriResponse.t,
-          [ `AWS of UpdateKnowledgeBaseTemplateUriResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateKnowledgeBaseTemplateUriResponse.error) Result.t Lwt.t

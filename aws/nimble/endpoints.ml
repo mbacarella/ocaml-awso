@@ -940,363 +940,358 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateStudio -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateStudioComponent -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AcceptEulas ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AcceptEulasResponse.error_of_json)
-       | Ok resp -> Ok (AcceptEulasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AcceptEulasResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AcceptEulasResponse.error_of_json))
   | CreateLaunchProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLaunchProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateLaunchProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateLaunchProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateLaunchProfileResponse.error_of_json))
   | CreateStreamingImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateStreamingImageResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateStreamingImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateStreamingImageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateStreamingImageResponse.error_of_json))
   | CreateStreamingSession ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateStreamingSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateStreamingSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateStreamingSessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateStreamingSessionResponse.error_of_json))
   | CreateStreamingSessionStream ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateStreamingSessionStreamResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateStreamingSessionStreamResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateStreamingSessionStreamResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateStreamingSessionStreamResponse.error_of_json))
   | CreateStudio ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateStudioResponse.error_of_json)
-       | Ok resp -> Ok (CreateStudioResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateStudioResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateStudioResponse.error_of_json))
   | CreateStudioComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateStudioComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateStudioComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateStudioComponentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateStudioComponentResponse.error_of_json))
   | DeleteLaunchProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteLaunchProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteLaunchProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteLaunchProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteLaunchProfileResponse.error_of_json))
   | DeleteLaunchProfileMember ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteLaunchProfileMemberResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteLaunchProfileMemberResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteLaunchProfileMemberResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLaunchProfileMemberResponse.error_of_json))
   | DeleteStreamingImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteStreamingImageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteStreamingImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteStreamingImageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteStreamingImageResponse.error_of_json))
   | DeleteStreamingSession ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteStreamingSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteStreamingSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteStreamingSessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteStreamingSessionResponse.error_of_json))
   | DeleteStudio ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteStudioResponse.error_of_json)
-       | Ok resp -> Ok (DeleteStudioResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteStudioResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteStudioResponse.error_of_json))
   | DeleteStudioComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteStudioComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteStudioComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteStudioComponentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteStudioComponentResponse.error_of_json))
   | DeleteStudioMember ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteStudioMemberResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteStudioMemberResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteStudioMemberResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteStudioMemberResponse.error_of_json))
   | GetEula ->
-      (match resp with
-       | Error err -> handle_error err (Some GetEulaResponse.error_of_json)
-       | Ok resp -> Ok (GetEulaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetEulaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetEulaResponse.error_of_json))
   | GetLaunchProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLaunchProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetLaunchProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLaunchProfileResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetLaunchProfileResponse.error_of_json))
   | GetLaunchProfileDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLaunchProfileDetailsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetLaunchProfileDetailsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetLaunchProfileDetailsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetLaunchProfileDetailsResponse.error_of_json))
   | GetLaunchProfileInitialization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLaunchProfileInitializationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetLaunchProfileInitializationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetLaunchProfileInitializationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetLaunchProfileInitializationResponse.error_of_json))
   | GetLaunchProfileMember ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLaunchProfileMemberResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetLaunchProfileMemberResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetLaunchProfileMemberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetLaunchProfileMemberResponse.error_of_json))
   | GetStreamingImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetStreamingImageResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetStreamingImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetStreamingImageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetStreamingImageResponse.error_of_json))
   | GetStreamingSession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetStreamingSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetStreamingSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetStreamingSessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetStreamingSessionResponse.error_of_json))
   | GetStreamingSessionStream ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetStreamingSessionStreamResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetStreamingSessionStreamResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetStreamingSessionStreamResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetStreamingSessionStreamResponse.error_of_json))
   | GetStudio ->
-      (match resp with
-       | Error err -> handle_error err (Some GetStudioResponse.error_of_json)
-       | Ok resp -> Ok (GetStudioResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetStudioResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetStudioResponse.error_of_json))
   | GetStudioComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetStudioComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetStudioComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetStudioComponentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetStudioComponentResponse.error_of_json))
   | GetStudioMember ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetStudioMemberResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetStudioMemberResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetStudioMemberResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetStudioMemberResponse.error_of_json))
   | ListEulaAcceptances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListEulaAcceptancesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListEulaAcceptancesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListEulaAcceptancesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListEulaAcceptancesResponse.error_of_json))
   | ListEulas ->
-      (match resp with
-       | Error err -> handle_error err (Some ListEulasResponse.error_of_json)
-       | Ok resp -> Ok (ListEulasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListEulasResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListEulasResponse.error_of_json))
   | ListLaunchProfileMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListLaunchProfileMembersResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListLaunchProfileMembersResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListLaunchProfileMembersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListLaunchProfileMembersResponse.error_of_json))
   | ListLaunchProfiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLaunchProfilesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListLaunchProfilesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListLaunchProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListLaunchProfilesResponse.error_of_json))
   | ListStreamingImages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStreamingImagesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListStreamingImagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStreamingImagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListStreamingImagesResponse.error_of_json))
   | ListStreamingSessions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListStreamingSessionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListStreamingSessionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStreamingSessionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListStreamingSessionsResponse.error_of_json))
   | ListStudioComponents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStudioComponentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListStudioComponentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStudioComponentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListStudioComponentsResponse.error_of_json))
   | ListStudioMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStudioMembersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListStudioMembersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStudioMembersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListStudioMembersResponse.error_of_json))
   | ListStudios ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListStudiosResponse.error_of_json)
-       | Ok resp -> Ok (ListStudiosResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListStudiosResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListStudiosResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutLaunchProfileMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutLaunchProfileMembersResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (PutLaunchProfileMembersResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutLaunchProfileMembersResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutLaunchProfileMembersResponse.error_of_json))
   | PutStudioMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutStudioMembersResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutStudioMembersResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutStudioMembersResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some PutStudioMembersResponse.error_of_json))
   | StartStreamingSession ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartStreamingSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartStreamingSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartStreamingSessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartStreamingSessionResponse.error_of_json))
   | StartStudioSSOConfigurationRepair ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartStudioSSOConfigurationRepairResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartStudioSSOConfigurationRepairResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (StartStudioSSOConfigurationRepairResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartStudioSSOConfigurationRepairResponse.error_of_json))
   | StopStreamingSession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopStreamingSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (StopStreamingSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StopStreamingSessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StopStreamingSessionResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateLaunchProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateLaunchProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateLaunchProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateLaunchProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateLaunchProfileResponse.error_of_json))
   | UpdateLaunchProfileMember ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateLaunchProfileMemberResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateLaunchProfileMemberResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateLaunchProfileMemberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLaunchProfileMemberResponse.error_of_json))
   | UpdateStreamingImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateStreamingImageResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateStreamingImageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateStreamingImageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateStreamingImageResponse.error_of_json))
   | UpdateStudio ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateStudioResponse.error_of_json)
-       | Ok resp -> Ok (UpdateStudioResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateStudioResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateStudioResponse.error_of_json))
   | UpdateStudioComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateStudioComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateStudioComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateStudioComponentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateStudioComponentResponse.error_of_json))

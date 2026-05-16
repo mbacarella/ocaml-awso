@@ -4,599 +4,451 @@ val associate_approval_rule_template_with_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateApprovalRuleTemplateWithRepositoryInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val batch_associate_approval_rule_template_with_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchAssociateApprovalRuleTemplateWithRepositoriesInput.t ->
         (BatchAssociateApprovalRuleTemplateWithRepositoriesOutput.t,
-          [
-            `AWS of
-              BatchAssociateApprovalRuleTemplateWithRepositoriesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchAssociateApprovalRuleTemplateWithRepositoriesOutput.error)
+          Result.t Async.Deferred.t
 val batch_describe_merge_conflicts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDescribeMergeConflictsInput.t ->
         (BatchDescribeMergeConflictsOutput.t,
-          [ `AWS of BatchDescribeMergeConflictsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchDescribeMergeConflictsOutput.error) Result.t Async.Deferred.t
 val batch_disassociate_approval_rule_template_from_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateApprovalRuleTemplateFromRepositoriesInput.t ->
         (BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput.t,
-          [
-            `AWS of
-              BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput.error
-               | `Transport of Awso.Http.Io.Error.call ])
+          BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput.error)
           Result.t Async.Deferred.t
 val batch_get_commits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetCommitsInput.t ->
-        (BatchGetCommitsOutput.t,
-          [ `AWS of BatchGetCommitsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchGetCommitsOutput.t, BatchGetCommitsOutput.error) Result.t
           Async.Deferred.t
 val batch_get_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetRepositoriesInput.t ->
-        (BatchGetRepositoriesOutput.t,
-          [ `AWS of BatchGetRepositoriesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchGetRepositoriesOutput.t, BatchGetRepositoriesOutput.error)
+          Result.t Async.Deferred.t
 val create_approval_rule_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApprovalRuleTemplateInput.t ->
         (CreateApprovalRuleTemplateOutput.t,
-          [ `AWS of CreateApprovalRuleTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateApprovalRuleTemplateOutput.error) Result.t Async.Deferred.t
 val create_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateBranchInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      CreateBranchInput.t -> (unit, unit) Result.t Async.Deferred.t
 val create_commit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCommitInput.t ->
-        (CreateCommitOutput.t,
-          [ `AWS of CreateCommitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCommitOutput.t, CreateCommitOutput.error) Result.t
           Async.Deferred.t
 val create_pull_request :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePullRequestInput.t ->
-        (CreatePullRequestOutput.t,
-          [ `AWS of CreatePullRequestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePullRequestOutput.t, CreatePullRequestOutput.error) Result.t
           Async.Deferred.t
 val create_pull_request_approval_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePullRequestApprovalRuleInput.t ->
         (CreatePullRequestApprovalRuleOutput.t,
-          [ `AWS of CreatePullRequestApprovalRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreatePullRequestApprovalRuleOutput.error) Result.t
           Async.Deferred.t
 val create_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRepositoryInput.t ->
-        (CreateRepositoryOutput.t,
-          [ `AWS of CreateRepositoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRepositoryOutput.t, CreateRepositoryOutput.error) Result.t
           Async.Deferred.t
 val create_unreferenced_merge_commit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUnreferencedMergeCommitInput.t ->
         (CreateUnreferencedMergeCommitOutput.t,
-          [ `AWS of CreateUnreferencedMergeCommitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateUnreferencedMergeCommitOutput.error) Result.t
           Async.Deferred.t
 val delete_approval_rule_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApprovalRuleTemplateInput.t ->
         (DeleteApprovalRuleTemplateOutput.t,
-          [ `AWS of DeleteApprovalRuleTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteApprovalRuleTemplateOutput.error) Result.t Async.Deferred.t
 val delete_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBranchInput.t ->
-        (DeleteBranchOutput.t,
-          [ `AWS of DeleteBranchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteBranchOutput.t, DeleteBranchOutput.error) Result.t
           Async.Deferred.t
 val delete_comment_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCommentContentInput.t ->
-        (DeleteCommentContentOutput.t,
-          [ `AWS of DeleteCommentContentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteCommentContentOutput.t, DeleteCommentContentOutput.error)
+          Result.t Async.Deferred.t
 val delete_file :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFileInput.t ->
-        (DeleteFileOutput.t,
-          [ `AWS of DeleteFileOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFileOutput.t, DeleteFileOutput.error) Result.t
           Async.Deferred.t
 val delete_pull_request_approval_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePullRequestApprovalRuleInput.t ->
         (DeletePullRequestApprovalRuleOutput.t,
-          [ `AWS of DeletePullRequestApprovalRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeletePullRequestApprovalRuleOutput.error) Result.t
           Async.Deferred.t
 val delete_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryInput.t ->
-        (DeleteRepositoryOutput.t,
-          [ `AWS of DeleteRepositoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteRepositoryOutput.t, DeleteRepositoryOutput.error) Result.t
           Async.Deferred.t
 val describe_merge_conflicts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMergeConflictsInput.t ->
-        (DescribeMergeConflictsOutput.t,
-          [ `AWS of DescribeMergeConflictsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeMergeConflictsOutput.t, DescribeMergeConflictsOutput.error)
+          Result.t Async.Deferred.t
 val describe_pull_request_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePullRequestEventsInput.t ->
         (DescribePullRequestEventsOutput.t,
-          [ `AWS of DescribePullRequestEventsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribePullRequestEventsOutput.error) Result.t Async.Deferred.t
 val disassociate_approval_rule_template_from_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateApprovalRuleTemplateFromRepositoryInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val evaluate_pull_request_approval_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EvaluatePullRequestApprovalRulesInput.t ->
         (EvaluatePullRequestApprovalRulesOutput.t,
-          [ `AWS of EvaluatePullRequestApprovalRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          EvaluatePullRequestApprovalRulesOutput.error) Result.t
           Async.Deferred.t
 val get_approval_rule_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApprovalRuleTemplateInput.t ->
         (GetApprovalRuleTemplateOutput.t,
-          [ `AWS of GetApprovalRuleTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetApprovalRuleTemplateOutput.error) Result.t Async.Deferred.t
 val get_blob :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBlobInput.t ->
-        (GetBlobOutput.t,
-          [ `AWS of GetBlobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBlobOutput.t, GetBlobOutput.error) Result.t Async.Deferred.t
 val get_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBranchInput.t ->
-        (GetBranchOutput.t,
-          [ `AWS of GetBranchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBranchOutput.t, GetBranchOutput.error) Result.t Async.Deferred.t
 val get_comment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCommentInput.t ->
-        (GetCommentOutput.t,
-          [ `AWS of GetCommentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCommentOutput.t, GetCommentOutput.error) Result.t
           Async.Deferred.t
 val get_comment_reactions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCommentReactionsInput.t ->
-        (GetCommentReactionsOutput.t,
-          [ `AWS of GetCommentReactionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetCommentReactionsOutput.t, GetCommentReactionsOutput.error)
+          Result.t Async.Deferred.t
 val get_comments_for_compared_commit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCommentsForComparedCommitInput.t ->
         (GetCommentsForComparedCommitOutput.t,
-          [ `AWS of GetCommentsForComparedCommitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetCommentsForComparedCommitOutput.error) Result.t Async.Deferred.t
 val get_comments_for_pull_request :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCommentsForPullRequestInput.t ->
         (GetCommentsForPullRequestOutput.t,
-          [ `AWS of GetCommentsForPullRequestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetCommentsForPullRequestOutput.error) Result.t Async.Deferred.t
 val get_commit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCommitInput.t ->
-        (GetCommitOutput.t,
-          [ `AWS of GetCommitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetCommitOutput.t, GetCommitOutput.error) Result.t Async.Deferred.t
 val get_differences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDifferencesInput.t ->
-        (GetDifferencesOutput.t,
-          [ `AWS of GetDifferencesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDifferencesOutput.t, GetDifferencesOutput.error) Result.t
           Async.Deferred.t
 val get_file :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFileInput.t ->
-        (GetFileOutput.t,
-          [ `AWS of GetFileOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetFileOutput.t, GetFileOutput.error) Result.t Async.Deferred.t
 val get_folder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFolderInput.t ->
-        (GetFolderOutput.t,
-          [ `AWS of GetFolderOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetFolderOutput.t, GetFolderOutput.error) Result.t Async.Deferred.t
 val get_merge_commit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMergeCommitInput.t ->
-        (GetMergeCommitOutput.t,
-          [ `AWS of GetMergeCommitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMergeCommitOutput.t, GetMergeCommitOutput.error) Result.t
           Async.Deferred.t
 val get_merge_conflicts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMergeConflictsInput.t ->
-        (GetMergeConflictsOutput.t,
-          [ `AWS of GetMergeConflictsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMergeConflictsOutput.t, GetMergeConflictsOutput.error) Result.t
           Async.Deferred.t
 val get_merge_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMergeOptionsInput.t ->
-        (GetMergeOptionsOutput.t,
-          [ `AWS of GetMergeOptionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMergeOptionsOutput.t, GetMergeOptionsOutput.error) Result.t
           Async.Deferred.t
 val get_pull_request :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPullRequestInput.t ->
-        (GetPullRequestOutput.t,
-          [ `AWS of GetPullRequestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPullRequestOutput.t, GetPullRequestOutput.error) Result.t
           Async.Deferred.t
 val get_pull_request_approval_states :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPullRequestApprovalStatesInput.t ->
         (GetPullRequestApprovalStatesOutput.t,
-          [ `AWS of GetPullRequestApprovalStatesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetPullRequestApprovalStatesOutput.error) Result.t Async.Deferred.t
 val get_pull_request_override_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPullRequestOverrideStateInput.t ->
         (GetPullRequestOverrideStateOutput.t,
-          [ `AWS of GetPullRequestOverrideStateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetPullRequestOverrideStateOutput.error) Result.t Async.Deferred.t
 val get_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryInput.t ->
-        (GetRepositoryOutput.t,
-          [ `AWS of GetRepositoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetRepositoryOutput.t, GetRepositoryOutput.error) Result.t
           Async.Deferred.t
 val get_repository_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryTriggersInput.t ->
-        (GetRepositoryTriggersOutput.t,
-          [ `AWS of GetRepositoryTriggersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRepositoryTriggersOutput.t, GetRepositoryTriggersOutput.error)
+          Result.t Async.Deferred.t
 val list_approval_rule_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApprovalRuleTemplatesInput.t ->
         (ListApprovalRuleTemplatesOutput.t,
-          [ `AWS of ListApprovalRuleTemplatesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListApprovalRuleTemplatesOutput.error) Result.t Async.Deferred.t
 val list_associated_approval_rule_templates_for_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociatedApprovalRuleTemplatesForRepositoryInput.t ->
         (ListAssociatedApprovalRuleTemplatesForRepositoryOutput.t,
-          [
-            `AWS of
-              ListAssociatedApprovalRuleTemplatesForRepositoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAssociatedApprovalRuleTemplatesForRepositoryOutput.error)
+          Result.t Async.Deferred.t
 val list_branches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBranchesInput.t ->
-        (ListBranchesOutput.t,
-          [ `AWS of ListBranchesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListBranchesOutput.t, ListBranchesOutput.error) Result.t
           Async.Deferred.t
 val list_pull_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPullRequestsInput.t ->
-        (ListPullRequestsOutput.t,
-          [ `AWS of ListPullRequestsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPullRequestsOutput.t, ListPullRequestsOutput.error) Result.t
           Async.Deferred.t
 val list_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoriesInput.t ->
-        (ListRepositoriesOutput.t,
-          [ `AWS of ListRepositoriesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRepositoriesOutput.t, ListRepositoriesOutput.error) Result.t
           Async.Deferred.t
 val list_repositories_for_approval_rule_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoriesForApprovalRuleTemplateInput.t ->
         (ListRepositoriesForApprovalRuleTemplateOutput.t,
-          [ `AWS of ListRepositoriesForApprovalRuleTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListRepositoriesForApprovalRuleTemplateOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val merge_branches_by_fast_forward :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergeBranchesByFastForwardInput.t ->
         (MergeBranchesByFastForwardOutput.t,
-          [ `AWS of MergeBranchesByFastForwardOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          MergeBranchesByFastForwardOutput.error) Result.t Async.Deferred.t
 val merge_branches_by_squash :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergeBranchesBySquashInput.t ->
-        (MergeBranchesBySquashOutput.t,
-          [ `AWS of MergeBranchesBySquashOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (MergeBranchesBySquashOutput.t, MergeBranchesBySquashOutput.error)
+          Result.t Async.Deferred.t
 val merge_branches_by_three_way :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergeBranchesByThreeWayInput.t ->
         (MergeBranchesByThreeWayOutput.t,
-          [ `AWS of MergeBranchesByThreeWayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          MergeBranchesByThreeWayOutput.error) Result.t Async.Deferred.t
 val merge_pull_request_by_fast_forward :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergePullRequestByFastForwardInput.t ->
         (MergePullRequestByFastForwardOutput.t,
-          [ `AWS of MergePullRequestByFastForwardOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          MergePullRequestByFastForwardOutput.error) Result.t
           Async.Deferred.t
 val merge_pull_request_by_squash :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergePullRequestBySquashInput.t ->
         (MergePullRequestBySquashOutput.t,
-          [ `AWS of MergePullRequestBySquashOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          MergePullRequestBySquashOutput.error) Result.t Async.Deferred.t
 val merge_pull_request_by_three_way :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergePullRequestByThreeWayInput.t ->
         (MergePullRequestByThreeWayOutput.t,
-          [ `AWS of MergePullRequestByThreeWayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          MergePullRequestByThreeWayOutput.error) Result.t Async.Deferred.t
 val override_pull_request_approval_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       OverridePullRequestApprovalRulesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val post_comment_for_compared_commit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PostCommentForComparedCommitInput.t ->
         (PostCommentForComparedCommitOutput.t,
-          [ `AWS of PostCommentForComparedCommitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PostCommentForComparedCommitOutput.error) Result.t Async.Deferred.t
 val post_comment_for_pull_request :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PostCommentForPullRequestInput.t ->
         (PostCommentForPullRequestOutput.t,
-          [ `AWS of PostCommentForPullRequestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PostCommentForPullRequestOutput.error) Result.t Async.Deferred.t
 val post_comment_reply :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PostCommentReplyInput.t ->
-        (PostCommentReplyOutput.t,
-          [ `AWS of PostCommentReplyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PostCommentReplyOutput.t, PostCommentReplyOutput.error) Result.t
           Async.Deferred.t
 val put_comment_reaction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutCommentReactionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      PutCommentReactionInput.t -> (unit, unit) Result.t Async.Deferred.t
 val put_file :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutFileInput.t ->
-        (PutFileOutput.t,
-          [ `AWS of PutFileOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutFileOutput.t, PutFileOutput.error) Result.t Async.Deferred.t
 val put_repository_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRepositoryTriggersInput.t ->
-        (PutRepositoryTriggersOutput.t,
-          [ `AWS of PutRepositoryTriggersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutRepositoryTriggersOutput.t, PutRepositoryTriggersOutput.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceInput.t -> (unit, unit) Result.t Async.Deferred.t
 val test_repository_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestRepositoryTriggersInput.t ->
-        (TestRepositoryTriggersOutput.t,
-          [ `AWS of TestRepositoryTriggersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (TestRepositoryTriggersOutput.t, TestRepositoryTriggersOutput.error)
+          Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceInput.t -> (unit, unit) Result.t Async.Deferred.t
 val update_approval_rule_template_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApprovalRuleTemplateContentInput.t ->
         (UpdateApprovalRuleTemplateContentOutput.t,
-          [ `AWS of UpdateApprovalRuleTemplateContentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateApprovalRuleTemplateContentOutput.error) Result.t
           Async.Deferred.t
 val update_approval_rule_template_description :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApprovalRuleTemplateDescriptionInput.t ->
         (UpdateApprovalRuleTemplateDescriptionOutput.t,
-          [ `AWS of UpdateApprovalRuleTemplateDescriptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateApprovalRuleTemplateDescriptionOutput.error) Result.t
           Async.Deferred.t
 val update_approval_rule_template_name :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApprovalRuleTemplateNameInput.t ->
         (UpdateApprovalRuleTemplateNameOutput.t,
-          [ `AWS of UpdateApprovalRuleTemplateNameOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateApprovalRuleTemplateNameOutput.error) Result.t
           Async.Deferred.t
 val update_comment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCommentInput.t ->
-        (UpdateCommentOutput.t,
-          [ `AWS of UpdateCommentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateCommentOutput.t, UpdateCommentOutput.error) Result.t
           Async.Deferred.t
 val update_default_branch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateDefaultBranchInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateDefaultBranchInput.t -> (unit, unit) Result.t Async.Deferred.t
 val update_pull_request_approval_rule_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePullRequestApprovalRuleContentInput.t ->
         (UpdatePullRequestApprovalRuleContentOutput.t,
-          [ `AWS of UpdatePullRequestApprovalRuleContentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdatePullRequestApprovalRuleContentOutput.error) Result.t
           Async.Deferred.t
 val update_pull_request_approval_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePullRequestApprovalStateInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val update_pull_request_description :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePullRequestDescriptionInput.t ->
         (UpdatePullRequestDescriptionOutput.t,
-          [ `AWS of UpdatePullRequestDescriptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdatePullRequestDescriptionOutput.error) Result.t Async.Deferred.t
 val update_pull_request_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePullRequestStatusInput.t ->
         (UpdatePullRequestStatusOutput.t,
-          [ `AWS of UpdatePullRequestStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdatePullRequestStatusOutput.error) Result.t Async.Deferred.t
 val update_pull_request_title :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePullRequestTitleInput.t ->
-        (UpdatePullRequestTitleOutput.t,
-          [ `AWS of UpdatePullRequestTitleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdatePullRequestTitleOutput.t, UpdatePullRequestTitleOutput.error)
+          Result.t Async.Deferred.t
 val update_repository_description :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRepositoryDescriptionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val update_repository_name :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateRepositoryNameInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateRepositoryNameInput.t -> (unit, unit) Result.t Async.Deferred.t

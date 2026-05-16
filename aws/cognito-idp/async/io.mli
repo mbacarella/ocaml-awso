@@ -4,785 +4,588 @@ val add_custom_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddCustomAttributesRequest.t ->
-        (AddCustomAttributesResponse.t,
-          [ `AWS of AddCustomAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AddCustomAttributesResponse.t, AddCustomAttributesResponse.error)
+          Result.t Async.Deferred.t
 val admin_add_user_to_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AdminAddUserToGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AdminAddUserToGroupRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val admin_confirm_sign_up :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminConfirmSignUpRequest.t ->
-        (AdminConfirmSignUpResponse.t,
-          [ `AWS of AdminConfirmSignUpResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AdminConfirmSignUpResponse.t, AdminConfirmSignUpResponse.error)
+          Result.t Async.Deferred.t
 val admin_create_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminCreateUserRequest.t ->
-        (AdminCreateUserResponse.t,
-          [ `AWS of AdminCreateUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AdminCreateUserResponse.t, AdminCreateUserResponse.error) Result.t
           Async.Deferred.t
 val admin_delete_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AdminDeleteUserRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AdminDeleteUserRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val admin_delete_user_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminDeleteUserAttributesRequest.t ->
         (AdminDeleteUserAttributesResponse.t,
-          [ `AWS of AdminDeleteUserAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminDeleteUserAttributesResponse.error) Result.t Async.Deferred.t
 val admin_disable_provider_for_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminDisableProviderForUserRequest.t ->
         (AdminDisableProviderForUserResponse.t,
-          [ `AWS of AdminDisableProviderForUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AdminDisableProviderForUserResponse.error) Result.t
           Async.Deferred.t
 val admin_disable_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminDisableUserRequest.t ->
-        (AdminDisableUserResponse.t,
-          [ `AWS of AdminDisableUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AdminDisableUserResponse.t, AdminDisableUserResponse.error) Result.t
           Async.Deferred.t
 val admin_enable_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminEnableUserRequest.t ->
-        (AdminEnableUserResponse.t,
-          [ `AWS of AdminEnableUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AdminEnableUserResponse.t, AdminEnableUserResponse.error) Result.t
           Async.Deferred.t
 val admin_forget_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AdminForgetDeviceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AdminForgetDeviceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val admin_get_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminGetDeviceRequest.t ->
-        (AdminGetDeviceResponse.t,
-          [ `AWS of AdminGetDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AdminGetDeviceResponse.t, AdminGetDeviceResponse.error) Result.t
           Async.Deferred.t
 val admin_get_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminGetUserRequest.t ->
-        (AdminGetUserResponse.t,
-          [ `AWS of AdminGetUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AdminGetUserResponse.t, AdminGetUserResponse.error) Result.t
           Async.Deferred.t
 val admin_initiate_auth :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminInitiateAuthRequest.t ->
-        (AdminInitiateAuthResponse.t,
-          [ `AWS of AdminInitiateAuthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AdminInitiateAuthResponse.t, AdminInitiateAuthResponse.error)
+          Result.t Async.Deferred.t
 val admin_link_provider_for_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminLinkProviderForUserRequest.t ->
         (AdminLinkProviderForUserResponse.t,
-          [ `AWS of AdminLinkProviderForUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminLinkProviderForUserResponse.error) Result.t Async.Deferred.t
 val admin_list_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminListDevicesRequest.t ->
-        (AdminListDevicesResponse.t,
-          [ `AWS of AdminListDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AdminListDevicesResponse.t, AdminListDevicesResponse.error) Result.t
           Async.Deferred.t
 val admin_list_groups_for_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminListGroupsForUserRequest.t ->
         (AdminListGroupsForUserResponse.t,
-          [ `AWS of AdminListGroupsForUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminListGroupsForUserResponse.error) Result.t Async.Deferred.t
 val admin_list_user_auth_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminListUserAuthEventsRequest.t ->
         (AdminListUserAuthEventsResponse.t,
-          [ `AWS of AdminListUserAuthEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminListUserAuthEventsResponse.error) Result.t Async.Deferred.t
 val admin_remove_user_from_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminRemoveUserFromGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val admin_reset_user_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminResetUserPasswordRequest.t ->
         (AdminResetUserPasswordResponse.t,
-          [ `AWS of AdminResetUserPasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminResetUserPasswordResponse.error) Result.t Async.Deferred.t
 val admin_respond_to_auth_challenge :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminRespondToAuthChallengeRequest.t ->
         (AdminRespondToAuthChallengeResponse.t,
-          [ `AWS of AdminRespondToAuthChallengeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AdminRespondToAuthChallengeResponse.error) Result.t
           Async.Deferred.t
 val admin_set_user_m_f_a_preference :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminSetUserMFAPreferenceRequest.t ->
         (AdminSetUserMFAPreferenceResponse.t,
-          [ `AWS of AdminSetUserMFAPreferenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminSetUserMFAPreferenceResponse.error) Result.t Async.Deferred.t
 val admin_set_user_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminSetUserPasswordRequest.t ->
-        (AdminSetUserPasswordResponse.t,
-          [ `AWS of AdminSetUserPasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AdminSetUserPasswordResponse.t, AdminSetUserPasswordResponse.error)
+          Result.t Async.Deferred.t
 val admin_set_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminSetUserSettingsRequest.t ->
-        (AdminSetUserSettingsResponse.t,
-          [ `AWS of AdminSetUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AdminSetUserSettingsResponse.t, AdminSetUserSettingsResponse.error)
+          Result.t Async.Deferred.t
 val admin_update_auth_event_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminUpdateAuthEventFeedbackRequest.t ->
         (AdminUpdateAuthEventFeedbackResponse.t,
-          [ `AWS of AdminUpdateAuthEventFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AdminUpdateAuthEventFeedbackResponse.error) Result.t
           Async.Deferred.t
 val admin_update_device_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminUpdateDeviceStatusRequest.t ->
         (AdminUpdateDeviceStatusResponse.t,
-          [ `AWS of AdminUpdateDeviceStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminUpdateDeviceStatusResponse.error) Result.t Async.Deferred.t
 val admin_update_user_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminUpdateUserAttributesRequest.t ->
         (AdminUpdateUserAttributesResponse.t,
-          [ `AWS of AdminUpdateUserAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminUpdateUserAttributesResponse.error) Result.t Async.Deferred.t
 val admin_user_global_sign_out :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdminUserGlobalSignOutRequest.t ->
         (AdminUserGlobalSignOutResponse.t,
-          [ `AWS of AdminUserGlobalSignOutResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AdminUserGlobalSignOutResponse.error) Result.t Async.Deferred.t
 val associate_software_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateSoftwareTokenRequest.t ->
         (AssociateSoftwareTokenResponse.t,
-          [ `AWS of AssociateSoftwareTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateSoftwareTokenResponse.error) Result.t Async.Deferred.t
 val change_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ChangePasswordRequest.t ->
-        (ChangePasswordResponse.t,
-          [ `AWS of ChangePasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ChangePasswordResponse.t, ChangePasswordResponse.error) Result.t
           Async.Deferred.t
 val confirm_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfirmDeviceRequest.t ->
-        (ConfirmDeviceResponse.t,
-          [ `AWS of ConfirmDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ConfirmDeviceResponse.t, ConfirmDeviceResponse.error) Result.t
           Async.Deferred.t
 val confirm_forgot_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfirmForgotPasswordRequest.t ->
         (ConfirmForgotPasswordResponse.t,
-          [ `AWS of ConfirmForgotPasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ConfirmForgotPasswordResponse.error) Result.t Async.Deferred.t
 val confirm_sign_up :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfirmSignUpRequest.t ->
-        (ConfirmSignUpResponse.t,
-          [ `AWS of ConfirmSignUpResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ConfirmSignUpResponse.t, ConfirmSignUpResponse.error) Result.t
           Async.Deferred.t
 val create_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupRequest.t ->
-        (CreateGroupResponse.t,
-          [ `AWS of CreateGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateGroupResponse.t, CreateGroupResponse.error) Result.t
           Async.Deferred.t
 val create_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIdentityProviderRequest.t ->
         (CreateIdentityProviderResponse.t,
-          [ `AWS of CreateIdentityProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateIdentityProviderResponse.error) Result.t Async.Deferred.t
 val create_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceServerRequest.t ->
-        (CreateResourceServerResponse.t,
-          [ `AWS of CreateResourceServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateResourceServerResponse.t, CreateResourceServerResponse.error)
+          Result.t Async.Deferred.t
 val create_user_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserImportJobRequest.t ->
-        (CreateUserImportJobResponse.t,
-          [ `AWS of CreateUserImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateUserImportJobResponse.t, CreateUserImportJobResponse.error)
+          Result.t Async.Deferred.t
 val create_user_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserPoolRequest.t ->
-        (CreateUserPoolResponse.t,
-          [ `AWS of CreateUserPoolResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateUserPoolResponse.t, CreateUserPoolResponse.error) Result.t
           Async.Deferred.t
 val create_user_pool_client :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserPoolClientRequest.t ->
-        (CreateUserPoolClientResponse.t,
-          [ `AWS of CreateUserPoolClientResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateUserPoolClientResponse.t, CreateUserPoolClientResponse.error)
+          Result.t Async.Deferred.t
 val create_user_pool_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserPoolDomainRequest.t ->
-        (CreateUserPoolDomainResponse.t,
-          [ `AWS of CreateUserPoolDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateUserPoolDomainResponse.t, CreateUserPoolDomainResponse.error)
+          Result.t Async.Deferred.t
 val delete_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteGroupRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIdentityProviderRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteResourceServerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteResourceServerRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteUserRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteUserRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_user_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserAttributesRequest.t ->
-        (DeleteUserAttributesResponse.t,
-          [ `AWS of DeleteUserAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteUserAttributesResponse.t, DeleteUserAttributesResponse.error)
+          Result.t Async.Deferred.t
 val delete_user_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteUserPoolRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteUserPoolRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_user_pool_client :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteUserPoolClientRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteUserPoolClientRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_user_pool_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserPoolDomainRequest.t ->
-        (DeleteUserPoolDomainResponse.t,
-          [ `AWS of DeleteUserPoolDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteUserPoolDomainResponse.t, DeleteUserPoolDomainResponse.error)
+          Result.t Async.Deferred.t
 val describe_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityProviderRequest.t ->
         (DescribeIdentityProviderResponse.t,
-          [ `AWS of DescribeIdentityProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeIdentityProviderResponse.error) Result.t Async.Deferred.t
 val describe_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResourceServerRequest.t ->
         (DescribeResourceServerResponse.t,
-          [ `AWS of DescribeResourceServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeResourceServerResponse.error) Result.t Async.Deferred.t
 val describe_risk_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRiskConfigurationRequest.t ->
         (DescribeRiskConfigurationResponse.t,
-          [ `AWS of DescribeRiskConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeRiskConfigurationResponse.error) Result.t Async.Deferred.t
 val describe_user_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserImportJobRequest.t ->
         (DescribeUserImportJobResponse.t,
-          [ `AWS of DescribeUserImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeUserImportJobResponse.error) Result.t Async.Deferred.t
 val describe_user_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserPoolRequest.t ->
-        (DescribeUserPoolResponse.t,
-          [ `AWS of DescribeUserPoolResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeUserPoolResponse.t, DescribeUserPoolResponse.error) Result.t
           Async.Deferred.t
 val describe_user_pool_client :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserPoolClientRequest.t ->
         (DescribeUserPoolClientResponse.t,
-          [ `AWS of DescribeUserPoolClientResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeUserPoolClientResponse.error) Result.t Async.Deferred.t
 val describe_user_pool_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserPoolDomainRequest.t ->
         (DescribeUserPoolDomainResponse.t,
-          [ `AWS of DescribeUserPoolDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeUserPoolDomainResponse.error) Result.t Async.Deferred.t
 val forget_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ForgetDeviceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      ForgetDeviceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val forgot_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ForgotPasswordRequest.t ->
-        (ForgotPasswordResponse.t,
-          [ `AWS of ForgotPasswordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ForgotPasswordResponse.t, ForgotPasswordResponse.error) Result.t
           Async.Deferred.t
 val get_c_s_v_header :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCSVHeaderRequest.t ->
-        (GetCSVHeaderResponse.t,
-          [ `AWS of GetCSVHeaderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCSVHeaderResponse.t, GetCSVHeaderResponse.error) Result.t
           Async.Deferred.t
 val get_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceRequest.t ->
-        (GetDeviceResponse.t,
-          [ `AWS of GetDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDeviceResponse.t, GetDeviceResponse.error) Result.t
           Async.Deferred.t
 val get_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupRequest.t ->
-        (GetGroupResponse.t,
-          [ `AWS of GetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetGroupResponse.t, GetGroupResponse.error) Result.t
           Async.Deferred.t
 val get_identity_provider_by_identifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityProviderByIdentifierRequest.t ->
         (GetIdentityProviderByIdentifierResponse.t,
-          [ `AWS of GetIdentityProviderByIdentifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetIdentityProviderByIdentifierResponse.error) Result.t
           Async.Deferred.t
 val get_signing_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSigningCertificateRequest.t ->
         (GetSigningCertificateResponse.t,
-          [ `AWS of GetSigningCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetSigningCertificateResponse.error) Result.t Async.Deferred.t
 val get_u_i_customization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUICustomizationRequest.t ->
-        (GetUICustomizationResponse.t,
-          [ `AWS of GetUICustomizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetUICustomizationResponse.t, GetUICustomizationResponse.error)
+          Result.t Async.Deferred.t
 val get_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserRequest.t ->
-        (GetUserResponse.t,
-          [ `AWS of GetUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetUserResponse.t, GetUserResponse.error) Result.t Async.Deferred.t
 val get_user_attribute_verification_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserAttributeVerificationCodeRequest.t ->
         (GetUserAttributeVerificationCodeResponse.t,
-          [ `AWS of GetUserAttributeVerificationCodeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetUserAttributeVerificationCodeResponse.error) Result.t
           Async.Deferred.t
 val get_user_pool_mfa_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserPoolMfaConfigRequest.t ->
-        (GetUserPoolMfaConfigResponse.t,
-          [ `AWS of GetUserPoolMfaConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetUserPoolMfaConfigResponse.t, GetUserPoolMfaConfigResponse.error)
+          Result.t Async.Deferred.t
 val global_sign_out :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GlobalSignOutRequest.t ->
-        (GlobalSignOutResponse.t,
-          [ `AWS of GlobalSignOutResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GlobalSignOutResponse.t, GlobalSignOutResponse.error) Result.t
           Async.Deferred.t
 val initiate_auth :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateAuthRequest.t ->
-        (InitiateAuthResponse.t,
-          [ `AWS of InitiateAuthResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (InitiateAuthResponse.t, InitiateAuthResponse.error) Result.t
           Async.Deferred.t
 val list_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicesRequest.t ->
-        (ListDevicesResponse.t,
-          [ `AWS of ListDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDevicesResponse.t, ListDevicesResponse.error) Result.t
           Async.Deferred.t
 val list_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupsRequest.t ->
-        (ListGroupsResponse.t,
-          [ `AWS of ListGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListGroupsResponse.t, ListGroupsResponse.error) Result.t
           Async.Deferred.t
 val list_identity_providers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentityProvidersRequest.t ->
         (ListIdentityProvidersResponse.t,
-          [ `AWS of ListIdentityProvidersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListIdentityProvidersResponse.error) Result.t Async.Deferred.t
 val list_resource_servers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceServersRequest.t ->
-        (ListResourceServersResponse.t,
-          [ `AWS of ListResourceServersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListResourceServersResponse.t, ListResourceServersResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_user_import_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUserImportJobsRequest.t ->
-        (ListUserImportJobsResponse.t,
-          [ `AWS of ListUserImportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListUserImportJobsResponse.t, ListUserImportJobsResponse.error)
+          Result.t Async.Deferred.t
 val list_user_pool_clients :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUserPoolClientsRequest.t ->
-        (ListUserPoolClientsResponse.t,
-          [ `AWS of ListUserPoolClientsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListUserPoolClientsResponse.t, ListUserPoolClientsResponse.error)
+          Result.t Async.Deferred.t
 val list_user_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUserPoolsRequest.t ->
-        (ListUserPoolsResponse.t,
-          [ `AWS of ListUserPoolsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListUserPoolsResponse.t, ListUserPoolsResponse.error) Result.t
           Async.Deferred.t
 val list_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsersRequest.t ->
-        (ListUsersResponse.t,
-          [ `AWS of ListUsersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListUsersResponse.t, ListUsersResponse.error) Result.t
           Async.Deferred.t
 val list_users_in_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsersInGroupRequest.t ->
-        (ListUsersInGroupResponse.t,
-          [ `AWS of ListUsersInGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListUsersInGroupResponse.t, ListUsersInGroupResponse.error) Result.t
           Async.Deferred.t
 val resend_confirmation_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResendConfirmationCodeRequest.t ->
         (ResendConfirmationCodeResponse.t,
-          [ `AWS of ResendConfirmationCodeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ResendConfirmationCodeResponse.error) Result.t Async.Deferred.t
 val respond_to_auth_challenge :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RespondToAuthChallengeRequest.t ->
         (RespondToAuthChallengeResponse.t,
-          [ `AWS of RespondToAuthChallengeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RespondToAuthChallengeResponse.error) Result.t Async.Deferred.t
 val revoke_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeTokenRequest.t ->
-        (RevokeTokenResponse.t,
-          [ `AWS of RevokeTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RevokeTokenResponse.t, RevokeTokenResponse.error) Result.t
           Async.Deferred.t
 val set_risk_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetRiskConfigurationRequest.t ->
-        (SetRiskConfigurationResponse.t,
-          [ `AWS of SetRiskConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SetRiskConfigurationResponse.t, SetRiskConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val set_u_i_customization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetUICustomizationRequest.t ->
-        (SetUICustomizationResponse.t,
-          [ `AWS of SetUICustomizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SetUICustomizationResponse.t, SetUICustomizationResponse.error)
+          Result.t Async.Deferred.t
 val set_user_m_f_a_preference :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetUserMFAPreferenceRequest.t ->
-        (SetUserMFAPreferenceResponse.t,
-          [ `AWS of SetUserMFAPreferenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SetUserMFAPreferenceResponse.t, SetUserMFAPreferenceResponse.error)
+          Result.t Async.Deferred.t
 val set_user_pool_mfa_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetUserPoolMfaConfigRequest.t ->
-        (SetUserPoolMfaConfigResponse.t,
-          [ `AWS of SetUserPoolMfaConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SetUserPoolMfaConfigResponse.t, SetUserPoolMfaConfigResponse.error)
+          Result.t Async.Deferred.t
 val set_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetUserSettingsRequest.t ->
-        (SetUserSettingsResponse.t,
-          [ `AWS of SetUserSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SetUserSettingsResponse.t, SetUserSettingsResponse.error) Result.t
           Async.Deferred.t
 val sign_up :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SignUpRequest.t ->
-        (SignUpResponse.t,
-          [ `AWS of SignUpResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SignUpResponse.t, SignUpResponse.error) Result.t Async.Deferred.t
 val start_user_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartUserImportJobRequest.t ->
-        (StartUserImportJobResponse.t,
-          [ `AWS of StartUserImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartUserImportJobResponse.t, StartUserImportJobResponse.error)
+          Result.t Async.Deferred.t
 val stop_user_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopUserImportJobRequest.t ->
-        (StopUserImportJobResponse.t,
-          [ `AWS of StopUserImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StopUserImportJobResponse.t, StopUserImportJobResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_auth_event_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAuthEventFeedbackRequest.t ->
         (UpdateAuthEventFeedbackResponse.t,
-          [ `AWS of UpdateAuthEventFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateAuthEventFeedbackResponse.error) Result.t Async.Deferred.t
 val update_device_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDeviceStatusRequest.t ->
-        (UpdateDeviceStatusResponse.t,
-          [ `AWS of UpdateDeviceStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateDeviceStatusResponse.t, UpdateDeviceStatusResponse.error)
+          Result.t Async.Deferred.t
 val update_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGroupRequest.t ->
-        (UpdateGroupResponse.t,
-          [ `AWS of UpdateGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateGroupResponse.t, UpdateGroupResponse.error) Result.t
           Async.Deferred.t
 val update_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIdentityProviderRequest.t ->
         (UpdateIdentityProviderResponse.t,
-          [ `AWS of UpdateIdentityProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateIdentityProviderResponse.error) Result.t Async.Deferred.t
 val update_resource_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceServerRequest.t ->
-        (UpdateResourceServerResponse.t,
-          [ `AWS of UpdateResourceServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateResourceServerResponse.t, UpdateResourceServerResponse.error)
+          Result.t Async.Deferred.t
 val update_user_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserAttributesRequest.t ->
-        (UpdateUserAttributesResponse.t,
-          [ `AWS of UpdateUserAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateUserAttributesResponse.t, UpdateUserAttributesResponse.error)
+          Result.t Async.Deferred.t
 val update_user_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserPoolRequest.t ->
-        (UpdateUserPoolResponse.t,
-          [ `AWS of UpdateUserPoolResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateUserPoolResponse.t, UpdateUserPoolResponse.error) Result.t
           Async.Deferred.t
 val update_user_pool_client :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserPoolClientRequest.t ->
-        (UpdateUserPoolClientResponse.t,
-          [ `AWS of UpdateUserPoolClientResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateUserPoolClientResponse.t, UpdateUserPoolClientResponse.error)
+          Result.t Async.Deferred.t
 val update_user_pool_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserPoolDomainRequest.t ->
-        (UpdateUserPoolDomainResponse.t,
-          [ `AWS of UpdateUserPoolDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateUserPoolDomainResponse.t, UpdateUserPoolDomainResponse.error)
+          Result.t Async.Deferred.t
 val verify_software_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifySoftwareTokenRequest.t ->
-        (VerifySoftwareTokenResponse.t,
-          [ `AWS of VerifySoftwareTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (VerifySoftwareTokenResponse.t, VerifySoftwareTokenResponse.error)
+          Result.t Async.Deferred.t
 val verify_user_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifyUserAttributeRequest.t ->
-        (VerifyUserAttributeResponse.t,
-          [ `AWS of VerifyUserAttributeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (VerifyUserAttributeResponse.t, VerifyUserAttributeResponse.error)
+          Result.t Async.Deferred.t

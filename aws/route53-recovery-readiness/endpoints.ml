@@ -508,228 +508,239 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateRecoveryGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateResourceSet -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateCell ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCellResponse.error_of_json)
-       | Ok resp -> Ok (CreateCellResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateCellResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateCellResponse.error_of_json))
   | CreateCrossAccountAuthorization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCrossAccountAuthorizationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateCrossAccountAuthorizationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateCrossAccountAuthorizationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCrossAccountAuthorizationResponse.error_of_json))
   | CreateReadinessCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateReadinessCheckResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateReadinessCheckResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateReadinessCheckResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateReadinessCheckResponse.error_of_json))
   | CreateRecoveryGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRecoveryGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateRecoveryGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRecoveryGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRecoveryGroupResponse.error_of_json))
   | CreateResourceSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateResourceSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateResourceSetResponse.of_json (response_to_json resp)))
-  | DeleteCell -> Ok ()
+      if is_success
+      then Ok (CreateResourceSetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateResourceSetResponse.error_of_json))
+  | DeleteCell -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCrossAccountAuthorization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteCrossAccountAuthorizationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteCrossAccountAuthorizationResponse.of_header_and_body
-                (headers, ())))
-  | DeleteReadinessCheck -> Ok ()
-  | DeleteRecoveryGroup -> Ok ()
-  | DeleteResourceSet -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteCrossAccountAuthorizationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCrossAccountAuthorizationResponse.error_of_json))
+  | DeleteReadinessCheck ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRecoveryGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourceSet ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GetArchitectureRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetArchitectureRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetArchitectureRecommendationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetArchitectureRecommendationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetArchitectureRecommendationsResponse.error_of_json))
   | GetCell ->
-      (match resp with
-       | Error err -> handle_error err (Some GetCellResponse.error_of_json)
-       | Ok resp -> Ok (GetCellResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCellResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetCellResponse.error_of_json))
   | GetCellReadinessSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCellReadinessSummaryResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetCellReadinessSummaryResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetCellReadinessSummaryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCellReadinessSummaryResponse.error_of_json))
   | GetReadinessCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetReadinessCheckResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetReadinessCheckResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetReadinessCheckResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetReadinessCheckResponse.error_of_json))
   | GetReadinessCheckResourceStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetReadinessCheckResourceStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetReadinessCheckResourceStatusResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetReadinessCheckResourceStatusResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetReadinessCheckResourceStatusResponse.error_of_json))
   | GetReadinessCheckStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetReadinessCheckStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetReadinessCheckStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetReadinessCheckStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetReadinessCheckStatusResponse.error_of_json))
   | GetRecoveryGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRecoveryGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetRecoveryGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetRecoveryGroupResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetRecoveryGroupResponse.error_of_json))
   | GetRecoveryGroupReadinessSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRecoveryGroupReadinessSummaryResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetRecoveryGroupReadinessSummaryResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetRecoveryGroupReadinessSummaryResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRecoveryGroupReadinessSummaryResponse.error_of_json))
   | GetResourceSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourceSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetResourceSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourceSetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetResourceSetResponse.error_of_json))
   | ListCells ->
-      (match resp with
-       | Error err -> handle_error err (Some ListCellsResponse.error_of_json)
-       | Ok resp -> Ok (ListCellsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCellsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListCellsResponse.error_of_json))
   | ListCrossAccountAuthorizations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCrossAccountAuthorizationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListCrossAccountAuthorizationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListCrossAccountAuthorizationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCrossAccountAuthorizationsResponse.error_of_json))
   | ListReadinessChecks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListReadinessChecksResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListReadinessChecksResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListReadinessChecksResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListReadinessChecksResponse.error_of_json))
   | ListRecoveryGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRecoveryGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListRecoveryGroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRecoveryGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRecoveryGroupsResponse.error_of_json))
   | ListResourceSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListResourceSetsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListResourceSetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListResourceSetsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListResourceSetsResponse.error_of_json))
   | ListRules ->
-      (match resp with
-       | Error err -> handle_error err (Some ListRulesResponse.error_of_json)
-       | Ok resp -> Ok (ListRulesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRulesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRulesResponse.error_of_json))
   | ListTagsForResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourcesResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateCell ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateCellResponse.error_of_json)
-       | Ok resp -> Ok (UpdateCellResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateCellResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateCellResponse.error_of_json))
   | UpdateReadinessCheck ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateReadinessCheckResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateReadinessCheckResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateReadinessCheckResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateReadinessCheckResponse.error_of_json))
   | UpdateRecoveryGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRecoveryGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRecoveryGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRecoveryGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRecoveryGroupResponse.error_of_json))
   | UpdateResourceSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateResourceSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateResourceSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateResourceSetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateResourceSetResponse.error_of_json))

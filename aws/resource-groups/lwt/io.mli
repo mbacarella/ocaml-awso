@@ -4,111 +4,81 @@ val create_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupInput.t ->
-        (CreateGroupOutput.t,
-          [ `AWS of CreateGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGroupOutput.t, CreateGroupOutput.error) Result.t Lwt.t
 val delete_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGroupInput.t ->
-        (DeleteGroupOutput.t,
-          [ `AWS of DeleteGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteGroupOutput.t, DeleteGroupOutput.error) Result.t Lwt.t
 val get_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupInput.t ->
-        (GetGroupOutput.t,
-          [ `AWS of GetGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGroupOutput.t, GetGroupOutput.error) Result.t Lwt.t
 val get_group_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupConfigurationInput.t ->
-        (GetGroupConfigurationOutput.t,
-          [ `AWS of GetGroupConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGroupConfigurationOutput.t, GetGroupConfigurationOutput.error)
+          Result.t Lwt.t
 val get_group_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGroupQueryInput.t ->
-        (GetGroupQueryOutput.t,
-          [ `AWS of GetGroupQueryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetGroupQueryOutput.t, GetGroupQueryOutput.error) Result.t Lwt.t
 val get_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      GetTagsInput.t ->
-        (GetTagsOutput.t,
-          [ `AWS of GetTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      GetTagsInput.t -> (GetTagsOutput.t, GetTagsOutput.error) Result.t Lwt.t
 val group_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GroupResourcesInput.t ->
-        (GroupResourcesOutput.t,
-          [ `AWS of GroupResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GroupResourcesOutput.t, GroupResourcesOutput.error) Result.t Lwt.t
 val list_group_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupResourcesInput.t ->
-        (ListGroupResourcesOutput.t,
-          [ `AWS of ListGroupResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGroupResourcesOutput.t, ListGroupResourcesOutput.error) Result.t
+          Lwt.t
 val list_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupsInput.t ->
-        (ListGroupsOutput.t,
-          [ `AWS of ListGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGroupsOutput.t, ListGroupsOutput.error) Result.t Lwt.t
 val put_group_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutGroupConfigurationInput.t ->
-        (PutGroupConfigurationOutput.t,
-          [ `AWS of PutGroupConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutGroupConfigurationOutput.t, PutGroupConfigurationOutput.error)
+          Result.t Lwt.t
 val search_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchResourcesInput.t ->
-        (SearchResourcesOutput.t,
-          [ `AWS of SearchResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchResourcesOutput.t, SearchResourcesOutput.error) Result.t Lwt.t
 val tag :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagInput.t ->
-        (TagOutput.t,
-          [ `AWS of TagOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      TagInput.t -> (TagOutput.t, TagOutput.error) Result.t Lwt.t
 val ungroup_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UngroupResourcesInput.t ->
-        (UngroupResourcesOutput.t,
-          [ `AWS of UngroupResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UngroupResourcesOutput.t, UngroupResourcesOutput.error) Result.t
+          Lwt.t
 val untag :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagInput.t ->
-        (UntagOutput.t,
-          [ `AWS of UntagOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      UntagInput.t -> (UntagOutput.t, UntagOutput.error) Result.t Lwt.t
 val update_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGroupInput.t ->
-        (UpdateGroupOutput.t,
-          [ `AWS of UpdateGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateGroupOutput.t, UpdateGroupOutput.error) Result.t Lwt.t
 val update_group_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGroupQueryInput.t ->
-        (UpdateGroupQueryOutput.t,
-          [ `AWS of UpdateGroupQueryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateGroupQueryOutput.t, UpdateGroupQueryOutput.error) Result.t
+          Lwt.t

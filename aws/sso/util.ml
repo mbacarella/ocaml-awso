@@ -8,14 +8,21 @@ open! Awso.Import
 let sha1_insecure s =
   (let h = Cryptokit.Hash.sha1 () in
    let hh = Cryptokit.hash_string h s in
-   Cryptokit.transform_string (Cryptokit.Hexa.encode ()) hh) [@alert "-crypto"]
+   Cryptokit.transform_string (Cryptokit.Hexa.encode ()) hh)
+  [@alert "-crypto"]
 ;;
 
 let format_utc (t : float) =
   let tm = Unix.gmtime t in
-  sprintf "%04d-%02d-%02d %02d:%02d:%02dZ"
-    (tm.tm_year + 1900) (tm.tm_mon + 1) tm.tm_mday
-    tm.tm_hour tm.tm_min tm.tm_sec
+  sprintf
+    "%04d-%02d-%02d %02d:%02d:%02dZ"
+    (tm.tm_year + 1900)
+    (tm.tm_mon + 1)
+    tm.tm_mday
+    tm.tm_hour
+    tm.tm_min
+    tm.tm_sec
+;;
 
 let validate_expiration expiration =
   let expiration =
@@ -29,8 +36,8 @@ let validate_expiration expiration =
   if Float.( < ) expiration now
   then
     failwithf
-      "Sso.get_role_credentials returned roleCredentials that were already expired! \
-       %s < now (%s)"
+      "Sso.get_role_credentials returned roleCredentials that were already expired! %s < \
+       now (%s)"
       (format_utc expiration)
       (format_utc now)
       ()
@@ -73,11 +80,11 @@ let get_sso_role_request_and_cfg_exn ~cfg ~cached_sso_token_file jsonstr =
     GetRoleCredentialsRequest.make
       ~accountId:
         (cfg.Awso.Cfg.sso_account_id
-        |> Option.value_exn ~message:"No 'sso_account_id' set in credentials")
+         |> Option.value_exn ~message:"No 'sso_account_id' set in credentials")
       ~accessToken:(member_string "accessToken")
       ~roleName:
         (cfg.Awso.Cfg.sso_role_name
-        |> Option.value_exn ~message:"No 'sso_role_name' set in credentials")
+         |> Option.value_exn ~message:"No 'sso_role_name' set in credentials")
       ()
   in
   let sso_region = member_string "region" |> Awso.Region.of_string in
@@ -92,26 +99,19 @@ let get_sso_role_request_and_cfg ~cfg ~cached_sso_token_file jsonstr =
 
 let parse_role_credentials_response_exn = function
   | Ok ({ roleCredentials } : GetRoleCredentialsResponse.t) -> roleCredentials
-  | Error (`AWS (`UnauthorizedException (ue : UnauthorizedException.t))) ->
+  | Error (`UnauthorizedException (ue : UnauthorizedException.t)) ->
     eprintf "Unauthorized: %s\n" (Option.value ~default:"<no message given>" ue.message);
     eprintf "Maybe you need to re-run `aws sso login`?\n";
     exit 1
-  | Error (`AWS err) ->
+  | Error err ->
     failwithf
       "Sso.get_role_credentials: AWS call: %s"
       (err |> GetRoleCredentialsResponse.error_to_json |> Yojson.Safe.to_string)
       ()
-  | Error (`Transport err) ->
-    failwithf
-      "Sso.get_role_credentials: transport: %s"
-      (err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string)
-      ()
 ;;
 
 let update_cfg_with_role_credentials_exn ~(cfg : Awso.Cfg.t) role_credentials =
-  let ({ accessKeyId; secretAccessKey; sessionToken; expiration }
-        : RoleCredentials.t)
-    =
+  let ({ accessKeyId; secretAccessKey; sessionToken; expiration } : RoleCredentials.t) =
     role_credentials
     |> Option.value_exn
          ~message:"Sso.get_role_credentials returned empty roleCredentials??"

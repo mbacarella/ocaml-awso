@@ -4,15 +4,12 @@ val send_s_s_h_public_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendSSHPublicKeyRequest.t ->
-        (SendSSHPublicKeyResponse.t,
-          [ `AWS of SendSSHPublicKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SendSSHPublicKeyResponse.t, SendSSHPublicKeyResponse.error) Result.t
           Async.Deferred.t
 val send_serial_console_s_s_h_public_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendSerialConsoleSSHPublicKeyRequest.t ->
         (SendSerialConsoleSSHPublicKeyResponse.t,
-          [ `AWS of SendSerialConsoleSSHPublicKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          SendSerialConsoleSSHPublicKeyResponse.error) Result.t
           Async.Deferred.t

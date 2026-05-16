@@ -5,219 +5,168 @@ val associate_service_role_to_account :
     ?cfg:Awso.Cfg.t ->
       AssociateServiceRoleToAccountRequest.t ->
         (AssociateServiceRoleToAccountResponse.t,
-          [ `AWS of AssociateServiceRoleToAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AssociateServiceRoleToAccountResponse.error) Result.t
           Async.Deferred.t
 val batch_associate_client_device_with_core_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchAssociateClientDeviceWithCoreDeviceRequest.t ->
         (BatchAssociateClientDeviceWithCoreDeviceResponse.t,
-          [ `AWS of BatchAssociateClientDeviceWithCoreDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchAssociateClientDeviceWithCoreDeviceResponse.error) Result.t
           Async.Deferred.t
 val batch_disassociate_client_device_from_core_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateClientDeviceFromCoreDeviceRequest.t ->
         (BatchDisassociateClientDeviceFromCoreDeviceResponse.t,
-          [
-            `AWS of BatchDisassociateClientDeviceFromCoreDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchDisassociateClientDeviceFromCoreDeviceResponse.error) Result.t
           Async.Deferred.t
 val cancel_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelDeploymentRequest.t ->
-        (CancelDeploymentResponse.t,
-          [ `AWS of CancelDeploymentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelDeploymentResponse.t, CancelDeploymentResponse.error) Result.t
           Async.Deferred.t
 val create_component_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateComponentVersionRequest.t ->
         (CreateComponentVersionResponse.t,
-          [ `AWS of CreateComponentVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateComponentVersionResponse.error) Result.t Async.Deferred.t
 val create_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentRequest.t ->
-        (CreateDeploymentResponse.t,
-          [ `AWS of CreateDeploymentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDeploymentResponse.t, CreateDeploymentResponse.error) Result.t
           Async.Deferred.t
 val delete_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteComponentRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteComponentRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_core_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCoreDeviceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteCoreDeviceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeComponentRequest.t ->
-        (DescribeComponentResponse.t,
-          [ `AWS of DescribeComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeComponentResponse.t, DescribeComponentResponse.error)
+          Result.t Async.Deferred.t
 val disassociate_service_role_from_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateServiceRoleFromAccountRequest.t ->
         (DisassociateServiceRoleFromAccountResponse.t,
-          [ `AWS of DisassociateServiceRoleFromAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateServiceRoleFromAccountResponse.error) Result.t
           Async.Deferred.t
 val get_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComponentRequest.t ->
-        (GetComponentResponse.t,
-          [ `AWS of GetComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetComponentResponse.t, GetComponentResponse.error) Result.t
           Async.Deferred.t
 val get_component_version_artifact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComponentVersionArtifactRequest.t ->
         (GetComponentVersionArtifactResponse.t,
-          [ `AWS of GetComponentVersionArtifactResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetComponentVersionArtifactResponse.error) Result.t
           Async.Deferred.t
 val get_connectivity_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectivityInfoRequest.t ->
-        (GetConnectivityInfoResponse.t,
-          [ `AWS of GetConnectivityInfoResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetConnectivityInfoResponse.t, GetConnectivityInfoResponse.error)
+          Result.t Async.Deferred.t
 val get_core_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCoreDeviceRequest.t ->
-        (GetCoreDeviceResponse.t,
-          [ `AWS of GetCoreDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCoreDeviceResponse.t, GetCoreDeviceResponse.error) Result.t
           Async.Deferred.t
 val get_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeploymentRequest.t ->
-        (GetDeploymentResponse.t,
-          [ `AWS of GetDeploymentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDeploymentResponse.t, GetDeploymentResponse.error) Result.t
           Async.Deferred.t
 val get_service_role_for_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceRoleForAccountRequest.t ->
         (GetServiceRoleForAccountResponse.t,
-          [ `AWS of GetServiceRoleForAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetServiceRoleForAccountResponse.error) Result.t Async.Deferred.t
 val list_client_devices_associated_with_core_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClientDevicesAssociatedWithCoreDeviceRequest.t ->
         (ListClientDevicesAssociatedWithCoreDeviceResponse.t,
-          [ `AWS of ListClientDevicesAssociatedWithCoreDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListClientDevicesAssociatedWithCoreDeviceResponse.error) Result.t
           Async.Deferred.t
 val list_component_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComponentVersionsRequest.t ->
         (ListComponentVersionsResponse.t,
-          [ `AWS of ListComponentVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListComponentVersionsResponse.error) Result.t Async.Deferred.t
 val list_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComponentsRequest.t ->
-        (ListComponentsResponse.t,
-          [ `AWS of ListComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListComponentsResponse.t, ListComponentsResponse.error) Result.t
           Async.Deferred.t
 val list_core_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCoreDevicesRequest.t ->
-        (ListCoreDevicesResponse.t,
-          [ `AWS of ListCoreDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCoreDevicesResponse.t, ListCoreDevicesResponse.error) Result.t
           Async.Deferred.t
 val list_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentsRequest.t ->
-        (ListDeploymentsResponse.t,
-          [ `AWS of ListDeploymentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDeploymentsResponse.t, ListDeploymentsResponse.error) Result.t
           Async.Deferred.t
 val list_effective_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEffectiveDeploymentsRequest.t ->
         (ListEffectiveDeploymentsResponse.t,
-          [ `AWS of ListEffectiveDeploymentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListEffectiveDeploymentsResponse.error) Result.t Async.Deferred.t
 val list_installed_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstalledComponentsRequest.t ->
         (ListInstalledComponentsResponse.t,
-          [ `AWS of ListInstalledComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListInstalledComponentsResponse.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val resolve_component_candidates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResolveComponentCandidatesRequest.t ->
         (ResolveComponentCandidatesResponse.t,
-          [ `AWS of ResolveComponentCandidatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ResolveComponentCandidatesResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_connectivity_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectivityInfoRequest.t ->
         (UpdateConnectivityInfoResponse.t,
-          [ `AWS of UpdateConnectivityInfoResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateConnectivityInfoResponse.error) Result.t Async.Deferred.t

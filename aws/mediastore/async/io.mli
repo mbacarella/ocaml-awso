@@ -4,167 +4,125 @@ val create_container :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateContainerInput.t ->
-        (CreateContainerOutput.t,
-          [ `AWS of CreateContainerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateContainerOutput.t, CreateContainerOutput.error) Result.t
           Async.Deferred.t
 val delete_container :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContainerInput.t ->
-        (DeleteContainerOutput.t,
-          [ `AWS of DeleteContainerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteContainerOutput.t, DeleteContainerOutput.error) Result.t
           Async.Deferred.t
 val delete_container_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContainerPolicyInput.t ->
-        (DeleteContainerPolicyOutput.t,
-          [ `AWS of DeleteContainerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteContainerPolicyOutput.t, DeleteContainerPolicyOutput.error)
+          Result.t Async.Deferred.t
 val delete_cors_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCorsPolicyInput.t ->
-        (DeleteCorsPolicyOutput.t,
-          [ `AWS of DeleteCorsPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteCorsPolicyOutput.t, DeleteCorsPolicyOutput.error) Result.t
           Async.Deferred.t
 val delete_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLifecyclePolicyInput.t ->
-        (DeleteLifecyclePolicyOutput.t,
-          [ `AWS of DeleteLifecyclePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteLifecyclePolicyOutput.t, DeleteLifecyclePolicyOutput.error)
+          Result.t Async.Deferred.t
 val delete_metric_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMetricPolicyInput.t ->
-        (DeleteMetricPolicyOutput.t,
-          [ `AWS of DeleteMetricPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteMetricPolicyOutput.t, DeleteMetricPolicyOutput.error) Result.t
           Async.Deferred.t
 val describe_container :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeContainerInput.t ->
-        (DescribeContainerOutput.t,
-          [ `AWS of DescribeContainerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeContainerOutput.t, DescribeContainerOutput.error) Result.t
           Async.Deferred.t
 val get_container_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContainerPolicyInput.t ->
-        (GetContainerPolicyOutput.t,
-          [ `AWS of GetContainerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetContainerPolicyOutput.t, GetContainerPolicyOutput.error) Result.t
           Async.Deferred.t
 val get_cors_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCorsPolicyInput.t ->
-        (GetCorsPolicyOutput.t,
-          [ `AWS of GetCorsPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCorsPolicyOutput.t, GetCorsPolicyOutput.error) Result.t
           Async.Deferred.t
 val get_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLifecyclePolicyInput.t ->
-        (GetLifecyclePolicyOutput.t,
-          [ `AWS of GetLifecyclePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetLifecyclePolicyOutput.t, GetLifecyclePolicyOutput.error) Result.t
           Async.Deferred.t
 val get_metric_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMetricPolicyInput.t ->
-        (GetMetricPolicyOutput.t,
-          [ `AWS of GetMetricPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMetricPolicyOutput.t, GetMetricPolicyOutput.error) Result.t
           Async.Deferred.t
 val list_containers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListContainersInput.t ->
-        (ListContainersOutput.t,
-          [ `AWS of ListContainersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListContainersOutput.t, ListContainersOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val put_container_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutContainerPolicyInput.t ->
-        (PutContainerPolicyOutput.t,
-          [ `AWS of PutContainerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutContainerPolicyOutput.t, PutContainerPolicyOutput.error) Result.t
           Async.Deferred.t
 val put_cors_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutCorsPolicyInput.t ->
-        (PutCorsPolicyOutput.t,
-          [ `AWS of PutCorsPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutCorsPolicyOutput.t, PutCorsPolicyOutput.error) Result.t
           Async.Deferred.t
 val put_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLifecyclePolicyInput.t ->
-        (PutLifecyclePolicyOutput.t,
-          [ `AWS of PutLifecyclePolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutLifecyclePolicyOutput.t, PutLifecyclePolicyOutput.error) Result.t
           Async.Deferred.t
 val put_metric_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMetricPolicyInput.t ->
-        (PutMetricPolicyOutput.t,
-          [ `AWS of PutMetricPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutMetricPolicyOutput.t, PutMetricPolicyOutput.error) Result.t
           Async.Deferred.t
 val start_access_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAccessLoggingInput.t ->
-        (StartAccessLoggingOutput.t,
-          [ `AWS of StartAccessLoggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartAccessLoggingOutput.t, StartAccessLoggingOutput.error) Result.t
           Async.Deferred.t
 val stop_access_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopAccessLoggingInput.t ->
-        (StopAccessLoggingOutput.t,
-          [ `AWS of StopAccessLoggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopAccessLoggingOutput.t, StopAccessLoggingOutput.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t
           Async.Deferred.t

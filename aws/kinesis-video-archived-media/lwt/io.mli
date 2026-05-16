@@ -3,35 +3,27 @@ open Awso_kinesis_video_archived_media.Values
 val get_clip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      GetClipInput.t ->
-        (GetClipOutput.t,
-          [ `AWS of GetClipOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      GetClipInput.t -> (GetClipOutput.t, GetClipOutput.error) Result.t Lwt.t
 val get_d_a_s_h_streaming_session_u_r_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDASHStreamingSessionURLInput.t ->
         (GetDASHStreamingSessionURLOutput.t,
-          [ `AWS of GetDASHStreamingSessionURLOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDASHStreamingSessionURLOutput.error) Result.t Lwt.t
 val get_h_l_s_streaming_session_u_r_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetHLSStreamingSessionURLInput.t ->
         (GetHLSStreamingSessionURLOutput.t,
-          [ `AWS of GetHLSStreamingSessionURLOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetHLSStreamingSessionURLOutput.error) Result.t Lwt.t
 val get_media_for_fragment_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMediaForFragmentListInput.t ->
         (GetMediaForFragmentListOutput.t,
-          [ `AWS of GetMediaForFragmentListOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMediaForFragmentListOutput.error) Result.t Lwt.t
 val list_fragments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFragmentsInput.t ->
-        (ListFragmentsOutput.t,
-          [ `AWS of ListFragmentsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFragmentsOutput.t, ListFragmentsOutput.error) Result.t Lwt.t

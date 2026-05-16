@@ -4,245 +4,186 @@ val create_cell :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCellRequest.t ->
-        (CreateCellResponse.t,
-          [ `AWS of CreateCellResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCellResponse.t, CreateCellResponse.error) Result.t
           Async.Deferred.t
 val create_cross_account_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCrossAccountAuthorizationRequest.t ->
         (CreateCrossAccountAuthorizationResponse.t,
-          [ `AWS of CreateCrossAccountAuthorizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateCrossAccountAuthorizationResponse.error) Result.t
           Async.Deferred.t
 val create_readiness_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReadinessCheckRequest.t ->
-        (CreateReadinessCheckResponse.t,
-          [ `AWS of CreateReadinessCheckResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateReadinessCheckResponse.t, CreateReadinessCheckResponse.error)
+          Result.t Async.Deferred.t
 val create_recovery_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRecoveryGroupRequest.t ->
-        (CreateRecoveryGroupResponse.t,
-          [ `AWS of CreateRecoveryGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateRecoveryGroupResponse.t, CreateRecoveryGroupResponse.error)
+          Result.t Async.Deferred.t
 val create_resource_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceSetRequest.t ->
-        (CreateResourceSetResponse.t,
-          [ `AWS of CreateResourceSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateResourceSetResponse.t, CreateResourceSetResponse.error)
+          Result.t Async.Deferred.t
 val delete_cell :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCellRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteCellRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_cross_account_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCrossAccountAuthorizationRequest.t ->
         (DeleteCrossAccountAuthorizationResponse.t,
-          [ `AWS of DeleteCrossAccountAuthorizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteCrossAccountAuthorizationResponse.error) Result.t
           Async.Deferred.t
 val delete_readiness_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteReadinessCheckRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteReadinessCheckRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_recovery_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRecoveryGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteRecoveryGroupRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_resource_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteResourceSetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteResourceSetRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val get_architecture_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetArchitectureRecommendationsRequest.t ->
         (GetArchitectureRecommendationsResponse.t,
-          [ `AWS of GetArchitectureRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetArchitectureRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val get_cell :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCellRequest.t ->
-        (GetCellResponse.t,
-          [ `AWS of GetCellResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetCellResponse.t, GetCellResponse.error) Result.t Async.Deferred.t
 val get_cell_readiness_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCellReadinessSummaryRequest.t ->
         (GetCellReadinessSummaryResponse.t,
-          [ `AWS of GetCellReadinessSummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetCellReadinessSummaryResponse.error) Result.t Async.Deferred.t
 val get_readiness_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReadinessCheckRequest.t ->
-        (GetReadinessCheckResponse.t,
-          [ `AWS of GetReadinessCheckResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetReadinessCheckResponse.t, GetReadinessCheckResponse.error)
+          Result.t Async.Deferred.t
 val get_readiness_check_resource_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReadinessCheckResourceStatusRequest.t ->
         (GetReadinessCheckResourceStatusResponse.t,
-          [ `AWS of GetReadinessCheckResourceStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetReadinessCheckResourceStatusResponse.error) Result.t
           Async.Deferred.t
 val get_readiness_check_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReadinessCheckStatusRequest.t ->
         (GetReadinessCheckStatusResponse.t,
-          [ `AWS of GetReadinessCheckStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetReadinessCheckStatusResponse.error) Result.t Async.Deferred.t
 val get_recovery_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecoveryGroupRequest.t ->
-        (GetRecoveryGroupResponse.t,
-          [ `AWS of GetRecoveryGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetRecoveryGroupResponse.t, GetRecoveryGroupResponse.error) Result.t
           Async.Deferred.t
 val get_recovery_group_readiness_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecoveryGroupReadinessSummaryRequest.t ->
         (GetRecoveryGroupReadinessSummaryResponse.t,
-          [ `AWS of GetRecoveryGroupReadinessSummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetRecoveryGroupReadinessSummaryResponse.error) Result.t
           Async.Deferred.t
 val get_resource_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceSetRequest.t ->
-        (GetResourceSetResponse.t,
-          [ `AWS of GetResourceSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetResourceSetResponse.t, GetResourceSetResponse.error) Result.t
           Async.Deferred.t
 val list_cells :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCellsRequest.t ->
-        (ListCellsResponse.t,
-          [ `AWS of ListCellsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCellsResponse.t, ListCellsResponse.error) Result.t
           Async.Deferred.t
 val list_cross_account_authorizations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCrossAccountAuthorizationsRequest.t ->
         (ListCrossAccountAuthorizationsResponse.t,
-          [ `AWS of ListCrossAccountAuthorizationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListCrossAccountAuthorizationsResponse.error) Result.t
           Async.Deferred.t
 val list_readiness_checks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReadinessChecksRequest.t ->
-        (ListReadinessChecksResponse.t,
-          [ `AWS of ListReadinessChecksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListReadinessChecksResponse.t, ListReadinessChecksResponse.error)
+          Result.t Async.Deferred.t
 val list_recovery_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecoveryGroupsRequest.t ->
-        (ListRecoveryGroupsResponse.t,
-          [ `AWS of ListRecoveryGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRecoveryGroupsResponse.t, ListRecoveryGroupsResponse.error)
+          Result.t Async.Deferred.t
 val list_resource_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceSetsRequest.t ->
-        (ListResourceSetsResponse.t,
-          [ `AWS of ListResourceSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListResourceSetsResponse.t, ListResourceSetsResponse.error) Result.t
           Async.Deferred.t
 val list_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRulesRequest.t ->
-        (ListRulesResponse.t,
-          [ `AWS of ListRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRulesResponse.t, ListRulesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourcesRequest.t ->
-        (ListTagsForResourcesResponse.t,
-          [ `AWS of ListTagsForResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourcesResponse.t, ListTagsForResourcesResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_cell :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCellRequest.t ->
-        (UpdateCellResponse.t,
-          [ `AWS of UpdateCellResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateCellResponse.t, UpdateCellResponse.error) Result.t
           Async.Deferred.t
 val update_readiness_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReadinessCheckRequest.t ->
-        (UpdateReadinessCheckResponse.t,
-          [ `AWS of UpdateReadinessCheckResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateReadinessCheckResponse.t, UpdateReadinessCheckResponse.error)
+          Result.t Async.Deferred.t
 val update_recovery_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRecoveryGroupRequest.t ->
-        (UpdateRecoveryGroupResponse.t,
-          [ `AWS of UpdateRecoveryGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateRecoveryGroupResponse.t, UpdateRecoveryGroupResponse.error)
+          Result.t Async.Deferred.t
 val update_resource_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceSetRequest.t ->
-        (UpdateResourceSetResponse.t,
-          [ `AWS of UpdateResourceSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateResourceSetResponse.t, UpdateResourceSetResponse.error)
+          Result.t Async.Deferred.t

@@ -687,263 +687,284 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
-  | AddPermission -> Ok ()
+  | AddPermission ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CheckIfPhoneNumberIsOptedOut ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CheckIfPhoneNumberIsOptedOutResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CheckIfPhoneNumberIsOptedOutResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CheckIfPhoneNumberIsOptedOutResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CheckIfPhoneNumberIsOptedOutResponse.error_of_xml))
   | ConfirmSubscription ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ConfirmSubscriptionResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ConfirmSubscriptionResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ConfirmSubscriptionResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ConfirmSubscriptionResponse.error_of_xml))
   | CreatePlatformApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreatePlatformApplicationResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreatePlatformApplicationResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreatePlatformApplicationResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePlatformApplicationResponse.error_of_xml))
   | CreatePlatformEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateEndpointResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateEndpointResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateEndpointResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateEndpointResponse.error_of_xml))
   | CreateSMSSandboxPhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSMSSandboxPhoneNumberResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateSMSSandboxPhoneNumberResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateSMSSandboxPhoneNumberResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSMSSandboxPhoneNumberResult.error_of_xml))
   | CreateTopic ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTopicResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateTopicResponse.of_xml xml))
-  | DeleteEndpoint -> Ok ()
-  | DeletePlatformApplication -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateTopicResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateTopicResponse.error_of_xml))
+  | DeleteEndpoint ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePlatformApplication ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteSMSSandboxPhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteSMSSandboxPhoneNumberResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteSMSSandboxPhoneNumberResult.of_xml xml))
-  | DeleteTopic -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteSMSSandboxPhoneNumberResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSMSSandboxPhoneNumberResult.error_of_xml))
+  | DeleteTopic -> if is_success then Ok () else Error (parse_aws_error None)
   | GetEndpointAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetEndpointAttributesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetEndpointAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetEndpointAttributesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetEndpointAttributesResponse.error_of_xml))
   | GetPlatformApplicationAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPlatformApplicationAttributesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetPlatformApplicationAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetPlatformApplicationAttributesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetPlatformApplicationAttributesResponse.error_of_xml))
   | GetSMSAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSMSAttributesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetSMSAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetSMSAttributesResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetSMSAttributesResponse.error_of_xml))
   | GetSMSSandboxAccountStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSMSSandboxAccountStatusResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetSMSSandboxAccountStatusResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetSMSSandboxAccountStatusResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetSMSSandboxAccountStatusResult.error_of_xml))
   | GetSubscriptionAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSubscriptionAttributesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetSubscriptionAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetSubscriptionAttributesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetSubscriptionAttributesResponse.error_of_xml))
   | GetTopicAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTopicAttributesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetTopicAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetTopicAttributesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetTopicAttributesResponse.error_of_xml))
   | ListEndpointsByPlatformApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListEndpointsByPlatformApplicationResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListEndpointsByPlatformApplicationResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListEndpointsByPlatformApplicationResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListEndpointsByPlatformApplicationResponse.error_of_xml))
   | ListOriginationNumbers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListOriginationNumbersResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListOriginationNumbersResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListOriginationNumbersResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListOriginationNumbersResult.error_of_xml))
   | ListPhoneNumbersOptedOut ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPhoneNumbersOptedOutResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPhoneNumbersOptedOutResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPhoneNumbersOptedOutResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPhoneNumbersOptedOutResponse.error_of_xml))
   | ListPlatformApplications ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPlatformApplicationsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPlatformApplicationsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPlatformApplicationsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPlatformApplicationsResponse.error_of_xml))
   | ListSMSSandboxPhoneNumbers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSMSSandboxPhoneNumbersResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListSMSSandboxPhoneNumbersResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListSMSSandboxPhoneNumbersResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSMSSandboxPhoneNumbersResult.error_of_xml))
   | ListSubscriptions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSubscriptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListSubscriptionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListSubscriptionsResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListSubscriptionsResponse.error_of_xml))
   | ListSubscriptionsByTopic ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSubscriptionsByTopicResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListSubscriptionsByTopicResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListSubscriptionsByTopicResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSubscriptionsByTopicResponse.error_of_xml))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_xml))
   | ListTopics ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTopicsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListTopicsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListTopicsResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListTopicsResponse.error_of_xml))
   | OptInPhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some OptInPhoneNumberResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (OptInPhoneNumberResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (OptInPhoneNumberResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some OptInPhoneNumberResponse.error_of_xml))
   | Publish ->
-      (match resp with
-       | Error err -> handle_error err (Some PublishResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PublishResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PublishResponse.of_xml xml)
+      else Error (parse_aws_error (Some PublishResponse.error_of_xml))
   | PublishBatch ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PublishBatchResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PublishBatchResponse.of_xml xml))
-  | RemovePermission -> Ok ()
-  | SetEndpointAttributes -> Ok ()
-  | SetPlatformApplicationAttributes -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PublishBatchResponse.of_xml xml)
+      else Error (parse_aws_error (Some PublishBatchResponse.error_of_xml))
+  | RemovePermission ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetEndpointAttributes ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetPlatformApplicationAttributes ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | SetSMSAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SetSMSAttributesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetSMSAttributesResponse.of_xml xml))
-  | SetSubscriptionAttributes -> Ok ()
-  | SetTopicAttributes -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetSMSAttributesResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some SetSMSAttributesResponse.error_of_xml))
+  | SetSubscriptionAttributes ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetTopicAttributes ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | Subscribe ->
-      (match resp with
-       | Error err -> handle_error err (Some SubscribeResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SubscribeResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SubscribeResponse.of_xml xml)
+      else Error (parse_aws_error (Some SubscribeResponse.error_of_xml))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_xml xml))
-  | Unsubscribe -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_xml xml)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_xml))
+  | Unsubscribe -> if is_success then Ok () else Error (parse_aws_error None)
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_xml xml)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_xml))
   | VerifySMSSandboxPhoneNumber ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some VerifySMSSandboxPhoneNumberResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (VerifySMSSandboxPhoneNumberResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (VerifySMSSandboxPhoneNumberResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some VerifySMSSandboxPhoneNumberResult.error_of_xml))

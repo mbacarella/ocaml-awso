@@ -5,334 +5,271 @@ val create_configuration_set :
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationSetRequest.t ->
         (CreateConfigurationSetResponse.t,
-          [ `AWS of CreateConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateConfigurationSetResponse.error) Result.t Async.Deferred.t
 val create_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationSetEventDestinationRequest.t ->
         (CreateConfigurationSetEventDestinationResponse.t,
-          [ `AWS of CreateConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateConfigurationSetEventDestinationResponse.error) Result.t
           Async.Deferred.t
 val create_dedicated_ip_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDedicatedIpPoolRequest.t ->
         (CreateDedicatedIpPoolResponse.t,
-          [ `AWS of CreateDedicatedIpPoolResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateDedicatedIpPoolResponse.error) Result.t Async.Deferred.t
 val create_deliverability_test_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeliverabilityTestReportRequest.t ->
         (CreateDeliverabilityTestReportResponse.t,
-          [ `AWS of CreateDeliverabilityTestReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateDeliverabilityTestReportResponse.error) Result.t
           Async.Deferred.t
 val create_email_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEmailIdentityRequest.t ->
-        (CreateEmailIdentityResponse.t,
-          [ `AWS of CreateEmailIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateEmailIdentityResponse.t, CreateEmailIdentityResponse.error)
+          Result.t Async.Deferred.t
 val delete_configuration_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationSetRequest.t ->
         (DeleteConfigurationSetResponse.t,
-          [ `AWS of DeleteConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteConfigurationSetResponse.error) Result.t Async.Deferred.t
 val delete_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationSetEventDestinationRequest.t ->
         (DeleteConfigurationSetEventDestinationResponse.t,
-          [ `AWS of DeleteConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteConfigurationSetEventDestinationResponse.error) Result.t
           Async.Deferred.t
 val delete_dedicated_ip_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDedicatedIpPoolRequest.t ->
         (DeleteDedicatedIpPoolResponse.t,
-          [ `AWS of DeleteDedicatedIpPoolResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteDedicatedIpPoolResponse.error) Result.t Async.Deferred.t
 val delete_email_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEmailIdentityRequest.t ->
-        (DeleteEmailIdentityResponse.t,
-          [ `AWS of DeleteEmailIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteEmailIdentityResponse.t, DeleteEmailIdentityResponse.error)
+          Result.t Async.Deferred.t
 val get_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccountRequest.t ->
-        (GetAccountResponse.t,
-          [ `AWS of GetAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAccountResponse.t, GetAccountResponse.error) Result.t
           Async.Deferred.t
 val get_blacklist_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBlacklistReportsRequest.t ->
-        (GetBlacklistReportsResponse.t,
-          [ `AWS of GetBlacklistReportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBlacklistReportsResponse.t, GetBlacklistReportsResponse.error)
+          Result.t Async.Deferred.t
 val get_configuration_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConfigurationSetRequest.t ->
-        (GetConfigurationSetResponse.t,
-          [ `AWS of GetConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetConfigurationSetResponse.t, GetConfigurationSetResponse.error)
+          Result.t Async.Deferred.t
 val get_configuration_set_event_destinations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConfigurationSetEventDestinationsRequest.t ->
         (GetConfigurationSetEventDestinationsResponse.t,
-          [ `AWS of GetConfigurationSetEventDestinationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetConfigurationSetEventDestinationsResponse.error) Result.t
           Async.Deferred.t
 val get_dedicated_ip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDedicatedIpRequest.t ->
-        (GetDedicatedIpResponse.t,
-          [ `AWS of GetDedicatedIpResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDedicatedIpResponse.t, GetDedicatedIpResponse.error) Result.t
           Async.Deferred.t
 val get_dedicated_ips :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDedicatedIpsRequest.t ->
-        (GetDedicatedIpsResponse.t,
-          [ `AWS of GetDedicatedIpsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDedicatedIpsResponse.t, GetDedicatedIpsResponse.error) Result.t
           Async.Deferred.t
 val get_deliverability_dashboard_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeliverabilityDashboardOptionsRequest.t ->
         (GetDeliverabilityDashboardOptionsResponse.t,
-          [ `AWS of GetDeliverabilityDashboardOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetDeliverabilityDashboardOptionsResponse.error) Result.t
           Async.Deferred.t
 val get_deliverability_test_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeliverabilityTestReportRequest.t ->
         (GetDeliverabilityTestReportResponse.t,
-          [ `AWS of GetDeliverabilityTestReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetDeliverabilityTestReportResponse.error) Result.t
           Async.Deferred.t
 val get_domain_deliverability_campaign :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainDeliverabilityCampaignRequest.t ->
         (GetDomainDeliverabilityCampaignResponse.t,
-          [ `AWS of GetDomainDeliverabilityCampaignResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetDomainDeliverabilityCampaignResponse.error) Result.t
           Async.Deferred.t
 val get_domain_statistics_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainStatisticsReportRequest.t ->
         (GetDomainStatisticsReportResponse.t,
-          [ `AWS of GetDomainStatisticsReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetDomainStatisticsReportResponse.error) Result.t Async.Deferred.t
 val get_email_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEmailIdentityRequest.t ->
-        (GetEmailIdentityResponse.t,
-          [ `AWS of GetEmailIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetEmailIdentityResponse.t, GetEmailIdentityResponse.error) Result.t
           Async.Deferred.t
 val list_configuration_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConfigurationSetsRequest.t ->
         (ListConfigurationSetsResponse.t,
-          [ `AWS of ListConfigurationSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListConfigurationSetsResponse.error) Result.t Async.Deferred.t
 val list_dedicated_ip_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDedicatedIpPoolsRequest.t ->
-        (ListDedicatedIpPoolsResponse.t,
-          [ `AWS of ListDedicatedIpPoolsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListDedicatedIpPoolsResponse.t, ListDedicatedIpPoolsResponse.error)
+          Result.t Async.Deferred.t
 val list_deliverability_test_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeliverabilityTestReportsRequest.t ->
         (ListDeliverabilityTestReportsResponse.t,
-          [ `AWS of ListDeliverabilityTestReportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListDeliverabilityTestReportsResponse.error) Result.t
           Async.Deferred.t
 val list_domain_deliverability_campaigns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainDeliverabilityCampaignsRequest.t ->
         (ListDomainDeliverabilityCampaignsResponse.t,
-          [ `AWS of ListDomainDeliverabilityCampaignsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListDomainDeliverabilityCampaignsResponse.error) Result.t
           Async.Deferred.t
 val list_email_identities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEmailIdentitiesRequest.t ->
-        (ListEmailIdentitiesResponse.t,
-          [ `AWS of ListEmailIdentitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListEmailIdentitiesResponse.t, ListEmailIdentitiesResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_account_dedicated_ip_warmup_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAccountDedicatedIpWarmupAttributesRequest.t ->
         (PutAccountDedicatedIpWarmupAttributesResponse.t,
-          [ `AWS of PutAccountDedicatedIpWarmupAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutAccountDedicatedIpWarmupAttributesResponse.error) Result.t
           Async.Deferred.t
 val put_account_sending_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAccountSendingAttributesRequest.t ->
         (PutAccountSendingAttributesResponse.t,
-          [ `AWS of PutAccountSendingAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutAccountSendingAttributesResponse.error) Result.t
           Async.Deferred.t
 val put_configuration_set_delivery_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutConfigurationSetDeliveryOptionsRequest.t ->
         (PutConfigurationSetDeliveryOptionsResponse.t,
-          [ `AWS of PutConfigurationSetDeliveryOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutConfigurationSetDeliveryOptionsResponse.error) Result.t
           Async.Deferred.t
 val put_configuration_set_reputation_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutConfigurationSetReputationOptionsRequest.t ->
         (PutConfigurationSetReputationOptionsResponse.t,
-          [ `AWS of PutConfigurationSetReputationOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutConfigurationSetReputationOptionsResponse.error) Result.t
           Async.Deferred.t
 val put_configuration_set_sending_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutConfigurationSetSendingOptionsRequest.t ->
         (PutConfigurationSetSendingOptionsResponse.t,
-          [ `AWS of PutConfigurationSetSendingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutConfigurationSetSendingOptionsResponse.error) Result.t
           Async.Deferred.t
 val put_configuration_set_tracking_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutConfigurationSetTrackingOptionsRequest.t ->
         (PutConfigurationSetTrackingOptionsResponse.t,
-          [ `AWS of PutConfigurationSetTrackingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutConfigurationSetTrackingOptionsResponse.error) Result.t
           Async.Deferred.t
 val put_dedicated_ip_in_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDedicatedIpInPoolRequest.t ->
-        (PutDedicatedIpInPoolResponse.t,
-          [ `AWS of PutDedicatedIpInPoolResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutDedicatedIpInPoolResponse.t, PutDedicatedIpInPoolResponse.error)
+          Result.t Async.Deferred.t
 val put_dedicated_ip_warmup_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDedicatedIpWarmupAttributesRequest.t ->
         (PutDedicatedIpWarmupAttributesResponse.t,
-          [ `AWS of PutDedicatedIpWarmupAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutDedicatedIpWarmupAttributesResponse.error) Result.t
           Async.Deferred.t
 val put_deliverability_dashboard_option :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDeliverabilityDashboardOptionRequest.t ->
         (PutDeliverabilityDashboardOptionResponse.t,
-          [ `AWS of PutDeliverabilityDashboardOptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutDeliverabilityDashboardOptionResponse.error) Result.t
           Async.Deferred.t
 val put_email_identity_dkim_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEmailIdentityDkimAttributesRequest.t ->
         (PutEmailIdentityDkimAttributesResponse.t,
-          [ `AWS of PutEmailIdentityDkimAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutEmailIdentityDkimAttributesResponse.error) Result.t
           Async.Deferred.t
 val put_email_identity_feedback_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEmailIdentityFeedbackAttributesRequest.t ->
         (PutEmailIdentityFeedbackAttributesResponse.t,
-          [ `AWS of PutEmailIdentityFeedbackAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutEmailIdentityFeedbackAttributesResponse.error) Result.t
           Async.Deferred.t
 val put_email_identity_mail_from_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEmailIdentityMailFromAttributesRequest.t ->
         (PutEmailIdentityMailFromAttributesResponse.t,
-          [ `AWS of PutEmailIdentityMailFromAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutEmailIdentityMailFromAttributesResponse.error) Result.t
           Async.Deferred.t
 val send_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendEmailRequest.t ->
-        (SendEmailResponse.t,
-          [ `AWS of SendEmailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SendEmailResponse.t, SendEmailResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationSetEventDestinationRequest.t ->
         (UpdateConfigurationSetEventDestinationResponse.t,
-          [ `AWS of UpdateConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateConfigurationSetEventDestinationResponse.error) Result.t
           Async.Deferred.t

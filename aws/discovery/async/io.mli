@@ -5,200 +5,153 @@ val associate_configuration_items_to_application :
     ?cfg:Awso.Cfg.t ->
       AssociateConfigurationItemsToApplicationRequest.t ->
         (AssociateConfigurationItemsToApplicationResponse.t,
-          [ `AWS of AssociateConfigurationItemsToApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AssociateConfigurationItemsToApplicationResponse.error) Result.t
           Async.Deferred.t
 val batch_delete_import_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteImportDataRequest.t ->
         (BatchDeleteImportDataResponse.t,
-          [ `AWS of BatchDeleteImportDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchDeleteImportDataResponse.error) Result.t Async.Deferred.t
 val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResponse.t,
-          [ `AWS of CreateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t Async.Deferred.t
 val create_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTagsRequest.t ->
-        (CreateTagsResponse.t,
-          [ `AWS of CreateTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTagsResponse.t, CreateTagsResponse.error) Result.t
           Async.Deferred.t
 val delete_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationsRequest.t ->
-        (DeleteApplicationsResponse.t,
-          [ `AWS of DeleteApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteApplicationsResponse.t, DeleteApplicationsResponse.error)
+          Result.t Async.Deferred.t
 val delete_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTagsRequest.t ->
-        (DeleteTagsResponse.t,
-          [ `AWS of DeleteTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTagsResponse.t, DeleteTagsResponse.error) Result.t
           Async.Deferred.t
 val describe_agents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAgentsRequest.t ->
-        (DescribeAgentsResponse.t,
-          [ `AWS of DescribeAgentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAgentsResponse.t, DescribeAgentsResponse.error) Result.t
           Async.Deferred.t
 val describe_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationsRequest.t ->
         (DescribeConfigurationsResponse.t,
-          [ `AWS of DescribeConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeConfigurationsResponse.error) Result.t Async.Deferred.t
 val describe_continuous_exports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeContinuousExportsRequest.t ->
         (DescribeContinuousExportsResponse.t,
-          [ `AWS of DescribeContinuousExportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeContinuousExportsResponse.error) Result.t Async.Deferred.t
 val describe_export_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExportConfigurationsRequest.t ->
         (DescribeExportConfigurationsResponse.t,
-          [ `AWS of DescribeExportConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeExportConfigurationsResponse.error) Result.t
           Async.Deferred.t
 val describe_export_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExportTasksRequest.t ->
-        (DescribeExportTasksResponse.t,
-          [ `AWS of DescribeExportTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeExportTasksResponse.t, DescribeExportTasksResponse.error)
+          Result.t Async.Deferred.t
 val describe_import_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImportTasksRequest.t ->
-        (DescribeImportTasksResponse.t,
-          [ `AWS of DescribeImportTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeImportTasksResponse.t, DescribeImportTasksResponse.error)
+          Result.t Async.Deferred.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsRequest.t ->
-        (DescribeTagsResponse.t,
-          [ `AWS of DescribeTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTagsResponse.t, DescribeTagsResponse.error) Result.t
           Async.Deferred.t
 val disassociate_configuration_items_from_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateConfigurationItemsFromApplicationRequest.t ->
         (DisassociateConfigurationItemsFromApplicationResponse.t,
-          [
-            `AWS of
-              DisassociateConfigurationItemsFromApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DisassociateConfigurationItemsFromApplicationResponse.error)
+          Result.t Async.Deferred.t
 val export_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (ExportConfigurationsResponse.t,
-          [ `AWS of ExportConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ExportConfigurationsResponse.t, ExportConfigurationsResponse.error)
+          Result.t Async.Deferred.t
 val get_discovery_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDiscoverySummaryRequest.t ->
-        (GetDiscoverySummaryResponse.t,
-          [ `AWS of GetDiscoverySummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetDiscoverySummaryResponse.t, GetDiscoverySummaryResponse.error)
+          Result.t Async.Deferred.t
 val list_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConfigurationsRequest.t ->
-        (ListConfigurationsResponse.t,
-          [ `AWS of ListConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListConfigurationsResponse.t, ListConfigurationsResponse.error)
+          Result.t Async.Deferred.t
 val list_server_neighbors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServerNeighborsRequest.t ->
-        (ListServerNeighborsResponse.t,
-          [ `AWS of ListServerNeighborsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListServerNeighborsResponse.t, ListServerNeighborsResponse.error)
+          Result.t Async.Deferred.t
 val start_continuous_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartContinuousExportRequest.t ->
         (StartContinuousExportResponse.t,
-          [ `AWS of StartContinuousExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartContinuousExportResponse.error) Result.t Async.Deferred.t
 val start_data_collection_by_agent_ids :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDataCollectionByAgentIdsRequest.t ->
         (StartDataCollectionByAgentIdsResponse.t,
-          [ `AWS of StartDataCollectionByAgentIdsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          StartDataCollectionByAgentIdsResponse.error) Result.t
           Async.Deferred.t
 val start_export_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartExportTaskRequest.t ->
-        (StartExportTaskResponse.t,
-          [ `AWS of StartExportTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartExportTaskResponse.t, StartExportTaskResponse.error) Result.t
           Async.Deferred.t
 val start_import_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImportTaskRequest.t ->
-        (StartImportTaskResponse.t,
-          [ `AWS of StartImportTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartImportTaskResponse.t, StartImportTaskResponse.error) Result.t
           Async.Deferred.t
 val stop_continuous_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopContinuousExportRequest.t ->
-        (StopContinuousExportResponse.t,
-          [ `AWS of StopContinuousExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StopContinuousExportResponse.t, StopContinuousExportResponse.error)
+          Result.t Async.Deferred.t
 val stop_data_collection_by_agent_ids :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopDataCollectionByAgentIdsRequest.t ->
         (StopDataCollectionByAgentIdsResponse.t,
-          [ `AWS of StopDataCollectionByAgentIdsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          StopDataCollectionByAgentIdsResponse.error) Result.t
           Async.Deferred.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationRequest.t ->
-        (UpdateApplicationResponse.t,
-          [ `AWS of UpdateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateApplicationResponse.t, UpdateApplicationResponse.error)
+          Result.t Async.Deferred.t

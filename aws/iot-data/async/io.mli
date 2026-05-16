@@ -4,53 +4,39 @@ val delete_thing_shadow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteThingShadowRequest.t ->
-        (DeleteThingShadowResponse.t,
-          [ `AWS of DeleteThingShadowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteThingShadowResponse.t, DeleteThingShadowResponse.error)
+          Result.t Async.Deferred.t
 val get_retained_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRetainedMessageRequest.t ->
-        (GetRetainedMessageResponse.t,
-          [ `AWS of GetRetainedMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRetainedMessageResponse.t, GetRetainedMessageResponse.error)
+          Result.t Async.Deferred.t
 val get_thing_shadow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetThingShadowRequest.t ->
-        (GetThingShadowResponse.t,
-          [ `AWS of GetThingShadowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetThingShadowResponse.t, GetThingShadowResponse.error) Result.t
           Async.Deferred.t
 val list_named_shadows_for_thing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNamedShadowsForThingRequest.t ->
         (ListNamedShadowsForThingResponse.t,
-          [ `AWS of ListNamedShadowsForThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListNamedShadowsForThingResponse.error) Result.t Async.Deferred.t
 val list_retained_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRetainedMessagesRequest.t ->
-        (ListRetainedMessagesResponse.t,
-          [ `AWS of ListRetainedMessagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRetainedMessagesResponse.t, ListRetainedMessagesResponse.error)
+          Result.t Async.Deferred.t
 val publish :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PublishRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      PublishRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_thing_shadow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateThingShadowRequest.t ->
-        (UpdateThingShadowResponse.t,
-          [ `AWS of UpdateThingShadowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateThingShadowResponse.t, UpdateThingShadowResponse.error)
+          Result.t Async.Deferred.t

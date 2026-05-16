@@ -231,109 +231,107 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              |> Yojson.Safe.to_string) req.updatedTheme in
       Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateComponentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateComponentResponse.error_of_json))
   | CreateTheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateThemeResponse.error_of_json)
-       | Ok resp -> Ok (CreateThemeResponse.of_json (response_to_json resp)))
-  | DeleteComponent -> Ok ()
-  | DeleteTheme -> Ok ()
+      if is_success
+      then Ok (CreateThemeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateThemeResponse.error_of_json))
+  | DeleteComponent ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTheme -> if is_success then Ok () else Error (parse_aws_error None)
   | ExchangeCodeForToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExchangeCodeForTokenResponse.error_of_json)
-       | Ok resp ->
-           Ok (ExchangeCodeForTokenResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExchangeCodeForTokenResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ExchangeCodeForTokenResponse.error_of_json))
   | ExportComponents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExportComponentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ExportComponentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExportComponentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ExportComponentsResponse.error_of_json))
   | ExportThemes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExportThemesResponse.error_of_json)
-       | Ok resp -> Ok (ExportThemesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExportThemesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExportThemesResponse.error_of_json))
   | GetComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetComponentResponse.error_of_json)
-       | Ok resp -> Ok (GetComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetComponentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetComponentResponse.error_of_json))
   | GetTheme ->
-      (match resp with
-       | Error err -> handle_error err (Some GetThemeResponse.error_of_json)
-       | Ok resp -> Ok (GetThemeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetThemeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetThemeResponse.error_of_json))
   | ListComponents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListComponentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListComponentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListComponentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListComponentsResponse.error_of_json))
   | ListThemes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListThemesResponse.error_of_json)
-       | Ok resp -> Ok (ListThemesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListThemesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListThemesResponse.error_of_json))
   | RefreshToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RefreshTokenResponse.error_of_json)
-       | Ok resp -> Ok (RefreshTokenResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RefreshTokenResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some RefreshTokenResponse.error_of_json))
   | UpdateComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateComponentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateComponentResponse.error_of_json))
   | UpdateTheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateThemeResponse.error_of_json)
-       | Ok resp -> Ok (UpdateThemeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateThemeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateThemeResponse.error_of_json))

@@ -5,414 +5,314 @@ val associate_tracker_consumer :
     ?cfg:Awso.Cfg.t ->
       AssociateTrackerConsumerRequest.t ->
         (AssociateTrackerConsumerResponse.t,
-          [ `AWS of AssociateTrackerConsumerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateTrackerConsumerResponse.error) Result.t Async.Deferred.t
 val batch_delete_device_position_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteDevicePositionHistoryRequest.t ->
         (BatchDeleteDevicePositionHistoryResponse.t,
-          [ `AWS of BatchDeleteDevicePositionHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchDeleteDevicePositionHistoryResponse.error) Result.t
           Async.Deferred.t
 val batch_delete_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteGeofenceRequest.t ->
-        (BatchDeleteGeofenceResponse.t,
-          [ `AWS of BatchDeleteGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchDeleteGeofenceResponse.t, BatchDeleteGeofenceResponse.error)
+          Result.t Async.Deferred.t
 val batch_evaluate_geofences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchEvaluateGeofencesRequest.t ->
         (BatchEvaluateGeofencesResponse.t,
-          [ `AWS of BatchEvaluateGeofencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchEvaluateGeofencesResponse.error) Result.t Async.Deferred.t
 val batch_get_device_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetDevicePositionRequest.t ->
         (BatchGetDevicePositionResponse.t,
-          [ `AWS of BatchGetDevicePositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchGetDevicePositionResponse.error) Result.t Async.Deferred.t
 val batch_put_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchPutGeofenceRequest.t ->
-        (BatchPutGeofenceResponse.t,
-          [ `AWS of BatchPutGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchPutGeofenceResponse.t, BatchPutGeofenceResponse.error) Result.t
           Async.Deferred.t
 val batch_update_device_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdateDevicePositionRequest.t ->
         (BatchUpdateDevicePositionResponse.t,
-          [ `AWS of BatchUpdateDevicePositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchUpdateDevicePositionResponse.error) Result.t Async.Deferred.t
 val calculate_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CalculateRouteRequest.t ->
-        (CalculateRouteResponse.t,
-          [ `AWS of CalculateRouteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CalculateRouteResponse.t, CalculateRouteResponse.error) Result.t
           Async.Deferred.t
 val calculate_route_matrix :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CalculateRouteMatrixRequest.t ->
-        (CalculateRouteMatrixResponse.t,
-          [ `AWS of CalculateRouteMatrixResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CalculateRouteMatrixResponse.t, CalculateRouteMatrixResponse.error)
+          Result.t Async.Deferred.t
 val create_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGeofenceCollectionRequest.t ->
         (CreateGeofenceCollectionResponse.t,
-          [ `AWS of CreateGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateGeofenceCollectionResponse.error) Result.t Async.Deferred.t
 val create_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMapRequest.t ->
-        (CreateMapResponse.t,
-          [ `AWS of CreateMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateMapResponse.t, CreateMapResponse.error) Result.t
           Async.Deferred.t
 val create_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlaceIndexRequest.t ->
-        (CreatePlaceIndexResponse.t,
-          [ `AWS of CreatePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePlaceIndexResponse.t, CreatePlaceIndexResponse.error) Result.t
           Async.Deferred.t
 val create_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRouteCalculatorRequest.t ->
         (CreateRouteCalculatorResponse.t,
-          [ `AWS of CreateRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateRouteCalculatorResponse.error) Result.t Async.Deferred.t
 val create_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTrackerRequest.t ->
-        (CreateTrackerResponse.t,
-          [ `AWS of CreateTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTrackerResponse.t, CreateTrackerResponse.error) Result.t
           Async.Deferred.t
 val delete_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGeofenceCollectionRequest.t ->
         (DeleteGeofenceCollectionResponse.t,
-          [ `AWS of DeleteGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteGeofenceCollectionResponse.error) Result.t Async.Deferred.t
 val delete_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMapRequest.t ->
-        (DeleteMapResponse.t,
-          [ `AWS of DeleteMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteMapResponse.t, DeleteMapResponse.error) Result.t
           Async.Deferred.t
 val delete_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePlaceIndexRequest.t ->
-        (DeletePlaceIndexResponse.t,
-          [ `AWS of DeletePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeletePlaceIndexResponse.t, DeletePlaceIndexResponse.error) Result.t
           Async.Deferred.t
 val delete_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRouteCalculatorRequest.t ->
         (DeleteRouteCalculatorResponse.t,
-          [ `AWS of DeleteRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteRouteCalculatorResponse.error) Result.t Async.Deferred.t
 val delete_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTrackerRequest.t ->
-        (DeleteTrackerResponse.t,
-          [ `AWS of DeleteTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTrackerResponse.t, DeleteTrackerResponse.error) Result.t
           Async.Deferred.t
 val describe_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGeofenceCollectionRequest.t ->
         (DescribeGeofenceCollectionResponse.t,
-          [ `AWS of DescribeGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeGeofenceCollectionResponse.error) Result.t Async.Deferred.t
 val describe_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMapRequest.t ->
-        (DescribeMapResponse.t,
-          [ `AWS of DescribeMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeMapResponse.t, DescribeMapResponse.error) Result.t
           Async.Deferred.t
 val describe_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePlaceIndexRequest.t ->
-        (DescribePlaceIndexResponse.t,
-          [ `AWS of DescribePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribePlaceIndexResponse.t, DescribePlaceIndexResponse.error)
+          Result.t Async.Deferred.t
 val describe_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRouteCalculatorRequest.t ->
         (DescribeRouteCalculatorResponse.t,
-          [ `AWS of DescribeRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeRouteCalculatorResponse.error) Result.t Async.Deferred.t
 val describe_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTrackerRequest.t ->
-        (DescribeTrackerResponse.t,
-          [ `AWS of DescribeTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTrackerResponse.t, DescribeTrackerResponse.error) Result.t
           Async.Deferred.t
 val disassociate_tracker_consumer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTrackerConsumerRequest.t ->
         (DisassociateTrackerConsumerResponse.t,
-          [ `AWS of DisassociateTrackerConsumerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateTrackerConsumerResponse.error) Result.t
           Async.Deferred.t
 val get_device_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicePositionRequest.t ->
-        (GetDevicePositionResponse.t,
-          [ `AWS of GetDevicePositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetDevicePositionResponse.t, GetDevicePositionResponse.error)
+          Result.t Async.Deferred.t
 val get_device_position_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicePositionHistoryRequest.t ->
         (GetDevicePositionHistoryResponse.t,
-          [ `AWS of GetDevicePositionHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetDevicePositionHistoryResponse.error) Result.t Async.Deferred.t
 val get_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGeofenceRequest.t ->
-        (GetGeofenceResponse.t,
-          [ `AWS of GetGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetGeofenceResponse.t, GetGeofenceResponse.error) Result.t
           Async.Deferred.t
 val get_map_glyphs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapGlyphsRequest.t ->
-        (GetMapGlyphsResponse.t,
-          [ `AWS of GetMapGlyphsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMapGlyphsResponse.t, GetMapGlyphsResponse.error) Result.t
           Async.Deferred.t
 val get_map_sprites :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapSpritesRequest.t ->
-        (GetMapSpritesResponse.t,
-          [ `AWS of GetMapSpritesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMapSpritesResponse.t, GetMapSpritesResponse.error) Result.t
           Async.Deferred.t
 val get_map_style_descriptor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapStyleDescriptorRequest.t ->
         (GetMapStyleDescriptorResponse.t,
-          [ `AWS of GetMapStyleDescriptorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetMapStyleDescriptorResponse.error) Result.t Async.Deferred.t
 val get_map_tile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMapTileRequest.t ->
-        (GetMapTileResponse.t,
-          [ `AWS of GetMapTileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMapTileResponse.t, GetMapTileResponse.error) Result.t
           Async.Deferred.t
 val list_device_positions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicePositionsRequest.t ->
-        (ListDevicePositionsResponse.t,
-          [ `AWS of ListDevicePositionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListDevicePositionsResponse.t, ListDevicePositionsResponse.error)
+          Result.t Async.Deferred.t
 val list_geofence_collections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGeofenceCollectionsRequest.t ->
         (ListGeofenceCollectionsResponse.t,
-          [ `AWS of ListGeofenceCollectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListGeofenceCollectionsResponse.error) Result.t Async.Deferred.t
 val list_geofences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGeofencesRequest.t ->
-        (ListGeofencesResponse.t,
-          [ `AWS of ListGeofencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListGeofencesResponse.t, ListGeofencesResponse.error) Result.t
           Async.Deferred.t
 val list_maps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMapsRequest.t ->
-        (ListMapsResponse.t,
-          [ `AWS of ListMapsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListMapsResponse.t, ListMapsResponse.error) Result.t
           Async.Deferred.t
 val list_place_indexes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlaceIndexesRequest.t ->
-        (ListPlaceIndexesResponse.t,
-          [ `AWS of ListPlaceIndexesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPlaceIndexesResponse.t, ListPlaceIndexesResponse.error) Result.t
           Async.Deferred.t
 val list_route_calculators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRouteCalculatorsRequest.t ->
-        (ListRouteCalculatorsResponse.t,
-          [ `AWS of ListRouteCalculatorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRouteCalculatorsResponse.t, ListRouteCalculatorsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_tracker_consumers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTrackerConsumersRequest.t ->
-        (ListTrackerConsumersResponse.t,
-          [ `AWS of ListTrackerConsumersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTrackerConsumersResponse.t, ListTrackerConsumersResponse.error)
+          Result.t Async.Deferred.t
 val list_trackers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTrackersRequest.t ->
-        (ListTrackersResponse.t,
-          [ `AWS of ListTrackersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTrackersResponse.t, ListTrackersResponse.error) Result.t
           Async.Deferred.t
 val put_geofence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutGeofenceRequest.t ->
-        (PutGeofenceResponse.t,
-          [ `AWS of PutGeofenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutGeofenceResponse.t, PutGeofenceResponse.error) Result.t
           Async.Deferred.t
 val search_place_index_for_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchPlaceIndexForPositionRequest.t ->
         (SearchPlaceIndexForPositionResponse.t,
-          [ `AWS of SearchPlaceIndexForPositionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          SearchPlaceIndexForPositionResponse.error) Result.t
           Async.Deferred.t
 val search_place_index_for_suggestions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchPlaceIndexForSuggestionsRequest.t ->
         (SearchPlaceIndexForSuggestionsResponse.t,
-          [ `AWS of SearchPlaceIndexForSuggestionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          SearchPlaceIndexForSuggestionsResponse.error) Result.t
           Async.Deferred.t
 val search_place_index_for_text :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchPlaceIndexForTextRequest.t ->
         (SearchPlaceIndexForTextResponse.t,
-          [ `AWS of SearchPlaceIndexForTextResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          SearchPlaceIndexForTextResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGeofenceCollectionRequest.t ->
         (UpdateGeofenceCollectionResponse.t,
-          [ `AWS of UpdateGeofenceCollectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateGeofenceCollectionResponse.error) Result.t Async.Deferred.t
 val update_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMapRequest.t ->
-        (UpdateMapResponse.t,
-          [ `AWS of UpdateMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateMapResponse.t, UpdateMapResponse.error) Result.t
           Async.Deferred.t
 val update_place_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePlaceIndexRequest.t ->
-        (UpdatePlaceIndexResponse.t,
-          [ `AWS of UpdatePlaceIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdatePlaceIndexResponse.t, UpdatePlaceIndexResponse.error) Result.t
           Async.Deferred.t
 val update_route_calculator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRouteCalculatorRequest.t ->
         (UpdateRouteCalculatorResponse.t,
-          [ `AWS of UpdateRouteCalculatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateRouteCalculatorResponse.error) Result.t Async.Deferred.t
 val update_tracker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTrackerRequest.t ->
-        (UpdateTrackerResponse.t,
-          [ `AWS of UpdateTrackerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateTrackerResponse.t, UpdateTrackerResponse.error) Result.t
           Async.Deferred.t

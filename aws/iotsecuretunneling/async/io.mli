@@ -4,55 +4,41 @@ val close_tunnel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CloseTunnelRequest.t ->
-        (CloseTunnelResponse.t,
-          [ `AWS of CloseTunnelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CloseTunnelResponse.t, CloseTunnelResponse.error) Result.t
           Async.Deferred.t
 val describe_tunnel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTunnelRequest.t ->
-        (DescribeTunnelResponse.t,
-          [ `AWS of DescribeTunnelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTunnelResponse.t, DescribeTunnelResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_tunnels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTunnelsRequest.t ->
-        (ListTunnelsResponse.t,
-          [ `AWS of ListTunnelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTunnelsResponse.t, ListTunnelsResponse.error) Result.t
           Async.Deferred.t
 val open_tunnel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       OpenTunnelRequest.t ->
-        (OpenTunnelResponse.t,
-          [ `AWS of OpenTunnelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (OpenTunnelResponse.t, OpenTunnelResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

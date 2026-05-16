@@ -636,323 +636,357 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "GlobalAccelerator_V20180706.WithdrawByoipCidr")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AddCustomRoutingEndpoints ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AddCustomRoutingEndpointsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AddCustomRoutingEndpointsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AddCustomRoutingEndpointsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AddCustomRoutingEndpointsResponse.error_of_json))
   | AdvertiseByoipCidr ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AdvertiseByoipCidrResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AdvertiseByoipCidrResponse.of_json json))
-  | AllowCustomRoutingTraffic -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AdvertiseByoipCidrResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some AdvertiseByoipCidrResponse.error_of_json))
+  | AllowCustomRoutingTraffic ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateAccelerator ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAcceleratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateAcceleratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAcceleratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateAcceleratorResponse.error_of_json))
   | CreateCustomRoutingAccelerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCustomRoutingAcceleratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateCustomRoutingAcceleratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCustomRoutingAcceleratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCustomRoutingAcceleratorResponse.error_of_json))
   | CreateCustomRoutingEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCustomRoutingEndpointGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateCustomRoutingEndpointGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCustomRoutingEndpointGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCustomRoutingEndpointGroupResponse.error_of_json))
   | CreateCustomRoutingListener ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCustomRoutingListenerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateCustomRoutingListenerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCustomRoutingListenerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCustomRoutingListenerResponse.error_of_json))
   | CreateEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateEndpointGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateEndpointGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateEndpointGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateEndpointGroupResponse.error_of_json))
   | CreateListener ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateListenerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateListenerResponse.of_json json))
-  | DeleteAccelerator -> Ok ()
-  | DeleteCustomRoutingAccelerator -> Ok ()
-  | DeleteCustomRoutingEndpointGroup -> Ok ()
-  | DeleteCustomRoutingListener -> Ok ()
-  | DeleteEndpointGroup -> Ok ()
-  | DeleteListener -> Ok ()
-  | DenyCustomRoutingTraffic -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateListenerResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateListenerResponse.error_of_json))
+  | DeleteAccelerator ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCustomRoutingAccelerator ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCustomRoutingEndpointGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCustomRoutingListener ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteEndpointGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteListener ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DenyCustomRoutingTraffic ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeprovisionByoipCidr ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeprovisionByoipCidrResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeprovisionByoipCidrResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeprovisionByoipCidrResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeprovisionByoipCidrResponse.error_of_json))
   | DescribeAccelerator ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAcceleratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAcceleratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAcceleratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeAcceleratorResponse.error_of_json))
   | DescribeAcceleratorAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAcceleratorAttributesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAcceleratorAttributesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAcceleratorAttributesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAcceleratorAttributesResponse.error_of_json))
   | DescribeCustomRoutingAccelerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeCustomRoutingAcceleratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeCustomRoutingAcceleratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCustomRoutingAcceleratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCustomRoutingAcceleratorResponse.error_of_json))
   | DescribeCustomRoutingAcceleratorAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCustomRoutingAcceleratorAttributesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeCustomRoutingAcceleratorAttributesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (DescribeCustomRoutingAcceleratorAttributesResponse.of_json json))
+                DescribeCustomRoutingAcceleratorAttributesResponse.error_of_json))
   | DescribeCustomRoutingEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeCustomRoutingEndpointGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeCustomRoutingEndpointGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCustomRoutingEndpointGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCustomRoutingEndpointGroupResponse.error_of_json))
   | DescribeCustomRoutingListener ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeCustomRoutingListenerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeCustomRoutingListenerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCustomRoutingListenerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCustomRoutingListenerResponse.error_of_json))
   | DescribeEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeEndpointGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeEndpointGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeEndpointGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeEndpointGroupResponse.error_of_json))
   | DescribeListener ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeListenerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeListenerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeListenerResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeListenerResponse.error_of_json))
   | ListAccelerators ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAcceleratorsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAcceleratorsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAcceleratorsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListAcceleratorsResponse.error_of_json))
   | ListByoipCidrs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListByoipCidrsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListByoipCidrsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListByoipCidrsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListByoipCidrsResponse.error_of_json))
   | ListCustomRoutingAccelerators ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCustomRoutingAcceleratorsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCustomRoutingAcceleratorsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCustomRoutingAcceleratorsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCustomRoutingAcceleratorsResponse.error_of_json))
   | ListCustomRoutingEndpointGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCustomRoutingEndpointGroupsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCustomRoutingEndpointGroupsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCustomRoutingEndpointGroupsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCustomRoutingEndpointGroupsResponse.error_of_json))
   | ListCustomRoutingListeners ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCustomRoutingListenersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCustomRoutingListenersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCustomRoutingListenersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCustomRoutingListenersResponse.error_of_json))
   | ListCustomRoutingPortMappings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCustomRoutingPortMappingsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCustomRoutingPortMappingsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCustomRoutingPortMappingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCustomRoutingPortMappingsResponse.error_of_json))
   | ListCustomRoutingPortMappingsByDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCustomRoutingPortMappingsByDestinationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListCustomRoutingPortMappingsByDestinationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (ListCustomRoutingPortMappingsByDestinationResponse.of_json json))
+                ListCustomRoutingPortMappingsByDestinationResponse.error_of_json))
   | ListEndpointGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListEndpointGroupsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListEndpointGroupsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListEndpointGroupsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListEndpointGroupsResponse.error_of_json))
   | ListListeners ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListListenersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListListenersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListListenersResponse.of_json json)
+      else Error (parse_aws_error (Some ListListenersResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ProvisionByoipCidr ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ProvisionByoipCidrResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ProvisionByoipCidrResponse.of_json json))
-  | RemoveCustomRoutingEndpoints -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ProvisionByoipCidrResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ProvisionByoipCidrResponse.error_of_json))
+  | RemoveCustomRoutingEndpoints ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateAccelerator ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAcceleratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateAcceleratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAcceleratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateAcceleratorResponse.error_of_json))
   | UpdateAcceleratorAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAcceleratorAttributesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateAcceleratorAttributesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAcceleratorAttributesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAcceleratorAttributesResponse.error_of_json))
   | UpdateCustomRoutingAccelerator ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateCustomRoutingAcceleratorResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateCustomRoutingAcceleratorResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCustomRoutingAcceleratorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCustomRoutingAcceleratorResponse.error_of_json))
   | UpdateCustomRoutingAcceleratorAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCustomRoutingAcceleratorAttributesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                UpdateCustomRoutingAcceleratorAttributesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateCustomRoutingAcceleratorAttributesResponse.of_json json))
+                UpdateCustomRoutingAcceleratorAttributesResponse.error_of_json))
   | UpdateCustomRoutingListener ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateCustomRoutingListenerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateCustomRoutingListenerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCustomRoutingListenerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCustomRoutingListenerResponse.error_of_json))
   | UpdateEndpointGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateEndpointGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateEndpointGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateEndpointGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateEndpointGroupResponse.error_of_json))
   | UpdateListener ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateListenerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateListenerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateListenerResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateListenerResponse.error_of_json))
   | WithdrawByoipCidr ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some WithdrawByoipCidrResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WithdrawByoipCidrResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WithdrawByoipCidrResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some WithdrawByoipCidrResponse.error_of_json))

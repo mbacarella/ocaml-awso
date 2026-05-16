@@ -5,495 +5,419 @@ val batch_detect_dominant_language :
     ?cfg:Awso.Cfg.t ->
       BatchDetectDominantLanguageRequest.t ->
         (BatchDetectDominantLanguageResponse.t,
-          [ `AWS of BatchDetectDominantLanguageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDetectDominantLanguageResponse.error) Result.t Lwt.t
 val batch_detect_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDetectEntitiesRequest.t ->
-        (BatchDetectEntitiesResponse.t,
-          [ `AWS of BatchDetectEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDetectEntitiesResponse.t, BatchDetectEntitiesResponse.error)
+          Result.t Lwt.t
 val batch_detect_key_phrases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDetectKeyPhrasesRequest.t ->
         (BatchDetectKeyPhrasesResponse.t,
-          [ `AWS of BatchDetectKeyPhrasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDetectKeyPhrasesResponse.error) Result.t Lwt.t
 val batch_detect_sentiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDetectSentimentRequest.t ->
-        (BatchDetectSentimentResponse.t,
-          [ `AWS of BatchDetectSentimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDetectSentimentResponse.t, BatchDetectSentimentResponse.error)
+          Result.t Lwt.t
 val batch_detect_syntax :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDetectSyntaxRequest.t ->
-        (BatchDetectSyntaxResponse.t,
-          [ `AWS of BatchDetectSyntaxResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDetectSyntaxResponse.t, BatchDetectSyntaxResponse.error)
+          Result.t Lwt.t
 val classify_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ClassifyDocumentRequest.t ->
-        (ClassifyDocumentResponse.t,
-          [ `AWS of ClassifyDocumentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ClassifyDocumentResponse.t, ClassifyDocumentResponse.error) Result.t
+          Lwt.t
 val contains_pii_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ContainsPiiEntitiesRequest.t ->
-        (ContainsPiiEntitiesResponse.t,
-          [ `AWS of ContainsPiiEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ContainsPiiEntitiesResponse.t, ContainsPiiEntitiesResponse.error)
+          Result.t Lwt.t
 val create_document_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDocumentClassifierRequest.t ->
         (CreateDocumentClassifierResponse.t,
-          [ `AWS of CreateDocumentClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDocumentClassifierResponse.error) Result.t Lwt.t
 val create_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEndpointRequest.t ->
-        (CreateEndpointResponse.t,
-          [ `AWS of CreateEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEndpointResponse.t, CreateEndpointResponse.error) Result.t
+          Lwt.t
 val create_entity_recognizer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEntityRecognizerRequest.t ->
         (CreateEntityRecognizerResponse.t,
-          [ `AWS of CreateEntityRecognizerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateEntityRecognizerResponse.error) Result.t Lwt.t
 val delete_document_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDocumentClassifierRequest.t ->
         (DeleteDocumentClassifierResponse.t,
-          [ `AWS of DeleteDocumentClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDocumentClassifierResponse.error) Result.t Lwt.t
 val delete_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEndpointRequest.t ->
-        (DeleteEndpointResponse.t,
-          [ `AWS of DeleteEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEndpointResponse.t, DeleteEndpointResponse.error) Result.t
+          Lwt.t
 val delete_entity_recognizer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEntityRecognizerRequest.t ->
         (DeleteEntityRecognizerResponse.t,
-          [ `AWS of DeleteEntityRecognizerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEntityRecognizerResponse.error) Result.t Lwt.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyRequest.t ->
-        (DeleteResourcePolicyResponse.t,
-          [ `AWS of DeleteResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Lwt.t
 val describe_document_classification_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDocumentClassificationJobRequest.t ->
         (DescribeDocumentClassificationJobResponse.t,
-          [ `AWS of DescribeDocumentClassificationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDocumentClassificationJobResponse.error) Result.t Lwt.t
 val describe_document_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDocumentClassifierRequest.t ->
         (DescribeDocumentClassifierResponse.t,
-          [ `AWS of DescribeDocumentClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDocumentClassifierResponse.error) Result.t Lwt.t
 val describe_dominant_language_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDominantLanguageDetectionJobRequest.t ->
         (DescribeDominantLanguageDetectionJobResponse.t,
-          [ `AWS of DescribeDominantLanguageDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDominantLanguageDetectionJobResponse.error) Result.t Lwt.t
 val describe_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointRequest.t ->
-        (DescribeEndpointResponse.t,
-          [ `AWS of DescribeEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEndpointResponse.t, DescribeEndpointResponse.error) Result.t
+          Lwt.t
 val describe_entities_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEntitiesDetectionJobRequest.t ->
         (DescribeEntitiesDetectionJobResponse.t,
-          [ `AWS of DescribeEntitiesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEntitiesDetectionJobResponse.error) Result.t Lwt.t
 val describe_entity_recognizer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEntityRecognizerRequest.t ->
         (DescribeEntityRecognizerResponse.t,
-          [ `AWS of DescribeEntityRecognizerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEntityRecognizerResponse.error) Result.t Lwt.t
 val describe_events_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventsDetectionJobRequest.t ->
         (DescribeEventsDetectionJobResponse.t,
-          [ `AWS of DescribeEventsDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEventsDetectionJobResponse.error) Result.t Lwt.t
 val describe_key_phrases_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeKeyPhrasesDetectionJobRequest.t ->
         (DescribeKeyPhrasesDetectionJobResponse.t,
-          [ `AWS of DescribeKeyPhrasesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeKeyPhrasesDetectionJobResponse.error) Result.t Lwt.t
 val describe_pii_entities_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePiiEntitiesDetectionJobRequest.t ->
         (DescribePiiEntitiesDetectionJobResponse.t,
-          [ `AWS of DescribePiiEntitiesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePiiEntitiesDetectionJobResponse.error) Result.t Lwt.t
 val describe_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResourcePolicyRequest.t ->
         (DescribeResourcePolicyResponse.t,
-          [ `AWS of DescribeResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeResourcePolicyResponse.error) Result.t Lwt.t
 val describe_sentiment_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSentimentDetectionJobRequest.t ->
         (DescribeSentimentDetectionJobResponse.t,
-          [ `AWS of DescribeSentimentDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSentimentDetectionJobResponse.error) Result.t Lwt.t
 val describe_targeted_sentiment_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTargetedSentimentDetectionJobRequest.t ->
         (DescribeTargetedSentimentDetectionJobResponse.t,
-          [ `AWS of DescribeTargetedSentimentDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTargetedSentimentDetectionJobResponse.error) Result.t Lwt.t
 val describe_topics_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTopicsDetectionJobRequest.t ->
         (DescribeTopicsDetectionJobResponse.t,
-          [ `AWS of DescribeTopicsDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTopicsDetectionJobResponse.error) Result.t Lwt.t
 val detect_dominant_language :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectDominantLanguageRequest.t ->
         (DetectDominantLanguageResponse.t,
-          [ `AWS of DetectDominantLanguageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DetectDominantLanguageResponse.error) Result.t Lwt.t
 val detect_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectEntitiesRequest.t ->
-        (DetectEntitiesResponse.t,
-          [ `AWS of DetectEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectEntitiesResponse.t, DetectEntitiesResponse.error) Result.t
+          Lwt.t
 val detect_key_phrases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectKeyPhrasesRequest.t ->
-        (DetectKeyPhrasesResponse.t,
-          [ `AWS of DetectKeyPhrasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectKeyPhrasesResponse.t, DetectKeyPhrasesResponse.error) Result.t
+          Lwt.t
 val detect_pii_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectPiiEntitiesRequest.t ->
-        (DetectPiiEntitiesResponse.t,
-          [ `AWS of DetectPiiEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectPiiEntitiesResponse.t, DetectPiiEntitiesResponse.error)
+          Result.t Lwt.t
 val detect_sentiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectSentimentRequest.t ->
-        (DetectSentimentResponse.t,
-          [ `AWS of DetectSentimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectSentimentResponse.t, DetectSentimentResponse.error) Result.t
+          Lwt.t
 val detect_syntax :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectSyntaxRequest.t ->
-        (DetectSyntaxResponse.t,
-          [ `AWS of DetectSyntaxResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetectSyntaxResponse.t, DetectSyntaxResponse.error) Result.t Lwt.t
 val import_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportModelRequest.t ->
-        (ImportModelResponse.t,
-          [ `AWS of ImportModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportModelResponse.t, ImportModelResponse.error) Result.t Lwt.t
 val list_document_classification_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDocumentClassificationJobsRequest.t ->
         (ListDocumentClassificationJobsResponse.t,
-          [ `AWS of ListDocumentClassificationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDocumentClassificationJobsResponse.error) Result.t Lwt.t
 val list_document_classifier_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDocumentClassifierSummariesRequest.t ->
         (ListDocumentClassifierSummariesResponse.t,
-          [ `AWS of ListDocumentClassifierSummariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDocumentClassifierSummariesResponse.error) Result.t Lwt.t
 val list_document_classifiers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDocumentClassifiersRequest.t ->
         (ListDocumentClassifiersResponse.t,
-          [ `AWS of ListDocumentClassifiersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDocumentClassifiersResponse.error) Result.t Lwt.t
 val list_dominant_language_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDominantLanguageDetectionJobsRequest.t ->
         (ListDominantLanguageDetectionJobsResponse.t,
-          [ `AWS of ListDominantLanguageDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDominantLanguageDetectionJobsResponse.error) Result.t Lwt.t
 val list_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEndpointsRequest.t ->
-        (ListEndpointsResponse.t,
-          [ `AWS of ListEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEndpointsResponse.t, ListEndpointsResponse.error) Result.t Lwt.t
 val list_entities_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEntitiesDetectionJobsRequest.t ->
         (ListEntitiesDetectionJobsResponse.t,
-          [ `AWS of ListEntitiesDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEntitiesDetectionJobsResponse.error) Result.t Lwt.t
 val list_entity_recognizer_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEntityRecognizerSummariesRequest.t ->
         (ListEntityRecognizerSummariesResponse.t,
-          [ `AWS of ListEntityRecognizerSummariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEntityRecognizerSummariesResponse.error) Result.t Lwt.t
 val list_entity_recognizers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEntityRecognizersRequest.t ->
         (ListEntityRecognizersResponse.t,
-          [ `AWS of ListEntityRecognizersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEntityRecognizersResponse.error) Result.t Lwt.t
 val list_events_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventsDetectionJobsRequest.t ->
         (ListEventsDetectionJobsResponse.t,
-          [ `AWS of ListEventsDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEventsDetectionJobsResponse.error) Result.t Lwt.t
 val list_key_phrases_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKeyPhrasesDetectionJobsRequest.t ->
         (ListKeyPhrasesDetectionJobsResponse.t,
-          [ `AWS of ListKeyPhrasesDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListKeyPhrasesDetectionJobsResponse.error) Result.t Lwt.t
 val list_pii_entities_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPiiEntitiesDetectionJobsRequest.t ->
         (ListPiiEntitiesDetectionJobsResponse.t,
-          [ `AWS of ListPiiEntitiesDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPiiEntitiesDetectionJobsResponse.error) Result.t Lwt.t
 val list_sentiment_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSentimentDetectionJobsRequest.t ->
         (ListSentimentDetectionJobsResponse.t,
-          [ `AWS of ListSentimentDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSentimentDetectionJobsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_targeted_sentiment_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTargetedSentimentDetectionJobsRequest.t ->
         (ListTargetedSentimentDetectionJobsResponse.t,
-          [ `AWS of ListTargetedSentimentDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTargetedSentimentDetectionJobsResponse.error) Result.t Lwt.t
 val list_topics_detection_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTopicsDetectionJobsRequest.t ->
         (ListTopicsDetectionJobsResponse.t,
-          [ `AWS of ListTopicsDetectionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTopicsDetectionJobsResponse.error) Result.t Lwt.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyRequest.t ->
-        (PutResourcePolicyResponse.t,
-          [ `AWS of PutResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Lwt.t
 val start_document_classification_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDocumentClassificationJobRequest.t ->
         (StartDocumentClassificationJobResponse.t,
-          [ `AWS of StartDocumentClassificationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartDocumentClassificationJobResponse.error) Result.t Lwt.t
 val start_dominant_language_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDominantLanguageDetectionJobRequest.t ->
         (StartDominantLanguageDetectionJobResponse.t,
-          [ `AWS of StartDominantLanguageDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartDominantLanguageDetectionJobResponse.error) Result.t Lwt.t
 val start_entities_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartEntitiesDetectionJobRequest.t ->
         (StartEntitiesDetectionJobResponse.t,
-          [ `AWS of StartEntitiesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartEntitiesDetectionJobResponse.error) Result.t Lwt.t
 val start_events_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartEventsDetectionJobRequest.t ->
         (StartEventsDetectionJobResponse.t,
-          [ `AWS of StartEventsDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartEventsDetectionJobResponse.error) Result.t Lwt.t
 val start_key_phrases_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartKeyPhrasesDetectionJobRequest.t ->
         (StartKeyPhrasesDetectionJobResponse.t,
-          [ `AWS of StartKeyPhrasesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartKeyPhrasesDetectionJobResponse.error) Result.t Lwt.t
 val start_pii_entities_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartPiiEntitiesDetectionJobRequest.t ->
         (StartPiiEntitiesDetectionJobResponse.t,
-          [ `AWS of StartPiiEntitiesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartPiiEntitiesDetectionJobResponse.error) Result.t Lwt.t
 val start_sentiment_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSentimentDetectionJobRequest.t ->
         (StartSentimentDetectionJobResponse.t,
-          [ `AWS of StartSentimentDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartSentimentDetectionJobResponse.error) Result.t Lwt.t
 val start_targeted_sentiment_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTargetedSentimentDetectionJobRequest.t ->
         (StartTargetedSentimentDetectionJobResponse.t,
-          [ `AWS of StartTargetedSentimentDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartTargetedSentimentDetectionJobResponse.error) Result.t Lwt.t
 val start_topics_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTopicsDetectionJobRequest.t ->
         (StartTopicsDetectionJobResponse.t,
-          [ `AWS of StartTopicsDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartTopicsDetectionJobResponse.error) Result.t Lwt.t
 val stop_dominant_language_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopDominantLanguageDetectionJobRequest.t ->
         (StopDominantLanguageDetectionJobResponse.t,
-          [ `AWS of StopDominantLanguageDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopDominantLanguageDetectionJobResponse.error) Result.t Lwt.t
 val stop_entities_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopEntitiesDetectionJobRequest.t ->
         (StopEntitiesDetectionJobResponse.t,
-          [ `AWS of StopEntitiesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopEntitiesDetectionJobResponse.error) Result.t Lwt.t
 val stop_events_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopEventsDetectionJobRequest.t ->
         (StopEventsDetectionJobResponse.t,
-          [ `AWS of StopEventsDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopEventsDetectionJobResponse.error) Result.t Lwt.t
 val stop_key_phrases_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopKeyPhrasesDetectionJobRequest.t ->
         (StopKeyPhrasesDetectionJobResponse.t,
-          [ `AWS of StopKeyPhrasesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopKeyPhrasesDetectionJobResponse.error) Result.t Lwt.t
 val stop_pii_entities_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopPiiEntitiesDetectionJobRequest.t ->
         (StopPiiEntitiesDetectionJobResponse.t,
-          [ `AWS of StopPiiEntitiesDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopPiiEntitiesDetectionJobResponse.error) Result.t Lwt.t
 val stop_sentiment_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopSentimentDetectionJobRequest.t ->
         (StopSentimentDetectionJobResponse.t,
-          [ `AWS of StopSentimentDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopSentimentDetectionJobResponse.error) Result.t Lwt.t
 val stop_targeted_sentiment_detection_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopTargetedSentimentDetectionJobRequest.t ->
         (StopTargetedSentimentDetectionJobResponse.t,
-          [ `AWS of StopTargetedSentimentDetectionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopTargetedSentimentDetectionJobResponse.error) Result.t Lwt.t
 val stop_training_document_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopTrainingDocumentClassifierRequest.t ->
         (StopTrainingDocumentClassifierResponse.t,
-          [ `AWS of StopTrainingDocumentClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopTrainingDocumentClassifierResponse.error) Result.t Lwt.t
 val stop_training_entity_recognizer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopTrainingEntityRecognizerRequest.t ->
         (StopTrainingEntityRecognizerResponse.t,
-          [ `AWS of StopTrainingEntityRecognizerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopTrainingEntityRecognizerResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEndpointRequest.t ->
-        (UpdateEndpointResponse.t,
-          [ `AWS of UpdateEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEndpointResponse.t, UpdateEndpointResponse.error) Result.t
+          Lwt.t

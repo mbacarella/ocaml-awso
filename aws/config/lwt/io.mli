@@ -5,604 +5,496 @@ val batch_get_aggregate_resource_config :
     ?cfg:Awso.Cfg.t ->
       BatchGetAggregateResourceConfigRequest.t ->
         (BatchGetAggregateResourceConfigResponse.t,
-          [ `AWS of BatchGetAggregateResourceConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetAggregateResourceConfigResponse.error) Result.t Lwt.t
 val batch_get_resource_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetResourceConfigRequest.t ->
         (BatchGetResourceConfigResponse.t,
-          [ `AWS of BatchGetResourceConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetResourceConfigResponse.error) Result.t Lwt.t
 val delete_aggregation_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAggregationAuthorizationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAggregationAuthorizationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_config_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteConfigRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteConfigRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_configuration_aggregator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteConfigurationAggregatorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteConfigurationAggregatorRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_configuration_recorder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteConfigurationRecorderRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteConfigurationRecorderRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_conformance_pack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteConformancePackRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteConformancePackRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_delivery_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDeliveryChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDeliveryChannelRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_evaluation_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEvaluationResultsRequest.t ->
         (DeleteEvaluationResultsResponse.t,
-          [ `AWS of DeleteEvaluationResultsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEvaluationResultsResponse.error) Result.t Lwt.t
 val delete_organization_config_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteOrganizationConfigRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteOrganizationConfigRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_organization_conformance_pack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOrganizationConformancePackRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_pending_aggregation_request :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePendingAggregationRequestRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeletePendingAggregationRequestRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_remediation_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRemediationConfigurationRequest.t ->
         (DeleteRemediationConfigurationResponse.t,
-          [ `AWS of DeleteRemediationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRemediationConfigurationResponse.error) Result.t Lwt.t
 val delete_remediation_exceptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRemediationExceptionsRequest.t ->
         (DeleteRemediationExceptionsResponse.t,
-          [ `AWS of DeleteRemediationExceptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRemediationExceptionsResponse.error) Result.t Lwt.t
 val delete_resource_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteResourceConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteResourceConfigRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_retention_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRetentionConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteRetentionConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_stored_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStoredQueryRequest.t ->
-        (DeleteStoredQueryResponse.t,
-          [ `AWS of DeleteStoredQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteStoredQueryResponse.t, DeleteStoredQueryResponse.error)
+          Result.t Lwt.t
 val deliver_config_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeliverConfigSnapshotRequest.t ->
         (DeliverConfigSnapshotResponse.t,
-          [ `AWS of DeliverConfigSnapshotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeliverConfigSnapshotResponse.error) Result.t Lwt.t
 val describe_aggregate_compliance_by_config_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAggregateComplianceByConfigRulesRequest.t ->
         (DescribeAggregateComplianceByConfigRulesResponse.t,
-          [ `AWS of DescribeAggregateComplianceByConfigRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAggregateComplianceByConfigRulesResponse.error) Result.t
+          Lwt.t
 val describe_aggregate_compliance_by_conformance_packs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAggregateComplianceByConformancePacksRequest.t ->
         (DescribeAggregateComplianceByConformancePacksResponse.t,
-          [
-            `AWS of
-              DescribeAggregateComplianceByConformancePacksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAggregateComplianceByConformancePacksResponse.error)
+          Result.t Lwt.t
 val describe_aggregation_authorizations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAggregationAuthorizationsRequest.t ->
         (DescribeAggregationAuthorizationsResponse.t,
-          [ `AWS of DescribeAggregationAuthorizationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAggregationAuthorizationsResponse.error) Result.t Lwt.t
 val describe_compliance_by_config_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeComplianceByConfigRuleRequest.t ->
         (DescribeComplianceByConfigRuleResponse.t,
-          [ `AWS of DescribeComplianceByConfigRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeComplianceByConfigRuleResponse.error) Result.t Lwt.t
 val describe_compliance_by_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeComplianceByResourceRequest.t ->
         (DescribeComplianceByResourceResponse.t,
-          [ `AWS of DescribeComplianceByResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeComplianceByResourceResponse.error) Result.t Lwt.t
 val describe_config_rule_evaluation_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigRuleEvaluationStatusRequest.t ->
         (DescribeConfigRuleEvaluationStatusResponse.t,
-          [ `AWS of DescribeConfigRuleEvaluationStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConfigRuleEvaluationStatusResponse.error) Result.t Lwt.t
 val describe_config_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigRulesRequest.t ->
-        (DescribeConfigRulesResponse.t,
-          [ `AWS of DescribeConfigRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeConfigRulesResponse.t, DescribeConfigRulesResponse.error)
+          Result.t Lwt.t
 val describe_configuration_aggregator_sources_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationAggregatorSourcesStatusRequest.t ->
         (DescribeConfigurationAggregatorSourcesStatusResponse.t,
-          [
-            `AWS of
-              DescribeConfigurationAggregatorSourcesStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConfigurationAggregatorSourcesStatusResponse.error)
+          Result.t Lwt.t
 val describe_configuration_aggregators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationAggregatorsRequest.t ->
         (DescribeConfigurationAggregatorsResponse.t,
-          [ `AWS of DescribeConfigurationAggregatorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConfigurationAggregatorsResponse.error) Result.t Lwt.t
 val describe_configuration_recorder_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationRecorderStatusRequest.t ->
         (DescribeConfigurationRecorderStatusResponse.t,
-          [ `AWS of DescribeConfigurationRecorderStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConfigurationRecorderStatusResponse.error) Result.t Lwt.t
 val describe_configuration_recorders :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationRecordersRequest.t ->
         (DescribeConfigurationRecordersResponse.t,
-          [ `AWS of DescribeConfigurationRecordersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConfigurationRecordersResponse.error) Result.t Lwt.t
 val describe_conformance_pack_compliance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConformancePackComplianceRequest.t ->
         (DescribeConformancePackComplianceResponse.t,
-          [ `AWS of DescribeConformancePackComplianceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConformancePackComplianceResponse.error) Result.t Lwt.t
 val describe_conformance_pack_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConformancePackStatusRequest.t ->
         (DescribeConformancePackStatusResponse.t,
-          [ `AWS of DescribeConformancePackStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConformancePackStatusResponse.error) Result.t Lwt.t
 val describe_conformance_packs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConformancePacksRequest.t ->
         (DescribeConformancePacksResponse.t,
-          [ `AWS of DescribeConformancePacksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeConformancePacksResponse.error) Result.t Lwt.t
 val describe_delivery_channel_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeliveryChannelStatusRequest.t ->
         (DescribeDeliveryChannelStatusResponse.t,
-          [ `AWS of DescribeDeliveryChannelStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDeliveryChannelStatusResponse.error) Result.t Lwt.t
 val describe_delivery_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeliveryChannelsRequest.t ->
         (DescribeDeliveryChannelsResponse.t,
-          [ `AWS of DescribeDeliveryChannelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDeliveryChannelsResponse.error) Result.t Lwt.t
 val describe_organization_config_rule_statuses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationConfigRuleStatusesRequest.t ->
         (DescribeOrganizationConfigRuleStatusesResponse.t,
-          [ `AWS of DescribeOrganizationConfigRuleStatusesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOrganizationConfigRuleStatusesResponse.error) Result.t
+          Lwt.t
 val describe_organization_config_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationConfigRulesRequest.t ->
         (DescribeOrganizationConfigRulesResponse.t,
-          [ `AWS of DescribeOrganizationConfigRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOrganizationConfigRulesResponse.error) Result.t Lwt.t
 val describe_organization_conformance_pack_statuses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationConformancePackStatusesRequest.t ->
         (DescribeOrganizationConformancePackStatusesResponse.t,
-          [
-            `AWS of DescribeOrganizationConformancePackStatusesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOrganizationConformancePackStatusesResponse.error) Result.t
+          Lwt.t
 val describe_organization_conformance_packs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationConformancePacksRequest.t ->
         (DescribeOrganizationConformancePacksResponse.t,
-          [ `AWS of DescribeOrganizationConformancePacksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOrganizationConformancePacksResponse.error) Result.t Lwt.t
 val describe_pending_aggregation_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePendingAggregationRequestsRequest.t ->
         (DescribePendingAggregationRequestsResponse.t,
-          [ `AWS of DescribePendingAggregationRequestsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePendingAggregationRequestsResponse.error) Result.t Lwt.t
 val describe_remediation_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRemediationConfigurationsRequest.t ->
         (DescribeRemediationConfigurationsResponse.t,
-          [ `AWS of DescribeRemediationConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRemediationConfigurationsResponse.error) Result.t Lwt.t
 val describe_remediation_exceptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRemediationExceptionsRequest.t ->
         (DescribeRemediationExceptionsResponse.t,
-          [ `AWS of DescribeRemediationExceptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRemediationExceptionsResponse.error) Result.t Lwt.t
 val describe_remediation_execution_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRemediationExecutionStatusRequest.t ->
         (DescribeRemediationExecutionStatusResponse.t,
-          [ `AWS of DescribeRemediationExecutionStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRemediationExecutionStatusResponse.error) Result.t Lwt.t
 val describe_retention_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRetentionConfigurationsRequest.t ->
         (DescribeRetentionConfigurationsResponse.t,
-          [ `AWS of DescribeRetentionConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRetentionConfigurationsResponse.error) Result.t Lwt.t
 val get_aggregate_compliance_details_by_config_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAggregateComplianceDetailsByConfigRuleRequest.t ->
         (GetAggregateComplianceDetailsByConfigRuleResponse.t,
-          [ `AWS of GetAggregateComplianceDetailsByConfigRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAggregateComplianceDetailsByConfigRuleResponse.error) Result.t
+          Lwt.t
 val get_aggregate_config_rule_compliance_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAggregateConfigRuleComplianceSummaryRequest.t ->
         (GetAggregateConfigRuleComplianceSummaryResponse.t,
-          [ `AWS of GetAggregateConfigRuleComplianceSummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAggregateConfigRuleComplianceSummaryResponse.error) Result.t
+          Lwt.t
 val get_aggregate_conformance_pack_compliance_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAggregateConformancePackComplianceSummaryRequest.t ->
         (GetAggregateConformancePackComplianceSummaryResponse.t,
-          [
-            `AWS of
-              GetAggregateConformancePackComplianceSummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAggregateConformancePackComplianceSummaryResponse.error)
+          Result.t Lwt.t
 val get_aggregate_discovered_resource_counts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAggregateDiscoveredResourceCountsRequest.t ->
         (GetAggregateDiscoveredResourceCountsResponse.t,
-          [ `AWS of GetAggregateDiscoveredResourceCountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAggregateDiscoveredResourceCountsResponse.error) Result.t Lwt.t
 val get_aggregate_resource_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAggregateResourceConfigRequest.t ->
         (GetAggregateResourceConfigResponse.t,
-          [ `AWS of GetAggregateResourceConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAggregateResourceConfigResponse.error) Result.t Lwt.t
 val get_compliance_details_by_config_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComplianceDetailsByConfigRuleRequest.t ->
         (GetComplianceDetailsByConfigRuleResponse.t,
-          [ `AWS of GetComplianceDetailsByConfigRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetComplianceDetailsByConfigRuleResponse.error) Result.t Lwt.t
 val get_compliance_details_by_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComplianceDetailsByResourceRequest.t ->
         (GetComplianceDetailsByResourceResponse.t,
-          [ `AWS of GetComplianceDetailsByResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetComplianceDetailsByResourceResponse.error) Result.t Lwt.t
 val get_compliance_summary_by_config_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (GetComplianceSummaryByConfigRuleResponse.t,
-          [ `AWS of GetComplianceSummaryByConfigRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetComplianceSummaryByConfigRuleResponse.error) Result.t Lwt.t
 val get_compliance_summary_by_resource_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComplianceSummaryByResourceTypeRequest.t ->
         (GetComplianceSummaryByResourceTypeResponse.t,
-          [ `AWS of GetComplianceSummaryByResourceTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetComplianceSummaryByResourceTypeResponse.error) Result.t Lwt.t
 val get_conformance_pack_compliance_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConformancePackComplianceDetailsRequest.t ->
         (GetConformancePackComplianceDetailsResponse.t,
-          [ `AWS of GetConformancePackComplianceDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetConformancePackComplianceDetailsResponse.error) Result.t Lwt.t
 val get_conformance_pack_compliance_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConformancePackComplianceSummaryRequest.t ->
         (GetConformancePackComplianceSummaryResponse.t,
-          [ `AWS of GetConformancePackComplianceSummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetConformancePackComplianceSummaryResponse.error) Result.t Lwt.t
 val get_custom_rule_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCustomRulePolicyRequest.t ->
-        (GetCustomRulePolicyResponse.t,
-          [ `AWS of GetCustomRulePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCustomRulePolicyResponse.t, GetCustomRulePolicyResponse.error)
+          Result.t Lwt.t
 val get_discovered_resource_counts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDiscoveredResourceCountsRequest.t ->
         (GetDiscoveredResourceCountsResponse.t,
-          [ `AWS of GetDiscoveredResourceCountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDiscoveredResourceCountsResponse.error) Result.t Lwt.t
 val get_organization_config_rule_detailed_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOrganizationConfigRuleDetailedStatusRequest.t ->
         (GetOrganizationConfigRuleDetailedStatusResponse.t,
-          [ `AWS of GetOrganizationConfigRuleDetailedStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetOrganizationConfigRuleDetailedStatusResponse.error) Result.t
+          Lwt.t
 val get_organization_conformance_pack_detailed_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOrganizationConformancePackDetailedStatusRequest.t ->
         (GetOrganizationConformancePackDetailedStatusResponse.t,
-          [
-            `AWS of
-              GetOrganizationConformancePackDetailedStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetOrganizationConformancePackDetailedStatusResponse.error)
+          Result.t Lwt.t
 val get_organization_custom_rule_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOrganizationCustomRulePolicyRequest.t ->
         (GetOrganizationCustomRulePolicyResponse.t,
-          [ `AWS of GetOrganizationCustomRulePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetOrganizationCustomRulePolicyResponse.error) Result.t Lwt.t
 val get_resource_config_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceConfigHistoryRequest.t ->
         (GetResourceConfigHistoryResponse.t,
-          [ `AWS of GetResourceConfigHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResourceConfigHistoryResponse.error) Result.t Lwt.t
 val get_stored_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStoredQueryRequest.t ->
-        (GetStoredQueryResponse.t,
-          [ `AWS of GetStoredQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetStoredQueryResponse.t, GetStoredQueryResponse.error) Result.t
+          Lwt.t
 val list_aggregate_discovered_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAggregateDiscoveredResourcesRequest.t ->
         (ListAggregateDiscoveredResourcesResponse.t,
-          [ `AWS of ListAggregateDiscoveredResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAggregateDiscoveredResourcesResponse.error) Result.t Lwt.t
 val list_discovered_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDiscoveredResourcesRequest.t ->
         (ListDiscoveredResourcesResponse.t,
-          [ `AWS of ListDiscoveredResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDiscoveredResourcesResponse.error) Result.t Lwt.t
 val list_stored_queries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStoredQueriesRequest.t ->
-        (ListStoredQueriesResponse.t,
-          [ `AWS of ListStoredQueriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListStoredQueriesResponse.t, ListStoredQueriesResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_aggregation_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAggregationAuthorizationRequest.t ->
         (PutAggregationAuthorizationResponse.t,
-          [ `AWS of PutAggregationAuthorizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAggregationAuthorizationResponse.error) Result.t Lwt.t
 val put_config_rule :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutConfigRuleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutConfigRuleRequest.t -> (unit, unit) Result.t Lwt.t
 val put_configuration_aggregator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutConfigurationAggregatorRequest.t ->
         (PutConfigurationAggregatorResponse.t,
-          [ `AWS of PutConfigurationAggregatorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutConfigurationAggregatorResponse.error) Result.t Lwt.t
 val put_configuration_recorder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutConfigurationRecorderRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutConfigurationRecorderRequest.t -> (unit, unit) Result.t Lwt.t
 val put_conformance_pack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutConformancePackRequest.t ->
-        (PutConformancePackResponse.t,
-          [ `AWS of PutConformancePackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutConformancePackResponse.t, PutConformancePackResponse.error)
+          Result.t Lwt.t
 val put_delivery_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutDeliveryChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutDeliveryChannelRequest.t -> (unit, unit) Result.t Lwt.t
 val put_evaluations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutEvaluationsRequest.t ->
-        (PutEvaluationsResponse.t,
-          [ `AWS of PutEvaluationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutEvaluationsResponse.t, PutEvaluationsResponse.error) Result.t
+          Lwt.t
 val put_external_evaluation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutExternalEvaluationRequest.t ->
         (PutExternalEvaluationResponse.t,
-          [ `AWS of PutExternalEvaluationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutExternalEvaluationResponse.error) Result.t Lwt.t
 val put_organization_config_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutOrganizationConfigRuleRequest.t ->
         (PutOrganizationConfigRuleResponse.t,
-          [ `AWS of PutOrganizationConfigRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutOrganizationConfigRuleResponse.error) Result.t Lwt.t
 val put_organization_conformance_pack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutOrganizationConformancePackRequest.t ->
         (PutOrganizationConformancePackResponse.t,
-          [ `AWS of PutOrganizationConformancePackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutOrganizationConformancePackResponse.error) Result.t Lwt.t
 val put_remediation_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRemediationConfigurationsRequest.t ->
         (PutRemediationConfigurationsResponse.t,
-          [ `AWS of PutRemediationConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutRemediationConfigurationsResponse.error) Result.t Lwt.t
 val put_remediation_exceptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRemediationExceptionsRequest.t ->
         (PutRemediationExceptionsResponse.t,
-          [ `AWS of PutRemediationExceptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutRemediationExceptionsResponse.error) Result.t Lwt.t
 val put_resource_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutResourceConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutResourceConfigRequest.t -> (unit, unit) Result.t Lwt.t
 val put_retention_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRetentionConfigurationRequest.t ->
         (PutRetentionConfigurationResponse.t,
-          [ `AWS of PutRetentionConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutRetentionConfigurationResponse.error) Result.t Lwt.t
 val put_stored_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutStoredQueryRequest.t ->
-        (PutStoredQueryResponse.t,
-          [ `AWS of PutStoredQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutStoredQueryResponse.t, PutStoredQueryResponse.error) Result.t
+          Lwt.t
 val select_aggregate_resource_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SelectAggregateResourceConfigRequest.t ->
         (SelectAggregateResourceConfigResponse.t,
-          [ `AWS of SelectAggregateResourceConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SelectAggregateResourceConfigResponse.error) Result.t Lwt.t
 val select_resource_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SelectResourceConfigRequest.t ->
-        (SelectResourceConfigResponse.t,
-          [ `AWS of SelectResourceConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SelectResourceConfigResponse.t, SelectResourceConfigResponse.error)
+          Result.t Lwt.t
 val start_config_rules_evaluation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartConfigRulesEvaluationRequest.t ->
         (StartConfigRulesEvaluationResponse.t,
-          [ `AWS of StartConfigRulesEvaluationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartConfigRulesEvaluationResponse.error) Result.t Lwt.t
 val start_configuration_recorder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StartConfigurationRecorderRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StartConfigurationRecorderRequest.t -> (unit, unit) Result.t Lwt.t
 val start_remediation_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartRemediationExecutionRequest.t ->
         (StartRemediationExecutionResponse.t,
-          [ `AWS of StartRemediationExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartRemediationExecutionResponse.error) Result.t Lwt.t
 val stop_configuration_recorder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StopConfigurationRecorderRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StopConfigurationRecorderRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t

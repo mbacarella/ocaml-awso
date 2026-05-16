@@ -287,184 +287,192 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "ServiceQuotasV20190624.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AssociateServiceQuotaTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateServiceQuotaTemplateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AssociateServiceQuotaTemplateResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateServiceQuotaTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateServiceQuotaTemplateResponse.error_of_json))
   | DeleteServiceQuotaIncreaseRequestFromTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DeleteServiceQuotaIncreaseRequestFromTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DeleteServiceQuotaIncreaseRequestFromTemplateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (DeleteServiceQuotaIncreaseRequestFromTemplateResponse.of_json
-                json))
+                DeleteServiceQuotaIncreaseRequestFromTemplateResponse.error_of_json))
   | DisassociateServiceQuotaTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateServiceQuotaTemplateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DisassociateServiceQuotaTemplateResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateServiceQuotaTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateServiceQuotaTemplateResponse.error_of_json))
   | GetAWSDefaultServiceQuota ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAWSDefaultServiceQuotaResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAWSDefaultServiceQuotaResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAWSDefaultServiceQuotaResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAWSDefaultServiceQuotaResponse.error_of_json))
   | GetAssociationForServiceQuotaTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAssociationForServiceQuotaTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetAssociationForServiceQuotaTemplateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAssociationForServiceQuotaTemplateResponse.of_json json))
+                GetAssociationForServiceQuotaTemplateResponse.error_of_json))
   | GetRequestedServiceQuotaChange ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRequestedServiceQuotaChangeResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRequestedServiceQuotaChangeResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRequestedServiceQuotaChangeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetRequestedServiceQuotaChangeResponse.error_of_json))
   | GetServiceQuota ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServiceQuotaResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetServiceQuotaResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetServiceQuotaResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetServiceQuotaResponse.error_of_json))
   | GetServiceQuotaIncreaseRequestFromTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetServiceQuotaIncreaseRequestFromTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetServiceQuotaIncreaseRequestFromTemplateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (GetServiceQuotaIncreaseRequestFromTemplateResponse.of_json json))
+                GetServiceQuotaIncreaseRequestFromTemplateResponse.error_of_json))
   | ListAWSDefaultServiceQuotas ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAWSDefaultServiceQuotasResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAWSDefaultServiceQuotasResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAWSDefaultServiceQuotasResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAWSDefaultServiceQuotasResponse.error_of_json))
   | ListRequestedServiceQuotaChangeHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRequestedServiceQuotaChangeHistoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListRequestedServiceQuotaChangeHistoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListRequestedServiceQuotaChangeHistoryResponse.of_json json))
+                ListRequestedServiceQuotaChangeHistoryResponse.error_of_json))
   | ListRequestedServiceQuotaChangeHistoryByQuota ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (ListRequestedServiceQuotaChangeHistoryByQuotaResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListRequestedServiceQuotaChangeHistoryByQuotaResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (ListRequestedServiceQuotaChangeHistoryByQuotaResponse.of_json
-                json))
+                ListRequestedServiceQuotaChangeHistoryByQuotaResponse.error_of_json))
   | ListServiceQuotaIncreaseRequestsInTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListServiceQuotaIncreaseRequestsInTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListServiceQuotaIncreaseRequestsInTemplateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (ListServiceQuotaIncreaseRequestsInTemplateResponse.of_json json))
+                ListServiceQuotaIncreaseRequestsInTemplateResponse.error_of_json))
   | ListServiceQuotas ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListServiceQuotasResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListServiceQuotasResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListServiceQuotasResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListServiceQuotasResponse.error_of_json))
   | ListServices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListServicesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListServicesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListServicesResponse.of_json json)
+      else Error (parse_aws_error (Some ListServicesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutServiceQuotaIncreaseRequestIntoTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutServiceQuotaIncreaseRequestIntoTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                PutServiceQuotaIncreaseRequestIntoTemplateResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (PutServiceQuotaIncreaseRequestIntoTemplateResponse.of_json json))
+                PutServiceQuotaIncreaseRequestIntoTemplateResponse.error_of_json))
   | RequestServiceQuotaIncrease ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RequestServiceQuotaIncreaseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RequestServiceQuotaIncreaseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RequestServiceQuotaIncreaseResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RequestServiceQuotaIncreaseResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))

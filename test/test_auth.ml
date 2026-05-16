@@ -22,16 +22,17 @@ type test =
   }
 
 let test_canonical_request { name; req_file; creq_file } =
-  if List.mem
-       ~equal:String.equal
-       [ "get-vanilla-with-session-token"
-       ; "get-vanilla-query-order-encoded"
-       ; "get-header-value-trim"
-       ; "get-header-value-multiline"
-       ; "post-vanilla-query-space"
-       ; "post-vanilla-query-nonunreserved"
-       ]
-       name
+  if
+    List.mem
+      ~equal:String.equal
+      [ "get-vanilla-with-session-token"
+      ; "get-vanilla-query-order-encoded"
+      ; "get-header-value-trim"
+      ; "get-header-value-multiline"
+      ; "post-vanilla-query-space"
+      ; "post-vanilla-query-nonunreserved"
+      ]
+      name
   then skip ~name "test is not supported yet, see comment at top of test/test_auth.ml"
   else (
     let request, body = Aws4_testsuite.Req.of_file req_file in

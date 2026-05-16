@@ -866,533 +866,560 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "WorkMailService.UpdateResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AssociateDelegateToResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateDelegateToResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AssociateDelegateToResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateDelegateToResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateDelegateToResourceResponse.error_of_json))
   | AssociateMemberToGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateMemberToGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AssociateMemberToGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateMemberToGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateMemberToGroupResponse.error_of_json))
   | CancelMailboxExportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CancelMailboxExportJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CancelMailboxExportJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelMailboxExportJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CancelMailboxExportJobResponse.error_of_json))
   | CreateAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAliasResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateAliasResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAliasResponse.of_json json)
+      else Error (parse_aws_error (Some CreateAliasResponse.error_of_json))
   | CreateGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGroupResponse.of_json json)
+      else Error (parse_aws_error (Some CreateGroupResponse.error_of_json))
   | CreateMobileDeviceAccessRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateMobileDeviceAccessRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateMobileDeviceAccessRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMobileDeviceAccessRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMobileDeviceAccessRuleResponse.error_of_json))
   | CreateOrganization ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateOrganizationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateOrganizationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateOrganizationResponse.error_of_json))
   | CreateResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateResourceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateResourceResponse.error_of_json))
   | CreateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateUserResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateUserResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateUserResponse.of_json json)
+      else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
   | DeleteAccessControlRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAccessControlRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteAccessControlRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAccessControlRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAccessControlRuleResponse.error_of_json))
   | DeleteAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAliasResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteAliasResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAliasResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteAliasResponse.error_of_json))
   | DeleteEmailMonitoringConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteEmailMonitoringConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteEmailMonitoringConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteEmailMonitoringConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteEmailMonitoringConfigurationResponse.error_of_json))
   | DeleteGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteGroupResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteGroupResponse.error_of_json))
   | DeleteMailboxPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteMailboxPermissionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteMailboxPermissionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMailboxPermissionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMailboxPermissionsResponse.error_of_json))
   | DeleteMobileDeviceAccessOverride ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteMobileDeviceAccessOverrideResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteMobileDeviceAccessOverrideResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMobileDeviceAccessOverrideResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMobileDeviceAccessOverrideResponse.error_of_json))
   | DeleteMobileDeviceAccessRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteMobileDeviceAccessRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteMobileDeviceAccessRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMobileDeviceAccessRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMobileDeviceAccessRuleResponse.error_of_json))
   | DeleteOrganization ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteOrganizationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteOrganizationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteOrganizationResponse.error_of_json))
   | DeleteResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteResourceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteResourceResponse.error_of_json))
   | DeleteRetentionPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRetentionPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRetentionPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRetentionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteRetentionPolicyResponse.error_of_json))
   | DeleteUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteUserResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteUserResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteUserResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteUserResponse.error_of_json))
   | DeregisterFromWorkMail ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeregisterFromWorkMailResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeregisterFromWorkMailResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeregisterFromWorkMailResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterFromWorkMailResponse.error_of_json))
   | DeregisterMailDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeregisterMailDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeregisterMailDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeregisterMailDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeregisterMailDomainResponse.error_of_json))
   | DescribeEmailMonitoringConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeEmailMonitoringConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeEmailMonitoringConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeEmailMonitoringConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEmailMonitoringConfigurationResponse.error_of_json))
   | DescribeGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeGroupResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeGroupResponse.error_of_json))
   | DescribeInboundDmarcSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeInboundDmarcSettingsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeInboundDmarcSettingsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInboundDmarcSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInboundDmarcSettingsResponse.error_of_json))
   | DescribeMailboxExportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeMailboxExportJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeMailboxExportJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMailboxExportJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMailboxExportJobResponse.error_of_json))
   | DescribeOrganization ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeOrganizationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeOrganizationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeOrganizationResponse.error_of_json))
   | DescribeResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeResourceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeResourceResponse.error_of_json))
   | DescribeUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeUserResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeUserResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeUserResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeUserResponse.error_of_json))
   | DisassociateDelegateFromResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateDelegateFromResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DisassociateDelegateFromResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateDelegateFromResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateDelegateFromResourceResponse.error_of_json))
   | DisassociateMemberFromGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateMemberFromGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DisassociateMemberFromGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateMemberFromGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateMemberFromGroupResponse.error_of_json))
   | GetAccessControlEffect ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAccessControlEffectResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAccessControlEffectResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAccessControlEffectResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAccessControlEffectResponse.error_of_json))
   | GetDefaultRetentionPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDefaultRetentionPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDefaultRetentionPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDefaultRetentionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDefaultRetentionPolicyResponse.error_of_json))
   | GetMailDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMailDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetMailDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMailDomainResponse.of_json json)
+      else Error (parse_aws_error (Some GetMailDomainResponse.error_of_json))
   | GetMailboxDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMailboxDetailsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetMailboxDetailsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMailboxDetailsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetMailboxDetailsResponse.error_of_json))
   | GetMobileDeviceAccessEffect ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMobileDeviceAccessEffectResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetMobileDeviceAccessEffectResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMobileDeviceAccessEffectResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetMobileDeviceAccessEffectResponse.error_of_json))
   | GetMobileDeviceAccessOverride ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMobileDeviceAccessOverrideResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetMobileDeviceAccessOverrideResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMobileDeviceAccessOverrideResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetMobileDeviceAccessOverrideResponse.error_of_json))
   | ListAccessControlRules ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAccessControlRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAccessControlRulesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccessControlRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAccessControlRulesResponse.error_of_json))
   | ListAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAliasesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAliasesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAliasesResponse.of_json json)
+      else Error (parse_aws_error (Some ListAliasesResponse.error_of_json))
   | ListGroupMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGroupMembersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListGroupMembersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGroupMembersResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListGroupMembersResponse.error_of_json))
   | ListGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGroupsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListGroupsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGroupsResponse.of_json json)
+      else Error (parse_aws_error (Some ListGroupsResponse.error_of_json))
   | ListMailDomains ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMailDomainsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListMailDomainsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMailDomainsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListMailDomainsResponse.error_of_json))
   | ListMailboxExportJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMailboxExportJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListMailboxExportJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMailboxExportJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListMailboxExportJobsResponse.error_of_json))
   | ListMailboxPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMailboxPermissionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListMailboxPermissionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMailboxPermissionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMailboxPermissionsResponse.error_of_json))
   | ListMobileDeviceAccessOverrides ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMobileDeviceAccessOverridesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListMobileDeviceAccessOverridesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMobileDeviceAccessOverridesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMobileDeviceAccessOverridesResponse.error_of_json))
   | ListMobileDeviceAccessRules ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMobileDeviceAccessRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListMobileDeviceAccessRulesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMobileDeviceAccessRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMobileDeviceAccessRulesResponse.error_of_json))
   | ListOrganizations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListOrganizationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListOrganizationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListOrganizationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListOrganizationsResponse.error_of_json))
   | ListResourceDelegates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListResourceDelegatesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListResourceDelegatesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourceDelegatesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListResourceDelegatesResponse.error_of_json))
   | ListResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListResourcesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListResourcesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourcesResponse.of_json json)
+      else Error (parse_aws_error (Some ListResourcesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListUsers ->
-      (match resp with
-       | Error err -> handle_error err (Some ListUsersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListUsersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListUsersResponse.of_json json)
+      else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
   | PutAccessControlRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutAccessControlRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutAccessControlRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutAccessControlRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutAccessControlRuleResponse.error_of_json))
   | PutEmailMonitoringConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutEmailMonitoringConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutEmailMonitoringConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutEmailMonitoringConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutEmailMonitoringConfigurationResponse.error_of_json))
   | PutInboundDmarcSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutInboundDmarcSettingsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutInboundDmarcSettingsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutInboundDmarcSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutInboundDmarcSettingsResponse.error_of_json))
   | PutMailboxPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutMailboxPermissionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutMailboxPermissionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutMailboxPermissionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutMailboxPermissionsResponse.error_of_json))
   | PutMobileDeviceAccessOverride ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutMobileDeviceAccessOverrideResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutMobileDeviceAccessOverrideResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutMobileDeviceAccessOverrideResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutMobileDeviceAccessOverrideResponse.error_of_json))
   | PutRetentionPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutRetentionPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutRetentionPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRetentionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutRetentionPolicyResponse.error_of_json))
   | RegisterMailDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterMailDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RegisterMailDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterMailDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some RegisterMailDomainResponse.error_of_json))
   | RegisterToWorkMail ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterToWorkMailResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RegisterToWorkMailResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterToWorkMailResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some RegisterToWorkMailResponse.error_of_json))
   | ResetPassword ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ResetPasswordResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ResetPasswordResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ResetPasswordResponse.of_json json)
+      else Error (parse_aws_error (Some ResetPasswordResponse.error_of_json))
   | StartMailboxExportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartMailboxExportJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartMailboxExportJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMailboxExportJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartMailboxExportJobResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateDefaultMailDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDefaultMailDomainResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateDefaultMailDomainResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDefaultMailDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDefaultMailDomainResponse.error_of_json))
   | UpdateMailboxQuota ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateMailboxQuotaResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateMailboxQuotaResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMailboxQuotaResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateMailboxQuotaResponse.error_of_json))
   | UpdateMobileDeviceAccessRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateMobileDeviceAccessRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateMobileDeviceAccessRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMobileDeviceAccessRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMobileDeviceAccessRuleResponse.error_of_json))
   | UpdatePrimaryEmailAddress ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdatePrimaryEmailAddressResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdatePrimaryEmailAddressResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdatePrimaryEmailAddressResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePrimaryEmailAddressResponse.error_of_json))
   | UpdateResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateResourceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateResourceResponse.error_of_json))

@@ -4,95 +4,79 @@ val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResponse.t,
-          [ `AWS of CreateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t Lwt.t
 val create_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationVersionRequest.t ->
         (CreateApplicationVersionResponse.t,
-          [ `AWS of CreateApplicationVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateApplicationVersionResponse.error) Result.t Lwt.t
 val create_cloud_formation_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCloudFormationChangeSetRequest.t ->
         (CreateCloudFormationChangeSetResponse.t,
-          [ `AWS of CreateCloudFormationChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCloudFormationChangeSetResponse.error) Result.t Lwt.t
 val create_cloud_formation_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCloudFormationTemplateRequest.t ->
         (CreateCloudFormationTemplateResponse.t,
-          [ `AWS of CreateCloudFormationTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCloudFormationTemplateResponse.error) Result.t Lwt.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteApplicationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteApplicationRequest.t -> (unit, unit) Result.t Lwt.t
 val get_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApplicationRequest.t ->
-        (GetApplicationResponse.t,
-          [ `AWS of GetApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetApplicationResponse.t, GetApplicationResponse.error) Result.t
+          Lwt.t
 val get_application_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApplicationPolicyRequest.t ->
-        (GetApplicationPolicyResponse.t,
-          [ `AWS of GetApplicationPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetApplicationPolicyResponse.t, GetApplicationPolicyResponse.error)
+          Result.t Lwt.t
 val get_cloud_formation_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCloudFormationTemplateRequest.t ->
         (GetCloudFormationTemplateResponse.t,
-          [ `AWS of GetCloudFormationTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCloudFormationTemplateResponse.error) Result.t Lwt.t
 val list_application_dependencies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationDependenciesRequest.t ->
         (ListApplicationDependenciesResponse.t,
-          [ `AWS of ListApplicationDependenciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListApplicationDependenciesResponse.error) Result.t Lwt.t
 val list_application_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationVersionsRequest.t ->
         (ListApplicationVersionsResponse.t,
-          [ `AWS of ListApplicationVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListApplicationVersionsResponse.error) Result.t Lwt.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationsRequest.t ->
-        (ListApplicationsResponse.t,
-          [ `AWS of ListApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListApplicationsResponse.t, ListApplicationsResponse.error) Result.t
+          Lwt.t
 val put_application_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutApplicationPolicyRequest.t ->
-        (PutApplicationPolicyResponse.t,
-          [ `AWS of PutApplicationPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutApplicationPolicyResponse.t, PutApplicationPolicyResponse.error)
+          Result.t Lwt.t
 val unshare_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UnshareApplicationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UnshareApplicationRequest.t -> (unit, unit) Result.t Lwt.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationRequest.t ->
-        (UpdateApplicationResponse.t,
-          [ `AWS of UpdateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateApplicationResponse.t, UpdateApplicationResponse.error)
+          Result.t Lwt.t

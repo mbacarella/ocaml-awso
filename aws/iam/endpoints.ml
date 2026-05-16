@@ -2612,723 +2612,818 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
-  | AddClientIDToOpenIDConnectProvider -> Ok ()
-  | AddRoleToInstanceProfile -> Ok ()
-  | AddUserToGroup -> Ok ()
-  | AttachGroupPolicy -> Ok ()
-  | AttachRolePolicy -> Ok ()
-  | AttachUserPolicy -> Ok ()
-  | ChangePassword -> Ok ()
+  | AddClientIDToOpenIDConnectProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AddRoleToInstanceProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AddUserToGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AttachGroupPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AttachRolePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AttachUserPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | ChangePassword ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateAccessKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAccessKeyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateAccessKeyResponse.of_xml xml))
-  | CreateAccountAlias -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateAccessKeyResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some CreateAccessKeyResponse.error_of_xml))
+  | CreateAccountAlias ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGroupResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateGroupResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateGroupResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateGroupResponse.error_of_xml))
   | CreateInstanceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateInstanceProfileResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateInstanceProfileResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateInstanceProfileResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateInstanceProfileResponse.error_of_xml))
   | CreateLoginProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLoginProfileResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateLoginProfileResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateLoginProfileResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateLoginProfileResponse.error_of_xml))
   | CreateOpenIDConnectProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateOpenIDConnectProviderResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateOpenIDConnectProviderResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateOpenIDConnectProviderResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateOpenIDConnectProviderResponse.error_of_xml))
   | CreatePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreatePolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreatePolicyResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreatePolicyResponse.error_of_xml))
   | CreatePolicyVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePolicyVersionResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreatePolicyVersionResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreatePolicyVersionResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreatePolicyVersionResponse.error_of_xml))
   | CreateRole ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateRoleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateRoleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateRoleResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateRoleResponse.error_of_xml))
   | CreateSAMLProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSAMLProviderResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateSAMLProviderResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateSAMLProviderResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateSAMLProviderResponse.error_of_xml))
   | CreateServiceLinkedRole ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateServiceLinkedRoleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateServiceLinkedRoleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateServiceLinkedRoleResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateServiceLinkedRoleResponse.error_of_xml))
   | CreateServiceSpecificCredential ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateServiceSpecificCredentialResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateServiceSpecificCredentialResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateServiceSpecificCredentialResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateServiceSpecificCredentialResponse.error_of_xml))
   | CreateUser ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateUserResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateUserResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateUserResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateUserResponse.error_of_xml))
   | CreateVirtualMFADevice ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateVirtualMFADeviceResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateVirtualMFADeviceResponse.of_xml xml))
-  | DeactivateMFADevice -> Ok ()
-  | DeleteAccessKey -> Ok ()
-  | DeleteAccountAlias -> Ok ()
-  | DeleteAccountPasswordPolicy -> Ok ()
-  | DeleteGroup -> Ok ()
-  | DeleteGroupPolicy -> Ok ()
-  | DeleteInstanceProfile -> Ok ()
-  | DeleteLoginProfile -> Ok ()
-  | DeleteOpenIDConnectProvider -> Ok ()
-  | DeletePolicy -> Ok ()
-  | DeletePolicyVersion -> Ok ()
-  | DeleteRole -> Ok ()
-  | DeleteRolePermissionsBoundary -> Ok ()
-  | DeleteRolePolicy -> Ok ()
-  | DeleteSAMLProvider -> Ok ()
-  | DeleteSSHPublicKey -> Ok ()
-  | DeleteServerCertificate -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateVirtualMFADeviceResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateVirtualMFADeviceResponse.error_of_xml))
+  | DeactivateMFADevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAccessKey ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAccountAlias ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAccountPasswordPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteGroup -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteGroupPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteInstanceProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLoginProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteOpenIDConnectProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePolicyVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRole -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRolePermissionsBoundary ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRolePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSAMLProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSSHPublicKey ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteServerCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteServiceLinkedRole ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteServiceLinkedRoleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteServiceLinkedRoleResponse.of_xml xml))
-  | DeleteServiceSpecificCredential -> Ok ()
-  | DeleteSigningCertificate -> Ok ()
-  | DeleteUser -> Ok ()
-  | DeleteUserPermissionsBoundary -> Ok ()
-  | DeleteUserPolicy -> Ok ()
-  | DeleteVirtualMFADevice -> Ok ()
-  | DetachGroupPolicy -> Ok ()
-  | DetachRolePolicy -> Ok ()
-  | DetachUserPolicy -> Ok ()
-  | EnableMFADevice -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteServiceLinkedRoleResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteServiceLinkedRoleResponse.error_of_xml))
+  | DeleteServiceSpecificCredential ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSigningCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteUser -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteUserPermissionsBoundary ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteUserPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVirtualMFADevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DetachGroupPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DetachRolePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DetachUserPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | EnableMFADevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GenerateCredentialReport ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateCredentialReportResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GenerateCredentialReportResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GenerateCredentialReportResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateCredentialReportResponse.error_of_xml))
   | GenerateOrganizationsAccessReport ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateOrganizationsAccessReportResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GenerateOrganizationsAccessReportResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GenerateOrganizationsAccessReportResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateOrganizationsAccessReportResponse.error_of_xml))
   | GenerateServiceLastAccessedDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateServiceLastAccessedDetailsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GenerateServiceLastAccessedDetailsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GenerateServiceLastAccessedDetailsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateServiceLastAccessedDetailsResponse.error_of_xml))
   | GetAccessKeyLastUsed ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccessKeyLastUsedResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetAccessKeyLastUsedResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetAccessKeyLastUsedResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetAccessKeyLastUsedResponse.error_of_xml))
   | GetAccountAuthorizationDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAccountAuthorizationDetailsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetAccountAuthorizationDetailsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetAccountAuthorizationDetailsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAccountAuthorizationDetailsResponse.error_of_xml))
   | GetAccountPasswordPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAccountPasswordPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetAccountPasswordPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetAccountPasswordPolicyResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAccountPasswordPolicyResponse.error_of_xml))
   | GetAccountSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccountSummaryResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetAccountSummaryResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetAccountSummaryResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetAccountSummaryResponse.error_of_xml))
   | GetContextKeysForCustomPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetContextKeysForPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetContextKeysForPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetContextKeysForPolicyResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetContextKeysForPolicyResponse.error_of_xml))
   | GetContextKeysForPrincipalPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetContextKeysForPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetContextKeysForPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetContextKeysForPolicyResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetContextKeysForPolicyResponse.error_of_xml))
   | GetCredentialReport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCredentialReportResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetCredentialReportResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetCredentialReportResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetCredentialReportResponse.error_of_xml))
   | GetGroup ->
-      (match resp with
-       | Error err -> handle_error err (Some GetGroupResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetGroupResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetGroupResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetGroupResponse.error_of_xml))
   | GetGroupPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetGroupPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetGroupPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetGroupPolicyResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetGroupPolicyResponse.error_of_xml))
   | GetInstanceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetInstanceProfileResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetInstanceProfileResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetInstanceProfileResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetInstanceProfileResponse.error_of_xml))
   | GetLoginProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLoginProfileResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetLoginProfileResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetLoginProfileResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetLoginProfileResponse.error_of_xml))
   | GetOpenIDConnectProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetOpenIDConnectProviderResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetOpenIDConnectProviderResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetOpenIDConnectProviderResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetOpenIDConnectProviderResponse.error_of_xml))
   | GetOrganizationsAccessReport ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetOrganizationsAccessReportResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetOrganizationsAccessReportResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetOrganizationsAccessReportResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetOrganizationsAccessReportResponse.error_of_xml))
   | GetPolicy ->
-      (match resp with
-       | Error err -> handle_error err (Some GetPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetPolicyResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetPolicyResponse.error_of_xml))
   | GetPolicyVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPolicyVersionResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetPolicyVersionResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetPolicyVersionResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetPolicyVersionResponse.error_of_xml))
   | GetRole ->
-      (match resp with
-       | Error err -> handle_error err (Some GetRoleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetRoleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetRoleResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetRoleResponse.error_of_xml))
   | GetRolePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRolePolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetRolePolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetRolePolicyResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetRolePolicyResponse.error_of_xml))
   | GetSAMLProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSAMLProviderResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetSAMLProviderResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetSAMLProviderResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetSAMLProviderResponse.error_of_xml))
   | GetSSHPublicKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSSHPublicKeyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetSSHPublicKeyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetSSHPublicKeyResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetSSHPublicKeyResponse.error_of_xml))
   | GetServerCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServerCertificateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetServerCertificateResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetServerCertificateResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetServerCertificateResponse.error_of_xml))
   | GetServiceLastAccessedDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetServiceLastAccessedDetailsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetServiceLastAccessedDetailsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetServiceLastAccessedDetailsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetServiceLastAccessedDetailsResponse.error_of_xml))
   | GetServiceLastAccessedDetailsWithEntities ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetServiceLastAccessedDetailsWithEntitiesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetServiceLastAccessedDetailsWithEntitiesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetServiceLastAccessedDetailsWithEntitiesResponse.of_xml xml))
+                GetServiceLastAccessedDetailsWithEntitiesResponse.error_of_xml))
   | GetServiceLinkedRoleDeletionStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetServiceLinkedRoleDeletionStatusResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetServiceLinkedRoleDeletionStatusResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetServiceLinkedRoleDeletionStatusResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetServiceLinkedRoleDeletionStatusResponse.error_of_xml))
   | GetUser ->
-      (match resp with
-       | Error err -> handle_error err (Some GetUserResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetUserResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetUserResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetUserResponse.error_of_xml))
   | GetUserPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUserPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetUserPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetUserPolicyResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetUserPolicyResponse.error_of_xml))
   | ListAccessKeys ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAccessKeysResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListAccessKeysResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListAccessKeysResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListAccessKeysResponse.error_of_xml))
   | ListAccountAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAccountAliasesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListAccountAliasesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListAccountAliasesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListAccountAliasesResponse.error_of_xml))
   | ListAttachedGroupPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAttachedGroupPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListAttachedGroupPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListAttachedGroupPoliciesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAttachedGroupPoliciesResponse.error_of_xml))
   | ListAttachedRolePolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAttachedRolePoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListAttachedRolePoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListAttachedRolePoliciesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAttachedRolePoliciesResponse.error_of_xml))
   | ListAttachedUserPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAttachedUserPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListAttachedUserPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListAttachedUserPoliciesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAttachedUserPoliciesResponse.error_of_xml))
   | ListEntitiesForPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListEntitiesForPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListEntitiesForPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListEntitiesForPolicyResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListEntitiesForPolicyResponse.error_of_xml))
   | ListGroupPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGroupPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListGroupPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListGroupPoliciesResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListGroupPoliciesResponse.error_of_xml))
   | ListGroups ->
-      (match resp with
-       | Error err -> handle_error err (Some ListGroupsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListGroupsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListGroupsResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListGroupsResponse.error_of_xml))
   | ListGroupsForUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGroupsForUserResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListGroupsForUserResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListGroupsForUserResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListGroupsForUserResponse.error_of_xml))
   | ListInstanceProfileTags ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListInstanceProfileTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListInstanceProfileTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListInstanceProfileTagsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListInstanceProfileTagsResponse.error_of_xml))
   | ListInstanceProfiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListInstanceProfilesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListInstanceProfilesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListInstanceProfilesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListInstanceProfilesResponse.error_of_xml))
   | ListInstanceProfilesForRole ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListInstanceProfilesForRoleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListInstanceProfilesForRoleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListInstanceProfilesForRoleResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListInstanceProfilesForRoleResponse.error_of_xml))
   | ListMFADeviceTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMFADeviceTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListMFADeviceTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListMFADeviceTagsResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListMFADeviceTagsResponse.error_of_xml))
   | ListMFADevices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMFADevicesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListMFADevicesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListMFADevicesResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListMFADevicesResponse.error_of_xml))
   | ListOpenIDConnectProviderTags ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListOpenIDConnectProviderTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListOpenIDConnectProviderTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListOpenIDConnectProviderTagsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListOpenIDConnectProviderTagsResponse.error_of_xml))
   | ListOpenIDConnectProviders ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListOpenIDConnectProvidersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListOpenIDConnectProvidersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListOpenIDConnectProvidersResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListOpenIDConnectProvidersResponse.error_of_xml))
   | ListPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPoliciesResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListPoliciesResponse.error_of_xml))
   | ListPoliciesGrantingServiceAccess ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPoliciesGrantingServiceAccessResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPoliciesGrantingServiceAccessResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPoliciesGrantingServiceAccessResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPoliciesGrantingServiceAccessResponse.error_of_xml))
   | ListPolicyTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPolicyTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPolicyTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPolicyTagsResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListPolicyTagsResponse.error_of_xml))
   | ListPolicyVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPolicyVersionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPolicyVersionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPolicyVersionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListPolicyVersionsResponse.error_of_xml))
   | ListRolePolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRolePoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListRolePoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListRolePoliciesResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListRolePoliciesResponse.error_of_xml))
   | ListRoleTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRoleTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListRoleTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListRoleTagsResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListRoleTagsResponse.error_of_xml))
   | ListRoles ->
-      (match resp with
-       | Error err -> handle_error err (Some ListRolesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListRolesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListRolesResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListRolesResponse.error_of_xml))
   | ListSAMLProviderTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSAMLProviderTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListSAMLProviderTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListSAMLProviderTagsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListSAMLProviderTagsResponse.error_of_xml))
   | ListSAMLProviders ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSAMLProvidersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListSAMLProvidersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListSAMLProvidersResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListSAMLProvidersResponse.error_of_xml))
   | ListSSHPublicKeys ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSSHPublicKeysResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListSSHPublicKeysResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListSSHPublicKeysResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListSSHPublicKeysResponse.error_of_xml))
   | ListServerCertificateTags ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListServerCertificateTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListServerCertificateTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListServerCertificateTagsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListServerCertificateTagsResponse.error_of_xml))
   | ListServerCertificates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListServerCertificatesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListServerCertificatesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListServerCertificatesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListServerCertificatesResponse.error_of_xml))
   | ListServiceSpecificCredentials ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListServiceSpecificCredentialsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListServiceSpecificCredentialsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListServiceSpecificCredentialsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListServiceSpecificCredentialsResponse.error_of_xml))
   | ListSigningCertificates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSigningCertificatesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListSigningCertificatesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListSigningCertificatesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSigningCertificatesResponse.error_of_xml))
   | ListUserPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListUserPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListUserPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListUserPoliciesResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListUserPoliciesResponse.error_of_xml))
   | ListUserTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListUserTagsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListUserTagsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListUserTagsResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListUserTagsResponse.error_of_xml))
   | ListUsers ->
-      (match resp with
-       | Error err -> handle_error err (Some ListUsersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListUsersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListUsersResponse.of_xml xml)
+      else Error (parse_aws_error (Some ListUsersResponse.error_of_xml))
   | ListVirtualMFADevices ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListVirtualMFADevicesResponse.of_xml xml))
-  | PutGroupPolicy -> Ok ()
-  | PutRolePermissionsBoundary -> Ok ()
-  | PutRolePolicy -> Ok ()
-  | PutUserPermissionsBoundary -> Ok ()
-  | PutUserPolicy -> Ok ()
-  | RemoveClientIDFromOpenIDConnectProvider -> Ok ()
-  | RemoveRoleFromInstanceProfile -> Ok ()
-  | RemoveUserFromGroup -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListVirtualMFADevicesResponse.of_xml xml)
+      else Error (parse_aws_error None)
+  | PutGroupPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutRolePermissionsBoundary ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutRolePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutUserPermissionsBoundary ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutUserPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RemoveClientIDFromOpenIDConnectProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RemoveRoleFromInstanceProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RemoveUserFromGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ResetServiceSpecificCredential ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ResetServiceSpecificCredentialResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ResetServiceSpecificCredentialResponse.of_xml xml))
-  | ResyncMFADevice -> Ok ()
-  | SetDefaultPolicyVersion -> Ok ()
-  | SetSecurityTokenServicePreferences -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ResetServiceSpecificCredentialResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ResetServiceSpecificCredentialResponse.error_of_xml))
+  | ResyncMFADevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetDefaultPolicyVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetSecurityTokenServicePreferences ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | SimulateCustomPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SimulatePolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SimulatePolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SimulatePolicyResponse.of_xml xml)
+      else Error (parse_aws_error (Some SimulatePolicyResponse.error_of_xml))
   | SimulatePrincipalPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SimulatePolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SimulatePolicyResponse.of_xml xml))
-  | TagInstanceProfile -> Ok ()
-  | TagMFADevice -> Ok ()
-  | TagOpenIDConnectProvider -> Ok ()
-  | TagPolicy -> Ok ()
-  | TagRole -> Ok ()
-  | TagSAMLProvider -> Ok ()
-  | TagServerCertificate -> Ok ()
-  | TagUser -> Ok ()
-  | UntagInstanceProfile -> Ok ()
-  | UntagMFADevice -> Ok ()
-  | UntagOpenIDConnectProvider -> Ok ()
-  | UntagPolicy -> Ok ()
-  | UntagRole -> Ok ()
-  | UntagSAMLProvider -> Ok ()
-  | UntagServerCertificate -> Ok ()
-  | UntagUser -> Ok ()
-  | UpdateAccessKey -> Ok ()
-  | UpdateAccountPasswordPolicy -> Ok ()
-  | UpdateAssumeRolePolicy -> Ok ()
-  | UpdateGroup -> Ok ()
-  | UpdateLoginProfile -> Ok ()
-  | UpdateOpenIDConnectProviderThumbprint -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SimulatePolicyResponse.of_xml xml)
+      else Error (parse_aws_error (Some SimulatePolicyResponse.error_of_xml))
+  | TagInstanceProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagMFADevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagOpenIDConnectProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagPolicy -> if is_success then Ok () else Error (parse_aws_error None)
+  | TagRole -> if is_success then Ok () else Error (parse_aws_error None)
+  | TagSAMLProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagServerCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | TagUser -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagInstanceProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagMFADevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagOpenIDConnectProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagPolicy -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagRole -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagSAMLProvider ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagServerCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagUser -> if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAccessKey ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAccountPasswordPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAssumeRolePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateGroup -> if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateLoginProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateOpenIDConnectProviderThumbprint ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateRole ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateRoleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateRoleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateRoleResponse.of_xml xml)
+      else Error (parse_aws_error (Some UpdateRoleResponse.error_of_xml))
   | UpdateRoleDescription ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRoleDescriptionResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateRoleDescriptionResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateRoleDescriptionResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some UpdateRoleDescriptionResponse.error_of_xml))
   | UpdateSAMLProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSAMLProviderResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateSAMLProviderResponse.of_xml xml))
-  | UpdateSSHPublicKey -> Ok ()
-  | UpdateServerCertificate -> Ok ()
-  | UpdateServiceSpecificCredential -> Ok ()
-  | UpdateSigningCertificate -> Ok ()
-  | UpdateUser -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateSAMLProviderResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some UpdateSAMLProviderResponse.error_of_xml))
+  | UpdateSSHPublicKey ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateServerCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateServiceSpecificCredential ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateSigningCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateUser -> if is_success then Ok () else Error (parse_aws_error None)
   | UploadSSHPublicKey ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UploadSSHPublicKeyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UploadSSHPublicKeyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UploadSSHPublicKeyResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some UploadSSHPublicKeyResponse.error_of_xml))
   | UploadServerCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UploadServerCertificateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UploadServerCertificateResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UploadServerCertificateResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some UploadServerCertificateResponse.error_of_xml))
   | UploadSigningCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UploadSigningCertificateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UploadSigningCertificateResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UploadSigningCertificateResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some UploadSigningCertificateResponse.error_of_xml))

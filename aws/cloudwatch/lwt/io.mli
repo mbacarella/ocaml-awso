@@ -2,246 +2,188 @@
 open Awso_cloudwatch.Values
 val delete_alarms :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAlarmsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteAlarmsInput.t -> (unit, unit) Result.t Lwt.t
 val delete_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAnomalyDetectorInput.t ->
-        (DeleteAnomalyDetectorOutput.t,
-          [ `AWS of DeleteAnomalyDetectorOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAnomalyDetectorOutput.t, DeleteAnomalyDetectorOutput.error)
+          Result.t Lwt.t
 val delete_dashboards :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDashboardsInput.t ->
-        (DeleteDashboardsOutput.t,
-          [ `AWS of DeleteDashboardsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDashboardsOutput.t, DeleteDashboardsOutput.error) Result.t
+          Lwt.t
 val delete_insight_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInsightRulesInput.t ->
-        (DeleteInsightRulesOutput.t,
-          [ `AWS of DeleteInsightRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteInsightRulesOutput.t, DeleteInsightRulesOutput.error) Result.t
+          Lwt.t
 val delete_metric_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMetricStreamInput.t ->
-        (DeleteMetricStreamOutput.t,
-          [ `AWS of DeleteMetricStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMetricStreamOutput.t, DeleteMetricStreamOutput.error) Result.t
+          Lwt.t
 val describe_alarm_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlarmHistoryInput.t ->
-        (DescribeAlarmHistoryOutput.t,
-          [ `AWS of DescribeAlarmHistoryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAlarmHistoryOutput.t, DescribeAlarmHistoryOutput.error)
+          Result.t Lwt.t
 val describe_alarms :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlarmsInput.t ->
-        (DescribeAlarmsOutput.t,
-          [ `AWS of DescribeAlarmsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAlarmsOutput.t, DescribeAlarmsOutput.error) Result.t Lwt.t
 val describe_alarms_for_metric :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlarmsForMetricInput.t ->
         (DescribeAlarmsForMetricOutput.t,
-          [ `AWS of DescribeAlarmsForMetricOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAlarmsForMetricOutput.error) Result.t Lwt.t
 val describe_anomaly_detectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAnomalyDetectorsInput.t ->
         (DescribeAnomalyDetectorsOutput.t,
-          [ `AWS of DescribeAnomalyDetectorsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAnomalyDetectorsOutput.error) Result.t Lwt.t
 val describe_insight_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInsightRulesInput.t ->
-        (DescribeInsightRulesOutput.t,
-          [ `AWS of DescribeInsightRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeInsightRulesOutput.t, DescribeInsightRulesOutput.error)
+          Result.t Lwt.t
 val disable_alarm_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisableAlarmActionsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisableAlarmActionsInput.t -> (unit, unit) Result.t Lwt.t
 val disable_insight_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableInsightRulesInput.t ->
-        (DisableInsightRulesOutput.t,
-          [ `AWS of DisableInsightRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableInsightRulesOutput.t, DisableInsightRulesOutput.error)
+          Result.t Lwt.t
 val enable_alarm_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      EnableAlarmActionsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      EnableAlarmActionsInput.t -> (unit, unit) Result.t Lwt.t
 val enable_insight_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableInsightRulesInput.t ->
-        (EnableInsightRulesOutput.t,
-          [ `AWS of EnableInsightRulesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableInsightRulesOutput.t, EnableInsightRulesOutput.error) Result.t
+          Lwt.t
 val get_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDashboardInput.t ->
-        (GetDashboardOutput.t,
-          [ `AWS of GetDashboardOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDashboardOutput.t, GetDashboardOutput.error) Result.t Lwt.t
 val get_insight_rule_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightRuleReportInput.t ->
-        (GetInsightRuleReportOutput.t,
-          [ `AWS of GetInsightRuleReportOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetInsightRuleReportOutput.t, GetInsightRuleReportOutput.error)
+          Result.t Lwt.t
 val get_metric_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMetricDataInput.t ->
-        (GetMetricDataOutput.t,
-          [ `AWS of GetMetricDataOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMetricDataOutput.t, GetMetricDataOutput.error) Result.t Lwt.t
 val get_metric_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMetricStatisticsInput.t ->
-        (GetMetricStatisticsOutput.t,
-          [ `AWS of GetMetricStatisticsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMetricStatisticsOutput.t, GetMetricStatisticsOutput.error)
+          Result.t Lwt.t
 val get_metric_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMetricStreamInput.t ->
-        (GetMetricStreamOutput.t,
-          [ `AWS of GetMetricStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMetricStreamOutput.t, GetMetricStreamOutput.error) Result.t Lwt.t
 val get_metric_widget_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMetricWidgetImageInput.t ->
-        (GetMetricWidgetImageOutput.t,
-          [ `AWS of GetMetricWidgetImageOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMetricWidgetImageOutput.t, GetMetricWidgetImageOutput.error)
+          Result.t Lwt.t
 val list_dashboards :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDashboardsInput.t ->
-        (ListDashboardsOutput.t,
-          [ `AWS of ListDashboardsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDashboardsOutput.t, ListDashboardsOutput.error) Result.t Lwt.t
 val list_metric_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMetricStreamsInput.t ->
-        (ListMetricStreamsOutput.t,
-          [ `AWS of ListMetricStreamsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMetricStreamsOutput.t, ListMetricStreamsOutput.error) Result.t
+          Lwt.t
 val list_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMetricsInput.t ->
-        (ListMetricsOutput.t,
-          [ `AWS of ListMetricsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMetricsOutput.t, ListMetricsOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val put_anomaly_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAnomalyDetectorInput.t ->
-        (PutAnomalyDetectorOutput.t,
-          [ `AWS of PutAnomalyDetectorOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutAnomalyDetectorOutput.t, PutAnomalyDetectorOutput.error) Result.t
+          Lwt.t
 val put_composite_alarm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutCompositeAlarmInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutCompositeAlarmInput.t -> (unit, unit) Result.t Lwt.t
 val put_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDashboardInput.t ->
-        (PutDashboardOutput.t,
-          [ `AWS of PutDashboardOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutDashboardOutput.t, PutDashboardOutput.error) Result.t Lwt.t
 val put_insight_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutInsightRuleInput.t ->
-        (PutInsightRuleOutput.t,
-          [ `AWS of PutInsightRuleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutInsightRuleOutput.t, PutInsightRuleOutput.error) Result.t Lwt.t
 val put_metric_alarm :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutMetricAlarmInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutMetricAlarmInput.t -> (unit, unit) Result.t Lwt.t
 val put_metric_data :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutMetricDataInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutMetricDataInput.t -> (unit, unit) Result.t Lwt.t
 val put_metric_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMetricStreamInput.t ->
-        (PutMetricStreamOutput.t,
-          [ `AWS of PutMetricStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutMetricStreamOutput.t, PutMetricStreamOutput.error) Result.t Lwt.t
 val set_alarm_state :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      SetAlarmStateInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> SetAlarmStateInput.t -> (unit, unit) Result.t Lwt.t
 val start_metric_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMetricStreamsInput.t ->
-        (StartMetricStreamsOutput.t,
-          [ `AWS of StartMetricStreamsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartMetricStreamsOutput.t, StartMetricStreamsOutput.error) Result.t
+          Lwt.t
 val stop_metric_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopMetricStreamsInput.t ->
-        (StopMetricStreamsOutput.t,
-          [ `AWS of StopMetricStreamsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopMetricStreamsOutput.t, StopMetricStreamsOutput.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t

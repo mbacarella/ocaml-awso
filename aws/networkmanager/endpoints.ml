@@ -1611,561 +1611,550 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateSite -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateVpcAttachment -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AcceptAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AcceptAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (AcceptAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AcceptAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some AcceptAttachmentResponse.error_of_json))
   | AssociateConnectPeer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociateConnectPeerResponse.error_of_json)
-       | Ok resp ->
-           Ok (AssociateConnectPeerResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociateConnectPeerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AssociateConnectPeerResponse.error_of_json))
   | AssociateCustomerGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateCustomerGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateCustomerGatewayResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (AssociateCustomerGatewayResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateCustomerGatewayResponse.error_of_json))
   | AssociateLink ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociateLinkResponse.error_of_json)
-       | Ok resp ->
-           Ok (AssociateLinkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociateLinkResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AssociateLinkResponse.error_of_json))
   | AssociateTransitGatewayConnectPeer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateTransitGatewayConnectPeerResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateTransitGatewayConnectPeerResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AssociateTransitGatewayConnectPeerResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateTransitGatewayConnectPeerResponse.error_of_json))
   | CreateConnectAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateConnectAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateConnectAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateConnectAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateConnectAttachmentResponse.error_of_json))
   | CreateConnectPeer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateConnectPeerResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateConnectPeerResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateConnectPeerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateConnectPeerResponse.error_of_json))
   | CreateConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateConnectionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateConnectionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateConnectionResponse.error_of_json))
   | CreateCoreNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCoreNetworkResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateCoreNetworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateCoreNetworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateCoreNetworkResponse.error_of_json))
   | CreateDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDeviceResponse.error_of_json)
-       | Ok resp -> Ok (CreateDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDeviceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDeviceResponse.error_of_json))
   | CreateGlobalNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGlobalNetworkResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateGlobalNetworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGlobalNetworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateGlobalNetworkResponse.error_of_json))
   | CreateLink ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLinkResponse.error_of_json)
-       | Ok resp -> Ok (CreateLinkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateLinkResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateLinkResponse.error_of_json))
   | CreateSite ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSiteResponse.error_of_json)
-       | Ok resp -> Ok (CreateSiteResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSiteResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateSiteResponse.error_of_json))
   | CreateSiteToSiteVpnAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSiteToSiteVpnAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateSiteToSiteVpnAttachmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateSiteToSiteVpnAttachmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSiteToSiteVpnAttachmentResponse.error_of_json))
   | CreateVpcAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVpcAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateVpcAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateVpcAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVpcAttachmentResponse.error_of_json))
   | DeleteAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteAttachmentResponse.error_of_json))
   | DeleteConnectPeer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteConnectPeerResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteConnectPeerResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteConnectPeerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteConnectPeerResponse.error_of_json))
   | DeleteConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteConnectionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteConnectionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteConnectionResponse.error_of_json))
   | DeleteCoreNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteCoreNetworkResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteCoreNetworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteCoreNetworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteCoreNetworkResponse.error_of_json))
   | DeleteCoreNetworkPolicyVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteCoreNetworkPolicyVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteCoreNetworkPolicyVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteCoreNetworkPolicyVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCoreNetworkPolicyVersionResponse.error_of_json))
   | DeleteDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDeviceResponse.error_of_json)
-       | Ok resp -> Ok (DeleteDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDeviceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDeviceResponse.error_of_json))
   | DeleteGlobalNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteGlobalNetworkResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteGlobalNetworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteGlobalNetworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteGlobalNetworkResponse.error_of_json))
   | DeleteLink ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteLinkResponse.error_of_json)
-       | Ok resp -> Ok (DeleteLinkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteLinkResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteLinkResponse.error_of_json))
   | DeleteResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteResourcePolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteResourcePolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
   | DeleteSite ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSiteResponse.error_of_json)
-       | Ok resp -> Ok (DeleteSiteResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteSiteResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteSiteResponse.error_of_json))
   | DeregisterTransitGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeregisterTransitGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeregisterTransitGatewayResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeregisterTransitGatewayResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterTransitGatewayResponse.error_of_json))
   | DescribeGlobalNetworks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeGlobalNetworksResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeGlobalNetworksResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeGlobalNetworksResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeGlobalNetworksResponse.error_of_json))
   | DisassociateConnectPeer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateConnectPeerResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateConnectPeerResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DisassociateConnectPeerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateConnectPeerResponse.error_of_json))
   | DisassociateCustomerGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateCustomerGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateCustomerGatewayResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DisassociateCustomerGatewayResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateCustomerGatewayResponse.error_of_json))
   | DisassociateLink ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisassociateLinkResponse.error_of_json)
-       | Ok resp ->
-           Ok (DisassociateLinkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisassociateLinkResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DisassociateLinkResponse.error_of_json))
   | DisassociateTransitGatewayConnectPeer ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DisassociateTransitGatewayConnectPeerResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateTransitGatewayConnectPeerResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateTransitGatewayConnectPeerResponse.of_json
-                (response_to_json resp)))
+                DisassociateTransitGatewayConnectPeerResponse.error_of_json))
   | ExecuteCoreNetworkChangeSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ExecuteCoreNetworkChangeSetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (ExecuteCoreNetworkChangeSetResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ExecuteCoreNetworkChangeSetResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some ExecuteCoreNetworkChangeSetResponse.error_of_json))
   | GetConnectAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetConnectAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetConnectAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetConnectAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetConnectAttachmentResponse.error_of_json))
   | GetConnectPeer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetConnectPeerResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetConnectPeerResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetConnectPeerResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetConnectPeerResponse.error_of_json))
   | GetConnectPeerAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetConnectPeerAssociationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetConnectPeerAssociationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetConnectPeerAssociationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetConnectPeerAssociationsResponse.error_of_json))
   | GetConnections ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetConnectionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetConnectionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetConnectionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetConnectionsResponse.error_of_json))
   | GetCoreNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCoreNetworkResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetCoreNetworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCoreNetworkResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetCoreNetworkResponse.error_of_json))
   | GetCoreNetworkChangeSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCoreNetworkChangeSetResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetCoreNetworkChangeSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetCoreNetworkChangeSetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCoreNetworkChangeSetResponse.error_of_json))
   | GetCoreNetworkPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCoreNetworkPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetCoreNetworkPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCoreNetworkPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCoreNetworkPolicyResponse.error_of_json))
   | GetCustomerGatewayAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCustomerGatewayAssociationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetCustomerGatewayAssociationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetCustomerGatewayAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCustomerGatewayAssociationsResponse.error_of_json))
   | GetDevices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDevicesResponse.error_of_json)
-       | Ok resp -> Ok (GetDevicesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDevicesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDevicesResponse.error_of_json))
   | GetLinkAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLinkAssociationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetLinkAssociationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLinkAssociationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLinkAssociationsResponse.error_of_json))
   | GetLinks ->
-      (match resp with
-       | Error err -> handle_error err (Some GetLinksResponse.error_of_json)
-       | Ok resp -> Ok (GetLinksResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLinksResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetLinksResponse.error_of_json))
   | GetNetworkResourceCounts ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetNetworkResourceCountsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetNetworkResourceCountsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetNetworkResourceCountsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetNetworkResourceCountsResponse.error_of_json))
   | GetNetworkResourceRelationships ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetNetworkResourceRelationshipsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetNetworkResourceRelationshipsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetNetworkResourceRelationshipsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetNetworkResourceRelationshipsResponse.error_of_json))
   | GetNetworkResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetNetworkResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetNetworkResourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetNetworkResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetNetworkResourcesResponse.error_of_json))
   | GetNetworkRoutes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetNetworkRoutesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetNetworkRoutesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetNetworkRoutesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetNetworkRoutesResponse.error_of_json))
   | GetNetworkTelemetry ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetNetworkTelemetryResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetNetworkTelemetryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetNetworkTelemetryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetNetworkTelemetryResponse.error_of_json))
   | GetResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetResourcePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | GetRouteAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRouteAnalysisResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetRouteAnalysisResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetRouteAnalysisResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetRouteAnalysisResponse.error_of_json))
   | GetSiteToSiteVpnAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSiteToSiteVpnAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetSiteToSiteVpnAttachmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetSiteToSiteVpnAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSiteToSiteVpnAttachmentResponse.error_of_json))
   | GetSites ->
-      (match resp with
-       | Error err -> handle_error err (Some GetSitesResponse.error_of_json)
-       | Ok resp -> Ok (GetSitesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSitesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSitesResponse.error_of_json))
   | GetTransitGatewayConnectPeerAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetTransitGatewayConnectPeerAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetTransitGatewayConnectPeerAssociationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetTransitGatewayConnectPeerAssociationsResponse.of_json
-                (response_to_json resp)))
+                GetTransitGatewayConnectPeerAssociationsResponse.error_of_json))
   | GetTransitGatewayRegistrations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetTransitGatewayRegistrationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetTransitGatewayRegistrationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetTransitGatewayRegistrationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTransitGatewayRegistrationsResponse.error_of_json))
   | GetVpcAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetVpcAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetVpcAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetVpcAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetVpcAttachmentResponse.error_of_json))
   | ListAttachments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAttachmentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAttachmentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAttachmentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAttachmentsResponse.error_of_json))
   | ListConnectPeers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListConnectPeersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListConnectPeersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListConnectPeersResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListConnectPeersResponse.error_of_json))
   | ListCoreNetworkPolicyVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCoreNetworkPolicyVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListCoreNetworkPolicyVersionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListCoreNetworkPolicyVersionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCoreNetworkPolicyVersionsResponse.error_of_json))
   | ListCoreNetworks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCoreNetworksResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListCoreNetworksResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCoreNetworksResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCoreNetworksResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutCoreNetworkPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutCoreNetworkPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutCoreNetworkPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutCoreNetworkPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutCoreNetworkPolicyResponse.error_of_json))
   | PutResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutResourcePolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutResourcePolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | RegisterTransitGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegisterTransitGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RegisterTransitGatewayResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (RegisterTransitGatewayResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterTransitGatewayResponse.error_of_json))
   | RejectAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RejectAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (RejectAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RejectAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some RejectAttachmentResponse.error_of_json))
   | RestoreCoreNetworkPolicyVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RestoreCoreNetworkPolicyVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RestoreCoreNetworkPolicyVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (RestoreCoreNetworkPolicyVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RestoreCoreNetworkPolicyVersionResponse.error_of_json))
   | StartRouteAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartRouteAnalysisResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartRouteAnalysisResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartRouteAnalysisResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartRouteAnalysisResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateConnectionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateConnectionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateConnectionResponse.error_of_json))
   | UpdateCoreNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateCoreNetworkResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateCoreNetworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateCoreNetworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateCoreNetworkResponse.error_of_json))
   | UpdateDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDeviceResponse.error_of_json)
-       | Ok resp -> Ok (UpdateDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDeviceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateDeviceResponse.error_of_json))
   | UpdateGlobalNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateGlobalNetworkResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateGlobalNetworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateGlobalNetworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateGlobalNetworkResponse.error_of_json))
   | UpdateLink ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateLinkResponse.error_of_json)
-       | Ok resp -> Ok (UpdateLinkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateLinkResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateLinkResponse.error_of_json))
   | UpdateNetworkResourceMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateNetworkResourceMetadataResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateNetworkResourceMetadataResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateNetworkResourceMetadataResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateNetworkResourceMetadataResponse.error_of_json))
   | UpdateSite ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSiteResponse.error_of_json)
-       | Ok resp -> Ok (UpdateSiteResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSiteResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateSiteResponse.error_of_json))
   | UpdateVpcAttachment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVpcAttachmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateVpcAttachmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateVpcAttachmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVpcAttachmentResponse.error_of_json))

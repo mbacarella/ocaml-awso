@@ -5,427 +5,331 @@ val add_layer_version_permission :
     ?cfg:Awso.Cfg.t ->
       AddLayerVersionPermissionRequest.t ->
         (AddLayerVersionPermissionResponse.t,
-          [ `AWS of AddLayerVersionPermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddLayerVersionPermissionResponse.error) Result.t Lwt.t
 val add_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddPermissionRequest.t ->
-        (AddPermissionResponse.t,
-          [ `AWS of AddPermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddPermissionResponse.t, AddPermissionResponse.error) Result.t Lwt.t
 val create_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAliasRequest.t ->
-        (AliasConfiguration.t,
-          [ `AWS of AliasConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AliasConfiguration.t, AliasConfiguration.error) Result.t Lwt.t
 val create_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCodeSigningConfigRequest.t ->
         (CreateCodeSigningConfigResponse.t,
-          [ `AWS of CreateCodeSigningConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCodeSigningConfigResponse.error) Result.t Lwt.t
 val create_event_source_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEventSourceMappingRequest.t ->
         (EventSourceMappingConfiguration.t,
-          [ `AWS of EventSourceMappingConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EventSourceMappingConfiguration.error) Result.t Lwt.t
 val create_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFunctionRequest.t ->
-        (FunctionConfiguration.t,
-          [ `AWS of FunctionConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionConfiguration.t, FunctionConfiguration.error) Result.t Lwt.t
 val create_function_url_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFunctionUrlConfigRequest.t ->
         (CreateFunctionUrlConfigResponse.t,
-          [ `AWS of CreateFunctionUrlConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateFunctionUrlConfigResponse.error) Result.t Lwt.t
 val delete_alias :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteAliasRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCodeSigningConfigRequest.t ->
         (DeleteCodeSigningConfigResponse.t,
-          [ `AWS of DeleteCodeSigningConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteCodeSigningConfigResponse.error) Result.t Lwt.t
 val delete_event_source_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventSourceMappingRequest.t ->
         (EventSourceMappingConfiguration.t,
-          [ `AWS of EventSourceMappingConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EventSourceMappingConfiguration.error) Result.t Lwt.t
 val delete_function :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteFunctionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteFunctionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_function_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFunctionCodeSigningConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteFunctionCodeSigningConfigRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_function_concurrency :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFunctionConcurrencyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteFunctionConcurrencyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_function_event_invoke_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFunctionEventInvokeConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteFunctionEventInvokeConfigRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_function_url_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFunctionUrlConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteFunctionUrlConfigRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_layer_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteLayerVersionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteLayerVersionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_provisioned_concurrency_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProvisionedConcurrencyConfigRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val get_account_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccountSettingsRequest.t ->
-        (GetAccountSettingsResponse.t,
-          [ `AWS of GetAccountSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccountSettingsResponse.t, GetAccountSettingsResponse.error)
+          Result.t Lwt.t
 val get_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAliasRequest.t ->
-        (AliasConfiguration.t,
-          [ `AWS of AliasConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AliasConfiguration.t, AliasConfiguration.error) Result.t Lwt.t
 val get_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCodeSigningConfigRequest.t ->
-        (GetCodeSigningConfigResponse.t,
-          [ `AWS of GetCodeSigningConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCodeSigningConfigResponse.t, GetCodeSigningConfigResponse.error)
+          Result.t Lwt.t
 val get_event_source_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventSourceMappingRequest.t ->
         (EventSourceMappingConfiguration.t,
-          [ `AWS of EventSourceMappingConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EventSourceMappingConfiguration.error) Result.t Lwt.t
 val get_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionRequest.t ->
-        (GetFunctionResponse.t,
-          [ `AWS of GetFunctionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFunctionResponse.t, GetFunctionResponse.error) Result.t Lwt.t
 val get_function_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionCodeSigningConfigRequest.t ->
         (GetFunctionCodeSigningConfigResponse.t,
-          [ `AWS of GetFunctionCodeSigningConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFunctionCodeSigningConfigResponse.error) Result.t Lwt.t
 val get_function_concurrency :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionConcurrencyRequest.t ->
         (GetFunctionConcurrencyResponse.t,
-          [ `AWS of GetFunctionConcurrencyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFunctionConcurrencyResponse.error) Result.t Lwt.t
 val get_function_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionConfigurationRequest.t ->
-        (FunctionConfiguration.t,
-          [ `AWS of FunctionConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionConfiguration.t, FunctionConfiguration.error) Result.t Lwt.t
 val get_function_event_invoke_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionEventInvokeConfigRequest.t ->
-        (FunctionEventInvokeConfig.t,
-          [ `AWS of FunctionEventInvokeConfig.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionEventInvokeConfig.t, FunctionEventInvokeConfig.error)
+          Result.t Lwt.t
 val get_function_url_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFunctionUrlConfigRequest.t ->
-        (GetFunctionUrlConfigResponse.t,
-          [ `AWS of GetFunctionUrlConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFunctionUrlConfigResponse.t, GetFunctionUrlConfigResponse.error)
+          Result.t Lwt.t
 val get_layer_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLayerVersionRequest.t ->
-        (GetLayerVersionResponse.t,
-          [ `AWS of GetLayerVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLayerVersionResponse.t, GetLayerVersionResponse.error) Result.t
+          Lwt.t
 val get_layer_version_by_arn :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLayerVersionByArnRequest.t ->
-        (GetLayerVersionResponse.t,
-          [ `AWS of GetLayerVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLayerVersionResponse.t, GetLayerVersionResponse.error) Result.t
+          Lwt.t
 val get_layer_version_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLayerVersionPolicyRequest.t ->
         (GetLayerVersionPolicyResponse.t,
-          [ `AWS of GetLayerVersionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLayerVersionPolicyResponse.error) Result.t Lwt.t
 val get_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPolicyRequest.t ->
-        (GetPolicyResponse.t,
-          [ `AWS of GetPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPolicyResponse.t, GetPolicyResponse.error) Result.t Lwt.t
 val get_provisioned_concurrency_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProvisionedConcurrencyConfigRequest.t ->
         (GetProvisionedConcurrencyConfigResponse.t,
-          [ `AWS of GetProvisionedConcurrencyConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetProvisionedConcurrencyConfigResponse.error) Result.t Lwt.t
 val invoke :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InvocationRequest.t ->
-        (InvocationResponse.t,
-          [ `AWS of InvocationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InvocationResponse.t, InvocationResponse.error) Result.t Lwt.t
 val invoke_async :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InvokeAsyncRequest.t ->
-        (InvokeAsyncResponse.t,
-          [ `AWS of InvokeAsyncResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InvokeAsyncResponse.t, InvokeAsyncResponse.error) Result.t Lwt.t
 val list_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAliasesRequest.t ->
-        (ListAliasesResponse.t,
-          [ `AWS of ListAliasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAliasesResponse.t, ListAliasesResponse.error) Result.t Lwt.t
 val list_code_signing_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCodeSigningConfigsRequest.t ->
         (ListCodeSigningConfigsResponse.t,
-          [ `AWS of ListCodeSigningConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCodeSigningConfigsResponse.error) Result.t Lwt.t
 val list_event_source_mappings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventSourceMappingsRequest.t ->
         (ListEventSourceMappingsResponse.t,
-          [ `AWS of ListEventSourceMappingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEventSourceMappingsResponse.error) Result.t Lwt.t
 val list_function_event_invoke_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFunctionEventInvokeConfigsRequest.t ->
         (ListFunctionEventInvokeConfigsResponse.t,
-          [ `AWS of ListFunctionEventInvokeConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFunctionEventInvokeConfigsResponse.error) Result.t Lwt.t
 val list_function_url_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFunctionUrlConfigsRequest.t ->
         (ListFunctionUrlConfigsResponse.t,
-          [ `AWS of ListFunctionUrlConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFunctionUrlConfigsResponse.error) Result.t Lwt.t
 val list_functions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFunctionsRequest.t ->
-        (ListFunctionsResponse.t,
-          [ `AWS of ListFunctionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFunctionsResponse.t, ListFunctionsResponse.error) Result.t Lwt.t
 val list_functions_by_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFunctionsByCodeSigningConfigRequest.t ->
         (ListFunctionsByCodeSigningConfigResponse.t,
-          [ `AWS of ListFunctionsByCodeSigningConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFunctionsByCodeSigningConfigResponse.error) Result.t Lwt.t
 val list_layer_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLayerVersionsRequest.t ->
-        (ListLayerVersionsResponse.t,
-          [ `AWS of ListLayerVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLayerVersionsResponse.t, ListLayerVersionsResponse.error)
+          Result.t Lwt.t
 val list_layers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLayersRequest.t ->
-        (ListLayersResponse.t,
-          [ `AWS of ListLayersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLayersResponse.t, ListLayersResponse.error) Result.t Lwt.t
 val list_provisioned_concurrency_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProvisionedConcurrencyConfigsRequest.t ->
         (ListProvisionedConcurrencyConfigsResponse.t,
-          [ `AWS of ListProvisionedConcurrencyConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListProvisionedConcurrencyConfigsResponse.error) Result.t Lwt.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResponse.t,
-          [ `AWS of ListTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsResponse.t, ListTagsResponse.error) Result.t Lwt.t
 val list_versions_by_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVersionsByFunctionRequest.t ->
         (ListVersionsByFunctionResponse.t,
-          [ `AWS of ListVersionsByFunctionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListVersionsByFunctionResponse.error) Result.t Lwt.t
 val publish_layer_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishLayerVersionRequest.t ->
-        (PublishLayerVersionResponse.t,
-          [ `AWS of PublishLayerVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PublishLayerVersionResponse.t, PublishLayerVersionResponse.error)
+          Result.t Lwt.t
 val publish_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishVersionRequest.t ->
-        (FunctionConfiguration.t,
-          [ `AWS of FunctionConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionConfiguration.t, FunctionConfiguration.error) Result.t Lwt.t
 val put_function_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutFunctionCodeSigningConfigRequest.t ->
         (PutFunctionCodeSigningConfigResponse.t,
-          [ `AWS of PutFunctionCodeSigningConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutFunctionCodeSigningConfigResponse.error) Result.t Lwt.t
 val put_function_concurrency :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutFunctionConcurrencyRequest.t ->
-        (Concurrency.t,
-          [ `AWS of Concurrency.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (Concurrency.t, Concurrency.error) Result.t Lwt.t
 val put_function_event_invoke_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutFunctionEventInvokeConfigRequest.t ->
-        (FunctionEventInvokeConfig.t,
-          [ `AWS of FunctionEventInvokeConfig.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionEventInvokeConfig.t, FunctionEventInvokeConfig.error)
+          Result.t Lwt.t
 val put_provisioned_concurrency_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutProvisionedConcurrencyConfigRequest.t ->
         (PutProvisionedConcurrencyConfigResponse.t,
-          [ `AWS of PutProvisionedConcurrencyConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutProvisionedConcurrencyConfigResponse.error) Result.t Lwt.t
 val remove_layer_version_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveLayerVersionPermissionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveLayerVersionPermissionRequest.t -> (unit, unit) Result.t Lwt.t
 val remove_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemovePermissionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemovePermissionRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAliasRequest.t ->
-        (AliasConfiguration.t,
-          [ `AWS of AliasConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AliasConfiguration.t, AliasConfiguration.error) Result.t Lwt.t
 val update_code_signing_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCodeSigningConfigRequest.t ->
         (UpdateCodeSigningConfigResponse.t,
-          [ `AWS of UpdateCodeSigningConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateCodeSigningConfigResponse.error) Result.t Lwt.t
 val update_event_source_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEventSourceMappingRequest.t ->
         (EventSourceMappingConfiguration.t,
-          [ `AWS of EventSourceMappingConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EventSourceMappingConfiguration.error) Result.t Lwt.t
 val update_function_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFunctionCodeRequest.t ->
-        (FunctionConfiguration.t,
-          [ `AWS of FunctionConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionConfiguration.t, FunctionConfiguration.error) Result.t Lwt.t
 val update_function_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFunctionConfigurationRequest.t ->
-        (FunctionConfiguration.t,
-          [ `AWS of FunctionConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionConfiguration.t, FunctionConfiguration.error) Result.t Lwt.t
 val update_function_event_invoke_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFunctionEventInvokeConfigRequest.t ->
-        (FunctionEventInvokeConfig.t,
-          [ `AWS of FunctionEventInvokeConfig.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FunctionEventInvokeConfig.t, FunctionEventInvokeConfig.error)
+          Result.t Lwt.t
 val update_function_url_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFunctionUrlConfigRequest.t ->
         (UpdateFunctionUrlConfigResponse.t,
-          [ `AWS of UpdateFunctionUrlConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateFunctionUrlConfigResponse.error) Result.t Lwt.t
