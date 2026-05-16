@@ -5843,7 +5843,7 @@ module DescribeOpsItemsRequest =
       {
       opsItemFilters: OpsItemFilters.t option
         [@ocaml.doc
-          "One or more filters to limit the response. Key: CreatedTime Operations: GreaterThan, LessThan Key: LastModifiedBy Operations: Contains, Equals Key: LastModifiedTime Operations: GreaterThan, LessThan Key: Priority Operations: Equals Key: Source Operations: Contains, Equals Key: Status Operations: Equals Key: Title* Operations: Equals,Contains Key: OperationalData** Operations: Equals Key: OperationalDataKey Operations: Equals Key: OperationalDataValue Operations: Equals, Contains Key: OpsItemId Operations: Equals Key: ResourceId Operations: Contains Key: AutomationId Operations: Equals *The Equals operator for Title matches the first 100 characters. If you specify more than 100 characters, they system returns an error that the filter value exceeds the length limit. **If you filter the response by using the OperationalData operator, specify a key-value pair by using the following JSON format: {\"key\":\"key_name\",\"value\":\"a_value\"}"];
+          "One or more filters to limit the response. Key: CreatedTime Operations: GreaterThan, LessThan Key: LastModifiedBy Operations: Contains, Equals Key: LastModifiedTime Operations: GreaterThan, LessThan Key: Priority Operations: Equals Key: Source Operations: Contains, Equals Key: Status Operations: Equals Key: Title* Operations: Equals,Contains Key: OperationalData** Operations: Equals Key: OperationalDataKey Operations: Equals Key: OperationalDataValue Operations: Equals, Contains Key: OpsItemId Operations: Equals Key: ResourceId Operations: Contains Key: AutomationId Operations: Equals *The Equals operator for Title matches the first 100 characters. If you specify more than 100 characters, they system returns an error that the filter value exceeds the length limit. **If you filter the response by using the OperationalData operator, specify a key-value pair by using the following JSON format: \\{\"key\":\"key_name\",\"value\":\"a_value\"\\}"];
       maxResults: OpsItemMaxResults.t option
         [@ocaml.doc
           "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
@@ -7580,7 +7580,7 @@ module DescribePatchGroupsResult =
       {
       mappings: PatchGroupPatchBaselineMappingList.t option
         [@ocaml.doc
-          "Each entry in the array contains: PatchGroup: string (between 1 and 256 characters. Regex: ^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$) PatchBaselineIdentity: A PatchBaselineIdentity element."];
+          "Each entry in the array contains: PatchGroup: string (between 1 and 256 characters. Regex: ^(\\[\\p\\{L\\}\\p\\{Z\\}\\p\\{N\\}_.:/=+\\-\\@\\]*)$) PatchBaselineIdentity: A PatchBaselineIdentity element."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
@@ -21818,7 +21818,7 @@ module PutParameterRequest =
           "Information about the parameter that you want to add to the system. Optional but recommended. Don't enter personally identifiable information in this field."];
       value: PSParameterValue.t
         [@ocaml.doc
-          "The parameter value that you want to add to the system. Standard parameters have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB. Parameters can't be referenced or nested in the values of other parameters. You can't include {{}} or {{ssm:parameter-name}} in a parameter value."];
+          "The parameter value that you want to add to the system. Standard parameters have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB. Parameters can't be referenced or nested in the values of other parameters. You can't include \\{\\{\\}\\} or \\{\\{ssm:parameter-name\\}\\} in a parameter value."];
       type_: ParameterType.t option
         [@ocaml.doc
           "The type of parameter that you want to add to the system. SecureString isn't currently supported for CloudFormation templates. Items in a StringList must be separated by a comma (,). You can't use other punctuation or special character to escape items in the list. If you have a parameter value that requires a comma, then use the String data type. Specifying a parameter type isn't required when updating a parameter. You must specify a parameter type when creating a parameter."];
@@ -24863,7 +24863,7 @@ module UpdateAssociationRequest =
         [@ocaml.doc "The ID of the association you want to update."];
       parameters: Parameters.t option
         [@ocaml.doc
-          "The parameters you want to update for the association. If you create a parameter using Parameter Store, a capability of Amazon Web Services Systems Manager, you can reference the parameter using {{ssm:parameter-name}}."];
+          "The parameters you want to update for the association. If you create a parameter using Parameter Store, a capability of Amazon Web Services Systems Manager, you can reference the parameter using \\{\\{ssm:parameter-name\\}\\}."];
       documentVersion: DocumentVersion.t option
         [@ocaml.doc
           "The document version you want update for the association. State Manager doesn't support running associations that use a new version of a document if that document is shared from another account. State Manager always runs the default version of a document if shared from another account, even though the Systems Manager console shows that a new version was processed. If you want to run an association using a new version of a document shared form another account, you must set the document version to default."];

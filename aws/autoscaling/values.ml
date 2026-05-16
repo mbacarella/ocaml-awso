@@ -6680,7 +6680,7 @@ module ScheduledUpdateGroupActionRequest =
           "The date and time for the recurring schedule to end, in UTC."];
       recurrence: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The recurring schedule for the action, in Unix cron syntax format. This format consists of five fields separated by white spaces: [Minute] [Hour] [Day_of_Month] [Month_of_Year] [Day_of_Week]. The value must be in quotes (for example, \"30 0 1 1,6,12 *\"). For more information about this format, see Crontab. When StartTime and EndTime are specified with Recurrence, they form the boundaries of when the recurring action starts and stops. Cron expressions use Universal Coordinated Time (UTC) by default."];
+          "The recurring schedule for the action, in Unix cron syntax format. This format consists of five fields separated by white spaces: \\[Minute\\] \\[Hour\\] \\[Day_of_Month\\] \\[Month_of_Year\\] \\[Day_of_Week\\]. The value must be in quotes (for example, \"30 0 1 1,6,12 *\"). For more information about this format, see Crontab. When StartTime and EndTime are specified with Recurrence, they form the boundaries of when the recurring action starts and stops. Cron expressions use Universal Coordinated Time (UTC) by default."];
       minSize: AutoScalingGroupMinSize.t option
         [@ocaml.doc "The minimum size of the Auto Scaling group."];
       maxSize: AutoScalingGroupMaxSize.t option
@@ -9681,7 +9681,7 @@ module PutScheduledUpdateGroupActionType =
           "The date and time for the recurring schedule to end, in UTC."];
       recurrence: XmlStringMaxLen255.t option
         [@ocaml.doc
-          "The recurring schedule for this action. This format consists of five fields separated by white spaces: [Minute] [Hour] [Day_of_Month] [Month_of_Year] [Day_of_Week]. The value must be in quotes (for example, \"30 0 1 1,6,12 *\"). For more information about this format, see Crontab. When StartTime and EndTime are specified with Recurrence, they form the boundaries of when the recurring action starts and stops. Cron expressions use Universal Coordinated Time (UTC) by default."];
+          "The recurring schedule for this action. This format consists of five fields separated by white spaces: \\[Minute\\] \\[Hour\\] \\[Day_of_Month\\] \\[Month_of_Year\\] \\[Day_of_Week\\]. The value must be in quotes (for example, \"30 0 1 1,6,12 *\"). For more information about this format, see Crontab. When StartTime and EndTime are specified with Recurrence, they form the boundaries of when the recurring action starts and stops. Cron expressions use Universal Coordinated Time (UTC) by default."];
       minSize: AutoScalingGroupMinSize.t option
         [@ocaml.doc "The minimum size of the Auto Scaling group."];
       maxSize: AutoScalingGroupMaxSize.t option
@@ -13280,7 +13280,7 @@ module CreateLaunchConfigurationType =
           "The name of the key pair. For more information, see Amazon EC2 Key Pairs in the Amazon EC2 User Guide for Linux Instances."];
       securityGroups: SecurityGroups.t option
         [@ocaml.doc
-          "A list that contains the security groups to assign to the instances in the Auto Scaling group. [EC2-VPC] Specify the security group IDs. For more information, see Security Groups for Your VPC in the Amazon Virtual Private Cloud User Guide. [EC2-Classic] Specify either the security group names or the security group IDs. For more information, see Amazon EC2 Security Groups in the Amazon EC2 User Guide for Linux Instances."];
+          "A list that contains the security groups to assign to the instances in the Auto Scaling group. \\[EC2-VPC\\] Specify the security group IDs. For more information, see Security Groups for Your VPC in the Amazon Virtual Private Cloud User Guide. \\[EC2-Classic\\] Specify either the security group names or the security group IDs. For more information, see Amazon EC2 Security Groups in the Amazon EC2 User Guide for Linux Instances."];
       classicLinkVPCId: XmlStringMaxLen255.t option
         [@ocaml.doc
           "The ID of a ClassicLink-enabled VPC to link your EC2-Classic instances to. For more information, see ClassicLink in the Amazon EC2 User Guide for Linux Instances and Linking EC2-Classic instances to a VPC in the Amazon EC2 Auto Scaling User Guide. This parameter can only be used if you are launching EC2-Classic instances."];

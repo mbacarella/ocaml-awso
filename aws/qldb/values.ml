@@ -2493,13 +2493,13 @@ module GetRevisionRequest =
       name: LedgerName.t [@ocaml.doc "The name of the ledger."];
       blockAddress: ValueHolder.t
         [@ocaml.doc
-          "The block location of the document revision to be verified. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: {strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:14}."];
+          "The block location of the document revision to be verified. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: \\{strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:14\\}."];
       documentId: UniqueId.t
         [@ocaml.doc
           "The UUID (represented in Base62-encoded text) of the document to be verified."];
       digestTipAddress: ValueHolder.t option
         [@ocaml.doc
-          "The latest block location covered by the digest for which to request a proof. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: {strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:49}."]}
+          "The latest block location covered by the digest for which to request a proof. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: \\{strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:49\\}."]}
     let context_ = "GetRevisionRequest"
     let make ?digestTipAddress =
       fun ~name ->
@@ -2724,10 +2724,10 @@ module GetBlockRequest =
       name: LedgerName.t [@ocaml.doc "The name of the ledger."];
       blockAddress: ValueHolder.t
         [@ocaml.doc
-          "The location of the block that you want to request. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: {strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:14}."];
+          "The location of the block that you want to request. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: \\{strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:14\\}."];
       digestTipAddress: ValueHolder.t option
         [@ocaml.doc
-          "The latest block location covered by the digest for which to request a proof. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: {strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:49}."]}
+          "The latest block location covered by the digest for which to request a proof. An address is an Amazon Ion structure that has two fields: strandId and sequenceNo. For example: \\{strandId:\"BlFTjlSXze9BIh1KOszcE3\",sequenceNo:49\\}."]}
     let context_ = "GetBlockRequest"
     let make ?digestTipAddress =
       fun ~name ->

@@ -721,7 +721,7 @@ module DomainValidationOption =
           "A fully qualified domain name (FQDN) in the certificate request."];
       validationDomain: DomainNameString.t
         [@ocaml.doc
-          "The domain name that you want ACM to use to send you validation emails. This domain name is the suffix of the email addresses that you want ACM to use. This must be the same as the DomainName value or a superdomain of the DomainName value. For example, if you request a certificate for testing.example.com, you can specify example.com for this value. In that case, ACM sends domain validation emails to the following five addresses: admin@example.com administrator@example.com hostmaster@example.com postmaster@example.com webmaster@example.com"]}
+          "The domain name that you want ACM to use to send you validation emails. This domain name is the suffix of the email addresses that you want ACM to use. This must be the same as the DomainName value or a superdomain of the DomainName value. For example, if you request a certificate for testing.example.com, you can specify example.com for this value. In that case, ACM sends domain validation emails to the following five addresses: admin\\@example.com administrator\\@example.com hostmaster\\@example.com postmaster\\@example.com webmaster\\@example.com"]}
     let context_ = "DomainValidationOption"
     let make ~domainName =
       fun ~validationDomain -> fun () -> { domainName; validationDomain }
@@ -1626,7 +1626,7 @@ module Filters =
         [@ocaml.doc "Specify one or more KeyUsage extension values."];
       keyTypes: KeyAlgorithmList.t option
         [@ocaml.doc
-          "Specify one or more algorithms that can be used to generate key pairs. Default filtering returns only RSA_1024 and RSA_2048 certificates that have at least one domain. To return other certificate types, provide the desired type signatures in a comma-separated list. For example, \"keyTypes\": [\"RSA_2048,RSA_4096\"] returns both RSA_2048 and RSA_4096 certificates."]}
+          "Specify one or more algorithms that can be used to generate key pairs. Default filtering returns only RSA_1024 and RSA_2048 certificates that have at least one domain. To return other certificate types, provide the desired type signatures in a comma-separated list. For example, \"keyTypes\": \\[\"RSA_2048,RSA_4096\"\\] returns both RSA_2048 and RSA_4096 certificates."]}
     let make ?extendedKeyUsage =
       fun ?keyUsage ->
         fun ?keyTypes -> fun () -> { extendedKeyUsage; keyUsage; keyTypes }
@@ -2225,7 +2225,7 @@ module ResendValidationEmailRequest =
           "The fully qualified domain name (FQDN) of the certificate that needs to be validated."];
       validationDomain: DomainNameString.t
         [@ocaml.doc
-          "The base validation domain that will act as the suffix of the email addresses that are used to send the emails. This must be the same as the Domain value or a superdomain of the Domain value. For example, if you requested a certificate for site.subdomain.example.com and specify a ValidationDomain of subdomain.example.com, ACM sends email to the domain registrant, technical contact, and administrative contact in WHOIS and the following five addresses: admin@subdomain.example.com administrator@subdomain.example.com hostmaster@subdomain.example.com postmaster@subdomain.example.com webmaster@subdomain.example.com"]}
+          "The base validation domain that will act as the suffix of the email addresses that are used to send the emails. This must be the same as the Domain value or a superdomain of the Domain value. For example, if you requested a certificate for site.subdomain.example.com and specify a ValidationDomain of subdomain.example.com, ACM sends email to the domain registrant, technical contact, and administrative contact in WHOIS and the following five addresses: admin\\@subdomain.example.com administrator\\@subdomain.example.com hostmaster\\@subdomain.example.com postmaster\\@subdomain.example.com webmaster\\@subdomain.example.com"]}
     let context_ = "ResendValidationEmailRequest"
     let make ~certificateArn =
       fun ~domain ->

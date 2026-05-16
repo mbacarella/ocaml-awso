@@ -5746,7 +5746,7 @@ module ResourceTag =
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Tags are key-value pairs that can be associated with Amazon SWF state machines and activities. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - @."]
+       "Tags are key-value pairs that can be associated with Amazon SWF state machines and activities. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - \\@."]
 module Decision =
   struct
     type nonrec t =
@@ -7836,7 +7836,7 @@ module TagFilter =
       {
       tag: Tag.t
         [@ocaml.doc
-          "Specifies the tag that must be associated with the execution for it to meet the filter criteria. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - @."]}
+          "Specifies the tag that must be associated with the execution for it to meet the filter criteria. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - \\@."]}
     let context_ = "TagFilter"
     let make ~tag = fun () -> { tag }
     let to_value x =
@@ -8751,7 +8751,7 @@ module TagResourceInput =
           "The Amazon Resource Name (ARN) for the Amazon SWF domain."];
       tags: ResourceTagList.t
         [@ocaml.doc
-          "The list of tags to add to a domain. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - @."]}
+          "The list of tags to add to a domain. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - \\@."]}
     let context_ = "TagResourceInput"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -9385,7 +9385,7 @@ module RegisterDomainInput =
           "The duration (in days) that records and histories of workflow executions on the domain should be kept by the service. After the retention period, the workflow execution isn't available in the results of visibility calls. If you pass the value NONE or 0 (zero), then the workflow execution history isn't retained. As soon as the workflow execution completes, the execution record and its history are deleted. The maximum workflow execution retention period is 90 days. For more information about Amazon SWF service limits, see: Amazon SWF Service Limits in the Amazon SWF Developer Guide."];
       tags: ResourceTagList.t option
         [@ocaml.doc
-          "Tags to be added when registering a domain. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - @."]}
+          "Tags to be added when registering a domain. Tags may only contain unicode letters, digits, whitespace, or these symbols: _ . : / = + - \\@."]}
     let context_ = "RegisterDomainInput"
     let make ?description =
       fun ?tags ->

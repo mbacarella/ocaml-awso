@@ -6569,7 +6569,7 @@ module UserIdGroupPair =
       {
       description: String_.t option
         [@ocaml.doc
-          "A description for the security group rule that references this user ID group pair. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,@[]+=;{}!$*"];
+          "A description for the security group rule that references this user ID group pair. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,\\@\\[\\]+=;\\{\\}!$*"];
       groupId: String_.t option [@ocaml.doc "The ID of the security group."];
       groupName: String_.t option
         [@ocaml.doc
@@ -6578,7 +6578,7 @@ module UserIdGroupPair =
         [@ocaml.doc "The status of a VPC peering connection, if applicable."];
       userId: String_.t option
         [@ocaml.doc
-          "The ID of an Amazon Web Services account. For a referenced security group in another VPC, the account ID of the referenced security group is returned in the response. If the referenced security group is deleted, this value is not returned. [EC2-Classic] Required when adding or removing rules that reference a security group in another Amazon Web Services account."];
+          "The ID of an Amazon Web Services account. For a referenced security group in another VPC, the account ID of the referenced security group is returned in the response. If the referenced security group is deleted, this value is not returned. \\[EC2-Classic\\] Required when adding or removing rules that reference a security group in another Amazon Web Services account."];
       vpcId: String_.t option
         [@ocaml.doc
           "The ID of the VPC for the referenced security group, if applicable."];
@@ -6796,7 +6796,7 @@ module SpotPlacement =
       {
       availabilityZone: String_.t option
         [@ocaml.doc
-          "The Availability Zone. [Spot Fleet only] To specify multiple Availability Zones, separate them using commas; for example, \"us-west-2a, us-west-2b\"."];
+          "The Availability Zone. \\[Spot Fleet only\\] To specify multiple Availability Zones, separate them using commas; for example, \"us-west-2a, us-west-2b\"."];
       groupName: PlacementGroupName.t option
         [@ocaml.doc "The name of the placement group."];
       tenancy: Tenancy.t option
@@ -6995,7 +6995,7 @@ module IpRange =
           "The IPv4 CIDR range. You can either specify a CIDR range or a source security group, not both. To specify a single IPv4 address, use the /32 prefix length."];
       description: String_.t option
         [@ocaml.doc
-          "A description for the security group rule that references this IPv4 address range. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,@[]+=&;{}!$*"]}
+          "A description for the security group rule that references this IPv4 address range. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,\\@\\[\\]+=&;\\{\\}!$*"]}
     let make ?cidrIp = fun ?description -> fun () -> { cidrIp; description }
     let to_value x =
       structure_to_value
@@ -7023,7 +7023,7 @@ module Ipv6Range =
           "The IPv6 CIDR range. You can either specify a CIDR range or a source security group, not both. To specify a single IPv6 address, use the /128 prefix length."];
       description: String_.t option
         [@ocaml.doc
-          "A description for the security group rule that references this IPv6 address range. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,@[]+=&;{}!$*"]}
+          "A description for the security group rule that references this IPv6 address range. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,\\@\\[\\]+=&;\\{\\}!$*"]}
     let make ?cidrIpv6 =
       fun ?description -> fun () -> { cidrIpv6; description }
     let to_value x =
@@ -7042,14 +7042,14 @@ module Ipv6Range =
       let cidrIpv6 = field_map json "CidrIpv6" String_.of_json in
       make ?description ?cidrIpv6 ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "[EC2-VPC only] Describes an IPv6 range."]
+  end[@@ocaml.doc "\\[EC2-VPC only\\] Describes an IPv6 range."]
 module PrefixListId =
   struct
     type nonrec t =
       {
       description: String_.t option
         [@ocaml.doc
-          "A description for the security group rule that references this prefix list ID. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,@[]+=;{}!$*"];
+          "A description for the security group rule that references this prefix list ID. Constraints: Up to 255 characters in length. Allowed characters are a-z, A-Z, 0-9, spaces, and ._-:/()#,\\@\\[\\]+=;\\{\\}!$*"];
       prefixListId: String_.t option [@ocaml.doc "The ID of the prefix."]}
     let make ?description =
       fun ?prefixListId -> fun () -> { description; prefixListId }
@@ -11237,7 +11237,7 @@ module AnalysisLoadBalancerListener =
         [@ocaml.doc "The port on which the load balancer is listening."];
       instancePort: Port.t option
         [@ocaml.doc
-          "[Classic Load Balancers] The back-end port for the listener."]}
+          "\\[Classic Load Balancers\\] The back-end port for the listener."]}
     let make ?loadBalancerPort =
       fun ?instancePort -> fun () -> { loadBalancerPort; instancePort }
     let to_value x =

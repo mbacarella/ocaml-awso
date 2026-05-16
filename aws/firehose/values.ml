@@ -562,7 +562,7 @@ module OpenXJsonSerDe =
           "When set to true, which is the default, Kinesis Data Firehose converts JSON keys to lowercase before deserializing them."];
       columnToJsonKeyMappings: ColumnToJsonKeyMappings.t option
         [@ocaml.doc
-          "Maps column names to JSON keys that aren't identical to the column names. This is useful when the JSON contains keys that are Hive keywords. For example, timestamp is a Hive keyword. If you have a JSON key named timestamp, set this parameter to {\"ts\": \"timestamp\"} to map this key to a column named ts."]}
+          "Maps column names to JSON keys that aren't identical to the column names. This is useful when the JSON contains keys that are Hive keywords. For example, timestamp is a Hive keyword. If you have a JSON key named timestamp, set this parameter to \\{\"ts\": \"timestamp\"\\} to map this key to a column named ts."]}
     let make ?convertDotsInJsonKeysToUnderscores =
       fun ?caseInsensitive ->
         fun ?columnToJsonKeyMappings ->
@@ -4405,7 +4405,7 @@ module DestinationDescription =
       destinationId: DestinationId.t
         [@ocaml.doc "The ID of the destination."];
       s3DestinationDescription: S3DestinationDescription.t option
-        [@ocaml.doc "[Deprecated] The destination in Amazon S3."];
+        [@ocaml.doc "\\[Deprecated\\] The destination in Amazon S3."];
       extendedS3DestinationDescription:
         ExtendedS3DestinationDescription.t option
         [@ocaml.doc "The destination in Amazon S3."];
@@ -4753,10 +4753,10 @@ module Tag =
       {
       key: TagKey.t
         [@ocaml.doc
-          "A unique identifier for the tag. Maximum length: 128 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % @"];
+          "A unique identifier for the tag. Maximum length: 128 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"];
       value: TagValue.t option
         [@ocaml.doc
-          "An optional string, which you can use to describe or define the tag. Maximum length: 256 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % @"]}
+          "An optional string, which you can use to describe or define the tag. Maximum length: 256 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"]}
     let context_ = "Tag"
     let make ?value = fun ~key -> fun () -> { value; key }
     let to_value x =
@@ -7713,7 +7713,7 @@ module UpdateDestinationInput =
         [@ocaml.doc "The ID of the destination."];
       s3DestinationUpdate: S3DestinationUpdate.t option
         [@ocaml.doc
-          "[Deprecated] Describes an update for a destination in Amazon S3."];
+          "\\[Deprecated\\] Describes an update for a destination in Amazon S3."];
       extendedS3DestinationUpdate: ExtendedS3DestinationUpdate.t option
         [@ocaml.doc "Describes an update for a destination in Amazon S3."];
       redshiftDestinationUpdate: RedshiftDestinationUpdate.t option
@@ -9053,7 +9053,7 @@ module CreateDeliveryStreamInput =
           "Used to specify the type and Amazon Resource Name (ARN) of the KMS key needed for Server-Side Encryption (SSE)."];
       s3DestinationConfiguration: S3DestinationConfiguration.t option
         [@ocaml.doc
-          "[Deprecated] The destination in Amazon S3. You can specify only one destination."];
+          "\\[Deprecated\\] The destination in Amazon S3. You can specify only one destination."];
       extendedS3DestinationConfiguration:
         ExtendedS3DestinationConfiguration.t option
         [@ocaml.doc

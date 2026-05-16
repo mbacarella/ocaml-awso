@@ -164,7 +164,7 @@ module BlockAction =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies that Shield Advanced should configure its WAF rules with the WAF Block action. This is only used in the context of the ResponseAction setting. JSON specification: \"Block\": {}"]
+       "Specifies that Shield Advanced should configure its WAF rules with the WAF Block action. This is only used in the context of the ResponseAction setting. JSON specification: \"Block\": \\{\\}"]
 module CountAction =
   struct
     type nonrec t = unit
@@ -176,7 +176,7 @@ module CountAction =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies that Shield Advanced should configure its WAF rules with the WAF Count action. This is only used in the context of the ResponseAction setting. JSON specification: \"Count\": {}"]
+       "Specifies that Shield Advanced should configure its WAF rules with the WAF Count action. This is only used in the context of the ResponseAction setting. JSON specification: \"Count\": \\{\\}"]
 module ProtectionGroupArbitraryPatternLimits =
   struct
     type nonrec t =

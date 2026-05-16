@@ -1061,7 +1061,7 @@ module CreateJobQuotaExceededException =
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Each account can create only a certain number of jobs per day. If you need to create more than this, please contact awsimportexport@amazon.com to explain your particular use case."]
+       "Each account can create only a certain number of jobs per day. If you need to create more than this, please contact awsimportexport\\@amazon.com to explain your particular use case."]
 module SignatureFileContents =
   struct
     type nonrec t = string[@@ocaml.doc

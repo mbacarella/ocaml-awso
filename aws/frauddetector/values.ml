@@ -924,7 +924,7 @@ module LabelSchema =
       {
       labelMapper: LabelMapper.t
         [@ocaml.doc
-          "The label mapper maps the Amazon Fraud Detector supported model classification labels (FRAUD, LEGIT) to the appropriate event type labels. For example, if \"FRAUD\" and \"LEGIT\" are Amazon Fraud Detector supported labels, this mapper could be: {\"FRAUD\" => [\"0\"], \"LEGIT\" => [\"1\"]} or {\"FRAUD\" => [\"false\"], \"LEGIT\" => [\"true\"]} or {\"FRAUD\" => [\"fraud\", \"abuse\"], \"LEGIT\" => [\"legit\", \"safe\"]}. The value part of the mapper is a list, because you may have multiple label variants from your event type for a single Amazon Fraud Detector label."];
+          "The label mapper maps the Amazon Fraud Detector supported model classification labels (FRAUD, LEGIT) to the appropriate event type labels. For example, if \"FRAUD\" and \"LEGIT\" are Amazon Fraud Detector supported labels, this mapper could be: \\{\"FRAUD\" => \\[\"0\"\\], \"LEGIT\" => \\[\"1\"\\]\\} or \\{\"FRAUD\" => \\[\"false\"\\], \"LEGIT\" => \\[\"true\"\\]\\} or \\{\"FRAUD\" => \\[\"fraud\", \"abuse\"\\], \"LEGIT\" => \\[\"legit\", \"safe\"\\]\\}. The value part of the mapper is a list, because you may have multiple label variants from your event type for a single Amazon Fraud Detector label."];
       unlabeledEventsTreatment: UnlabeledEventsTreatment.t option
         [@ocaml.doc "The action to take for unlabeled events."]}
     let context_ = "LabelSchema"
@@ -8201,7 +8201,7 @@ module ListEventPredictionsResult =
       make ?nextToken ?eventPredictionSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of past predictions. The list can be filtered by detector ID, detector version ID, event ID, event type, or by specifying a time period. If filter is not specified, the most recent prediction is returned. For example, the following filter lists all past predictions for xyz event type - { \"eventType\":{ \"value\": \"xyz\" }\226\128\157 } This is a paginated API. If you provide a null maxResults, this action will retrieve a maximum of 10 records per page. If you provide a maxResults, the value must be between 50 and 100. To get the next page results, provide the nextToken from the response as part of your request. A null nextToken fetches the records from the beginning."]
+       "Gets a list of past predictions. The list can be filtered by detector ID, detector version ID, event ID, event type, or by specifying a time period. If filter is not specified, the most recent prediction is returned. For example, the following filter lists all past predictions for xyz event type - \\{ \"eventType\":\\{ \"value\": \"xyz\" \\}\226\128\157 \\} This is a paginated API. If you provide a null maxResults, this action will retrieve a maximum of 10 records per page. If you provide a maxResults, the value must be between 50 and 100. To get the next page results, provide the nextToken from the response as part of your request. A null nextToken fetches the records from the beginning."]
 module ListEventPredictionsRequest =
   struct
     type nonrec t =
@@ -8288,7 +8288,7 @@ module ListEventPredictionsRequest =
         ?detectorId ?eventType ?eventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of past predictions. The list can be filtered by detector ID, detector version ID, event ID, event type, or by specifying a time period. If filter is not specified, the most recent prediction is returned. For example, the following filter lists all past predictions for xyz event type - { \"eventType\":{ \"value\": \"xyz\" }\226\128\157 } This is a paginated API. If you provide a null maxResults, this action will retrieve a maximum of 10 records per page. If you provide a maxResults, the value must be between 50 and 100. To get the next page results, provide the nextToken from the response as part of your request. A null nextToken fetches the records from the beginning."]
+       "Gets a list of past predictions. The list can be filtered by detector ID, detector version ID, event ID, event type, or by specifying a time period. If filter is not specified, the most recent prediction is returned. For example, the following filter lists all past predictions for xyz event type - \\{ \"eventType\":\\{ \"value\": \"xyz\" \\}\226\128\157 \\} This is a paginated API. If you provide a null maxResults, this action will retrieve a maximum of 10 records per page. If you provide a maxResults, the value must be between 50 and 100. To get the next page results, provide the nextToken from the response as part of your request. A null nextToken fetches the records from the beginning."]
 module GetVariablesResult =
   struct
     type nonrec t =

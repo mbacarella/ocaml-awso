@@ -10959,7 +10959,7 @@ module ModifyReplicationGroupMessage =
           "A valid cache node type that you want to scale this replication group to."];
       authToken: String_.t option
         [@ocaml.doc
-          "Reserved parameter. The password used to access a password protected server. This parameter must be specified with the auth-token-update-strategy parameter. Password constraints: Must be only printable ASCII characters Must be at least 16 characters and no more than 128 characters in length Cannot contain any of the following characters: '/', '\"', or '@', '%' For more information, see AUTH password at AUTH."];
+          "Reserved parameter. The password used to access a password protected server. This parameter must be specified with the auth-token-update-strategy parameter. Password constraints: Must be only printable ASCII characters Must be at least 16 characters and no more than 128 characters in length Cannot contain any of the following characters: '/', '\"', or '\\@', '%' For more information, see AUTH password at AUTH."];
       authTokenUpdateStrategy: AuthTokenUpdateStrategyType.t option
         [@ocaml.doc
           "Specifies the strategy to use to update the AUTH token. This parameter must be specified with the auth-token parameter. Possible values: Rotate Set For more information, see Authenticating Users with Redis AUTH"];
@@ -11834,7 +11834,7 @@ module ModifyCacheClusterMessage =
           "A valid cache node type that you want to scale this cluster up to."];
       authToken: String_.t option
         [@ocaml.doc
-          "Reserved parameter. The password used to access a password protected server. This parameter must be specified with the auth-token-update parameter. Password constraints: Must be only printable ASCII characters Must be at least 16 characters and no more than 128 characters in length Cannot contain any of the following characters: '/', '\"', or '@', '%' For more information, see AUTH password at AUTH."];
+          "Reserved parameter. The password used to access a password protected server. This parameter must be specified with the auth-token-update parameter. Password constraints: Must be only printable ASCII characters Must be at least 16 characters and no more than 128 characters in length Cannot contain any of the following characters: '/', '\"', or '\\@', '%' For more information, see AUTH password at AUTH."];
       authTokenUpdateStrategy: AuthTokenUpdateStrategyType.t option
         [@ocaml.doc
           "Specifies the strategy to use to update the AUTH token. This parameter must be specified with the auth-token parameter. Possible values: Rotate Set For more information, see Authenticating Users with Redis AUTH"];

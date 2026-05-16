@@ -1581,7 +1581,7 @@ module Parameters =
       {
       excludeBootVolume: ExcludeBootVolume.t option
         [@ocaml.doc
-          "[EBS Snapshot Management \226\128\147 Instance policies only] Indicates whether to exclude the root volume from snapshots created using CreateSnapshots. The default is false."];
+          "\\[EBS Snapshot Management \226\128\147 Instance policies only\\] Indicates whether to exclude the root volume from snapshots created using CreateSnapshots. The default is false."];
       noReboot: NoReboot.t option
         [@ocaml.doc
           "Applies to AMI lifecycle policies only. Indicates whether targeted instances are rebooted when the lifecycle policy runs. true indicates that targeted instances are not rebooted when the policy runs. false indicates that target instances are rebooted when the policy runs. The default is true (instances are not rebooted)."]}
@@ -3321,7 +3321,7 @@ module CreateLifecyclePolicyRequest =
           "The Amazon Resource Name (ARN) of the IAM role used to run the operations specified by the lifecycle policy."];
       description: PolicyDescription.t
         [@ocaml.doc
-          "A description of the lifecycle policy. The characters ^[0-9A-Za-z _-]+$ are supported."];
+          "A description of the lifecycle policy. The characters ^\\[0-9A-Za-z _-\\]+$ are supported."];
       state: SettablePolicyStateValues.t
         [@ocaml.doc
           "The desired activation state of the lifecycle policy after creation."];

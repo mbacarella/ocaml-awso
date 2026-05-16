@@ -4538,10 +4538,10 @@ module DefaultClientBrandingAttributes =
           "The logo URL. This is the link where users can download the logo image. The only supported image format is .png."];
       supportEmail: ClientEmail.t option
         [@ocaml.doc
-          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback@amazon.com."];
+          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback\\@amazon.com."];
       supportLink: ClientUrl.t option
         [@ocaml.doc
-          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive.You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback@amazon.com."];
+          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive.You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback\\@amazon.com."];
       forgotPasswordLink: ClientUrl.t option
         [@ocaml.doc
           "The forgotten password link. This is the web address that users can go to if they forget the password for their WorkSpace."];
@@ -4605,19 +4605,19 @@ module IosClientBrandingAttributes =
       {
       logoUrl: ClientUrl.t option
         [@ocaml.doc
-          "The logo. This is the link where users can download the logo image. This is the standard-resolution display that has a 1:1 pixel density (or @1x), where one pixel is equal to one point."];
+          "The logo. This is the link where users can download the logo image. This is the standard-resolution display that has a 1:1 pixel density (or \\@1x), where one pixel is equal to one point."];
       logo2xUrl: ClientUrl.t option
         [@ocaml.doc
-          "The @2x version of the logo. This is the higher resolution display that offers a scale factor of 2.0 (or @2x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
+          "The \\@2x version of the logo. This is the higher resolution display that offers a scale factor of 2.0 (or \\@2x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
       logo3xUrl: ClientUrl.t option
         [@ocaml.doc
-          "The @3x version of the logo. This is the higher resolution display that offers a scale factor of 3.0 (or @3x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
+          "The \\@3x version of the logo. This is the higher resolution display that offers a scale factor of 3.0 (or \\@3x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
       supportEmail: ClientEmail.t option
         [@ocaml.doc
-          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback@amazon.com."];
+          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback\\@amazon.com."];
       supportLink: ClientUrl.t option
         [@ocaml.doc
-          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback@amazon.com."];
+          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback\\@amazon.com."];
       forgotPasswordLink: ClientUrl.t option
         [@ocaml.doc
           "The forgotten password link. This is the web address that users can go to if they forget the password for their WorkSpace."];
@@ -4696,10 +4696,10 @@ module DefaultImportClientBrandingAttributes =
           "The logo. This is the link where users can download the logo image. The only image format accepted is .png."];
       supportEmail: ClientEmail.t option
         [@ocaml.doc
-          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback@amazon.com."];
+          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback\\@amazon.com."];
       supportLink: ClientUrl.t option
         [@ocaml.doc
-          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback@amazon.com."];
+          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback\\@amazon.com."];
       forgotPasswordLink: ClientUrl.t option
         [@ocaml.doc
           "The forgotten password link. This is the web address that users can go to if they forget the password for their WorkSpace."];
@@ -4763,19 +4763,19 @@ module IosImportClientBrandingAttributes =
       {
       logo: IosLogo.t option
         [@ocaml.doc
-          "The logo. This is the link where users can download the logo image. This is the standard-resolution display that has a 1:1 pixel density (or @1x), where one pixel is equal to one point."];
+          "The logo. This is the link where users can download the logo image. This is the standard-resolution display that has a 1:1 pixel density (or \\@1x), where one pixel is equal to one point."];
       logo2x: Ios2XLogo.t option
         [@ocaml.doc
-          "The @2x version of the logo. This is the higher resolution display that offers a scale factor of 2.0 (or @2x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
+          "The \\@2x version of the logo. This is the higher resolution display that offers a scale factor of 2.0 (or \\@2x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
       logo3x: Ios3XLogo.t option
         [@ocaml.doc
-          "The @3x version of the logo. This is the higher resolution display that offers a scale factor of 3.0 (or @3x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
+          "The \\@3x version of the logo. This is the higher resolution display that offers a scale factor of 3.0 (or \\@3x). For more information about iOS image size and resolution, see Image Size and Resolution in the Apple Human Interface Guidelines."];
       supportEmail: ClientEmail.t option
         [@ocaml.doc
-          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback@amazon.com."];
+          "The support email. The company's customer support email address. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default email is workspaces-feedback\\@amazon.com."];
       supportLink: ClientUrl.t option
         [@ocaml.doc
-          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback@amazon.com."];
+          "The support link. The link for the company's customer support page for their WorkSpace. In each platform type, the SupportEmail and SupportLink parameters are mutually exclusive. You can specify one parameter for each platform type, but not both. The default support link is workspaces-feedback\\@amazon.com."];
       forgotPasswordLink: ClientUrl.t option
         [@ocaml.doc
           "The forgotten password link. This is the web address that users can go to if they forget the password for their WorkSpace."];

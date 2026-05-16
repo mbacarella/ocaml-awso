@@ -1855,7 +1855,7 @@ module CreateEnvironmentRequest =
         [@ocaml.doc "Configuration information for the superuser."];
       dataBundles: DataBundleArns.t option
         [@ocaml.doc
-          "The list of Amazon Resource Names (ARN) of the data bundles to install. Currently supported data bundle ARNs: arn:aws:finspace:${Region}::data-bundle/capital-markets-sample - Contains sample Capital Markets datasets, categories and controlled vocabularies. arn:aws:finspace:${Region}::data-bundle/taq (default) - Contains trades and quotes data in addition to sample Capital Markets data."]}
+          "The list of Amazon Resource Names (ARN) of the data bundles to install. Currently supported data bundle ARNs: arn:aws:finspace:$\\{Region\\}::data-bundle/capital-markets-sample - Contains sample Capital Markets datasets, categories and controlled vocabularies. arn:aws:finspace:$\\{Region\\}::data-bundle/taq (default) - Contains trades and quotes data in addition to sample Capital Markets data."]}
     let context_ = "CreateEnvironmentRequest"
     let make ?description =
       fun ?kmsKeyId ->

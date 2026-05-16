@@ -2188,7 +2188,7 @@ module DescribeDimensionKeysRequest =
           "A specification for how to aggregate the data points from a query result. You must specify a valid dimension group. Performance Insights returns all dimensions within this group, unless you provide the names of specific dimensions within this group. You can also request that Performance Insights return a limited number of values for a dimension."];
       additionalMetrics: AdditionalMetricsList.t option
         [@ocaml.doc
-          "Additional metrics for the top N dimension keys. If the specified dimension group in the GroupBy parameter is db.sql_tokenized, you can specify per-SQL metrics to get the values for the top N SQL digests. The response syntax is as follows: \"AdditionalMetrics\" : { \"string\" : \"string\" }."];
+          "Additional metrics for the top N dimension keys. If the specified dimension group in the GroupBy parameter is db.sql_tokenized, you can specify per-SQL metrics to get the values for the top N SQL digests. The response syntax is as follows: \"AdditionalMetrics\" : \\{ \"string\" : \"string\" \\}."];
       partitionBy: DimensionGroup.t option
         [@ocaml.doc
           "For each dimension specified in GroupBy, specify a secondary dimension to further subdivide the partition keys in the response."];

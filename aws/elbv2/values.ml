@@ -920,12 +920,12 @@ module LoadBalancerAddress =
       ipAddress: IpAddress.t option [@ocaml.doc "The static IP address."];
       allocationId: AllocationId.t option
         [@ocaml.doc
-          "[Network Load Balancers] The allocation ID of the Elastic IP address for an internal-facing load balancer."];
+          "\\[Network Load Balancers\\] The allocation ID of the Elastic IP address for an internal-facing load balancer."];
       privateIPv4Address: PrivateIPv4Address.t option
         [@ocaml.doc
-          "[Network Load Balancers] The private IPv4 address for an internal load balancer."];
+          "\\[Network Load Balancers\\] The private IPv4 address for an internal load balancer."];
       iPv6Address: IPv6Address.t option
-        [@ocaml.doc "[Network Load Balancers] The IPv6 address."]}
+        [@ocaml.doc "\\[Network Load Balancers\\] The IPv6 address."]}
     let make ?ipAddress =
       fun ?allocationId ->
         fun ?privateIPv4Address ->
@@ -1432,16 +1432,16 @@ module RedirectActionConfig =
       {
       protocol: RedirectActionProtocol.t option
         [@ocaml.doc
-          "The protocol. You can specify HTTP, HTTPS, or #{protocol}. You can redirect HTTP to HTTP, HTTP to HTTPS, and HTTPS to HTTPS. You cannot redirect HTTPS to HTTP."];
+          "The protocol. You can specify HTTP, HTTPS, or #\\{protocol\\}. You can redirect HTTP to HTTP, HTTP to HTTPS, and HTTPS to HTTPS. You cannot redirect HTTPS to HTTP."];
       port: RedirectActionPort.t option
         [@ocaml.doc
-          "The port. You can specify a value from 1 to 65535 or #{port}."];
+          "The port. You can specify a value from 1 to 65535 or #\\{port\\}."];
       host: RedirectActionHost.t option
         [@ocaml.doc
-          "The hostname. This component is not percent-encoded. The hostname can contain #{host}."];
+          "The hostname. This component is not percent-encoded. The hostname can contain #\\{host\\}."];
       path: RedirectActionPath.t option
         [@ocaml.doc
-          "The absolute path, starting with the leading \"/\". This component is not percent-encoded. The path can contain #{host}, #{path}, and #{port}."];
+          "The absolute path, starting with the leading \"/\". This component is not percent-encoded. The path can contain #\\{host\\}, #\\{path\\}, and #\\{port\\}."];
       query: RedirectActionQuery.t option
         [@ocaml.doc
           "The query parameters, URL-encoded when necessary, but not percent-encoded. Do not include the leading \"?\", as it is automatically added. You can specify any of the reserved keywords."];
@@ -1495,7 +1495,7 @@ module RedirectActionConfig =
       make ~statusCode ?query ?path ?host ?port ?protocol ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a redirect action. A URI consists of the following components: protocol://hostname:port/path?query. You must modify at least one of the following components to avoid a redirect loop: protocol, hostname, port, or path. Any components that you do not modify retain their original values. You can reuse URI components using the following reserved keywords: #{protocol} #{host} #{port} #{path} (the leading \"/\" is removed) #{query} For example, you can change the path to \"/new/#{path}\", the hostname to \"example.#{host}\", or the query to \"#{query}&value=xyz\"."]
+       "Information about a redirect action. A URI consists of the following components: protocol://hostname:port/path?query. You must modify at least one of the following components to avoid a redirect loop: protocol, hostname, port, or path. Any components that you do not modify retain their original values. You can reuse URI components using the following reserved keywords: #\\{protocol\\} #\\{host\\} #\\{port\\} #\\{path\\} (the leading \"/\" is removed) #\\{query\\} For example, you can change the path to \"/new/#\\{path\\}\", the hostname to \"example.#\\{host\\}\", or the query to \"#\\{query\\}&value=xyz\"."]
 module ConditionFieldName =
   struct
     type nonrec t = string
@@ -1826,19 +1826,19 @@ module Action =
           "The Amazon Resource Name (ARN) of the target group. Specify only when Type is forward and you want to route to a single target group. To route to one or more target groups, use ForwardConfig instead."];
       authenticateOidcConfig: AuthenticateOidcActionConfig.t option
         [@ocaml.doc
-          "[HTTPS listeners] Information about an identity provider that is compliant with OpenID Connect (OIDC). Specify only when Type is authenticate-oidc."];
+          "\\[HTTPS listeners\\] Information about an identity provider that is compliant with OpenID Connect (OIDC). Specify only when Type is authenticate-oidc."];
       authenticateCognitoConfig: AuthenticateCognitoActionConfig.t option
         [@ocaml.doc
-          "[HTTPS listeners] Information for using Amazon Cognito to authenticate users. Specify only when Type is authenticate-cognito."];
+          "\\[HTTPS listeners\\] Information for using Amazon Cognito to authenticate users. Specify only when Type is authenticate-cognito."];
       order: ActionOrder.t option
         [@ocaml.doc
           "The order for the action. This value is required for rules with multiple actions. The action with the lowest value for order is performed first."];
       redirectConfig: RedirectActionConfig.t option
         [@ocaml.doc
-          "[Application Load Balancer] Information for creating a redirect action. Specify only when Type is redirect."];
+          "\\[Application Load Balancer\\] Information for creating a redirect action. Specify only when Type is redirect."];
       fixedResponseConfig: FixedResponseActionConfig.t option
         [@ocaml.doc
-          "[Application Load Balancer] Information for creating an action that returns a custom HTTP response. Specify only when Type is fixed-response."];
+          "\\[Application Load Balancer\\] Information for creating an action that returns a custom HTTP response. Specify only when Type is fixed-response."];
       forwardConfig: ForwardActionConfig.t option
         [@ocaml.doc
           "Information for creating an action that distributes requests among one or more target groups. For Network Load Balancers, you can specify a single target group. Specify only when Type is forward. If you specify both ForwardConfig and TargetGroupArn, you can specify only one target group using ForwardConfig and it must be the same target group specified in TargetGroupArn."]}
@@ -1942,7 +1942,7 @@ module RuleCondition =
           "The field in the HTTP request. The following are the possible values: http-header http-request-method host-header path-pattern query-string source-ip"];
       values: ListOfString.t option
         [@ocaml.doc
-          "The condition value. Specify only when Field is host-header or path-pattern. Alternatively, to specify multiple host names or multiple path patterns, use HostHeaderConfig or PathPatternConfig. If Field is host-header and you are not using HostHeaderConfig, you can specify a single host name (for example, my.example.com) in Values. A host name is case insensitive, can be up to 128 characters in length, and can contain any of the following characters. A-Z, a-z, 0-9 - . * (matches 0 or more characters) ? (matches exactly 1 character) If Field is path-pattern and you are not using PathPatternConfig, you can specify a single path pattern (for example, /img/*) in Values. A path pattern is case-sensitive, can be up to 128 characters in length, and can contain any of the following characters. A-Z, a-z, 0-9 _ - . $ / ~ \" ' @ : + & (using &amp;) * (matches 0 or more characters) ? (matches exactly 1 character)"];
+          "The condition value. Specify only when Field is host-header or path-pattern. Alternatively, to specify multiple host names or multiple path patterns, use HostHeaderConfig or PathPatternConfig. If Field is host-header and you are not using HostHeaderConfig, you can specify a single host name (for example, my.example.com) in Values. A host name is case insensitive, can be up to 128 characters in length, and can contain any of the following characters. A-Z, a-z, 0-9 - . * (matches 0 or more characters) ? (matches exactly 1 character) If Field is path-pattern and you are not using PathPatternConfig, you can specify a single path pattern (for example, /img/*) in Values. A path pattern is case-sensitive, can be up to 128 characters in length, and can contain any of the following characters. A-Z, a-z, 0-9 _ - . $ / ~ \" ' \\@ : + & (using &amp;) * (matches 0 or more characters) ? (matches exactly 1 character)"];
       hostHeaderConfig: HostHeaderConditionConfig.t option
         [@ocaml.doc
           "Information for a host header condition. Specify only when Field is host-header."];
@@ -2348,10 +2348,10 @@ module AvailabilityZone =
           "The ID of the subnet. You can specify one subnet per Availability Zone."];
       outpostId: OutpostId.t option
         [@ocaml.doc
-          "[Application Load Balancers on Outposts] The ID of the Outpost."];
+          "\\[Application Load Balancers on Outposts\\] The ID of the Outpost."];
       loadBalancerAddresses: LoadBalancerAddresses.t option
         [@ocaml.doc
-          "[Network Load Balancers] If you need static IP addresses for your load balancer, you can specify one Elastic IP address per Availability Zone when you create an internal-facing load balancer. For internal load balancers, you can specify a private IP address from the IPv4 range of the subnet."]}
+          "\\[Network Load Balancers\\] If you need static IP addresses for your load balancer, you can specify one Elastic IP address per Availability Zone when you create an internal-facing load balancer. For internal load balancers, you can specify a private IP address from the IPv4 range of the subnet."]}
     let make ?zoneName =
       fun ?subnetId ->
         fun ?outpostId ->
@@ -3397,12 +3397,12 @@ module SubnetMapping =
       subnetId: SubnetId.t option [@ocaml.doc "The ID of the subnet."];
       allocationId: AllocationId.t option
         [@ocaml.doc
-          "[Network Load Balancers] The allocation ID of the Elastic IP address for an internet-facing load balancer."];
+          "\\[Network Load Balancers\\] The allocation ID of the Elastic IP address for an internet-facing load balancer."];
       privateIPv4Address: PrivateIPv4Address.t option
         [@ocaml.doc
-          "[Network Load Balancers] The private IPv4 address for an internal load balancer."];
+          "\\[Network Load Balancers\\] The private IPv4 address for an internal load balancer."];
       iPv6Address: IPv6Address.t option
-        [@ocaml.doc "[Network Load Balancers] The IPv6 address."]}
+        [@ocaml.doc "\\[Network Load Balancers\\] The IPv6 address."]}
     let make ?subnetId =
       fun ?allocationId ->
         fun ?privateIPv4Address ->
@@ -3564,7 +3564,7 @@ module TargetGroup =
           "The type of target that you must specify when registering targets with this target group. The possible values are instance (register targets by instance ID), ip (register targets by IP address), lambda (register a single Lambda function as a target), or alb (register a single Application Load Balancer as a target)."];
       protocolVersion: ProtocolVersion.t option
         [@ocaml.doc
-          "[HTTP/HTTPS protocol] The protocol version. The possible values are GRPC, HTTP1, and HTTP2."];
+          "\\[HTTP/HTTPS protocol\\] The protocol version. The possible values are GRPC, HTTP1, and HTTP2."];
       ipAddressType: TargetGroupIpAddressTypeEnum.t option
         [@ocaml.doc
           "The type of IP address used for this target group. The possible values are ipv4 and ipv6. This is an optional parameter. If not specified, the IP address type defaults to ipv4."]}
@@ -3816,15 +3816,15 @@ module Listener =
           "The protocol for connections from clients to the load balancer."];
       certificates: CertificateList.t option
         [@ocaml.doc
-          "[HTTPS or TLS listener] The default certificate for the listener."];
+          "\\[HTTPS or TLS listener\\] The default certificate for the listener."];
       sslPolicy: SslPolicyName.t option
         [@ocaml.doc
-          "[HTTPS or TLS listener] The security policy that defines which protocols and ciphers are supported."];
+          "\\[HTTPS or TLS listener\\] The security policy that defines which protocols and ciphers are supported."];
       defaultActions: Actions.t option
         [@ocaml.doc "The default actions for the listener."];
       alpnPolicy: AlpnPolicyName.t option
         [@ocaml.doc
-          "[TLS listener] The name of the Application-Layer Protocol Negotiation (ALPN) policy."]}
+          "\\[TLS listener\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy."]}
     let make ?listenerArn =
       fun ?loadBalancerArn ->
         fun ?port ->
@@ -4036,7 +4036,7 @@ module LoadBalancer =
           "The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses)."];
       customerOwnedIpv4Pool: CustomerOwnedIpv4Pool.t option
         [@ocaml.doc
-          "[Application Load Balancers on Outposts] The ID of the customer-owned address pool."]}
+          "\\[Application Load Balancers on Outposts\\] The ID of the customer-owned address pool."]}
     let make ?loadBalancerArn =
       fun ?dNSName ->
         fun ?canonicalHostedZoneId ->
@@ -5170,7 +5170,7 @@ module SetSubnetsOutput =
       availabilityZones: AvailabilityZones.t option
         [@ocaml.doc "Information about the subnets."];
       ipAddressType: IpAddressType.t option
-        [@ocaml.doc "[Network Load Balancers] The IP address type."]}
+        [@ocaml.doc "\\[Network Load Balancers\\] The IP address type."]}
     and responseMetaData = unit
     and t =
       {
@@ -5301,13 +5301,13 @@ module SetSubnetsInput =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the load balancer."];
       subnets: Subnets.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. [Application Load Balancers] You must specify subnets from at least two Availability Zones. [Application Load Balancers on Outposts] You must specify one Outpost subnet. [Application Load Balancers on Local Zones] You can specify subnets from one or more Local Zones. [Network Load Balancers] You can specify subnets from one or more Availability Zones."];
+          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones."];
       subnetMappings: SubnetMappings.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. [Application Load Balancers] You must specify subnets from at least two Availability Zones. You cannot specify Elastic IP addresses for your subnets. [Application Load Balancers on Outposts] You must specify one Outpost subnet. [Application Load Balancers on Local Zones] You can specify subnets from one or more Local Zones. [Network Load Balancers] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet."];
+          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. You cannot specify Elastic IP addresses for your subnets. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet."];
       ipAddressType: IpAddressType.t option
         [@ocaml.doc
-          "[Network Load Balancers] The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses). You can\226\128\153t specify dualstack for a load balancer with a UDP or TCP_UDP listener. ."]}
+          "\\[Network Load Balancers\\] The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses). You can\226\128\153t specify dualstack for a load balancer with a UDP or TCP_UDP listener. ."]}
     let context_ = "SetSubnetsInput"
     let make ?subnets =
       fun ?subnetMappings ->
@@ -6102,7 +6102,7 @@ module ModifyTargetGroupInput =
           "The port the load balancer uses when performing health checks on targets."];
       healthCheckPath: Path.t option
         [@ocaml.doc
-          "[HTTP/HTTPS health checks] The destination for health checks on the targets. [HTTP1 or HTTP2 protocol version] The ping path. The default is /. [GRPC protocol version] The path of a custom health check method with the format /package.service/method. The default is /Amazon Web Services.ALB/healthcheck."];
+          "\\[HTTP/HTTPS health checks\\] The destination for health checks on the targets. \\[HTTP1 or HTTP2 protocol version\\] The ping path. The default is /. \\[GRPC protocol version\\] The path of a custom health check method with the format /package.service/method. The default is /Amazon Web Services.ALB/healthcheck."];
       healthCheckEnabled: HealthCheckEnabled.t option
         [@ocaml.doc "Indicates whether health checks are enabled."];
       healthCheckIntervalSeconds: HealthCheckIntervalSeconds.t option
@@ -6110,7 +6110,7 @@ module ModifyTargetGroupInput =
           "The approximate amount of time, in seconds, between health checks of an individual target. For TCP health checks, the supported values are 10 or 30 seconds. With Network Load Balancers, you can't modify this setting."];
       healthCheckTimeoutSeconds: HealthCheckTimeoutSeconds.t option
         [@ocaml.doc
-          "[HTTP/HTTPS health checks] The amount of time, in seconds, during which no response means a failed health check. With Network Load Balancers, you can't modify this setting."];
+          "\\[HTTP/HTTPS health checks\\] The amount of time, in seconds, during which no response means a failed health check. With Network Load Balancers, you can't modify this setting."];
       healthyThresholdCount: HealthCheckThresholdCount.t option
         [@ocaml.doc
           "The number of consecutive health checks successes required before considering an unhealthy target healthy."];
@@ -6119,7 +6119,7 @@ module ModifyTargetGroupInput =
           "The number of consecutive health check failures required before considering the target unhealthy. For target groups with a protocol of TCP or TLS, this value must be the same as the healthy threshold count."];
       matcher: Matcher.t option
         [@ocaml.doc
-          "[HTTP/HTTPS health checks] The HTTP or gRPC codes to use when checking for a successful response from a target. With Network Load Balancers, you can't modify this setting."]}
+          "\\[HTTP/HTTPS health checks\\] The HTTP or gRPC codes to use when checking for a successful response from a target. With Network Load Balancers, you can't modify this setting."]}
     let context_ = "ModifyTargetGroupInput"
     let make ?healthCheckProtocol =
       fun ?healthCheckPort ->
@@ -6917,15 +6917,15 @@ module ModifyListenerInput =
           "The protocol for connections from clients to the load balancer. Application Load Balancers support the HTTP and HTTPS protocols. Network Load Balancers support the TCP, TLS, UDP, and TCP_UDP protocols. You can\226\128\153t change the protocol to UDP or TCP_UDP if dual-stack mode is enabled. You cannot specify a protocol for a Gateway Load Balancer."];
       sslPolicy: SslPolicyName.t option
         [@ocaml.doc
-          "[HTTPS and TLS listeners] The security policy that defines which protocols and ciphers are supported. For more information, see Security policies in the Application Load Balancers Guide or Security policies in the Network Load Balancers Guide."];
+          "\\[HTTPS and TLS listeners\\] The security policy that defines which protocols and ciphers are supported. For more information, see Security policies in the Application Load Balancers Guide or Security policies in the Network Load Balancers Guide."];
       certificates: CertificateList.t option
         [@ocaml.doc
-          "[HTTPS and TLS listeners] The default certificate for the listener. You must provide exactly one certificate. Set CertificateArn to the certificate ARN but do not set IsDefault."];
+          "\\[HTTPS and TLS listeners\\] The default certificate for the listener. You must provide exactly one certificate. Set CertificateArn to the certificate ARN but do not set IsDefault."];
       defaultActions: Actions.t option
         [@ocaml.doc "The actions for the default rule."];
       alpnPolicy: AlpnPolicyName.t option
         [@ocaml.doc
-          "[TLS listeners] The name of the Application-Layer Protocol Negotiation (ALPN) policy. You can specify one policy name. The following are the possible values: HTTP1Only HTTP2Only HTTP2Optional HTTP2Preferred None For more information, see ALPN policies in the Network Load Balancers Guide."]}
+          "\\[TLS listeners\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy. You can specify one policy name. The following are the possible values: HTTP1Only HTTP2Only HTTP2Optional HTTP2Preferred None For more information, see ALPN policies in the Network Load Balancers Guide."]}
     let context_ = "ModifyListenerInput"
     let make ?port =
       fun ?protocol ->
@@ -8801,7 +8801,7 @@ module CreateTargetGroupInput =
           "The protocol to use for routing traffic to the targets. For Application Load Balancers, the supported protocols are HTTP and HTTPS. For Network Load Balancers, the supported protocols are TCP, TLS, UDP, or TCP_UDP. For Gateway Load Balancers, the supported protocol is GENEVE. A TCP_UDP listener must be associated with a TCP_UDP target group. If the target is a Lambda function, this parameter does not apply."];
       protocolVersion: ProtocolVersion.t option
         [@ocaml.doc
-          "[HTTP/HTTPS protocol] The protocol version. Specify GRPC to send requests to targets using gRPC. Specify HTTP2 to send requests to targets using HTTP/2. The default is HTTP1, which sends requests to targets using HTTP/1.1."];
+          "\\[HTTP/HTTPS protocol\\] The protocol version. Specify GRPC to send requests to targets using gRPC. Specify HTTP2 to send requests to targets using HTTP/2. The default is HTTP1, which sends requests to targets using HTTP/1.1."];
       port: Port.t option
         [@ocaml.doc
           "The port on which the targets receive traffic. This port is used unless you specify a port override when registering the target. If the target is a Lambda function, this parameter does not apply. If the protocol is GENEVE, the supported port is 6081."];
@@ -8819,7 +8819,7 @@ module CreateTargetGroupInput =
           "Indicates whether health checks are enabled. If the target type is lambda, health checks are disabled by default but can be enabled. If the target type is instance, ip, or alb, health checks are always enabled and cannot be disabled."];
       healthCheckPath: Path.t option
         [@ocaml.doc
-          "[HTTP/HTTPS health checks] The destination for health checks on the targets. [HTTP1 or HTTP2 protocol version] The ping path. The default is /. [GRPC protocol version] The path of a custom health check method with the format /package.service/method. The default is /Amazon Web Services.ALB/healthcheck."];
+          "\\[HTTP/HTTPS health checks\\] The destination for health checks on the targets. \\[HTTP1 or HTTP2 protocol version\\] The ping path. The default is /. \\[GRPC protocol version\\] The path of a custom health check method with the format /package.service/method. The default is /Amazon Web Services.ALB/healthcheck."];
       healthCheckIntervalSeconds: HealthCheckIntervalSeconds.t option
         [@ocaml.doc
           "The approximate amount of time, in seconds, between health checks of an individual target. If the target group protocol is TCP, TLS, UDP, or TCP_UDP, the supported values are 10 and 30 seconds. If the target group protocol is HTTP or HTTPS, the default is 30 seconds. If the target group protocol is GENEVE, the default is 10 seconds. If the target type is lambda, the default is 35 seconds."];
@@ -8834,7 +8834,7 @@ module CreateTargetGroupInput =
           "The number of consecutive health check failures required before considering a target unhealthy. If the target group protocol is HTTP or HTTPS, the default is 2. If the target group protocol is TCP or TLS, this value must be the same as the healthy threshold count. If the target group protocol is GENEVE, the default is 3. If the target type is lambda, the default is 2."];
       matcher: Matcher.t option
         [@ocaml.doc
-          "[HTTP/HTTPS health checks] The HTTP or gRPC codes to use when checking for a successful response from a target."];
+          "\\[HTTP/HTTPS health checks\\] The HTTP or gRPC codes to use when checking for a successful response from a target."];
       targetType: TargetTypeEnum.t option
         [@ocaml.doc
           "The type of target that you must specify when registering targets with this target group. You can't specify targets for a target group using more than one target type. instance - Register targets by instance ID. This is the default value. ip - Register targets by IP address. You can specify IP addresses from the subnets of the virtual private cloud (VPC) for the target group, the RFC 1918 range (10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16), and the RFC 6598 range (100.64.0.0/10). You can't specify publicly routable IP addresses. lambda - Register a single Lambda function as a target. alb - Register a single Application Load Balancer as a target."];
@@ -9458,13 +9458,13 @@ module CreateLoadBalancerInput =
           "The name of the load balancer. This name must be unique per region per account, can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens, must not begin or end with a hyphen, and must not begin with \"internal-\"."];
       subnets: Subnets.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. [Application Load Balancers] You must specify subnets from at least two Availability Zones. [Application Load Balancers on Outposts] You must specify one Outpost subnet. [Application Load Balancers on Local Zones] You can specify subnets from one or more Local Zones. [Network Load Balancers] You can specify subnets from one or more Availability Zones. [Gateway Load Balancers] You can specify subnets from one or more Availability Zones."];
+          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. \\[Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones."];
       subnetMappings: SubnetMappings.t option
         [@ocaml.doc
-          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. [Application Load Balancers] You must specify subnets from at least two Availability Zones. You cannot specify Elastic IP addresses for your subnets. [Application Load Balancers on Outposts] You must specify one Outpost subnet. [Application Load Balancers on Local Zones] You can specify subnets from one or more Local Zones. [Network Load Balancers] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet. [Gateway Load Balancers] You can specify subnets from one or more Availability Zones. You cannot specify Elastic IP addresses for your subnets."];
+          "The IDs of the public subnets. You can specify only one subnet per Availability Zone. You must specify either subnets or subnet mappings. \\[Application Load Balancers\\] You must specify subnets from at least two Availability Zones. You cannot specify Elastic IP addresses for your subnets. \\[Application Load Balancers on Outposts\\] You must specify one Outpost subnet. \\[Application Load Balancers on Local Zones\\] You can specify subnets from one or more Local Zones. \\[Network Load Balancers\\] You can specify subnets from one or more Availability Zones. You can specify one Elastic IP address per subnet if you need static IP addresses for your internet-facing load balancer. For internal load balancers, you can specify one private IP address per subnet from the IPv4 range of the subnet. For internet-facing load balancer, you can specify one IPv6 address per subnet. \\[Gateway Load Balancers\\] You can specify subnets from one or more Availability Zones. You cannot specify Elastic IP addresses for your subnets."];
       securityGroups: SecurityGroups.t option
         [@ocaml.doc
-          "[Application Load Balancers] The IDs of the security groups for the load balancer."];
+          "\\[Application Load Balancers\\] The IDs of the security groups for the load balancer."];
       scheme: LoadBalancerSchemeEnum.t option
         [@ocaml.doc
           "The nodes of an Internet-facing load balancer have public IP addresses. The DNS name of an Internet-facing load balancer is publicly resolvable to the public IP addresses of the nodes. Therefore, Internet-facing load balancers can route requests from clients over the internet. The nodes of an internal load balancer have only private IP addresses. The DNS name of an internal load balancer is publicly resolvable to the private IP addresses of the nodes. Therefore, internal load balancers can route requests only from clients with access to the VPC for the load balancer. The default is an Internet-facing load balancer. You cannot specify a scheme for a Gateway Load Balancer."];
@@ -9477,7 +9477,7 @@ module CreateLoadBalancerInput =
           "The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 (for IPv4 addresses) and dualstack (for IPv4 and IPv6 addresses)."];
       customerOwnedIpv4Pool: CustomerOwnedIpv4Pool.t option
         [@ocaml.doc
-          "[Application Load Balancers on Outposts] The ID of the customer-owned address pool (CoIP pool)."]}
+          "\\[Application Load Balancers on Outposts\\] The ID of the customer-owned address pool (CoIP pool)."]}
     let context_ = "CreateLoadBalancerInput"
     let make ?subnets =
       fun ?subnetMappings ->
@@ -9823,15 +9823,15 @@ module CreateListenerInput =
           "The port on which the load balancer is listening. You cannot specify a port for a Gateway Load Balancer."];
       sslPolicy: SslPolicyName.t option
         [@ocaml.doc
-          "[HTTPS and TLS listeners] The security policy that defines which protocols and ciphers are supported. For more information, see Security policies in the Application Load Balancers Guide and Security policies in the Network Load Balancers Guide."];
+          "\\[HTTPS and TLS listeners\\] The security policy that defines which protocols and ciphers are supported. For more information, see Security policies in the Application Load Balancers Guide and Security policies in the Network Load Balancers Guide."];
       certificates: CertificateList.t option
         [@ocaml.doc
-          "[HTTPS and TLS listeners] The default certificate for the listener. You must provide exactly one certificate. Set CertificateArn to the certificate ARN but do not set IsDefault."];
+          "\\[HTTPS and TLS listeners\\] The default certificate for the listener. You must provide exactly one certificate. Set CertificateArn to the certificate ARN but do not set IsDefault."];
       defaultActions: Actions.t
         [@ocaml.doc "The actions for the default rule."];
       alpnPolicy: AlpnPolicyName.t option
         [@ocaml.doc
-          "[TLS listeners] The name of the Application-Layer Protocol Negotiation (ALPN) policy. You can specify one policy name. The following are the possible values: HTTP1Only HTTP2Only HTTP2Optional HTTP2Preferred None For more information, see ALPN policies in the Network Load Balancers Guide."];
+          "\\[TLS listeners\\] The name of the Application-Layer Protocol Negotiation (ALPN) policy. You can specify one policy name. The following are the possible values: HTTP1Only HTTP2Only HTTP2Optional HTTP2Preferred None For more information, see ALPN policies in the Network Load Balancers Guide."];
       tags: TagList.t option
         [@ocaml.doc "The tags to assign to the listener."]}
     let context_ = "CreateListenerInput"

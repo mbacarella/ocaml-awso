@@ -2877,7 +2877,7 @@ module VirtualMFADevice =
           "The base32 seed defined as specified in RFC3548. The Base32StringSeed is base64-encoded."];
       qRCodePNG: BootstrapDatum.t option
         [@ocaml.doc
-          "A QR code PNG image that encodes otpauth://totp/$virtualMFADeviceName@$AccountName?secret=$Base32String where $virtualMFADeviceName is one of the create call arguments. AccountName is the user name if set (otherwise, the account ID otherwise), and Base32String is the seed in base32 format. The Base32String value is base64-encoded."];
+          "A QR code PNG image that encodes otpauth://totp/$virtualMFADeviceName\\@$AccountName?secret=$Base32String where $virtualMFADeviceName is one of the create call arguments. AccountName is the user name if set (otherwise, the account ID otherwise), and Base32String is the seed in base32 format. The Base32String value is base64-encoded."];
       user: User.t option
         [@ocaml.doc "The IAM user associated with this virtual MFA device."];
       enableDate: DateType.t option
@@ -6958,7 +6958,7 @@ module PasswordPolicy =
         [@ocaml.doc "Minimum length to require for IAM user passwords."];
       requireSymbols: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether IAM user passwords must contain at least one of the following symbols: ! @ # $ % ^ & * ( ) _ + - = [ ] { } | '"];
+          "Specifies whether IAM user passwords must contain at least one of the following symbols: ! \\@ # $ % ^ & * ( ) _ + - = \\[ \\] \\{ \\} | '"];
       requireNumbers: BooleanType.t option
         [@ocaml.doc
           "Specifies whether IAM user passwords must contain at least one numeric character (0 to 9)."];
@@ -7661,7 +7661,7 @@ module UploadSigningCertificateRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user the signing certificate is for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user the signing certificate is for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       certificateBody: CertificateBodyType.t
         [@ocaml.doc
           "The contents of the signing certificate. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
@@ -7839,7 +7839,7 @@ module UploadServerCertificateRequest =
           "The path for the server certificate. For more information about paths, see IAM identifiers in the IAM User Guide. This parameter is optional. If it is not included, it defaults to a slash (/). This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters. If you are uploading a server certificate specifically for use with Amazon CloudFront distributions, you must specify a path using the path parameter. The path must begin with /cloudfront and must include a trailing slash (for example, /cloudfront/test/)."];
       serverCertificateName: ServerCertificateNameType.t
         [@ocaml.doc
-          "The name for the server certificate. Do not include the path in this value. The name of the certificate cannot contain any spaces. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name for the server certificate. Do not include the path in this value. The name of the certificate cannot contain any spaces. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       certificateBody: CertificateBodyType.t
         [@ocaml.doc
           "The contents of the public key certificate in PEM-encoded format. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"];
@@ -8024,7 +8024,7 @@ module UploadSSHPublicKeyRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the IAM user to associate the SSH public key with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user to associate the SSH public key with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       sSHPublicKeyBody: PublicKeyMaterialType.t
         [@ocaml.doc
           "The SSH public key. The public key must be encoded in ssh-rsa format or PEM format. The minimum bit-length of the public key is 2048 bits. For example, you can generate a 2048-bit key, and the resulting PEM file is 1679 bytes long. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
@@ -8059,7 +8059,7 @@ module UpdateUserRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "Name of the user to update. If you're changing the name of the user, this is the original user name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "Name of the user to update. If you're changing the name of the user, this is the original user name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       newPath: PathType.t option
         [@ocaml.doc
           "New path for the IAM user. Include this parameter only if you're changing the user's path. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
@@ -8101,7 +8101,7 @@ module UpdateSigningCertificateRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user the signing certificate belongs to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user the signing certificate belongs to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       certificateId: CertificateIdType.t
         [@ocaml.doc
           "The ID of the signing certificate you want to update. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."];
@@ -8145,7 +8145,7 @@ module UpdateServiceSpecificCredentialRequest =
       {
       userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user associated with the service-specific credential. If you do not specify this value, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user associated with the service-specific credential. If you do not specify this value, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serviceSpecificCredentialId: ServiceSpecificCredentialId.t
         [@ocaml.doc
           "The unique identifier of the service-specific credential. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."];
@@ -8192,13 +8192,13 @@ module UpdateServerCertificateRequest =
       {
       serverCertificateName: ServerCertificateNameType.t
         [@ocaml.doc
-          "The name of the server certificate that you want to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the server certificate that you want to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       newPath: PathType.t option
         [@ocaml.doc
           "The new path for the server certificate. Include this only if you are updating the server certificate's path. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
       newServerCertificateName: ServerCertificateNameType.t option
         [@ocaml.doc
-          "The new name for the server certificate. Include this only if you are updating the server certificate's name. The name of the certificate cannot contain any spaces. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The new name for the server certificate. Include this only if you are updating the server certificate's name. The name of the certificate cannot contain any spaces. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "UpdateServerCertificateRequest"
     let make ?newPath =
       fun ?newServerCertificateName ->
@@ -8242,7 +8242,7 @@ module UpdateSSHPublicKeyRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the IAM user associated with the SSH public key. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user associated with the SSH public key. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       sSHPublicKeyId: PublicKeyIdType.t
         [@ocaml.doc
           "The unique identifier for the SSH public key. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."];
@@ -8678,7 +8678,7 @@ module UpdateLoginProfileRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the user whose password you want to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user whose password you want to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       password: PasswordType.t option
         [@ocaml.doc
           "The new password for the specified IAM user. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D) However, the format can be further restricted by the account administrator by setting a password policy on the Amazon Web Services account. For more information, see UpdateAccountPasswordPolicy."];
@@ -8722,7 +8722,7 @@ module UpdateGroupRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "Name of the IAM group to update. If you're changing the name of the group, this is the original name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "Name of the IAM group to update. If you're changing the name of the group, this is the original name. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       newPath: PathType.t option
         [@ocaml.doc
           "New path for the IAM group. Only include this if changing the group's path. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
@@ -8764,7 +8764,7 @@ module UpdateAssumeRolePolicyRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to update with the new policy. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the role to update with the new policy. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyDocument: PolicyDocumentType.t
         [@ocaml.doc
           "The policy that grants an entity permission to assume the role. You must provide policies in JSON format in IAM. However, for CloudFormation templates formatted in YAML, you can provide the policy in JSON or YAML format. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
@@ -8802,7 +8802,7 @@ module UpdateAccountPasswordPolicyRequest =
           "The minimum number of characters allowed in an IAM user password. If you do not specify a value for this parameter, then the operation uses the default value of 6."];
       requireSymbols: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether IAM user passwords must contain at least one of the following non-alphanumeric characters: ! @ # $ % ^ & * ( ) _ + - = [ ] { } | ' If you do not specify a value for this parameter, then the operation uses the default value of false. The result is that passwords do not require at least one symbol character."];
+          "Specifies whether IAM user passwords must contain at least one of the following non-alphanumeric characters: ! \\@ # $ % ^ & * ( ) _ + - = \\[ \\] \\{ \\} | ' If you do not specify a value for this parameter, then the operation uses the default value of false. The result is that passwords do not require at least one symbol character."];
       requireNumbers: BooleanType.t option
         [@ocaml.doc
           "Specifies whether IAM user passwords must contain at least one numeric character (0 to 9). If you do not specify a value for this parameter, then the operation uses the default value of false. The result is that passwords do not require at least one numeric character."];
@@ -8933,7 +8933,7 @@ module UpdateAccessKeyRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user whose key you want to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user whose key you want to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       accessKeyId: AccessKeyIdType.t
         [@ocaml.doc
           "The access key ID of the secret access key you want to update. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."];
@@ -8976,7 +8976,7 @@ module UntagUserRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the IAM user from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified user."]}
@@ -9009,7 +9009,7 @@ module UntagServerCertificateRequest =
       {
       serverCertificateName: ServerCertificateNameType.t
         [@ocaml.doc
-          "The name of the IAM server certificate from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM server certificate from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified IAM server certificate."]}
@@ -9045,7 +9045,7 @@ module UntagSAMLProviderRequest =
       {
       sAMLProviderArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the SAML identity provider in IAM from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the SAML identity provider in IAM from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified SAML identity provider."]}
@@ -9079,7 +9079,7 @@ module UntagRoleRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the IAM role from which you want to remove tags. This parameter accepts (through its regex pattern) a string of characters that consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM role from which you want to remove tags. This parameter accepts (through its regex pattern) a string of characters that consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified role."]}
@@ -9111,7 +9111,7 @@ module UntagPolicyRequest =
       {
       policyArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the IAM customer managed policy from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the IAM customer managed policy from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified policy."]}
@@ -9142,7 +9142,7 @@ module UntagOpenIDConnectProviderRequest =
       {
       openIDConnectProviderArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the OIDC provider in IAM from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the OIDC provider in IAM from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified OIDC provider."]}
@@ -9178,7 +9178,7 @@ module UntagMFADeviceRequest =
       {
       serialNumber: SerialNumberType.t
         [@ocaml.doc
-          "The unique identifier for the IAM virtual MFA device from which you want to remove tags. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The unique identifier for the IAM virtual MFA device from which you want to remove tags. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified instance profile."]}
@@ -9212,7 +9212,7 @@ module UntagInstanceProfileRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the IAM instance profile from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM instance profile from which you want to remove tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of key names as a simple array of strings. The tags with matching keys are removed from the specified instance profile."]}
@@ -9248,7 +9248,7 @@ module TagUserRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the IAM user to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the IAM user. Each tag consists of a key name and an associated value."]}
@@ -9280,7 +9280,7 @@ module TagServerCertificateRequest =
       {
       serverCertificateName: ServerCertificateNameType.t
         [@ocaml.doc
-          "The name of the IAM server certificate to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM server certificate to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the IAM server certificate. Each tag consists of a key name and an associated value."]}
@@ -9315,7 +9315,7 @@ module TagSAMLProviderRequest =
       {
       sAMLProviderArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the SAML identity provider in IAM to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the SAML identity provider in IAM to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the SAML identity provider in IAM. Each tag consists of a key name and an associated value."]}
@@ -9348,7 +9348,7 @@ module TagRoleRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the IAM role to which you want to add tags. This parameter accepts (through its regex pattern) a string of characters that consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM role to which you want to add tags. This parameter accepts (through its regex pattern) a string of characters that consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the IAM role. Each tag consists of a key name and an associated value."]}
@@ -9379,7 +9379,7 @@ module TagPolicyRequest =
       {
       policyArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the IAM customer managed policy to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the IAM customer managed policy to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the IAM customer managed policy. Each tag consists of a key name and an associated value."]}
@@ -9409,7 +9409,7 @@ module TagOpenIDConnectProviderRequest =
       {
       openIDConnectProviderArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the OIDC identity provider in IAM to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the OIDC identity provider in IAM to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the OIDC identity provider in IAM. Each tag consists of a key name and an associated value."]}
@@ -9444,7 +9444,7 @@ module TagMFADeviceRequest =
       {
       serialNumber: SerialNumberType.t
         [@ocaml.doc
-          "The unique identifier for the IAM virtual MFA device to which you want to add tags. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The unique identifier for the IAM virtual MFA device to which you want to add tags. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the IAM virtual MFA device. Each tag consists of a key name and an associated value."]}
@@ -9476,7 +9476,7 @@ module TagInstanceProfileRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the IAM instance profile to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM instance profile to which you want to add tags. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t
         [@ocaml.doc
           "The list of tags that you want to attach to the IAM instance profile. Each tag consists of a key name and an associated value."]}
@@ -9980,10 +9980,10 @@ module ResyncMFADeviceRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user whose MFA device you want to resynchronize. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user whose MFA device you want to resynchronize. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serialNumber: SerialNumberType.t
         [@ocaml.doc
-          "Serial number that uniquely identifies the MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "Serial number that uniquely identifies the MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       authenticationCode1: AuthenticationCodeType.t
         [@ocaml.doc
           "An authentication code emitted by the device. The format for this parameter is a sequence of six digits."];
@@ -10121,7 +10121,7 @@ module ResetServiceSpecificCredentialRequest =
       {
       userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user associated with the service-specific credential. If this value is not specified, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user associated with the service-specific credential. If this value is not specified, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serviceSpecificCredentialId: ServiceSpecificCredentialId.t
         [@ocaml.doc
           "The unique identifier of the service-specific credential. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."]}
@@ -10160,10 +10160,10 @@ module RemoveUserFromGroupRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name of the group to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the group to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user to remove. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the user to remove. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "RemoveUserFromGroupRequest"
     let make ~groupName = fun ~userName -> fun () -> { groupName; userName }
     let to_value x =
@@ -10192,10 +10192,10 @@ module RemoveRoleFromInstanceProfileRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the instance profile to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the instance profile to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to remove. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the role to remove. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "RemoveRoleFromInstanceProfileRequest"
     let make ~instanceProfileName =
       fun ~roleName -> fun () -> { instanceProfileName; roleName }
@@ -10264,10 +10264,10 @@ module PutUserPolicyRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user to associate the policy with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user to associate the policy with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name of the policy document. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the policy document. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyDocument: PolicyDocumentType.t
         [@ocaml.doc
           "The policy document. You must provide policies in JSON format in IAM. However, for CloudFormation templates formatted in YAML, you can provide the policy in JSON or YAML format. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
@@ -10345,10 +10345,10 @@ module PutRolePolicyRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to associate the policy with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the role to associate the policy with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name of the policy document. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the policy document. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyDocument: PolicyDocumentType.t
         [@ocaml.doc
           "The policy document. You must provide policies in JSON format in IAM. However, for CloudFormation templates formatted in YAML, you can provide the policy in JSON or YAML format. CloudFormation always converts a YAML policy to JSON format before submitting it to IAM. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
@@ -10425,10 +10425,10 @@ module PutGroupPolicyRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name of the group to associate the policy with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-."];
+          "The name of the group to associate the policy with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-."];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name of the policy document. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the policy document. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyDocument: PolicyDocumentType.t
         [@ocaml.doc
           "The policy document. You must provide policies in JSON format in IAM. However, for CloudFormation templates formatted in YAML, you can provide the policy in JSON or YAML format. CloudFormation always converts a YAML policy to JSON format before submitting it to = IAM. The regex pattern used to validate this parameter is a string of characters consisting of the following: Any printable ASCII character ranging from the space character (\\u0020) through the end of the ASCII character range The printable characters in the Basic Latin and Latin-1 Supplement character set (through \\u00FF) The special characters tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D)"]}
@@ -10815,7 +10815,7 @@ module ListUserTagsRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the IAM user whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -10947,7 +10947,7 @@ module ListUserPoliciesRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user to list policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user to list policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -11081,7 +11081,7 @@ module ListSigningCertificatesRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user whose signing certificates you want to examine. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user whose signing certificates you want to examine. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -11205,7 +11205,7 @@ module ListServiceSpecificCredentialsRequest =
       {
       userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the user whose service-specific credentials you want information about. If this value is not specified, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user whose service-specific credentials you want information about. If this value is not specified, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serviceName: ServiceName.t option
         [@ocaml.doc
           "Filters the returned results to only those for the specified Amazon Web Services service. If not specified, then Amazon Web Services returns service-specific credentials for all services."]}
@@ -11453,7 +11453,7 @@ module ListServerCertificateTagsRequest =
       {
       serverCertificateName: ServerCertificateNameType.t
         [@ocaml.doc
-          "The name of the IAM server certificate whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM server certificate whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -11581,7 +11581,7 @@ module ListSSHPublicKeysRequest =
       {
       userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user to list SSH public keys for. If none is specified, the UserName field is determined implicitly based on the Amazon Web Services access key used to sign the request. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user to list SSH public keys for. If none is specified, the UserName field is determined implicitly based on the Amazon Web Services access key used to sign the request. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -11797,7 +11797,7 @@ module ListSAMLProviderTagsRequest =
       {
       sAMLProviderArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the Security Assertion Markup Language (SAML) identity provider whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the Security Assertion Markup Language (SAML) identity provider whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -12045,7 +12045,7 @@ module ListRoleTagsRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the IAM role for which you want to see the list of tags. This parameter accepts (through its regex pattern) a string of characters that consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM role for which you want to see the list of tags. This parameter accepts (through its regex pattern) a string of characters that consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -12176,7 +12176,7 @@ module ListRolePoliciesRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to list policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the role to list policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -12455,7 +12455,7 @@ module ListPolicyTagsRequest =
       {
       policyArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the IAM customer managed policy whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the IAM customer managed policy whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -12981,7 +12981,7 @@ module ListOpenIDConnectProviderTagsRequest =
       {
       openIDConnectProviderArn: ArnType.t
         [@ocaml.doc
-          "The ARN of the OpenID Connect (OIDC) identity provider whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The ARN of the OpenID Connect (OIDC) identity provider whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -13114,7 +13114,7 @@ module ListMFADevicesRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user whose MFA devices you want to list. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user whose MFA devices you want to list. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -13253,7 +13253,7 @@ module ListMFADeviceTagsRequest =
       {
       serialNumber: SerialNumberType.t
         [@ocaml.doc
-          "The unique identifier for the IAM virtual MFA device whose tags you want to see. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The unique identifier for the IAM virtual MFA device whose tags you want to see. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -13511,7 +13511,7 @@ module ListInstanceProfilesForRoleRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to list instance profiles for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the role to list instance profiles for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -13641,7 +13641,7 @@ module ListInstanceProfileTagsRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the IAM instance profile whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM instance profile whose tags you want to see. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -13892,7 +13892,7 @@ module ListGroupsForUserRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user to list groups for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user to list groups for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -13933,7 +13933,7 @@ module ListGroupPoliciesResponse =
       {
       policyNames: PolicyNameListType.t
         [@ocaml.doc
-          "A list of policy names. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "A list of policy names. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       isTruncated: BooleanType.t option
         [@ocaml.doc
           "A flag that indicates whether there are more items to return. If your results were truncated, you can make a subsequent pagination request using the Marker request parameter to retrieve more items. Note that IAM might return fewer than the MaxItems number of results even when there are more results available. We recommend that you check IsTruncated after every call to ensure that you receive all your results."];
@@ -14025,7 +14025,7 @@ module ListGroupPoliciesRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name of the group to list policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the group to list policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -14374,7 +14374,7 @@ module ListAttachedUserPoliciesRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the user to list attached policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the user to list attached policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       pathPrefix: PolicyPathType.t option
         [@ocaml.doc
           "The path prefix for filtering the results. This parameter is optional. If it is not included, it defaults to a slash (/), listing all policies. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
@@ -14528,7 +14528,7 @@ module ListAttachedRolePoliciesRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the role to list attached policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the role to list attached policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       pathPrefix: PolicyPathType.t option
         [@ocaml.doc
           "The path prefix for filtering the results. This parameter is optional. If it is not included, it defaults to a slash (/), listing all policies. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
@@ -14682,7 +14682,7 @@ module ListAttachedGroupPoliciesRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the group to list attached policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the group to list attached policies for. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       pathPrefix: PolicyPathType.t option
         [@ocaml.doc
           "The path prefix for filtering the results. This parameter is optional. If it is not included, it defaults to a slash (/), listing all policies. This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
@@ -14940,7 +14940,7 @@ module ListAccessKeysRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -15088,7 +15088,7 @@ module GetUserRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user to get information about. This parameter is optional. If it is not included, it defaults to the user making the request. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the user to get information about. This parameter is optional. If it is not included, it defaults to the user making the request. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let make ?userName = fun () -> { userName }
     let to_value x =
       structure_to_value
@@ -15203,10 +15203,10 @@ module GetUserPolicyRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user who the policy is associated with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user who the policy is associated with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name of the policy document to get. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the policy document to get. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "GetUserPolicyRequest"
     let make ~userName =
       fun ~policyName -> fun () -> { userName; policyName }
@@ -15821,7 +15821,7 @@ module GetServerCertificateRequest =
       {
       serverCertificateName: ServerCertificateNameType.t
         [@ocaml.doc
-          "The name of the server certificate you want to retrieve information about. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the server certificate you want to retrieve information about. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "GetServerCertificateRequest"
     let make ~serverCertificateName = fun () -> { serverCertificateName }
     let to_value x =
@@ -15923,7 +15923,7 @@ module GetSSHPublicKeyRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the IAM user associated with the SSH public key. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user associated with the SSH public key. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       sSHPublicKeyId: PublicKeyIdType.t
         [@ocaml.doc
           "The unique identifier for the SSH public key. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."];
@@ -16166,7 +16166,7 @@ module GetRoleRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the IAM role to get information about. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the IAM role to get information about. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "GetRoleRequest"
     let make ~roleName = fun () -> { roleName }
     let to_value x =
@@ -16280,10 +16280,10 @@ module GetRolePolicyRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role associated with the policy. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the role associated with the policy. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name of the policy document to get. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the policy document to get. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "GetRolePolicyRequest"
     let make ~roleName =
       fun ~policyName -> fun () -> { roleName; policyName }
@@ -16953,7 +16953,7 @@ module GetLoginProfileRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the user whose login profile you want to retrieve. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the user whose login profile you want to retrieve. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "GetLoginProfileRequest"
     let make ~userName = fun () -> { userName }
     let to_value x =
@@ -17053,7 +17053,7 @@ module GetInstanceProfileRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the instance profile to get information about. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the instance profile to get information about. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "GetInstanceProfileRequest"
     let make ~instanceProfileName = fun () -> { instanceProfileName }
     let to_value x =
@@ -17174,7 +17174,7 @@ module GetGroupRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name of the group. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the group. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       marker: MarkerType.t option
         [@ocaml.doc
           "Use this parameter only when paginating results and only after you receive a response indicating that the results are truncated. Set it to the value of the Marker element in the response that you received to indicate where the next call should start."];
@@ -17305,10 +17305,10 @@ module GetGroupPolicyRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name of the group the policy is associated with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the group the policy is associated with. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name of the policy document to get. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the policy document to get. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "GetGroupPolicyRequest"
     let make ~groupName =
       fun ~policyName -> fun () -> { groupName; policyName }
@@ -18321,10 +18321,10 @@ module EnableMFADeviceRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the IAM user for whom you want to enable the MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user for whom you want to enable the MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serialNumber: SerialNumberType.t
         [@ocaml.doc
-          "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the device ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@:/-"];
+          "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the device ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.\\@:/-"];
       authenticationCode1: AuthenticationCodeType.t
         [@ocaml.doc
           "An authentication code emitted by the device. The format for this parameter is a string of six digits. Submit your request immediately after generating the authentication codes. If you generate the codes and then wait too long to submit the request, the MFA device successfully associates with the user but the MFA device becomes out of sync. This happens because time-based one-time passwords (TOTP) expire after a short period of time. If this happens, you can resync the device."];
@@ -18389,7 +18389,7 @@ module DetachUserPolicyRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the IAM user to detach the policy from. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the IAM user to detach the policy from. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyArn: ArnType.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM policy you want to detach. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
@@ -18420,7 +18420,7 @@ module DetachRolePolicyRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the IAM role to detach the policy from. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the IAM role to detach the policy from. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyArn: ArnType.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM policy you want to detach. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
@@ -18451,7 +18451,7 @@ module DetachGroupPolicyRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the IAM group to detach the policy from. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the IAM group to detach the policy from. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyArn: ArnType.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM policy you want to detach. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
@@ -18483,7 +18483,7 @@ module DeleteVirtualMFADeviceRequest =
       {
       serialNumber: SerialNumberType.t
         [@ocaml.doc
-          "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@:/-"]}
+          "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the same as the ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.\\@:/-"]}
     let context_ = "DeleteVirtualMFADeviceRequest"
     let make ~serialNumber = fun () -> { serialNumber }
     let to_value x =
@@ -18508,7 +18508,7 @@ module DeleteUserRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the user to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteUserRequest"
     let make ~userName = fun () -> { userName }
     let to_value x =
@@ -18533,10 +18533,10 @@ module DeleteUserPolicyRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) identifying the user that the policy is embedded in. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) identifying the user that the policy is embedded in. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name identifying the policy document to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name identifying the policy document to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteUserPolicyRequest"
     let make ~userName =
       fun ~policyName -> fun () -> { userName; policyName }
@@ -18591,7 +18591,7 @@ module DeleteSigningCertificateRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user the signing certificate belongs to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user the signing certificate belongs to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       certificateId: CertificateIdType.t
         [@ocaml.doc
           "The ID of the signing certificate to delete. The format of this parameter, as described by its regex pattern, is a string of characters that can be upper- or lower-cased letters or digits."]}
@@ -18627,7 +18627,7 @@ module DeleteServiceSpecificCredentialRequest =
       {
       userName: UserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user associated with the service-specific credential. If this value is not specified, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user associated with the service-specific credential. If this value is not specified, then the operation assumes the user whose credentials are used to call the operation. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serviceSpecificCredentialId: ServiceSpecificCredentialId.t
         [@ocaml.doc
           "The unique identifier of the service-specific credential. You can get this value by calling ListServiceSpecificCredentials. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."]}
@@ -18773,7 +18773,7 @@ module DeleteServerCertificateRequest =
       {
       serverCertificateName: ServerCertificateNameType.t
         [@ocaml.doc
-          "The name of the server certificate you want to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the server certificate you want to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteServerCertificateRequest"
     let make ~serverCertificateName = fun () -> { serverCertificateName }
     let to_value x =
@@ -18800,7 +18800,7 @@ module DeleteSSHPublicKeyRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the IAM user associated with the SSH public key. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user associated with the SSH public key. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       sSHPublicKeyId: PublicKeyIdType.t
         [@ocaml.doc
           "The unique identifier for the SSH public key. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."]}
@@ -18860,7 +18860,7 @@ module DeleteRoleRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the role to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteRoleRequest"
     let make ~roleName = fun () -> { roleName }
     let to_value x =
@@ -18884,10 +18884,10 @@ module DeleteRolePolicyRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) identifying the role that the policy is embedded in. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) identifying the role that the policy is embedded in. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name of the inline policy to delete from the specified IAM role. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the inline policy to delete from the specified IAM role. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteRolePolicyRequest"
     let make ~roleName =
       fun ~policyName -> fun () -> { roleName; policyName }
@@ -19025,7 +19025,7 @@ module DeleteLoginProfileRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the user whose password you want to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the user whose password you want to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteLoginProfileRequest"
     let make ~userName = fun () -> { userName }
     let to_value x =
@@ -19049,7 +19049,7 @@ module DeleteInstanceProfileRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the instance profile to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the instance profile to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteInstanceProfileRequest"
     let make ~instanceProfileName = fun () -> { instanceProfileName }
     let to_value x =
@@ -19076,7 +19076,7 @@ module DeleteGroupRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name of the IAM group to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the IAM group to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteGroupRequest"
     let make ~groupName = fun () -> { groupName }
     let to_value x =
@@ -19100,10 +19100,10 @@ module DeleteGroupPolicyRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) identifying the group that the policy is embedded in. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) identifying the group that the policy is embedded in. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyName: PolicyNameType.t
         [@ocaml.doc
-          "The name identifying the policy document to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name identifying the policy document to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "DeleteGroupPolicyRequest"
     let make ~groupName =
       fun ~policyName -> fun () -> { groupName; policyName }
@@ -19179,7 +19179,7 @@ module DeleteAccessKeyRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the user whose access key pair you want to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user whose access key pair you want to delete. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       accessKeyId: AccessKeyIdType.t
         [@ocaml.doc
           "The access key ID for the access key ID and secret access key you want to delete. This parameter allows (through its regex pattern) a string of characters that can consist of any upper or lowercased letter or digit."]}
@@ -19214,10 +19214,10 @@ module DeactivateMFADeviceRequest =
       {
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user whose MFA device you want to deactivate. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the user whose MFA device you want to deactivate. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serialNumber: SerialNumberType.t
         [@ocaml.doc
-          "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the device ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@:/-"]}
+          "The serial number that uniquely identifies the MFA device. For virtual MFA devices, the serial number is the device ARN. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.\\@:/-"]}
     let context_ = "DeactivateMFADeviceRequest"
     let make ~userName =
       fun ~serialNumber -> fun () -> { userName; serialNumber }
@@ -19360,7 +19360,7 @@ module CreateVirtualMFADeviceRequest =
           "The path for the virtual MFA device. For more information about paths, see IAM identifiers in the IAM User Guide. This parameter is optional. If it is not included, it defaults to a slash (/). This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
       virtualMFADeviceName: VirtualMFADeviceName.t
         [@ocaml.doc
-          "The name of the virtual MFA device. Use with path to uniquely identify a virtual MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the virtual MFA device. Use with path to uniquely identify a virtual MFA device. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that you want to attach to the new IAM virtual MFA device. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."]}
@@ -19650,7 +19650,7 @@ module CreateServiceSpecificCredentialRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the IAM user that is to be associated with the credentials. The new service-specific credentials have the same permissions as the associated user except that they can be used only to access the specified service. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user that is to be associated with the credentials. The new service-specific credentials have the same permissions as the associated user except that they can be used only to access the specified service. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       serviceName: ServiceName.t
         [@ocaml.doc
           "The name of the Amazon Web Services service that is to be associated with the credentials. The service you specify here is the only service that can be accessed using these credentials."]}
@@ -19933,7 +19933,7 @@ module CreateSAMLProviderRequest =
           "An XML document generated by an identity provider (IdP) that supports SAML 2.0. The document includes the issuer's name, expiration information, and keys that can be used to validate the SAML authentication response (assertions) that are received from the IdP. You must generate the metadata document using the identity management software that is used as your organization's IdP. For more information, see About SAML 2.0-based federation in the IAM User Guide"];
       name: SAMLProviderNameType.t
         [@ocaml.doc
-          "The name of the provider to create. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the provider to create. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       tags: TagListType.t option
         [@ocaml.doc
           "A list of tags that you want to attach to the new IAM SAML provider. Each tag consists of a key name and an associated value. For more information about tagging, see Tagging IAM resources in the IAM User Guide. If any one of the tags is invalid or if you exceed the allowed maximum number of tags, then the entire request fails and the resource is not created."]}
@@ -20783,7 +20783,7 @@ module CreateLoginProfileRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name of the IAM user to create a password for. The user must already exist. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the IAM user to create a password for. The user must already exist. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       password: PasswordType.t
         [@ocaml.doc
           "The new password for the user. The regex pattern that is used to validate this parameter is a string of characters. That string can include almost any printable ASCII character from the space (\\u0020) through the end of the ASCII character range (\\u00FF). You can also include the tab (\\u0009), line feed (\\u000A), and carriage return (\\u000D) characters. Any of these characters are valid in a password. However, many tools, such as the Amazon Web Services Management Console, might restrict the ability to type certain characters because they have special meaning within that tool."];
@@ -20936,7 +20936,7 @@ module CreateInstanceProfileRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the instance profile to create. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the instance profile to create. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       path: PathType.t option
         [@ocaml.doc
           "The path to the instance profile. For more information about paths, see IAM Identifiers in the IAM User Guide. This parameter is optional. If it is not included, it defaults to a slash (/). This parameter allows (through its regex pattern) a string of characters consisting of either a forward slash (/) by itself or a string that must begin and end with forward slashes. In addition, it can contain any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercased letters."];
@@ -21198,7 +21198,7 @@ module CreateAccessKeyRequest =
       {
       userName: ExistingUserNameType.t option
         [@ocaml.doc
-          "The name of the IAM user that the new key will belong to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the IAM user that the new key will belong to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let make ?userName = fun () -> { userName }
     let to_value x =
       structure_to_value
@@ -21254,7 +21254,7 @@ module AttachUserPolicyRequest =
       {
       userName: UserNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the IAM user to attach the policy to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the IAM user to attach the policy to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyArn: ArnType.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM policy you want to attach. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
@@ -21285,7 +21285,7 @@ module AttachRolePolicyRequest =
       {
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the role to attach the policy to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the role to attach the policy to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyArn: ArnType.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM policy you want to attach. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
@@ -21316,7 +21316,7 @@ module AttachGroupPolicyRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the group to attach the policy to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name (friendly name, not ARN) of the group to attach the policy to. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       policyArn: ArnType.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the IAM policy you want to attach. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
@@ -21348,10 +21348,10 @@ module AddUserToGroupRequest =
       {
       groupName: GroupNameType.t
         [@ocaml.doc
-          "The name of the group to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the group to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       userName: ExistingUserNameType.t
         [@ocaml.doc
-          "The name of the user to add. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the user to add. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "AddUserToGroupRequest"
     let make ~groupName = fun ~userName -> fun () -> { groupName; userName }
     let to_value x =
@@ -21380,10 +21380,10 @@ module AddRoleToInstanceProfileRequest =
       {
       instanceProfileName: InstanceProfileNameType.t
         [@ocaml.doc
-          "The name of the instance profile to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"];
+          "The name of the instance profile to update. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"];
       roleName: RoleNameType.t
         [@ocaml.doc
-          "The name of the role to add. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.@-"]}
+          "The name of the role to add. This parameter allows (through its regex pattern) a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: _+=,.\\@-"]}
     let context_ = "AddRoleToInstanceProfileRequest"
     let make ~instanceProfileName =
       fun ~roleName -> fun () -> { instanceProfileName; roleName }

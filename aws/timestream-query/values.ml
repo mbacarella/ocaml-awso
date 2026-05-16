@@ -1484,7 +1484,7 @@ module CreateScheduledQueryRequest =
       name: ScheduledQueryName.t [@ocaml.doc "Name of the scheduled query."];
       queryString: QueryString.t
         [@ocaml.doc
-          "The query string to run. Parameter names can be specified in the query string @ character followed by an identifier. The named Parameter @scheduled_runtime is reserved and can be used in the query to get the time at which the query is scheduled to run. The timestamp calculated according to the ScheduleConfiguration parameter, will be the value of @scheduled_runtime paramater for each query run. For example, consider an instance of a scheduled query executing on 2021-12-01 00:00:00. For this instance, the @scheduled_runtime parameter is initialized to the timestamp 2021-12-01 00:00:00 when invoking the query."];
+          "The query string to run. Parameter names can be specified in the query string \\@ character followed by an identifier. The named Parameter \\@scheduled_runtime is reserved and can be used in the query to get the time at which the query is scheduled to run. The timestamp calculated according to the ScheduleConfiguration parameter, will be the value of \\@scheduled_runtime paramater for each query run. For example, consider an instance of a scheduled query executing on 2021-12-01 00:00:00. For this instance, the \\@scheduled_runtime parameter is initialized to the timestamp 2021-12-01 00:00:00 when invoking the query."];
       scheduleConfiguration: ScheduleConfiguration.t
         [@ocaml.doc "The schedule configuration for the query."];
       notificationConfiguration: NotificationConfiguration.t
@@ -2415,7 +2415,7 @@ module ScheduledQueryRunSummary =
       {
       invocationTime: Time.t option
         [@ocaml.doc
-          "InvocationTime for this run. This is the time at which the query is scheduled to run. Parameter @scheduled_runtime can be used in the query to get the value."];
+          "InvocationTime for this run. This is the time at which the query is scheduled to run. Parameter \\@scheduled_runtime can be used in the query to get the value."];
       triggerTime: Time.t option
         [@ocaml.doc "The actual time when the query was run."];
       runStatus: ScheduledQueryRunStatus.t option
@@ -3490,7 +3490,7 @@ module PrepareQueryRequest =
       {
       queryString: QueryString.t
         [@ocaml.doc
-          "The Timestream query string that you want to use as a prepared statement. Parameter names can be specified in the query string @ character followed by an identifier."];
+          "The Timestream query string that you want to use as a prepared statement. Parameter names can be specified in the query string \\@ character followed by an identifier."];
       validateOnly: NullableBoolean.t option
         [@ocaml.doc
           "By setting this value to true, Timestream will only validate that the query string is a valid Timestream query, and not store the prepared query for later use."]}

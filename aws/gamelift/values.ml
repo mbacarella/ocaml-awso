@@ -980,13 +980,13 @@ module Player =
         [@ocaml.doc "A unique identifier for a player"];
       playerAttributes: PlayerAttributeMap.t option
         [@ocaml.doc
-          "A collection of key:value pairs containing player information for use in matchmaking. Player attribute keys must match the playerAttributes used in a matchmaking rule set. Example: \"PlayerAttributes\": {\"skill\": {\"N\": \"23\"}, \"gameMode\": {\"S\": \"deathmatch\"}}."];
+          "A collection of key:value pairs containing player information for use in matchmaking. Player attribute keys must match the playerAttributes used in a matchmaking rule set. Example: \"PlayerAttributes\": \\{\"skill\": \\{\"N\": \"23\"\\}, \"gameMode\": \\{\"S\": \"deathmatch\"\\}\\}."];
       team: NonZeroAndMaxString.t option
         [@ocaml.doc
           "Name of the team that the player is assigned to in a match. Team names are defined in a matchmaking rule set."];
       latencyInMs: LatencyMap.t option
         [@ocaml.doc
-          "A set of values, expressed in milliseconds, that indicates the amount of latency that a player experiences when connected to @aws; Regions. If this property is present, FlexMatch considers placing the match only in Regions for which latency is reported. If a matchmaker has a rule that evaluates player latency, players must report latency in order to be matched. If no latency is reported in this scenario, FlexMatch assumes that no Regions are available to the player and the ticket is not matchable."]}
+          "A set of values, expressed in milliseconds, that indicates the amount of latency that a player experiences when connected to \\@aws; Regions. If this property is present, FlexMatch considers placing the match only in Regions for which latency is reported. If a matchmaker has a rule that evaluates player latency, players must report latency in order to be matched. If no latency is reported in this scenario, FlexMatch assumes that no Regions are available to the player and the ticket is not matchable."]}
     let make ?playerId =
       fun ?playerAttributes ->
         fun ?team ->
@@ -4301,7 +4301,7 @@ module IpPermission =
           "An ending value for a range of allowed port numbers. Port numbers are end-inclusive. This value must be higher than FromPort. For fleets using Linux builds, only port 22, 443, 1026-60000 are valid. For fleets using Windows builds, only port 443, 1026-60000 are valid."];
       ipRange: NonBlankString.t
         [@ocaml.doc
-          "A range of allowed IP addresses. This value must be expressed in CIDR notation. Example: \"000.000.000.000/[subnet mask]\" or optionally the shortened version \"0.0.0.0/[subnet mask]\"."];
+          "A range of allowed IP addresses. This value must be expressed in CIDR notation. Example: \"000.000.000.000/\\[subnet mask\\]\" or optionally the shortened version \"0.0.0.0/\\[subnet mask\\]\"."];
       protocol: IpProtocol.t
         [@ocaml.doc "The network communication protocol used by the fleet."]}
     let context_ = "IpPermission"
@@ -7672,7 +7672,7 @@ module GameSessionPlacement =
           "Name of the Region where the game session created by this placement request is running. This value is set once the new game session is placed (placement status is FULFILLED)."];
       playerLatencies: PlayerLatencyList.t option
         [@ocaml.doc
-          "A set of values, expressed in milliseconds, that indicates the amount of latency that a player experiences when connected to @aws; Regions."];
+          "A set of values, expressed in milliseconds, that indicates the amount of latency that a player experiences when connected to \\@aws; Regions."];
       startTime: Timestamp.t option
         [@ocaml.doc
           "Time stamp indicating when this request was placed in the queue. Format is a number expressed in Unix time as milliseconds (for example \"1469498468.057\")."];
@@ -12279,7 +12279,7 @@ module StartGameSessionPlacementInput =
           "A descriptive label that is associated with a game session. Session names do not need to be unique."];
       playerLatencies: PlayerLatencyList.t option
         [@ocaml.doc
-          "A set of values, expressed in milliseconds, that indicates the amount of latency that a player experiences when connected to @aws; Regions. This information is used to try to place the new game session where it can offer the best possible gameplay experience for the players."];
+          "A set of values, expressed in milliseconds, that indicates the amount of latency that a player experiences when connected to \\@aws; Regions. This information is used to try to place the new game session where it can offer the best possible gameplay experience for the players."];
       desiredPlayerSessions: DesiredPlayerSessionList.t option
         [@ocaml.doc
           "Set of information on each player to create a player session for."];

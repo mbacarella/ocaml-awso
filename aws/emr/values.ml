@@ -1452,7 +1452,7 @@ module MetricDimension =
       let key = field_map json "Key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A CloudWatch dimension, which is specified using a Key (known as a Name in CloudWatch), Value pair. By default, Amazon EMR uses one dimension whose Key is JobFlowID and Value is a variable representing the cluster ID, which is ${emr.clusterId}. This enables the rule to bootstrap when the cluster ID becomes available."]
+       "A CloudWatch dimension, which is specified using a Key (known as a Name in CloudWatch), Value pair. By default, Amazon EMR uses one dimension whose Key is JobFlowID and Value is a variable representing the cluster ID, which is $\\{emr.clusterId\\}. This enables the rule to bootstrap when the cluster ID becomes available."]
 module MetricDimensionList =
   struct
     type nonrec t = MetricDimension.t list
@@ -11146,7 +11146,7 @@ module ReleaseLabelFilter =
           "Optional release label version prefix filter. For example, emr-5."];
       application: String_.t option
         [@ocaml.doc
-          "Optional release label application filter. For example, spark@2.1.0."]}
+          "Optional release label application filter. For example, spark\\@2.1.0."]}
     let make ?prefix = fun ?application -> fun () -> { prefix; application }
     let to_value x =
       structure_to_value

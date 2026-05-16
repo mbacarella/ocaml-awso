@@ -1002,10 +1002,10 @@ module DataProcessing =
       {
       inputFilter: JsonPath.t option
         [@ocaml.doc
-          "A JSONPath expression used to select a portion of the input data to pass to the algorithm. Use the InputFilter parameter to exclude fields, such as an ID column, from the input. If you want Amazon SageMaker to pass the entire input dataset to the algorithm, accept the default value $. Examples: \"$\", \"$[1:]\", \"$.features\""];
+          "A JSONPath expression used to select a portion of the input data to pass to the algorithm. Use the InputFilter parameter to exclude fields, such as an ID column, from the input. If you want Amazon SageMaker to pass the entire input dataset to the algorithm, accept the default value $. Examples: \"$\", \"$\\[1:\\]\", \"$.features\""];
       outputFilter: JsonPath.t option
         [@ocaml.doc
-          "A JSONPath expression used to select a portion of the joined dataset to save in the output file for a batch transform job. If you want Amazon SageMaker to store the entire input dataset in the output file, leave the default value, $. If you specify indexes that aren't within the dimension size of the joined dataset, you get an error. Examples: \"$\", \"$[0,5:]\", \"$['id','SageMakerOutput']\""];
+          "A JSONPath expression used to select a portion of the joined dataset to save in the output file for a batch transform job. If you want Amazon SageMaker to store the entire input dataset in the output file, leave the default value, $. If you specify indexes that aren't within the dimension size of the joined dataset, you get an error. Examples: \"$\", \"$\\[0,5:\\]\", \"$\\['id','SageMakerOutput'\\]\""];
       joinSource: JoinSource.t option
         [@ocaml.doc
           "Specifies the source of the data to join with the transformed data. The valid values are None and Input. The default value is None, which specifies not to join the input with the transformed data. If you want the batch transform job to join the original input data with the transformed data, set JoinSource to Input. You can specify OutputFilter as an additional filter to select a portion of the joined dataset and store it in the output file. For JSON or JSONLines objects, such as a JSON array, SageMaker adds the transformed data to the input JSON object in an attribute called SageMakerOutput. The joined result for JSON must be a key-value pair object. If the input is not a key-value pair object, SageMaker creates a new JSON file. In the new JSON file, and the input data is stored under the SageMakerInput key and the results are stored in SageMakerOutput. For CSV data, SageMaker takes each row as a JSON array and joins the transformed data with the input by appending each transformed row to the end of the input. The joined data has the original input data followed by the transformed data and the output is a CSV file. For information on how joining in applied, see Workflow for Associating Inferences with Input Records."]}
@@ -4819,7 +4819,7 @@ module DeployedImage =
       make ?resolutionTime ?resolvedImage ?specifiedImage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the Amazon EC2 Container Registry path of the docker image of the model that is hosted in this ProductionVariant. If you used the registry/repository[:tag] form to specify the image path of the primary container when you created the model hosted in this ProductionVariant, the path resolves to a path of the form registry/repository[@digest]. A digest is a hash value that identifies a specific version of an image. For information about Amazon ECR paths, see Pulling an Image in the Amazon ECR User Guide."]
+       "Gets the Amazon EC2 Container Registry path of the docker image of the model that is hosted in this ProductionVariant. If you used the registry/repository\\[:tag\\] form to specify the image path of the primary container when you created the model hosted in this ProductionVariant, the path resolves to a path of the form registry/repository\\[\\@digest\\]. A digest is a hash value that identifies a specific version of an image. For information about Amazon ECR paths, see Pulling an Image in the Amazon ECR User Guide."]
 module DeployedImages =
   struct
     type nonrec t = DeployedImage.t list
@@ -12074,7 +12074,7 @@ module DescribeLabelingJobResponse =
           "The Amazon Resource Name (ARN) that Amazon SageMaker assumes to perform tasks on your behalf during data labeling."];
       labelCategoryConfigS3Uri: S3Uri.t option
         [@ocaml.doc
-          "The S3 location of the JSON file that defines the categories used to label data objects. Please note the following label-category limits: Semantic segmentation labeling jobs using automated labeling: 20 labels Box bounding labeling jobs (all): 10 labels The file is a JSON structure in the following format: { \"document-version\": \"2018-11-28\" \"labels\": [ { \"label\": \"label 1\" }, { \"label\": \"label 2\" }, ... { \"label\": \"label n\" } ] }"];
+          "The S3 location of the JSON file that defines the categories used to label data objects. Please note the following label-category limits: Semantic segmentation labeling jobs using automated labeling: 20 labels Box bounding labeling jobs (all): 10 labels The file is a JSON structure in the following format: \\{ \"document-version\": \"2018-11-28\" \"labels\": \\[ \\{ \"label\": \"label 1\" \\}, \\{ \"label\": \"label 2\" \\}, ... \\{ \"label\": \"label n\" \\} \\] \\}"];
       stoppingConditions: LabelingJobStoppingConditions.t option
         [@ocaml.doc
           "A set of conditions for stopping a labeling job. If any of the conditions are met, the job is automatically stopped."];
@@ -21613,7 +21613,7 @@ module Filter =
       make ?value ?operator ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A conditional statement for a search expression that includes a resource property, a Boolean operator, and a value. Resources that match the statement are returned in the results from the Search API. If you specify a Value, but not an Operator, Amazon SageMaker uses the equals operator. In search, there are several property types: Metrics To define a metric filter, enter a value using the form \"Metrics.<name>\", where <name> is a metric name. For example, the following filter searches for training jobs with an \"accuracy\" metric greater than \"0.9\": { \"Name\": \"Metrics.accuracy\", \"Operator\": \"GreaterThan\", \"Value\": \"0.9\" } HyperParameters To define a hyperparameter filter, enter a value with the form \"HyperParameters.<name>\". Decimal hyperparameter values are treated as a decimal in a comparison if the specified Value is also a decimal value. If the specified Value is an integer, the decimal hyperparameter values are treated as integers. For example, the following filter is satisfied by training jobs with a \"learning_rate\" hyperparameter that is less than \"0.5\": { \"Name\": \"HyperParameters.learning_rate\", \"Operator\": \"LessThan\", \"Value\": \"0.5\" } Tags To define a tag filter, enter a value with the form Tags.<key>."]
+       "A conditional statement for a search expression that includes a resource property, a Boolean operator, and a value. Resources that match the statement are returned in the results from the Search API. If you specify a Value, but not an Operator, Amazon SageMaker uses the equals operator. In search, there are several property types: Metrics To define a metric filter, enter a value using the form \"Metrics.<name>\", where <name> is a metric name. For example, the following filter searches for training jobs with an \"accuracy\" metric greater than \"0.9\": \\{ \"Name\": \"Metrics.accuracy\", \"Operator\": \"GreaterThan\", \"Value\": \"0.9\" \\} HyperParameters To define a hyperparameter filter, enter a value with the form \"HyperParameters.<name>\". Decimal hyperparameter values are treated as a decimal in a comparison if the specified Value is also a decimal value. If the specified Value is an integer, the decimal hyperparameter values are treated as integers. For example, the following filter is satisfied by training jobs with a \"learning_rate\" hyperparameter that is less than \"0.5\": \\{ \"Name\": \"HyperParameters.learning_rate\", \"Operator\": \"LessThan\", \"Value\": \"0.5\" \\} Tags To define a tag filter, enter a value with the form Tags.<key>."]
 module FilterList =
   struct
     type nonrec t = Filter.t list
@@ -22438,7 +22438,7 @@ module GitConfigForUpdate =
       {
       secretArn: SecretArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that contains the credentials used to access the git repository. The secret must have a staging label of AWSCURRENT and must be in the following format: {\"username\": UserName, \"password\": Password}"]}
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that contains the credentials used to access the git repository. The secret must have a staging label of AWSCURRENT and must be in the following format: \\{\"username\": UserName, \"password\": Password\\}"]}
     let make ?secretArn = fun () -> { secretArn }
     let to_value x =
       structure_to_value
@@ -35152,7 +35152,7 @@ module ListTrainingJobsRequest =
         ?creationTimeAfter ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists training jobs. When StatusEquals and MaxResults are set at the same time, the MaxResults number of training jobs are first retrieved ignoring the StatusEquals parameter and then they are filtered by the StatusEquals parameter, which is returned as a response. For example, if ListTrainingJobs is invoked with the following parameters: { ... MaxResults: 100, StatusEquals: InProgress ... } First, 100 trainings jobs with any status, including those other than InProgress, are selected (sorted according to the creation time, from the most current to the oldest). Next, those with a status of InProgress are returned. You can quickly test the API using the following Amazon Web Services CLI code. aws sagemaker list-training-jobs --max-results 100 --status-equals InProgress"]
+       "Lists training jobs. When StatusEquals and MaxResults are set at the same time, the MaxResults number of training jobs are first retrieved ignoring the StatusEquals parameter and then they are filtered by the StatusEquals parameter, which is returned as a response. For example, if ListTrainingJobs is invoked with the following parameters: \\{ ... MaxResults: 100, StatusEquals: InProgress ... \\} First, 100 trainings jobs with any status, including those other than InProgress, are selected (sorted according to the creation time, from the most current to the oldest). Next, those with a status of InProgress are returned. You can quickly test the API using the following Amazon Web Services CLI code. aws sagemaker list-training-jobs --max-results 100 --status-equals InProgress"]
 module TrainingJobSummary =
   struct
     type nonrec t =
@@ -35316,7 +35316,7 @@ module ListTrainingJobsResponse =
       make ?nextToken ~trainingJobSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists training jobs. When StatusEquals and MaxResults are set at the same time, the MaxResults number of training jobs are first retrieved ignoring the StatusEquals parameter and then they are filtered by the StatusEquals parameter, which is returned as a response. For example, if ListTrainingJobs is invoked with the following parameters: { ... MaxResults: 100, StatusEquals: InProgress ... } First, 100 trainings jobs with any status, including those other than InProgress, are selected (sorted according to the creation time, from the most current to the oldest). Next, those with a status of InProgress are returned. You can quickly test the API using the following Amazon Web Services CLI code. aws sagemaker list-training-jobs --max-results 100 --status-equals InProgress"]
+       "Lists training jobs. When StatusEquals and MaxResults are set at the same time, the MaxResults number of training jobs are first retrieved ignoring the StatusEquals parameter and then they are filtered by the StatusEquals parameter, which is returned as a response. For example, if ListTrainingJobs is invoked with the following parameters: \\{ ... MaxResults: 100, StatusEquals: InProgress ... \\} First, 100 trainings jobs with any status, including those other than InProgress, are selected (sorted according to the creation time, from the most current to the oldest). Next, those with a status of InProgress are returned. You can quickly test the API using the following Amazon Web Services CLI code. aws sagemaker list-training-jobs --max-results 100 --status-equals InProgress"]
 module ListTransformJobsRequest =
   struct
     type nonrec t =
@@ -37279,7 +37279,7 @@ module NestedFilters =
       make ~filters ~nestedPropertyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of nested Filter objects. A resource must satisfy the conditions of all filters to be included in the results returned from the Search API. For example, to filter on a training job's InputDataConfig property with a specific channel name and S3Uri prefix, define the following filters: '{Name:\"InputDataConfig.ChannelName\", \"Operator\":\"Equals\", \"Value\":\"train\"}', '{Name:\"InputDataConfig.DataSource.S3DataSource.S3Uri\", \"Operator\":\"Contains\", \"Value\":\"mybucket/catdata\"}'"]
+       "A list of nested Filter objects. A resource must satisfy the conditions of all filters to be included in the results returned from the Search API. For example, to filter on a training job's InputDataConfig property with a specific channel name and S3Uri prefix, define the following filters: '\\{Name:\"InputDataConfig.ChannelName\", \"Operator\":\"Equals\", \"Value\":\"train\"\\}', '\\{Name:\"InputDataConfig.DataSource.S3DataSource.S3Uri\", \"Operator\":\"Contains\", \"Value\":\"mybucket/catdata\"\\}'"]
 module NestedFiltersList =
   struct
     type nonrec t = NestedFilters.t list
@@ -41874,7 +41874,7 @@ module UpdateCodeRepositoryInput =
         [@ocaml.doc "The name of the Git repository to update."];
       gitConfig: GitConfigForUpdate.t option
         [@ocaml.doc
-          "The configuration of the git repository, including the URL and the Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that contains the credentials used to access the repository. The secret must have a staging label of AWSCURRENT and must be in the following format: {\"username\": UserName, \"password\": Password}"]}
+          "The configuration of the git repository, including the URL and the Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that contains the credentials used to access the repository. The secret must have a staging label of AWSCURRENT and must be in the following format: \\{\"username\": UserName, \"password\": Password\\}"]}
     let context_ = "UpdateCodeRepositoryInput"
     let make ?gitConfig =
       fun ~codeRepositoryName -> fun () -> { gitConfig; codeRepositoryName }
@@ -42072,7 +42072,7 @@ module UpdateDeviceFleetRequest =
           "Output configuration for storing sample data collected by the fleet."];
       enableIotRoleAlias: EnableIotRoleAlias.t option
         [@ocaml.doc
-          "Whether to create an Amazon Web Services IoT Role Alias during device fleet creation. The name of the role alias generated will match this pattern: \"SageMakerEdge-{DeviceFleetName}\". For example, if your device fleet is called \"demo-fleet\", the name of the role alias will be \"SageMakerEdge-demo-fleet\"."]}
+          "Whether to create an Amazon Web Services IoT Role Alias during device fleet creation. The name of the role alias generated will match this pattern: \"SageMakerEdge-\\{DeviceFleetName\\}\". For example, if your device fleet is called \"demo-fleet\", the name of the role alias will be \"SageMakerEdge-demo-fleet\"."]}
     let context_ = "UpdateDeviceFleetRequest"
     let make ?roleArn =
       fun ?description ->

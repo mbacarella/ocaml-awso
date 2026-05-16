@@ -740,7 +740,7 @@ module DuplicateRequestException =
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A metering record has already been emitted by the same EC2 instance, ECS task, or EKS pod for the given {usageDimension, timestamp} with a different usageQuantity."]
+       "A metering record has already been emitted by the same EC2 instance, ECS task, or EKS pod for the given \\{usageDimension, timestamp\\} with a different usageQuantity."]
 module InvalidEndpointRegionException =
   struct
     type nonrec t = {

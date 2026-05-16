@@ -181,7 +181,7 @@ module User =
       {
       id: SsoId.t
         [@ocaml.doc
-          "The ID of the user or group. Pattern: ^([0-9a-fA-F]{10}-|)[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$"];
+          "The ID of the user or group. Pattern: ^(\\[0-9a-fA-F\\]\\{10\\}-|)\\[A-Fa-f0-9\\]\\{8\\}-\\[A-Fa-f0-9\\]\\{4\\}-\\[A-Fa-f0-9\\]\\{4\\}-\\[A-Fa-f0-9\\]\\{4\\}-\\[A-Fa-f0-9\\]\\{12\\}$"];
       type_: UserType.t
         [@ocaml.doc "Specifies whether this is a single user or a group."]}
     let context_ = "User"
@@ -4008,7 +4008,7 @@ module CreateWorkspaceRequest =
           "Specify the Amazon Web Services data sources that you want to be queried in this workspace. Specifying these data sources here enables Amazon Managed Grafana to create IAM roles and permissions that allow Amazon Managed Grafana to read data from these sources. You must still add them as data sources in the Grafana console in the workspace. If you don't specify a data source here, you can still add it as a data source in the workspace console later. However, you will then have to manually configure permissions for it."];
       workspaceDescription: Description.t option
         [@ocaml.doc
-          "A description for the workspace. This is used only to help you identify this workspace. Pattern: ^[\\\\p{L}\\\\p{Z}\\\\p{N}\\\\p{P}]{0,2048}$"];
+          "A description for the workspace. This is used only to help you identify this workspace. Pattern: ^\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}\\\\p\\{P\\}\\]\\{0,2048\\}$"];
       workspaceName: WorkspaceName.t option
         [@ocaml.doc
           "The name for the workspace. It does not have to be unique."];

@@ -148,7 +148,7 @@ module BaseScreenshot =
           "The name of the screenshot. This is generated the first time the canary is run after the UpdateCanary operation that specified for this canary to perform visual monitoring."];
       ignoreCoordinates: BaseScreenshotIgnoreCoordinates.t option
         [@ocaml.doc
-          "Coordinates that define the part of a screen to ignore during screenshot comparisons. To obtain the coordinates to use here, use the CloudWatch Logs console to draw the boundaries on the screen. For more information, see {LINK}"]}
+          "Coordinates that define the part of a screen to ignore during screenshot comparisons. To obtain the coordinates to use here, use the CloudWatch Logs console to draw the boundaries on the screen. For more information, see \\{LINK\\}"]}
     let context_ = "BaseScreenshot"
     let make ?ignoreCoordinates =
       fun ~screenshotName -> fun () -> { ignoreCoordinates; screenshotName }
@@ -1674,7 +1674,7 @@ module CanaryRunConfigInput =
           "Specifies whether this canary is to use active X-Ray tracing when it runs. Active tracing enables this canary run to be displayed in the ServiceLens and X-Ray service maps even if the canary does not hit an endpoint that has X-Ray tracing enabled. Using X-Ray tracing incurs charges. For more information, see Canaries and X-Ray tracing. You can enable active tracing only for canaries that use version syn-nodejs-2.0 or later for their canary runtime."];
       environmentVariables: EnvironmentVariablesMap.t option
         [@ocaml.doc
-          "Specifies the keys and values to use for any environment variables used in the canary script. Use the following format: { \"key1\" : \"value1\", \"key2\" : \"value2\", ...} Keys must start with a letter and be at least two characters. The total size of your environment variables cannot exceed 4 KB. You can't specify any Lambda reserved environment variables as the keys for your environment variables. For more information about reserved keys, see Runtime environment variables."]}
+          "Specifies the keys and values to use for any environment variables used in the canary script. Use the following format: \\{ \"key1\" : \"value1\", \"key2\" : \"value2\", ...\\} Keys must start with a letter and be at least two characters. The total size of your environment variables cannot exceed 4 KB. You can't specify any Lambda reserved environment variables as the keys for your environment variables. For more information about reserved keys, see Runtime environment variables."]}
     let make ?timeoutInSeconds =
       fun ?memoryInMB ->
         fun ?activeTracing ->

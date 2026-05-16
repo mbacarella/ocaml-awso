@@ -3631,7 +3631,7 @@ module SlotValueRegexFilter =
       {
       pattern: RegexPattern.t
         [@ocaml.doc
-          "A regular expression used to validate the value of a slot. Use a standard regular expression. Amazon Lex supports the following characters in the regular expression: A-Z, a-z 0-9 Unicode characters (\"\\ u<Unicode>\") Represent Unicode characters with four digits, for example \"\\u0041\" or \"\\u005A\". The following regular expression operators are not supported: Infinite repeaters: *, +, or {x,} with no upper bound. Wild card (.)"]}
+          "A regular expression used to validate the value of a slot. Use a standard regular expression. Amazon Lex supports the following characters in the regular expression: A-Z, a-z 0-9 Unicode characters (\"\\ u<Unicode>\") Represent Unicode characters with four digits, for example \"\\u0041\" or \"\\u005A\". The following regular expression operators are not supported: Infinite repeaters: *, +, or \\{x,\\} with no upper bound. Wild card (.)"]}
     let context_ = "SlotValueRegexFilter"
     let make ~pattern = fun () -> { pattern }
     let to_value x =
@@ -20704,7 +20704,7 @@ module CreateIntentRequest =
           "A unique identifier for the built-in intent to base this intent on."];
       sampleUtterances: SampleUtterancesList.t option
         [@ocaml.doc
-          "An array of strings that a user might say to signal the intent. For example, \"I want a pizza\", or \"I want a {PizzaSize} pizza\". In an utterance, slot names are enclosed in curly braces (\"{\", \"}\") to indicate where they should be displayed in the utterance shown to the user.."];
+          "An array of strings that a user might say to signal the intent. For example, \"I want a pizza\", or \"I want a \\{PizzaSize\\} pizza\". In an utterance, slot names are enclosed in curly braces (\"\\{\", \"\\}\") to indicate where they should be displayed in the utterance shown to the user.."];
       dialogCodeHook: DialogCodeHookSettings.t option
         [@ocaml.doc
           "Specifies that Amazon Lex invokes the alias Lambda function for each user input. You can invoke this Lambda function to personalize user interaction. For example, suppose that your bot determines that the user's name is John. You Lambda function might retrieve John's information from a backend database and prepopulate some of the values. For example, if you find that John is gluten intolerant, you might set the corresponding intent slot, glutenIntolerant to true. You might find John's phone number and set the corresponding session attribute."];

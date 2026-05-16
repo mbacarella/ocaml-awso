@@ -1039,7 +1039,7 @@ module Subscription =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "A descriptive or arbitrary ID for the subscription. This value must be unique within the subscription definition version. Max length is 128 characters with pattern ''[a-zA-Z0-9:_-]+''."];
+          "A descriptive or arbitrary ID for the subscription. This value must be unique within the subscription definition version. Max length is 128 characters with pattern ''\\[a-zA-Z0-9:_-\\]+''."];
       source: Zz__string.t
         [@ocaml.doc
           "The source of the subscription. Can be a thing ARN, a Lambda function ARN, a connector ARN, 'cloud' (which represents the AWS IoT cloud), or 'GGShadowService'."];
@@ -1085,10 +1085,10 @@ module Resource =
       {
       id: Zz__string.t
         [@ocaml.doc
-          "The resource ID, used to refer to a resource in the Lambda function configuration. Max length is 128 characters with pattern ''[a-zA-Z0-9:_-]+''. This must be unique within a Greengrass group."];
+          "The resource ID, used to refer to a resource in the Lambda function configuration. Max length is 128 characters with pattern ''\\[a-zA-Z0-9:_-\\]+''. This must be unique within a Greengrass group."];
       name: Zz__string.t
         [@ocaml.doc
-          "The descriptive resource name, which is displayed on the AWS IoT Greengrass console. Max length 128 characters with pattern ''[a-zA-Z0-9:_-]+''. This must be unique within a Greengrass group."];
+          "The descriptive resource name, which is displayed on the AWS IoT Greengrass console. Max length 128 characters with pattern ''\\[a-zA-Z0-9:_-\\]+''. This must be unique within a Greengrass group."];
       resourceDataContainer: ResourceDataContainer.t
         [@ocaml.doc "A container of data for all resource types."]}
     let context_ = "Resource"
@@ -1129,7 +1129,7 @@ module Logger =
         [@ocaml.doc "The component that will be subject to logging."];
       id: Zz__string.t
         [@ocaml.doc
-          "A descriptive or arbitrary ID for the logger. This value must be unique within the logger definition version. Max length is 128 characters with pattern ''[a-zA-Z0-9:_-]+''."];
+          "A descriptive or arbitrary ID for the logger. This value must be unique within the logger definition version. Max length is 128 characters with pattern ''\\[a-zA-Z0-9:_-\\]+''."];
       level: LoggerLevel.t [@ocaml.doc "The level of the logs."];
       space: Zz__integer.t option
         [@ocaml.doc
@@ -1212,7 +1212,7 @@ module Function =
         [@ocaml.doc "The configuration of the Lambda function."];
       id: Zz__string.t
         [@ocaml.doc
-          "A descriptive or arbitrary ID for the function. This value must be unique within the function definition version. Max length is 128 characters with pattern ''[a-zA-Z0-9:_-]+''."]}
+          "A descriptive or arbitrary ID for the function. This value must be unique within the function definition version. Max length is 128 characters with pattern ''\\[a-zA-Z0-9:_-\\]+''."]}
     let context_ = "Function"
     let make ?functionArn =
       fun ?functionConfiguration ->
@@ -1250,7 +1250,7 @@ module Device =
         [@ocaml.doc "The ARN of the certificate associated with the device."];
       id: Zz__string.t
         [@ocaml.doc
-          "A descriptive or arbitrary ID for the device. This value must be unique within the device definition version. Max length is 128 characters with pattern ''[a-zA-Z0-9:_-]+''."];
+          "A descriptive or arbitrary ID for the device. This value must be unique within the device definition version. Max length is 128 characters with pattern ''\\[a-zA-Z0-9:_-\\]+''."];
       syncShadow: Zz__boolean.t option
         [@ocaml.doc
           "If true, the device's local shadow will be automatically synced with the cloud."];
@@ -1297,7 +1297,7 @@ module Core_ =
         [@ocaml.doc "The ARN of the certificate associated with the core."];
       id: Zz__string.t
         [@ocaml.doc
-          "A descriptive or arbitrary ID for the core. This value must be unique within the core definition version. Max length is 128 characters with pattern ''[a-zA-Z0-9:_-]+''."];
+          "A descriptive or arbitrary ID for the core. This value must be unique within the core definition version. Max length is 128 characters with pattern ''\\[a-zA-Z0-9:_-\\]+''."];
       syncShadow: Zz__boolean.t option
         [@ocaml.doc
           "If true, the core's local shadow is automatically synced with the cloud."];
@@ -1344,7 +1344,7 @@ module Connector =
       connectorArn: Zz__string.t [@ocaml.doc "The ARN of the connector."];
       id: Zz__string.t
         [@ocaml.doc
-          "A descriptive or arbitrary ID for the connector. This value must be unique within the connector definition version. Max length is 128 characters with pattern [a-zA-Z0-9:_-]+."];
+          "A descriptive or arbitrary ID for the connector. This value must be unique within the connector definition version. Max length is 128 characters with pattern \\[a-zA-Z0-9:_-\\]+."];
       parameters: Zz__mapOf__string.t option
         [@ocaml.doc
           "The parameters or configuration that the connector uses."]}

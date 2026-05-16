@@ -2329,10 +2329,10 @@ module Tag =
       {
       key: TagKey.t
         [@ocaml.doc
-          "Required name of the tag. The string value can be Unicode characters and cannot be prefixed with \"aws:\". The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regex: \"^([\\\\p{L}\\\\p{Z}\\\\p{N}_.:/=+\\\\-]*)$\")."];
+          "Required name of the tag. The string value can be Unicode characters and cannot be prefixed with \"aws:\". The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."];
       value: TagValue.t
         [@ocaml.doc
-          "The optional value of the tag. The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regex: \"^([\\\\p{L}\\\\p{Z}\\\\p{N}_.:/=+\\\\-]*)$\")."]}
+          "The optional value of the tag. The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."]}
     let context_ = "Tag"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -12741,7 +12741,7 @@ module CreateDirectoryRequest =
         [@ocaml.doc "The NetBIOS name of the directory, such as CORP."];
       password: Password.t
         [@ocaml.doc
-          "The password for the directory administrator. The directory creation process creates a directory administrator account with the user name Administrator and this password. If you need to change the password for the administrator account, you can use the ResetUserPassword API call. The regex pattern for this string is made up of the following conditions: Length (?=^.{8,64}$) \226\128\147 Must be between 8 and 64 characters AND any 3 of the following password complexity rules required by Active Directory: Numbers and upper case and lowercase (?=.*\\d)(?=.*[A-Z])(?=.*[a-z]) Numbers and special characters and lower case (?=.*\\d)(?=.*[^A-Za-z0-9\\s])(?=.*[a-z]) Special characters and upper case and lower case (?=.*[^A-Za-z0-9\\s])(?=.*[A-Z])(?=.*[a-z]) Numbers and upper case and special characters (?=.*\\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9\\s]) For additional information about how Active Directory passwords are enforced, see Password must meet complexity requirements on the Microsoft website."];
+          "The password for the directory administrator. The directory creation process creates a directory administrator account with the user name Administrator and this password. If you need to change the password for the administrator account, you can use the ResetUserPassword API call. The regex pattern for this string is made up of the following conditions: Length (?=^.\\{8,64\\}$) \226\128\147 Must be between 8 and 64 characters AND any 3 of the following password complexity rules required by Active Directory: Numbers and upper case and lowercase (?=.*\\d)(?=.*\\[A-Z\\])(?=.*\\[a-z\\]) Numbers and special characters and lower case (?=.*\\d)(?=.*\\[^A-Za-z0-9\\s\\])(?=.*\\[a-z\\]) Special characters and upper case and lower case (?=.*\\[^A-Za-z0-9\\s\\])(?=.*\\[A-Z\\])(?=.*\\[a-z\\]) Numbers and upper case and special characters (?=.*\\d)(?=.*\\[A-Z\\])(?=.*\\[^A-Za-z0-9\\s\\]) For additional information about how Active Directory passwords are enforced, see Password must meet complexity requirements on the Microsoft website."];
       description: Description.t option
         [@ocaml.doc "A description for the directory."];
       size: DirectorySize.t [@ocaml.doc "The size of the directory."];

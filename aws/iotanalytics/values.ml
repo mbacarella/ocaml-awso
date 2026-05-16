@@ -1339,7 +1339,7 @@ module S3DestinationConfiguration =
           "The name of the S3 bucket to which dataset contents are delivered."];
       key: BucketKeyExpression.t
         [@ocaml.doc
-          "The key of the dataset contents object in an S3 bucket. Each object has a key that is a unique identifier. Each object has exactly one key. You can create a unique key with the following options: Use !{iotanalytics:scheduleTime} to insert the time of a scheduled SQL query run. Use !{iotanalytics:versionId} to insert a unique hash that identifies a dataset content. Use !{iotanalytics:creationTime} to insert the creation time of a dataset content. The following example creates a unique key for a CSV file: dataset/mydataset/!{iotanalytics:scheduleTime}/!{iotanalytics:versionId}.csv If you don't use !{iotanalytics:versionId} to specify the key, you might get duplicate keys. For example, you might have two dataset contents with the same scheduleTime but different versionIds. This means that one dataset content overwrites the other."];
+          "The key of the dataset contents object in an S3 bucket. Each object has a key that is a unique identifier. Each object has exactly one key. You can create a unique key with the following options: Use !\\{iotanalytics:scheduleTime\\} to insert the time of a scheduled SQL query run. Use !\\{iotanalytics:versionId\\} to insert a unique hash that identifies a dataset content. Use !\\{iotanalytics:creationTime\\} to insert the creation time of a dataset content. The following example creates a unique key for a CSV file: dataset/mydataset/!\\{iotanalytics:scheduleTime\\}/!\\{iotanalytics:versionId\\}.csv If you don't use !\\{iotanalytics:versionId\\} to specify the key, you might get duplicate keys. For example, you might have two dataset contents with the same scheduleTime but different versionIds. This means that one dataset content overwrites the other."];
       glueConfiguration: GlueConfiguration.t option
         [@ocaml.doc
           "Configuration information for coordination with Glue, a fully managed extract, transform and load (ETL) service."];
@@ -5410,7 +5410,7 @@ module UpdatePipelineRequest =
         [@ocaml.doc "The name of the pipeline to update."];
       pipelineActivities: PipelineActivities.t
         [@ocaml.doc
-          "A list of PipelineActivity objects. Activities perform transformations on your messages, such as removing, renaming or adding message attributes; filtering messages based on attribute values; invoking your Lambda functions on messages for advanced processing; or performing mathematical transformations to normalize device data. The list can be 2-25 PipelineActivity objects and must contain both a channel and a datastore activity. Each entry in the list must contain only one activity. For example: pipelineActivities = [ { \"channel\": { ... } }, { \"lambda\": { ... } }, ... ]"]}
+          "A list of PipelineActivity objects. Activities perform transformations on your messages, such as removing, renaming or adding message attributes; filtering messages based on attribute values; invoking your Lambda functions on messages for advanced processing; or performing mathematical transformations to normalize device data. The list can be 2-25 PipelineActivity objects and must contain both a channel and a datastore activity. Each entry in the list must contain only one activity. For example: pipelineActivities = \\[ \\{ \"channel\": \\{ ... \\} \\}, \\{ \"lambda\": \\{ ... \\} \\}, ... \\]"]}
     let context_ = "UpdatePipelineRequest"
     let make ~pipelineName =
       fun ~pipelineActivities ->
@@ -8014,7 +8014,7 @@ module CreatePipelineRequest =
       pipelineName: PipelineName.t [@ocaml.doc "The name of the pipeline."];
       pipelineActivities: PipelineActivities.t
         [@ocaml.doc
-          "A list of PipelineActivity objects. Activities perform transformations on your messages, such as removing, renaming or adding message attributes; filtering messages based on attribute values; invoking your Lambda unctions on messages for advanced processing; or performing mathematical transformations to normalize device data. The list can be 2-25 PipelineActivity objects and must contain both a channel and a datastore activity. Each entry in the list must contain only one activity. For example: pipelineActivities = [ { \"channel\": { ... } }, { \"lambda\": { ... } }, ... ]"];
+          "A list of PipelineActivity objects. Activities perform transformations on your messages, such as removing, renaming or adding message attributes; filtering messages based on attribute values; invoking your Lambda unctions on messages for advanced processing; or performing mathematical transformations to normalize device data. The list can be 2-25 PipelineActivity objects and must contain both a channel and a datastore activity. Each entry in the list must contain only one activity. For example: pipelineActivities = \\[ \\{ \"channel\": \\{ ... \\} \\}, \\{ \"lambda\": \\{ ... \\} \\}, ... \\]"];
       tags: TagList.t option
         [@ocaml.doc "Metadata which can be used to manage the pipeline."]}
     let context_ = "CreatePipelineRequest"
@@ -8976,7 +8976,7 @@ module BatchPutMessageRequest =
         [@ocaml.doc "The name of the channel where the messages are sent."];
       messages: Messages.t
         [@ocaml.doc
-          "The list of messages to be sent. Each message has the format: { \"messageId\": \"string\", \"payload\": \"string\"}. The field names of message payloads (data) that you send to IoT Analytics: Must contain only alphanumeric characters and undescores (_). No other special characters are allowed. Must begin with an alphabetic character or single underscore (_). Cannot contain hyphens (-). In regular expression terms: \"^[A-Za-z_]([A-Za-z0-9]*|[A-Za-z0-9][A-Za-z0-9_]*)$\". Cannot be more than 255 characters. Are case insensitive. (Fields named foo and FOO in the same payload are considered duplicates.) For example, {\"temp_01\": 29} or {\"_temp_01\": 29} are valid, but {\"temp-01\": 29}, {\"01_temp\": 29} or {\"__temp_01\": 29} are invalid in message payloads."]}
+          "The list of messages to be sent. Each message has the format: \\{ \"messageId\": \"string\", \"payload\": \"string\"\\}. The field names of message payloads (data) that you send to IoT Analytics: Must contain only alphanumeric characters and undescores (_). No other special characters are allowed. Must begin with an alphabetic character or single underscore (_). Cannot contain hyphens (-). In regular expression terms: \"^\\[A-Za-z_\\](\\[A-Za-z0-9\\]*|\\[A-Za-z0-9\\]\\[A-Za-z0-9_\\]*)$\". Cannot be more than 255 characters. Are case insensitive. (Fields named foo and FOO in the same payload are considered duplicates.) For example, \\{\"temp_01\": 29\\} or \\{\"_temp_01\": 29\\} are valid, but \\{\"temp-01\": 29\\}, \\{\"01_temp\": 29\\} or \\{\"__temp_01\": 29\\} are invalid in message payloads."]}
     let context_ = "BatchPutMessageRequest"
     let make ~channelName =
       fun ~messages -> fun () -> { channelName; messages }

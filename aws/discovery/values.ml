@@ -4105,7 +4105,7 @@ module ListConfigurationsRequest =
           "A valid configuration identified by Application Discovery Service."];
       filters: Filters.t option
         [@ocaml.doc
-          "You can filter the request using various logical operators and a key-value format. For example: {\"key\": \"serverType\", \"value\": \"webServer\"} For a complete list of filter options and guidance about using them with this action, see Using the ListConfigurations Action in the AWS Application Discovery Service User Guide."];
+          "You can filter the request using various logical operators and a key-value format. For example: \\{\"key\": \"serverType\", \"value\": \"webServer\"\\} For a complete list of filter options and guidance about using them with this action, see Using the ListConfigurations Action in the AWS Application Discovery Service User Guide."];
       maxResults: Integer.t option
         [@ocaml.doc
           "The total number of items to return. The maximum value is 100."];
@@ -5512,7 +5512,7 @@ module DescribeAgentsRequest =
           "The agent or the Connector IDs for which you want information. If you specify no IDs, the system returns information about all agents/Connectors associated with your AWS user account."];
       filters: Filters.t option
         [@ocaml.doc
-          "You can filter the request using various logical operators and a key-value format. For example: {\"key\": \"collectionStatus\", \"value\": \"STARTED\"}"];
+          "You can filter the request using various logical operators and a key-value format. For example: \\{\"key\": \"collectionStatus\", \"value\": \"STARTED\"\\}"];
       maxResults: Integer.t option
         [@ocaml.doc
           "The total number of agents/Connectors to return in a single page of output. The maximum value is 100."];
@@ -5649,7 +5649,7 @@ module DeleteTagsRequest =
           "A list of configuration items with tags that you want to delete."];
       tags: TagSet.t option
         [@ocaml.doc
-          "Tags that you want to delete from one or more configuration items. Specify the tags that you want to delete in a key-value format. For example: {\"key\": \"serverType\", \"value\": \"webServer\"}"]}
+          "Tags that you want to delete from one or more configuration items. Specify the tags that you want to delete in a key-value format. For example: \\{\"key\": \"serverType\", \"value\": \"webServer\"\\}"]}
     let context_ = "DeleteTagsRequest"
     let make ?tags =
       fun ~configurationIds -> fun () -> { tags; configurationIds }
@@ -5877,7 +5877,7 @@ module CreateTagsRequest =
         [@ocaml.doc "A list of configuration items that you want to tag."];
       tags: TagSet.t
         [@ocaml.doc
-          "Tags that you want to associate with one or more configuration items. Specify the tags that you want to create in a key-value format. For example: {\"key\": \"serverType\", \"value\": \"webServer\"}"]}
+          "Tags that you want to associate with one or more configuration items. Specify the tags that you want to create in a key-value format. For example: \\{\"key\": \"serverType\", \"value\": \"webServer\"\\}"]}
     let context_ = "CreateTagsRequest"
     let make ~configurationIds =
       fun ~tags -> fun () -> { configurationIds; tags }

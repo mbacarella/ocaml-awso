@@ -2508,7 +2508,7 @@ module PutLexiconInput =
       {
       name: LexiconName.t
         [@ocaml.doc
-          "Name of the lexicon. The name must follow the regular express format [0-9A-Za-z]{1,20}. That is, the name is a case-sensitive alphanumeric string up to 20 characters long."];
+          "Name of the lexicon. The name must follow the regular express format \\[0-9A-Za-z\\]\\{1,20\\}. That is, the name is a case-sensitive alphanumeric string up to 20 characters long."];
       content: LexiconContent.t
         [@ocaml.doc "Content of the PLS lexicon as string data."]}
     let context_ = "PutLexiconInput"

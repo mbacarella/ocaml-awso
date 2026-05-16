@@ -5228,7 +5228,7 @@ module ExportToS3Task =
         [@ocaml.doc "The format for the exported image."];
       s3Bucket: String_.t option
         [@ocaml.doc
-          "The Amazon S3 bucket for the destination image. The destination bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export@amazon.com."];
+          "The Amazon S3 bucket for the destination image. The destination bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export\\@amazon.com."];
       s3Key: String_.t option
         [@ocaml.doc "The encryption key for your S3 bucket."]}
     let make ?containerFormat =

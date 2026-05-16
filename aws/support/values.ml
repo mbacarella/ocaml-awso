@@ -225,7 +225,7 @@ module Communication =
           "The text of the communication between the customer and Amazon Web Services Support."];
       submittedBy: SubmittedBy.t option
         [@ocaml.doc
-          "The identity of the account that submitted, or responded to, the support case. Customer entries include the role or IAM user as well as the email address. For example, \"AdminRole (Role) <janedoe@example.com>. Entries from the Amazon Web Services Support team display \"Amazon Web Services,\" and don't show an email address."];
+          "The identity of the account that submitted, or responded to, the support case. Customer entries include the role or IAM user as well as the email address. For example, \"AdminRole (Role) <janedoe\\@example.com>. Entries from the Amazon Web Services Support team display \"Amazon Web Services,\" and don't show an email address."];
       timeCreated: TimeCreated.t option
         [@ocaml.doc "The time the communication was created."];
       attachmentSet: AttachmentSet.t option

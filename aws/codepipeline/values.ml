@@ -1034,7 +1034,7 @@ module ActionDeclaration =
         [@ocaml.doc "The order in which actions are run."];
       configuration: ActionConfigurationMap.t option
         [@ocaml.doc
-          "The action's configuration. These are key-value pairs that specify input values for an action. For more information, see Action Structure Requirements in CodePipeline. For the list of configuration properties for the AWS CloudFormation action type in CodePipeline, see Configuration Properties Reference in the AWS CloudFormation User Guide. For template snippets with examples, see Using Parameter Override Functions with CodePipeline Pipelines in the AWS CloudFormation User Guide. The values can be represented in either JSON or YAML format. For example, the JSON configuration item format is as follows: JSON: \"Configuration\" : { Key : Value },"];
+          "The action's configuration. These are key-value pairs that specify input values for an action. For more information, see Action Structure Requirements in CodePipeline. For the list of configuration properties for the AWS CloudFormation action type in CodePipeline, see Configuration Properties Reference in the AWS CloudFormation User Guide. For template snippets with examples, see Using Parameter Override Functions with CodePipeline Pipelines in the AWS CloudFormation User Guide. The values can be represented in either JSON or YAML format. For example, the JSON configuration item format is as follows: JSON: \"Configuration\" : \\{ Key : Value \\},"];
       outputArtifacts: OutputArtifactList.t option
         [@ocaml.doc
           "The name or ID of the result of the action declaration, such as a test or build artifact."];
@@ -1499,7 +1499,7 @@ module WebhookFilterRule =
           "A JsonPath expression that is applied to the body/payload of the webhook. The value selected by the JsonPath expression must match the value specified in the MatchEquals field. Otherwise, the request is ignored. For more information, see Java JsonPath implementation in GitHub."];
       matchEquals: MatchEquals.t option
         [@ocaml.doc
-          "The value selected by the JsonPath expression must match what is supplied in the MatchEquals field. Otherwise, the request is ignored. Properties from the target action configuration can be included as placeholders in this value by surrounding the action configuration key with curly brackets. For example, if the value supplied here is \"refs/heads/{Branch}\" and the target action has an action configuration property called \"Branch\" with a value of \"master\", the MatchEquals value is evaluated as \"refs/heads/master\". For a list of action configuration properties for built-in action types, see Pipeline Structure Reference Action Requirements."]}
+          "The value selected by the JsonPath expression must match what is supplied in the MatchEquals field. Otherwise, the request is ignored. Properties from the target action configuration can be included as placeholders in this value by surrounding the action configuration key with curly brackets. For example, if the value supplied here is \"refs/heads/\\{Branch\\}\" and the target action has an action configuration property called \"Branch\" with a value of \"master\", the MatchEquals value is evaluated as \"refs/heads/master\". For a list of action configuration properties for built-in action types, see Pipeline Structure Reference Action Requirements."]}
     let context_ = "WebhookFilterRule"
     let make ?matchEquals =
       fun ~jsonPath -> fun () -> { matchEquals; jsonPath }
@@ -10550,7 +10550,7 @@ module CreateCustomActionTypeInput =
           "URLs that provide users information about this custom action."];
       configurationProperties: ActionConfigurationPropertyList.t option
         [@ocaml.doc
-          "The configuration properties for the custom action. You can refer to a name in the configuration properties of the custom action within the URL templates by following the format of {Config:name}, as long as the configuration property is both required and not secret. For more information, see Create a Custom Action for a Pipeline."];
+          "The configuration properties for the custom action. You can refer to a name in the configuration properties of the custom action within the URL templates by following the format of \\{Config:name\\}, as long as the configuration property is both required and not secret. For more information, see Create a Custom Action for a Pipeline."];
       inputArtifactDetails: ArtifactDetails.t
         [@ocaml.doc
           "The details of the input artifact for the action, such as its commit ID."];

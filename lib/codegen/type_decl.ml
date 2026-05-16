@@ -7,6 +7,11 @@ let strip_html s =
   let s = String.substr_replace_all s ~pattern:"&gt;" ~with_:">" in
   let s = String.substr_replace_all s ~pattern:"&quot;" ~with_:"\"" in
   let s = String.substr_replace_all s ~pattern:"&#39;" ~with_:"'" in
+  let s = String.substr_replace_all s ~pattern:"{" ~with_:"\\{" in
+  let s = String.substr_replace_all s ~pattern:"}" ~with_:"\\}" in
+  let s = String.substr_replace_all s ~pattern:"[" ~with_:"\\[" in
+  let s = String.substr_replace_all s ~pattern:"]" ~with_:"\\]" in
+  let s = String.substr_replace_all s ~pattern:"@" ~with_:"\\@" in
   let s = Re.replace_string (Re.Perl.compile_pat "\\s+") ~by:" " s in
   String.strip s
 

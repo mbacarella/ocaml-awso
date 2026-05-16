@@ -1205,7 +1205,7 @@ module CreateBackendAuthMFAConfig =
       {
       mFAMode: MFAMode.t
         [@ocaml.doc
-          "Describes whether MFA should be [ON, OFF, or OPTIONAL] for authentication in your Amplify project."];
+          "Describes whether MFA should be \\[ON, OFF, or OPTIONAL\\] for authentication in your Amplify project."];
       settings: Settings.t option
         [@ocaml.doc
           "Describes the configuration settings and methods for your Amplify app users to use MFA."]}

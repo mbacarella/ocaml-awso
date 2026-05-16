@@ -3449,7 +3449,7 @@ module AssociatedAssetsSummary =
       id: ID.t [@ocaml.doc "The ID of the asset."];
       arn: ARN.t
         [@ocaml.doc
-          "The ARN of the asset, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:asset/${AssetId}"];
+          "The ARN of the asset, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:asset/$\\{AssetId\\}"];
       name: Name.t [@ocaml.doc "The name of the asset."];
       assetModelId: ID.t
         [@ocaml.doc "The ID of the asset model used to create the asset."];
@@ -3536,7 +3536,7 @@ module AssetSummary =
       id: ID.t [@ocaml.doc "The ID of the asset."];
       arn: ARN.t
         [@ocaml.doc
-          "The ARN of the asset, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:asset/${AssetId}"];
+          "The ARN of the asset, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:asset/$\\{AssetId\\}"];
       name: Name.t [@ocaml.doc "The name of the asset."];
       assetModelId: ID.t
         [@ocaml.doc "The ID of the asset model used to create this asset."];
@@ -3662,7 +3662,7 @@ module AssetModelSummary =
           "The ID of the asset model (used with IoT SiteWise APIs)."];
       arn: ARN.t
         [@ocaml.doc
-          "The ARN of the asset model, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:asset-model/${AssetModelId}"];
+          "The ARN of the asset model, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:asset-model/$\\{AssetModelId\\}"];
       name: Name.t [@ocaml.doc "The name of the asset model."];
       description: Description.t [@ocaml.doc "The asset model description."];
       creationDate: Timestamp.t
@@ -10649,7 +10649,7 @@ module DescribeProjectResponse =
       projectId: ID.t [@ocaml.doc "The ID of the project."];
       projectArn: ARN.t
         [@ocaml.doc
-          "The ARN of the project, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:project/${ProjectId}"];
+          "The ARN of the project, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:project/$\\{ProjectId\\}"];
       projectName: Name.t [@ocaml.doc "The name of the project."];
       portalId: ID.t
         [@ocaml.doc "The ID of the portal that the project is in."];
@@ -10805,7 +10805,7 @@ module DescribePortalResponse =
       portalId: ID.t [@ocaml.doc "The ID of the portal."];
       portalArn: ARN.t
         [@ocaml.doc
-          "The ARN of the portal, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:portal/${PortalId}"];
+          "The ARN of the portal, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:portal/$\\{PortalId\\}"];
       portalName: Name.t [@ocaml.doc "The name of the portal."];
       portalDescription: Description.t option
         [@ocaml.doc "The portal's description."];
@@ -11139,7 +11139,7 @@ module DescribeGatewayResponse =
       gatewayName: Name.t [@ocaml.doc "The name of the gateway."];
       gatewayArn: ARN.t
         [@ocaml.doc
-          "The ARN of the gateway, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:gateway/${GatewayId}"];
+          "The ARN of the gateway, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:gateway/$\\{GatewayId\\}"];
       gatewayPlatform: GatewayPlatform.t option
         [@ocaml.doc "The gateway's platform."];
       gatewayCapabilitySummaries: GatewayCapabilitySummaries.t
@@ -11558,7 +11558,7 @@ module DescribeDashboardResponse =
       dashboardId: ID.t [@ocaml.doc "The ID of the dashboard."];
       dashboardArn: ARN.t
         [@ocaml.doc
-          "The ARN of the dashboard, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:dashboard/${DashboardId}"];
+          "The ARN of the dashboard, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:dashboard/$\\{DashboardId\\}"];
       dashboardName: Name.t [@ocaml.doc "The name of the dashboard."];
       projectId: ID.t
         [@ocaml.doc "The ID of the project that the dashboard is in."];
@@ -11732,7 +11732,7 @@ module DescribeAssetResponse =
       assetId: ID.t [@ocaml.doc "The ID of the asset."];
       assetArn: ARN.t
         [@ocaml.doc
-          "The ARN of the asset, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:asset/${AssetId}"];
+          "The ARN of the asset, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:asset/$\\{AssetId\\}"];
       assetName: Name.t [@ocaml.doc "The name of the asset."];
       assetModelId: ID.t
         [@ocaml.doc
@@ -12067,7 +12067,7 @@ module DescribeAssetModelResponse =
       assetModelId: ID.t [@ocaml.doc "The ID of the asset model."];
       assetModelArn: ARN.t
         [@ocaml.doc
-          "The ARN of the asset model, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:asset-model/${AssetModelId}"];
+          "The ARN of the asset model, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:asset-model/$\\{AssetModelId\\}"];
       assetModelName: Name.t [@ocaml.doc "The name of the asset model."];
       assetModelDescription: Description.t
         [@ocaml.doc "The asset model's description."];
@@ -12276,7 +12276,7 @@ module DescribeAccessPolicyResponse =
       accessPolicyId: ID.t [@ocaml.doc "The ID of the access policy."];
       accessPolicyArn: ARN.t
         [@ocaml.doc
-          "The ARN of the access policy, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:access-policy/${AccessPolicyId}"];
+          "The ARN of the access policy, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:access-policy/$\\{AccessPolicyId\\}"];
       accessPolicyIdentity: Identity.t
         [@ocaml.doc
           "The identity (Amazon Web Services SSO user, Amazon Web Services SSO group, or IAM user) to which this access policy applies."];
@@ -13152,7 +13152,7 @@ module CreateProjectResponse =
       projectId: ID.t [@ocaml.doc "The ID of the project."];
       projectArn: ARN.t
         [@ocaml.doc
-          "The ARN of the project, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:project/${ProjectId}"]}
+          "The ARN of the project, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:project/$\\{ProjectId\\}"]}
     type nonrec error =
       [ `InternalFailureException of InternalFailureException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -13305,7 +13305,7 @@ module CreatePortalResponse =
       portalId: ID.t [@ocaml.doc "The ID of the created portal."];
       portalArn: ARN.t
         [@ocaml.doc
-          "The ARN of the portal, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:portal/${PortalId}"];
+          "The ARN of the portal, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:portal/$\\{PortalId\\}"];
       portalStartUrl: Url.t
         [@ocaml.doc
           "The URL for the IoT SiteWise Monitor portal. You can use this URL to access portals that use Amazon Web Services SSO for authentication. For portals that use IAM for authentication, you must use the IoT SiteWise console to get a URL that you can use to access the portal."];
@@ -13559,7 +13559,7 @@ module CreateGatewayResponse =
           "The ID of the gateway device. You can use this ID when you call other IoT SiteWise APIs."];
       gatewayArn: ARN.t
         [@ocaml.doc
-          "The ARN of the gateway, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:gateway/${GatewayId}"]}
+          "The ARN of the gateway, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:gateway/$\\{GatewayId\\}"]}
     type nonrec error =
       [ `InternalFailureException of InternalFailureException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -13694,7 +13694,7 @@ module CreateDashboardResponse =
       dashboardId: ID.t [@ocaml.doc "The ID of the dashboard."];
       dashboardArn: ARN.t
         [@ocaml.doc
-          "The ARN of the dashboard, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:dashboard/${DashboardId}"]}
+          "The ARN of the dashboard, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:dashboard/$\\{DashboardId\\}"]}
     type nonrec error =
       [ `InternalFailureException of InternalFailureException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -13863,7 +13863,7 @@ module CreateAssetResponse =
           "The ID of the asset. This ID uniquely identifies the asset within IoT SiteWise and can be used with other IoT SiteWise APIs."];
       assetArn: ARN.t
         [@ocaml.doc
-          "The ARN of the asset, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:asset/${AssetId}"];
+          "The ARN of the asset, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:asset/$\\{AssetId\\}"];
       assetStatus: AssetStatus.t
         [@ocaml.doc
           "The status of the asset, which contains a state (CREATING after successfully calling this operation) and any error message."]}
@@ -14033,7 +14033,7 @@ module CreateAssetModelResponse =
           "The ID of the asset model. You can use this ID when you call other IoT SiteWise APIs."];
       assetModelArn: ARN.t
         [@ocaml.doc
-          "The ARN of the asset model, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:asset-model/${AssetModelId}"];
+          "The ARN of the asset model, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:asset-model/$\\{AssetModelId\\}"];
       assetModelStatus: AssetModelStatus.t
         [@ocaml.doc
           "The status of the asset model, which contains a state (CREATING after successfully calling this operation) and any error message."]}
@@ -14260,7 +14260,7 @@ module CreateAccessPolicyResponse =
       accessPolicyId: ID.t [@ocaml.doc "The ID of the access policy."];
       accessPolicyArn: ARN.t
         [@ocaml.doc
-          "The ARN of the access policy, which has the following format. arn:${Partition}:iotsitewise:${Region}:${Account}:access-policy/${AccessPolicyId}"]}
+          "The ARN of the access policy, which has the following format. arn:$\\{Partition\\}:iotsitewise:$\\{Region\\}:$\\{Account\\}:access-policy/$\\{AccessPolicyId\\}"]}
     type nonrec error =
       [ `InternalFailureException of InternalFailureException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -14530,7 +14530,7 @@ module BatchPutAssetPropertyValueResponse =
       make ~errorEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a list of asset property values to IoT SiteWise. Each value is a timestamp-quality-value (TQV) data point. For more information, see Ingesting data using the API in the IoT SiteWise User Guide. To identify an asset property, you must specify one of the following: The assetId and propertyId of an asset property. A propertyAlias, which is a data stream alias (for example, /company/windfarm/3/turbine/7/temperature). To define an asset property's alias, see UpdateAssetProperty. With respect to Unix epoch time, IoT SiteWise accepts only TQVs that have a timestamp of no more than 7 days in the past and no more than 10 minutes in the future. IoT SiteWise rejects timestamps outside of the inclusive range of [-7 days, +10 minutes] and returns a TimestampOutOfRangeException error. For each asset property, IoT SiteWise overwrites TQVs with duplicate timestamps unless the newer TQV has a different quality. For example, if you store a TQV {T1, GOOD, V1}, then storing {T1, GOOD, V2} replaces the existing TQV. IoT SiteWise authorizes access to each BatchPutAssetPropertyValue entry individually. For more information, see BatchPutAssetPropertyValue authorization in the IoT SiteWise User Guide."]
+       "Sends a list of asset property values to IoT SiteWise. Each value is a timestamp-quality-value (TQV) data point. For more information, see Ingesting data using the API in the IoT SiteWise User Guide. To identify an asset property, you must specify one of the following: The assetId and propertyId of an asset property. A propertyAlias, which is a data stream alias (for example, /company/windfarm/3/turbine/7/temperature). To define an asset property's alias, see UpdateAssetProperty. With respect to Unix epoch time, IoT SiteWise accepts only TQVs that have a timestamp of no more than 7 days in the past and no more than 10 minutes in the future. IoT SiteWise rejects timestamps outside of the inclusive range of \\[-7 days, +10 minutes\\] and returns a TimestampOutOfRangeException error. For each asset property, IoT SiteWise overwrites TQVs with duplicate timestamps unless the newer TQV has a different quality. For example, if you store a TQV \\{T1, GOOD, V1\\}, then storing \\{T1, GOOD, V2\\} replaces the existing TQV. IoT SiteWise authorizes access to each BatchPutAssetPropertyValue entry individually. For more information, see BatchPutAssetPropertyValue authorization in the IoT SiteWise User Guide."]
 module BatchPutAssetPropertyValueRequest =
   struct
     type nonrec t =
@@ -14556,7 +14556,7 @@ module BatchPutAssetPropertyValueRequest =
       make ~entries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a list of asset property values to IoT SiteWise. Each value is a timestamp-quality-value (TQV) data point. For more information, see Ingesting data using the API in the IoT SiteWise User Guide. To identify an asset property, you must specify one of the following: The assetId and propertyId of an asset property. A propertyAlias, which is a data stream alias (for example, /company/windfarm/3/turbine/7/temperature). To define an asset property's alias, see UpdateAssetProperty. With respect to Unix epoch time, IoT SiteWise accepts only TQVs that have a timestamp of no more than 7 days in the past and no more than 10 minutes in the future. IoT SiteWise rejects timestamps outside of the inclusive range of [-7 days, +10 minutes] and returns a TimestampOutOfRangeException error. For each asset property, IoT SiteWise overwrites TQVs with duplicate timestamps unless the newer TQV has a different quality. For example, if you store a TQV {T1, GOOD, V1}, then storing {T1, GOOD, V2} replaces the existing TQV. IoT SiteWise authorizes access to each BatchPutAssetPropertyValue entry individually. For more information, see BatchPutAssetPropertyValue authorization in the IoT SiteWise User Guide."]
+       "Sends a list of asset property values to IoT SiteWise. Each value is a timestamp-quality-value (TQV) data point. For more information, see Ingesting data using the API in the IoT SiteWise User Guide. To identify an asset property, you must specify one of the following: The assetId and propertyId of an asset property. A propertyAlias, which is a data stream alias (for example, /company/windfarm/3/turbine/7/temperature). To define an asset property's alias, see UpdateAssetProperty. With respect to Unix epoch time, IoT SiteWise accepts only TQVs that have a timestamp of no more than 7 days in the past and no more than 10 minutes in the future. IoT SiteWise rejects timestamps outside of the inclusive range of \\[-7 days, +10 minutes\\] and returns a TimestampOutOfRangeException error. For each asset property, IoT SiteWise overwrites TQVs with duplicate timestamps unless the newer TQV has a different quality. For example, if you store a TQV \\{T1, GOOD, V1\\}, then storing \\{T1, GOOD, V2\\} replaces the existing TQV. IoT SiteWise authorizes access to each BatchPutAssetPropertyValue entry individually. For more information, see BatchPutAssetPropertyValue authorization in the IoT SiteWise User Guide."]
 module BatchDisassociateProjectAssetsResponse =
   struct
     type nonrec t =

@@ -2987,7 +2987,7 @@ module OracleSettings =
           "Set this attribute with ArchivedLogDestId in a primary/ standby setup. This attribute is useful in the case of a switchover. In this case, DMS needs to know which destination to get archive redo logs from to read changes. This need arises because the previous primary instance is now a standby instance after switchover. Although DMS supports the use of the Oracle RESETLOGS option to open the database, never use RESETLOGS unless necessary. For additional information about RESETLOGS, see RMAN Data Repair Concepts in the Oracle Database Backup and Recovery User's Guide."];
       extraArchivedLogDestIds: IntegerList.t option
         [@ocaml.doc
-          "Specifies the IDs of one more destinations for one or more archived redo logs. These IDs are the values of the dest_id column in the v$archived_log view. Use this setting with the archivedLogDestId extra connection attribute in a primary-to-single setup or a primary-to-multiple-standby setup. This setting is useful in a switchover when you use an Oracle Data Guard database as a source. In this case, DMS needs information about what destination to get archive redo logs from to read changes. DMS needs this because after the switchover the previous primary is a standby instance. For example, in a primary-to-single standby setup you might apply the following settings. archivedLogDestId=1; ExtraArchivedLogDestIds=[2] In a primary-to-multiple-standby setup, you might apply the following settings. archivedLogDestId=1; ExtraArchivedLogDestIds=[2,3,4] Although DMS supports the use of the Oracle RESETLOGS option to open the database, never use RESETLOGS unless it's necessary. For more information about RESETLOGS, see RMAN Data Repair Concepts in the Oracle Database Backup and Recovery User's Guide."];
+          "Specifies the IDs of one more destinations for one or more archived redo logs. These IDs are the values of the dest_id column in the v$archived_log view. Use this setting with the archivedLogDestId extra connection attribute in a primary-to-single setup or a primary-to-multiple-standby setup. This setting is useful in a switchover when you use an Oracle Data Guard database as a source. In this case, DMS needs information about what destination to get archive redo logs from to read changes. DMS needs this because after the switchover the previous primary is a standby instance. For example, in a primary-to-single standby setup you might apply the following settings. archivedLogDestId=1; ExtraArchivedLogDestIds=\\[2\\] In a primary-to-multiple-standby setup, you might apply the following settings. archivedLogDestId=1; ExtraArchivedLogDestIds=\\[2,3,4\\] Although DMS supports the use of the Oracle RESETLOGS option to open the database, never use RESETLOGS unless it's necessary. For more information about RESETLOGS, see RMAN Data Repair Concepts in the Oracle Database Backup and Recovery User's Guide."];
       allowSelectNestedTables: BooleanOptional.t option
         [@ocaml.doc
           "Set this attribute to true to enable replication of Oracle tables containing columns that are nested tables or defined types."];
@@ -4300,7 +4300,7 @@ module S3Settings =
           "For an S3 source, when this value is set to true or y, each leading double quotation mark has to be followed by an ending double quotation mark. This formatting complies with RFC 4180. When this value is set to false or n, string literals are copied to the target as is. In this case, a delimiter (row or column) signals the end of the field. Thus, you can't use a delimiter as part of the string, because it signals the end of the value. For an S3 target, an optional parameter used to set behavior to comply with RFC 4180 for data migrated to Amazon S3 using .csv file format only. When this value is set to true or y using Amazon S3 as a target, if the data has quotation marks or newline characters in it, DMS encloses the entire column with an additional pair of double quotation marks (\"). Every quotation mark within the data is repeated twice. The default value is true. Valid values include true, false, y, and n."];
       datePartitionTimezone: String_.t option
         [@ocaml.doc
-          "When creating an S3 target endpoint, set DatePartitionTimezone to convert the current UTC time into a specified time zone. The conversion occurs when a date partition folder is created and a CDC filename is generated. The time zone format is Area/Location. Use this parameter when DatePartitionedEnabled is set to true, as shown in the following example. s3-settings='{\"DatePartitionEnabled\": true, \"DatePartitionSequence\": \"YYYYMMDDHH\", \"DatePartitionDelimiter\": \"SLASH\", \"DatePartitionTimezone\":\"Asia/Seoul\", \"BucketName\": \"dms-nattarat-test\"}'"]}
+          "When creating an S3 target endpoint, set DatePartitionTimezone to convert the current UTC time into a specified time zone. The conversion occurs when a date partition folder is created and a CDC filename is generated. The time zone format is Area/Location. Use this parameter when DatePartitionedEnabled is set to true, as shown in the following example. s3-settings='\\{\"DatePartitionEnabled\": true, \"DatePartitionSequence\": \"YYYYMMDDHH\", \"DatePartitionDelimiter\": \"SLASH\", \"DatePartitionTimezone\":\"Asia/Seoul\", \"BucketName\": \"dms-nattarat-test\"\\}'"]}
     let make ?serviceAccessRoleArn =
       fun ?externalTableDefinition ->
         fun ?csvRowDelimiter ->
@@ -4929,10 +4929,10 @@ module Tag =
       {
       key: String_.t option
         [@ocaml.doc
-          "A key is the required name of the tag. The string value can be 1-128 Unicode characters in length and can't be prefixed with \"aws:\" or \"dms:\". The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regular expressions: \"^([\\\\p{L}\\\\p{Z}\\\\p{N}_.:/=+\\\\-]*)$\")."];
+          "A key is the required name of the tag. The string value can be 1-128 Unicode characters in length and can't be prefixed with \"aws:\" or \"dms:\". The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regular expressions: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."];
       value: String_.t option
         [@ocaml.doc
-          "A value is the optional value of the tag. The string value can be 1-256 Unicode characters in length and can't be prefixed with \"aws:\" or \"dms:\". The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regular expressions: \"^([\\\\p{L}\\\\p{Z}\\\\p{N}_.:/=+\\\\-]*)$\")."];
+          "A value is the optional value of the tag. The string value can be 1-256 Unicode characters in length and can't be prefixed with \"aws:\" or \"dms:\". The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regular expressions: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."];
       resourceArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) string that uniquely identifies the resource for which the tag is created."]}
@@ -7206,7 +7206,7 @@ module Certificate =
           "The contents of a .pem file, which contains an X.509 certificate."];
       certificateWallet: CertificateWallet.t option
         [@ocaml.doc
-          "The location of an imported Oracle Wallet certificate for use with SSL. Example: filebase64(\"${path.root}/rds-ca-2019-root.sso\")"];
+          "The location of an imported Oracle Wallet certificate for use with SSL. Example: filebase64(\"$\\{path.root\\}/rds-ca-2019-root.sso\")"];
       certificateArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the certificate."];
       certificateOwner: String_.t option
@@ -10835,7 +10835,7 @@ module ModifyEndpointMessage =
           "Settings in JSON format for the target Amazon S3 endpoint. For more information about the available settings, see Extra Connection Attributes When Using Amazon S3 as a Target for DMS in the Database Migration Service User Guide."];
       dmsTransferSettings: DmsTransferSettings.t option
         [@ocaml.doc
-          "The settings in JSON format for the DMS transfer type of source endpoint. Attributes include the following: serviceAccessRoleArn - The Amazon Resource Name (ARN) used by the service access IAM role. The role must allow the iam:PassRole action. BucketName - The name of the S3 bucket to use. Shorthand syntax for these settings is as follows: ServiceAccessRoleArn=string ,BucketName=string JSON syntax for these settings is as follows: { \"ServiceAccessRoleArn\": \"string\", \"BucketName\": \"string\"}"];
+          "The settings in JSON format for the DMS transfer type of source endpoint. Attributes include the following: serviceAccessRoleArn - The Amazon Resource Name (ARN) used by the service access IAM role. The role must allow the iam:PassRole action. BucketName - The name of the S3 bucket to use. Shorthand syntax for these settings is as follows: ServiceAccessRoleArn=string ,BucketName=string JSON syntax for these settings is as follows: \\{ \"ServiceAccessRoleArn\": \"string\", \"BucketName\": \"string\"\\}"];
       mongoDbSettings: MongoDbSettings.t option
         [@ocaml.doc
           "Settings in JSON format for the source MongoDB endpoint. For more information about the available settings, see the configuration properties section in Endpoint configuration settings when using MongoDB as a source for Database Migration Service in the Database Migration Service User Guide."];
@@ -10877,7 +10877,7 @@ module ModifyEndpointMessage =
         [@ocaml.doc "Settings in JSON format for the Redis target endpoint."];
       exactSettings: BooleanOptional.t option
         [@ocaml.doc
-          "If this attribute is Y, the current call to ModifyEndpoint replaces all existing endpoint settings with the exact settings that you specify in this call. If this attribute is N, the current call to ModifyEndpoint does two things: It replaces any endpoint settings that already exist with new values, for settings with the same names. It creates new endpoint settings that you specify in the call, for settings with different names. For example, if you call create-endpoint ... --endpoint-settings '{\"a\":1}' ..., the endpoint has the following endpoint settings: '{\"a\":1}'. If you then call modify-endpoint ... --endpoint-settings '{\"b\":2}' ... for the same endpoint, the endpoint has the following settings: '{\"a\":1,\"b\":2}'. However, suppose that you follow this with a call to modify-endpoint ... --endpoint-settings '{\"b\":2}' --exact-settings ... for that same endpoint again. Then the endpoint has the following settings: '{\"b\":2}'. All existing settings are replaced with the exact settings that you specify."];
+          "If this attribute is Y, the current call to ModifyEndpoint replaces all existing endpoint settings with the exact settings that you specify in this call. If this attribute is N, the current call to ModifyEndpoint does two things: It replaces any endpoint settings that already exist with new values, for settings with the same names. It creates new endpoint settings that you specify in the call, for settings with different names. For example, if you call create-endpoint ... --endpoint-settings '\\{\"a\":1\\}' ..., the endpoint has the following endpoint settings: '\\{\"a\":1\\}'. If you then call modify-endpoint ... --endpoint-settings '\\{\"b\":2\\}' ... for the same endpoint, the endpoint has the following settings: '\\{\"a\":1,\"b\":2\\}'. However, suppose that you follow this with a call to modify-endpoint ... --endpoint-settings '\\{\"b\":2\\}' --exact-settings ... for that same endpoint again. Then the endpoint has the following settings: '\\{\"b\":2\\}'. All existing settings are replaced with the exact settings that you specify."];
       gcpMySQLSettings: GcpMySQLSettings.t option
         [@ocaml.doc
           "Settings in JSON format for the source GCP MySQL endpoint."]}
@@ -11350,7 +11350,7 @@ module ImportCertificateMessage =
           "The contents of a .pem file, which contains an X.509 certificate."];
       certificateWallet: CertificateWallet.t option
         [@ocaml.doc
-          "The location of an imported Oracle Wallet certificate for use with SSL. Provide the name of a .sso file using the fileb:// prefix. You can't provide the certificate inline. Example: filebase64(\"${path.root}/rds-ca-2019-root.sso\")"];
+          "The location of an imported Oracle Wallet certificate for use with SSL. Provide the name of a .sso file using the fileb:// prefix. You can't provide the certificate inline. Example: filebase64(\"$\\{path.root\\}/rds-ca-2019-root.sso\")"];
       tags: TagList.t option
         [@ocaml.doc "The tags associated with the certificate."]}
     let context_ = "ImportCertificateMessage"
@@ -15490,7 +15490,7 @@ module CreateEndpointMessage =
           "Settings in JSON format for the target Amazon S3 endpoint. For more information about the available settings, see Extra Connection Attributes When Using Amazon S3 as a Target for DMS in the Database Migration Service User Guide."];
       dmsTransferSettings: DmsTransferSettings.t option
         [@ocaml.doc
-          "The settings in JSON format for the DMS transfer type of source endpoint. Possible settings include the following: ServiceAccessRoleArn - The Amazon Resource Name (ARN) used by the service access IAM role. The role must allow the iam:PassRole action. BucketName - The name of the S3 bucket to use. Shorthand syntax for these settings is as follows: ServiceAccessRoleArn=string,BucketName=string JSON syntax for these settings is as follows: { \"ServiceAccessRoleArn\": \"string\", \"BucketName\": \"string\", }"];
+          "The settings in JSON format for the DMS transfer type of source endpoint. Possible settings include the following: ServiceAccessRoleArn - The Amazon Resource Name (ARN) used by the service access IAM role. The role must allow the iam:PassRole action. BucketName - The name of the S3 bucket to use. Shorthand syntax for these settings is as follows: ServiceAccessRoleArn=string,BucketName=string JSON syntax for these settings is as follows: \\{ \"ServiceAccessRoleArn\": \"string\", \"BucketName\": \"string\", \\}"];
       mongoDbSettings: MongoDbSettings.t option
         [@ocaml.doc
           "Settings in JSON format for the source MongoDB endpoint. For more information about the available settings, see Endpoint configuration settings when using MongoDB as a source for Database Migration Service in the Database Migration Service User Guide."];

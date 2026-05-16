@@ -1227,7 +1227,7 @@ module StateExitedEventDetails =
       {
       name: Name.t
         [@ocaml.doc
-          "The name of the state. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the state. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       output: SensitiveData.t option
         [@ocaml.doc
           "The JSON output data of the state. Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
@@ -1764,7 +1764,7 @@ module Tag =
       let key = field_map json "key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Tags are key-value pairs that can be associated with Step Functions state machines and activities. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."]
+       "Tags are key-value pairs that can be associated with Step Functions state machines and activities. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
 module BilledDuration =
   struct
     type nonrec t = Int64.t
@@ -1815,7 +1815,7 @@ module StateMachineListItem =
           "The Amazon Resource Name (ARN) that identifies the state machine."];
       name: Name.t
         [@ocaml.doc
-          "The name of the state machine. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       type_: StateMachineType.t ;
       creationDate: Timestamp.t
         [@ocaml.doc "The date the state machine is created."]}
@@ -1865,7 +1865,7 @@ module ExecutionListItem =
           "The Amazon Resource Name (ARN) of the executed state machine."];
       name: Name.t
         [@ocaml.doc
-          "The name of the execution. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the execution. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       status: ExecutionStatus.t
         [@ocaml.doc "The current status of the execution."];
       startDate: Timestamp.t [@ocaml.doc "The date the execution started."];
@@ -1935,7 +1935,7 @@ module ActivityListItem =
           "The Amazon Resource Name (ARN) that identifies the activity."];
       name: Name.t
         [@ocaml.doc
-          "The name of the activity. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the activity. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       creationDate: Timestamp.t
         [@ocaml.doc "The date the activity is created."]}
     let context_ = "ActivityListItem"
@@ -3724,7 +3724,7 @@ module TagResourceOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."]
+       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
 module TagResourceInput =
   struct
     type nonrec t =
@@ -3734,7 +3734,7 @@ module TagResourceInput =
           "The Amazon Resource Name (ARN) for the Step Functions state machine or activity."];
       tags: TagList.t
         [@ocaml.doc
-          "The list of tags to add to a resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."]}
+          "The list of tags to add to a resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]}
     let context_ = "TagResourceInput"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -3754,7 +3754,7 @@ module TagResourceInput =
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."]
+       "Add a tag to a Step Functions resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
 module StopExecutionOutput =
   struct
     type nonrec t =
@@ -4082,7 +4082,7 @@ module StartSyncExecutionInput =
       name: Name.t option [@ocaml.doc "The name of the execution."];
       input: SensitiveData.t option
         [@ocaml.doc
-          "The string that contains the JSON input data for the execution, for example: \"input\": \"{\\\"first_name\\\" : \\\"test\\\"}\" If you don't include any JSON input data, you still must include the two braces, for example: \"input\": \"{}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
+          "The string that contains the JSON input data for the execution, for example: \"input\": \"\\{\\\"first_name\\\" : \\\"test\\\"\\}\" If you don't include any JSON input data, you still must include the two braces, for example: \"input\": \"\\{\\}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       traceHeader: TraceHeader.t option
         [@ocaml.doc
           "Passes the AWS X-Ray trace header. The trace header can also be passed in the request payload."]}
@@ -4234,10 +4234,10 @@ module StartExecutionInput =
           "The Amazon Resource Name (ARN) of the state machine to execute."];
       name: Name.t option
         [@ocaml.doc
-          "The name of the execution. This name must be unique for your AWS account, region, and state machine for 90 days. For more information, see Limits Related to State Machine Executions in the AWS Step Functions Developer Guide. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the execution. This name must be unique for your AWS account, region, and state machine for 90 days. For more information, see Limits Related to State Machine Executions in the AWS Step Functions Developer Guide. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       input: SensitiveData.t option
         [@ocaml.doc
-          "The string that contains the JSON input data for the execution, for example: \"input\": \"{\\\"first_name\\\" : \\\"test\\\"}\" If you don't include any JSON input data, you still must include the two braces, for example: \"input\": \"{}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
+          "The string that contains the JSON input data for the execution, for example: \"input\": \"\\{\\\"first_name\\\" : \\\"test\\\"\\}\" If you don't include any JSON input data, you still must include the two braces, for example: \"input\": \"\\{\\}\" Length constraints apply to the payload size, and are expressed as bytes in UTF-8 encoding."];
       traceHeader: TraceHeader.t option
         [@ocaml.doc
           "Passes the AWS X-Ray trace header. The trace header can also be passed in the request payload."]}
@@ -4579,7 +4579,7 @@ module ListTagsForResourceOutput =
       let tags = field_map json "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List tags for a given resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."]
+       "List tags for a given resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
 module ListTagsForResourceInput =
   struct
     type nonrec t =
@@ -4602,7 +4602,7 @@ module ListTagsForResourceInput =
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List tags for a given resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."]
+       "List tags for a given resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]
 module ListStateMachinesOutput =
   struct
     type nonrec t =
@@ -5171,7 +5171,7 @@ module DescribeStateMachineOutput =
           "The Amazon Resource Name (ARN) that identifies the state machine."];
       name: Name.t
         [@ocaml.doc
-          "The name of the state machine. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       status: StateMachineStatus.t option
         [@ocaml.doc "The current status of the state machine."];
       definition: Definition.t
@@ -5484,7 +5484,7 @@ module DescribeExecutionOutput =
           "The Amazon Resource Name (ARN) of the executed stated machine."];
       name: Name.t option
         [@ocaml.doc
-          "The name of the execution. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the execution. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       status: ExecutionStatus.t
         [@ocaml.doc "The current status of the execution."];
       startDate: Timestamp.t
@@ -5663,7 +5663,7 @@ module DescribeActivityOutput =
           "The Amazon Resource Name (ARN) that identifies the activity."];
       name: Name.t
         [@ocaml.doc
-          "The name of the activity. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the activity. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       creationDate: Timestamp.t
         [@ocaml.doc "The date the activity is created."]}
     type nonrec error =
@@ -6015,7 +6015,7 @@ module CreateStateMachineInput =
       {
       name: Name.t
         [@ocaml.doc
-          "The name of the state machine. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the state machine. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       definition: Definition.t
         [@ocaml.doc
           "The Amazon States Language definition of the state machine. See Amazon States Language."];
@@ -6030,7 +6030,7 @@ module CreateStateMachineInput =
           "Defines what execution history events are logged and where they are logged. By default, the level is set to OFF. For more information see Log Levels in the AWS Step Functions User Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "Tags to be added when creating a state machine. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."];
+          "Tags to be added when creating a state machine. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."];
       tracingConfiguration: TracingConfiguration.t option
         [@ocaml.doc "Selects whether AWS X-Ray tracing is enabled."]}
     let context_ = "CreateStateMachineInput"
@@ -6174,10 +6174,10 @@ module CreateActivityInput =
       {
       name: Name.t
         [@ocaml.doc
-          "The name of the activity to create. This name must be unique for your AWS account and region for 90 days. For more information, see Limits Related to State Machine Executions in the AWS Step Functions Developer Guide. A name must not contain: white space brackets < > { } [ ] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
+          "The name of the activity to create. This name must be unique for your AWS account and region for 90 days. For more information, see Limits Related to State Machine Executions in the AWS Step Functions Developer Guide. A name must not contain: white space brackets < > \\{ \\} \\[ \\] wildcard characters ? * special characters \" # % \\ ^ | ~ ` $ & , ; : / control characters (U+0000-001F, U+007F-009F) To enable logging with CloudWatch Logs, the name should only contain 0-9, A-Z, a-z, - and _."];
       tags: TagList.t option
         [@ocaml.doc
-          "The list of tags to add to a resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - @."]}
+          "The list of tags to add to a resource. An array of key-value pairs. For more information, see Using Cost Allocation Tags in the AWS Billing and Cost Management User Guide, and Controlling Access Using IAM Tags. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."]}
     let context_ = "CreateActivityInput"
     let make ?tags = fun ~name -> fun () -> { tags; name }
     let to_value x =

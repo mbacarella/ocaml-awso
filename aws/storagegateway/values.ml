@@ -3933,13 +3933,13 @@ module SMBFileShareInfo =
         [@ocaml.doc "Indicates whether AccessBasedEnumeration is enabled."];
       adminUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that have administrator rights to the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that have administrator rights to the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       validUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that are allowed to access the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that are allowed to access the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       invalidUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that are not allowed to access the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that are not allowed to access the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       auditDestinationARN: AuditDestinationARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the storage used for audit logs."];
@@ -3957,7 +3957,7 @@ module SMBFileShareInfo =
         [@ocaml.doc "Refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. {\\\"Upload\\\": {\\\"SettlingTimeInSeconds\\\": 60}} The following example sets NotificationPolicy off. {}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the SMB file share uses to connect to Amazon S3. This parameter is required for SMB file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -4251,7 +4251,7 @@ module NFSFileShareInfo =
         [@ocaml.doc "Refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. {\\\"Upload\\\": {\\\"SettlingTimeInSeconds\\\": 60}} The following example sets NotificationPolicy off. {}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the NFS file share uses to connect to Amazon S3. This parameter is required for NFS file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -6646,7 +6646,7 @@ module UpdateSnapshotScheduleInput =
           "Optional description of the snapshot that overwrites the existing description."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to a snapshot. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "A list of up to 50 tags that can be assigned to a snapshot. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "UpdateSnapshotScheduleInput"
     let make ?description =
       fun ?tags ->
@@ -7053,13 +7053,13 @@ module UpdateSMBFileShareInput =
           "The files and folders on this share will only be visible to users with read access."];
       adminUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that have administrator rights to the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that have administrator rights to the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       validUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that are allowed to access the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that are allowed to access the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       invalidUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that are not allowed to access the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that are not allowed to access the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       auditDestinationARN: AuditDestinationARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the storage used for audit logs."];
@@ -7074,7 +7074,7 @@ module UpdateSMBFileShareInput =
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. {\\\"Upload\\\": {\\\"SettlingTimeInSeconds\\\": 60}} The following example sets NotificationPolicy off. {}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       oplocksEnabled: Boolean.t option
         [@ocaml.doc
           "Specifies whether opportunistic locking is enabled for the SMB file share. Enabling opportunistic locking on case-sensitive shares is not recommended for workloads that involve access to files with the same name in different case. Valid Values: true | false"]}
@@ -7346,7 +7346,7 @@ module UpdateNFSFileShareInput =
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. {\\\"Upload\\\": {\\\"SettlingTimeInSeconds\\\": 60}} The following example sets NotificationPolicy off. {}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       auditDestinationARN: AuditDestinationARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the storage used for audit logs."]}
@@ -9223,7 +9223,7 @@ module RefreshCacheInput =
           "The Amazon Resource Name (ARN) of the file share you want to refresh."];
       folderList: FolderList.t option
         [@ocaml.doc
-          "A comma-separated list of the paths of folders to refresh in the cache. The default is [\"/\"]. The default refreshes objects and folders at the root of the Amazon S3 bucket. If Recursive is set to true, the entire S3 bucket that the file share has access to is refreshed."];
+          "A comma-separated list of the paths of folders to refresh in the cache. The default is \\[\"/\"\\]. The default refreshes objects and folders at the root of the Amazon S3 bucket. If Recursive is set to true, the entire S3 bucket that the file share has access to is refreshed."];
       recursive: Boolean.t option
         [@ocaml.doc
           "A value that specifies whether to recursively refresh folders in the cache. The refresh includes folders that were in the cache the last time the gateway listed the folder's contents. If this value set to true, each folder that is listed in FolderList is recursively updated. Otherwise, subfolders listed in FolderList are not refreshed. Only objects that are in folders listed directly under FolderList are found and used for the update. The default is true. Valid Values: true | false"]}
@@ -9356,7 +9356,7 @@ module ListVolumesOutput =
           "Use the marker in your next request to continue pagination of iSCSI volumes. If there are no more volumes to list, this field does not appear in the response body."];
       volumeInfos: VolumeInfos.t option
         [@ocaml.doc
-          "An array of VolumeInfo objects, where each object describes an iSCSI volume. If no volumes are defined for the gateway, then VolumeInfos is an empty array \"[]\"."]}
+          "An array of VolumeInfo objects, where each object describes an iSCSI volume. If no volumes are defined for the gateway, then VolumeInfos is an empty array \"\\[\\]\"."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
@@ -14272,7 +14272,7 @@ module CreateTapesInput =
           "Set to TRUE if the tape you are creating is to be configured as a write-once-read-many (WORM) tape."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to a virtual tape. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "A list of up to 50 tags that can be assigned to a virtual tape. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "CreateTapesInput"
     let make ?kMSEncrypted =
       fun ?kMSKey ->
@@ -14443,7 +14443,7 @@ module CreateTapeWithBarcodeInput =
           "Set to TRUE if the tape you are creating is to be configured as a write-once-read-many (WORM) tape."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to a virtual tape that has a barcode. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "A list of up to 50 tags that can be assigned to a virtual tape that has a barcode. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "CreateTapeWithBarcodeInput"
     let make ?kMSEncrypted =
       fun ?kMSKey ->
@@ -14587,7 +14587,7 @@ module CreateTapePoolInput =
           "Tape retention lock time is set in days. Tape retention lock can be enabled for up to 100 years (36,500 days)."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to tape pool. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "A list of up to 50 tags that can be assigned to tape pool. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "CreateTapePoolInput"
     let make ?retentionLockType =
       fun ?retentionLockTimeInDays ->
@@ -14747,7 +14747,7 @@ module CreateStorediSCSIVolumeInput =
           "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to a stored volume. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "A list of up to 50 tags that can be assigned to a stored volume. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "CreateStorediSCSIVolumeInput"
     let make ?snapshotId =
       fun ?kMSEncrypted ->
@@ -14913,7 +14913,7 @@ module CreateSnapshotInput =
           "Textual description of the snapshot that appears in the Amazon EC2 console, Elastic Block Store snapshots panel in the Description field, and in the Storage Gateway snapshot Details pane, Description field."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to a snapshot. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "A list of up to 50 tags that can be assigned to a snapshot. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "CreateSnapshotInput"
     let make ?tags =
       fun ~volumeARN ->
@@ -15043,7 +15043,7 @@ module CreateSnapshotFromVolumeRecoveryPointInput =
           "Textual description of the snapshot that appears in the Amazon EC2 console, Elastic Block Store snapshots panel in the Description field, and in the Storage Gateway snapshot Details pane, Description field."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to a snapshot. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "A list of up to 50 tags that can be assigned to a snapshot. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "CreateSnapshotFromVolumeRecoveryPointInput"
     let make ?tags =
       fun ~volumeARN ->
@@ -15180,13 +15180,13 @@ module CreateSMBFileShareInput =
           "The files and folders on this share will only be visible to users with read access."];
       adminUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that will be granted administrator privileges on the file share. These users can do all file operations as the super-user. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Use this option very carefully, because any user in this list can do anything they like on the file share, regardless of file permissions."];
+          "A list of users or groups in the Active Directory that will be granted administrator privileges on the file share. These users can do all file operations as the super-user. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Use this option very carefully, because any user in this list can do anything they like on the file share, regardless of file permissions."];
       validUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that are allowed to access the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that are allowed to access the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       invalidUserList: UserList.t option
         [@ocaml.doc
-          "A list of users or groups in the Active Directory that are not allowed to access the file share. A group must be prefixed with the @ character. Acceptable formats include: DOMAIN\\User1, user1, @group1, and @DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
+          "A list of users or groups in the Active Directory that are not allowed to access the file share. A group must be prefixed with the \\@ character. Acceptable formats include: DOMAIN\\User1, user1, \\@group1, and \\@DOMAIN\\group1. Can only be set if Authentication is set to ActiveDirectory."];
       auditDestinationARN: AuditDestinationARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the storage used for audit logs."];
@@ -15198,7 +15198,7 @@ module CreateSMBFileShareInput =
           "The case of an object name in an Amazon S3 bucket. For ClientSpecified, the client determines the case sensitivity. For CaseSensitive, the gateway determines the case sensitivity. The default value is ClientSpecified."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to the NFS file share. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."];
+          "A list of up to 50 tags that can be assigned to the NFS file share. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."];
       fileShareName: FileShareName.t option
         [@ocaml.doc
           "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used."];
@@ -15207,7 +15207,7 @@ module CreateSMBFileShareInput =
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. {\\\"Upload\\\": {\\\"SettlingTimeInSeconds\\\": 60}} The following example sets NotificationPolicy off. {}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the SMB file share uses to connect to Amazon S3. This parameter is required for SMB file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -15540,7 +15540,7 @@ module CreateNFSFileShareInput =
           "A value that sets who pays the cost of the request and the cost associated with data download from the S3 bucket. If this value is set to true, the requester pays the costs; otherwise, the S3 bucket owner pays. However, the S3 bucket owner always pays the cost of storing data. RequesterPays is a configuration for the S3 bucket that backs the file share, so make sure that the configuration on the file share is the same as the S3 bucket configuration. Valid Values: true | false"];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that can be assigned to the NFS file share. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."];
+          "A list of up to 50 tags that can be assigned to the NFS file share. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."];
       fileShareName: FileShareName.t option
         [@ocaml.doc
           "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used."];
@@ -15549,7 +15549,7 @@ module CreateNFSFileShareInput =
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. {\\\"Upload\\\": {\\\"SettlingTimeInSeconds\\\": 60}} The following example sets NotificationPolicy off. {}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the NFS file share uses to connect to Amazon S3. This parameter is required for NFS file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -15833,7 +15833,7 @@ module CreateCachediSCSIVolumeInput =
           "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that you can assign to a cached volume. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers that you can represent in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256 characters."]}
+          "A list of up to 50 tags that you can assign to a cached volume. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers that you can represent in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256 characters."]}
     let context_ = "CreateCachediSCSIVolumeInput"
     let make ?snapshotId =
       fun ?sourceVolumeARN ->
@@ -16753,7 +16753,7 @@ module AddTagsToResourceInput =
           "The Amazon Resource Name (ARN) of the resource you want to add tags to."];
       tags: Tags.t
         [@ocaml.doc
-          "The key-value pair that represents the tag you want to add to the resource. The value can be an empty string. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
+          "The key-value pair that represents the tag you want to add to the resource. The value can be an empty string. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."]}
     let context_ = "AddTagsToResourceInput"
     let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
     let to_value x =
@@ -16943,7 +16943,7 @@ module ActivateGatewayInput =
           "The value that indicates the type of medium changer to use for tape gateway. This field is optional. Valid Values: STK-L700 | AWS-Gateway-VTL | IBM-03584L32-0402"];
       tags: Tags.t option
         [@ocaml.doc
-          "A list of up to 50 tags that you can assign to the gateway. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers that can be represented in UTF-8 format, and the following special characters: + - = . _ : / @. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256 characters."]}
+          "A list of up to 50 tags that you can assign to the gateway. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers that can be represented in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256 characters."]}
     let context_ = "ActivateGatewayInput"
     let make ?gatewayType =
       fun ?tapeDriveType ->

@@ -837,7 +837,7 @@ module GeofenceGeometry =
       {
       polygon: LinearRings.t option
         [@ocaml.doc
-          "An array of 1 or more linear rings. A linear ring is an array of 4 or more vertices, where the first and last vertex are the same to form a closed boundary. Each vertex is a 2-dimensional point of the form: [longitude, latitude]. The first linear ring is an outer ring, describing the polygon's boundary. Subsequent linear rings may be inner or outer rings to describe holes and islands. Outer rings must list their vertices in counter-clockwise order around the ring's center, where the left side is the polygon's exterior. Inner rings must list their vertices in clockwise order, where the left side is the polygon's interior."]}
+          "An array of 1 or more linear rings. A linear ring is an array of 4 or more vertices, where the first and last vertex are the same to form a closed boundary. Each vertex is a 2-dimensional point of the form: \\[longitude, latitude\\]. The first linear ring is an outer ring, describing the polygon's boundary. Subsequent linear rings may be inner or outer rings to describe holes and islands. Outer rings must list their vertices in counter-clockwise order around the ring's center, where the left side is the polygon's exterior. Inner rings must list their vertices in clockwise order, where the left side is the polygon's interior."]}
     let make ?polygon = fun () -> { polygon }
     let to_value x =
       structure_to_value
@@ -967,7 +967,7 @@ module LegGeometry =
       {
       lineString: LineString.t option
         [@ocaml.doc
-          "An ordered list of positions used to plot a route on a map. The first position is closest to the start position for the leg, and the last position is the closest to the end position for the leg. For example, [[-123.117, 49.284],[-123.115, 49.285],[-123.115, 49.285]]"]}
+          "An ordered list of positions used to plot a route on a map. The first position is closest to the start position for the leg, and the last position is the closest to the end position for the leg. For example, \\[\\[-123.117, 49.284\\],\\[-123.115, 49.285\\],\\[-123.115, 49.285\\]\\]"]}
     let make ?lineString = fun () -> { lineString }
     let to_value x =
       structure_to_value
@@ -2221,13 +2221,13 @@ module Leg =
           "The estimated travel time between the leg's StartPosition and EndPosition. The travel mode and departure time that you specify in the request determines the calculated time."];
       endPosition: Position.t
         [@ocaml.doc
-          "The terminating position of the leg. Follows the format [longitude,latitude]. If the EndPosition isn't located on a road, it's snapped to a nearby road."];
+          "The terminating position of the leg. Follows the format \\[longitude,latitude\\]. If the EndPosition isn't located on a road, it's snapped to a nearby road."];
       geometry: LegGeometry.t option
         [@ocaml.doc
           "Contains the calculated route's path as a linestring geometry."];
       startPosition: Position.t
         [@ocaml.doc
-          "The starting position of the leg. Follows the format [longitude,latitude]. If the StartPosition isn't located on a road, it's snapped to a nearby road."];
+          "The starting position of the leg. Follows the format \\[longitude,latitude\\]. If the StartPosition isn't located on a road, it's snapped to a nearby road."];
       steps: StepList.t
         [@ocaml.doc
           "Contains a list of steps, which represent subsections of a leg. Each step provides instructions for how to move to the next step in the leg such as the step's start position, end position, travel distance, travel duration, and geometry offset."]}
@@ -2484,7 +2484,7 @@ module DevicePositionUpdate =
         [@ocaml.doc "The device associated to the position update."];
       position: Position.t
         [@ocaml.doc
-          "The latest device position defined in WGS 84 format: [X or longitude, Y or latitude]."];
+          "The latest device position defined in WGS 84 format: \\[X or longitude, Y or latitude\\]."];
       positionProperties: PropertyMap.t option
         [@ocaml.doc
           "Associates one of more properties with the position update. A property is a key-value pair stored with the position update and added to any geofence event the update may trigger. Format: \"key\" : \"value\""];
@@ -3021,7 +3021,7 @@ module SearchPlaceIndexForTextSummary =
       {
       biasPosition: Position.t option
         [@ocaml.doc
-          "Contains the coordinates for the optional bias position specified in the request. This parameter contains a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, [-123.1174, 49.2847] represents the position with longitude -123.1174 and latitude 49.2847."];
+          "Contains the coordinates for the optional bias position specified in the request. This parameter contains a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847."];
       dataSource: String_.t
         [@ocaml.doc
           "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Here For more information about data providers, see Amazon Location Service data providers."];
@@ -3169,7 +3169,7 @@ module SearchPlaceIndexForSuggestionsSummary =
       {
       biasPosition: Position.t option
         [@ocaml.doc
-          "Contains the coordinates for the optional bias position specified in the request. This parameter contains a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, [-123.1174, 49.2847] represents the position with longitude -123.1174 and latitude 49.2847."];
+          "Contains the coordinates for the optional bias position specified in the request. This parameter contains a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847."];
       dataSource: String_.t
         [@ocaml.doc
           "The geospatial data provider attached to the place index resource specified in the request. Values can be one of the following: Esri Here For more information about data providers, see Amazon Location Service data providers."];
@@ -3946,7 +3946,7 @@ module CalculateRouteSummary =
           "The total travel time for the route measured in seconds. The sum of the travel time between every stop on the route."];
       routeBBox: BoundingBox.t
         [@ocaml.doc
-          "Specifies a geographical box surrounding a route. Used to zoom into a route when displaying it in a map. For example, [min x, min y, max x, max y]. The first 2 bbox parameters describe the lower southwest corner: The first bbox position is the X coordinate or longitude of the lower southwest corner. The second bbox position is the Y coordinate or latitude of the lower southwest corner. The next 2 bbox parameters describe the upper northeast corner: The third bbox position is the X coordinate, or longitude of the upper northeast corner. The fourth bbox position is the Y coordinate, or latitude of the upper northeast corner."]}
+          "Specifies a geographical box surrounding a route. Used to zoom into a route when displaying it in a map. For example, \\[min x, min y, max x, max y\\]. The first 2 bbox parameters describe the lower southwest corner: The first bbox position is the X coordinate or longitude of the lower southwest corner. The second bbox position is the Y coordinate or latitude of the lower southwest corner. The next 2 bbox parameters describe the upper northeast corner: The third bbox position is the X coordinate, or longitude of the upper northeast corner. The fourth bbox position is the Y coordinate, or latitude of the upper northeast corner."]}
     let context_ = "CalculateRouteSummary"
     let make ~dataSource =
       fun ~distance ->
@@ -5755,7 +5755,7 @@ module TagResourceRequest =
           "The Amazon Resource Name (ARN) of the resource whose tags you want to update. Format example: arn:aws:geo:region:account-id:resourcetype/ExampleResource"];
       tags: TagMap.t
         [@ocaml.doc
-          "Applies one or more tags to specific resource. A tag is a key-value pair that helps you manage, identify, search, and filter your resources. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource. Each tag key must be unique and must have exactly one associated value. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / @ Cannot use \"aws:\" as a prefix for a key."]}
+          "Applies one or more tags to specific resource. A tag is a key-value pair that helps you manage, identify, search, and filter your resources. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource. Each tag key must be unique and must have exactly one associated value. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@ Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -5880,10 +5880,10 @@ module SearchPlaceIndexForTextRequest =
       {
       biasPosition: Position.t option
         [@ocaml.doc
-          "An optional parameter that indicates a preference for places that are closer to a specified position. If provided, this parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, [-123.1174, 49.2847] represents the position with longitude -123.1174 and latitude 49.2847. BiasPosition and FilterBBox are mutually exclusive. Specifying both options results in an error."];
+          "An optional parameter that indicates a preference for places that are closer to a specified position. If provided, this parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847. BiasPosition and FilterBBox are mutually exclusive. Specifying both options results in an error."];
       filterBBox: BoundingBox.t option
         [@ocaml.doc
-          "An optional parameter that limits the search results by returning only places that are within the provided bounding box. If provided, this parameter must contain a total of four consecutive numbers in two pairs. The first pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the southwest corner of the bounding box; the second pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the northeast corner of the bounding box. For example, [-12.7935, -37.4835, -12.0684, -36.9542] represents a bounding box where the southwest corner has longitude -12.7935 and latitude -37.4835, and the northeast corner has longitude -12.0684 and latitude -36.9542. FilterBBox and BiasPosition are mutually exclusive. Specifying both options results in an error."];
+          "An optional parameter that limits the search results by returning only places that are within the provided bounding box. If provided, this parameter must contain a total of four consecutive numbers in two pairs. The first pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the southwest corner of the bounding box; the second pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the northeast corner of the bounding box. For example, \\[-12.7935, -37.4835, -12.0684, -36.9542\\] represents a bounding box where the southwest corner has longitude -12.7935 and latitude -37.4835, and the northeast corner has longitude -12.0684 and latitude -36.9542. FilterBBox and BiasPosition are mutually exclusive. Specifying both options results in an error."];
       filterCountries: CountryCodeList.t option
         [@ocaml.doc
           "An optional parameter that limits the search results by returning only places that are in a specified list of countries. Valid values include ISO 3166 3-digit country codes. For example, Australia uses three upper-case characters: AUS."];
@@ -6075,10 +6075,10 @@ module SearchPlaceIndexForSuggestionsRequest =
       {
       biasPosition: Position.t option
         [@ocaml.doc
-          "An optional parameter that indicates a preference for place suggestions that are closer to a specified position. If provided, this parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, [-123.1174, 49.2847] represents the position with longitude -123.1174 and latitude 49.2847. BiasPosition and FilterBBox are mutually exclusive. Specifying both options results in an error."];
+          "An optional parameter that indicates a preference for place suggestions that are closer to a specified position. If provided, this parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents the position with longitude -123.1174 and latitude 49.2847. BiasPosition and FilterBBox are mutually exclusive. Specifying both options results in an error."];
       filterBBox: BoundingBox.t option
         [@ocaml.doc
-          "An optional parameter that limits the search results by returning only suggestions within a specified bounding box. If provided, this parameter must contain a total of four consecutive numbers in two pairs. The first pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the southwest corner of the bounding box; the second pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the northeast corner of the bounding box. For example, [-12.7935, -37.4835, -12.0684, -36.9542] represents a bounding box where the southwest corner has longitude -12.7935 and latitude -37.4835, and the northeast corner has longitude -12.0684 and latitude -36.9542. FilterBBox and BiasPosition are mutually exclusive. Specifying both options results in an error."];
+          "An optional parameter that limits the search results by returning only suggestions within a specified bounding box. If provided, this parameter must contain a total of four consecutive numbers in two pairs. The first pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the southwest corner of the bounding box; the second pair of numbers represents the X and Y coordinates (longitude and latitude, respectively) of the northeast corner of the bounding box. For example, \\[-12.7935, -37.4835, -12.0684, -36.9542\\] represents a bounding box where the southwest corner has longitude -12.7935 and latitude -37.4835, and the northeast corner has longitude -12.0684 and latitude -36.9542. FilterBBox and BiasPosition are mutually exclusive. Specifying both options results in an error."];
       filterCountries: CountryCodeList.t option
         [@ocaml.doc
           "An optional parameter that limits the search results by returning only suggestions within the provided list of countries. Use the ISO 3166 3-digit country code. For example, Australia uses three upper-case characters: AUS."];
@@ -6283,7 +6283,7 @@ module SearchPlaceIndexForPositionRequest =
           "An optional parameter. The maximum number of results returned per request. Default value: 50"];
       position: Position.t
         [@ocaml.doc
-          "Specifies the longitude and latitude of the position to query. This parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, [-123.1174, 49.2847] represents a position with longitude -123.1174 and latitude 49.2847."]}
+          "Specifies the longitude and latitude of the position to query. This parameter must contain a pair of numbers. The first number represents the X coordinate, or longitude; the second number represents the Y coordinate, or latitude. For example, \\[-123.1174, 49.2847\\] represents a position with longitude -123.1174 and latitude 49.2847."]}
     let context_ = "SearchPlaceIndexForPositionRequest"
     let make ?language =
       fun ?maxResults ->
@@ -6739,7 +6739,7 @@ module ListTagsForResourceResponse =
       {
       tags: TagMap.t option
         [@ocaml.doc
-          "Tags that have been applied to the specified resource. Tags are mapped from the tag key to the tag value: \"TagKey\" : \"TagValue\". Format example: {\"tag1\" : \"value1\", \"tag2\" : \"value2\"}"]}
+          "Tags that have been applied to the specified resource. Tags are mapped from the tag key to the tag value: \"TagKey\" : \"TagValue\". Format example: \\{\"tag1\" : \"value1\", \"tag2\" : \"value2\"\\}"]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7943,7 +7943,7 @@ module GetMapSpritesRequest =
       {
       fileName: GetMapSpritesRequestFileNameString.t
         [@ocaml.doc
-          "The name of the sprite \239\172\129le. Use the following \239\172\129le names for the sprite sheet: sprites.png sprites@2x.png for high pixel density displays For the JSON document contain image offsets. Use the following \239\172\129le names: sprites.json sprites@2x.json for high pixel density displays"];
+          "The name of the sprite \239\172\129le. Use the following \239\172\129le names for the sprite sheet: sprites.png sprites\\@2x.png for high pixel density displays For the JSON document contain image offsets. Use the following \239\172\129le names: sprites.json sprites\\@2x.json for high pixel density displays"];
       mapName: ResourceName.t
         [@ocaml.doc
           "The map resource associated with the sprite \239\172\129le."]}
@@ -10285,7 +10285,7 @@ module CreateTrackerRequest =
         [@ocaml.doc "This parameter is no longer used."];
       tags: TagMap.t option
         [@ocaml.doc
-          "Applies one or more tags to the tracker resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / @. Cannot use \"aws:\" as a prefix for a key."];
+          "Applies one or more tags to the tracker resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."];
       trackerName: ResourceName.t
         [@ocaml.doc
           "The name for the tracker resource. Requirements: Contain only alphanumeric characters (A-Z, a-z, 0-9) , hyphens (-), periods (.), and underscores (_). Must be a unique tracker resource name. No spaces allowed. For example, ExampleTracker."]}
@@ -10480,7 +10480,7 @@ module CreateRouteCalculatorRequest =
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
       tags: TagMap.t option
         [@ocaml.doc
-          "Applies one or more tags to the route calculator resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. For example: { \"tag1\" : \"value1\", \"tag2\" : \"value2\"} Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / @. Cannot use \"aws:\" as a prefix for a key."]}
+          "Applies one or more tags to the route calculator resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. For example: \\{ \"tag1\" : \"value1\", \"tag2\" : \"value2\"\\} Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "CreateRouteCalculatorRequest"
     let make ?description =
       fun ?pricingPlan ->
@@ -10647,7 +10647,7 @@ module CreatePlaceIndexRequest =
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
       tags: TagMap.t option
         [@ocaml.doc
-          "Applies one or more tags to the place index resource. A tag is a key-value pair that helps you manage, identify, search, and filter your resources. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource. Each tag key must be unique and must have exactly one associated value. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / @ Cannot use \"aws:\" as a prefix for a key."]}
+          "Applies one or more tags to the place index resource. A tag is a key-value pair that helps you manage, identify, search, and filter your resources. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource. Each tag key must be unique and must have exactly one associated value. Maximum key length: 128 Unicode characters in UTF-8. Maximum value length: 256 Unicode characters in UTF-8. Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@ Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "CreatePlaceIndexRequest"
     let make ?dataSourceConfiguration =
       fun ?description ->
@@ -10828,7 +10828,7 @@ module CreateMapRequest =
           "No longer used. If included, the only allowed value is RequestBasedUsage."];
       tags: TagMap.t option
         [@ocaml.doc
-          "Applies one or more tags to the map resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / @. Cannot use \"aws:\" as a prefix for a key."]}
+          "Applies one or more tags to the map resource. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "CreateMapRequest"
     let make ?description =
       fun ?pricingPlan ->
@@ -10997,7 +10997,7 @@ module CreateGeofenceCollectionRequest =
         [@ocaml.doc "This parameter is no longer used."];
       tags: TagMap.t option
         [@ocaml.doc
-          "Applies one or more tags to the geofence collection. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / @. Cannot use \"aws:\" as a prefix for a key."]}
+          "Applies one or more tags to the geofence collection. A tag is a key-value pair helps manage, identify, search, and filter your resources by labelling them. Format: \"key\" : \"value\" Restrictions: Maximum 50 tags per resource Each resource tag must be unique with a maximum of one value. Maximum key length: 128 Unicode characters in UTF-8 Maximum value length: 256 Unicode characters in UTF-8 Can use alphanumeric characters (A\226\128\147Z, a\226\128\147z, 0\226\128\1479), and the following characters: + - = . _ : / \\@. Cannot use \"aws:\" as a prefix for a key."]}
     let context_ = "CreateGeofenceCollectionRequest"
     let make ?description =
       fun ?kmsKeyId ->
@@ -11167,13 +11167,13 @@ module CalculateRouteRequest =
           "Sets the time of departure as the current time. Uses the current time to calculate a route. Otherwise, the best time of day to travel with the best traffic conditions is used to calculate the route. Default Value: false Valid Values: false | true"];
       departurePosition: Position.t
         [@ocaml.doc
-          "The start position for the route. Defined in WGS 84 format: [longitude, latitude]. For example, [-123.115, 49.285] If you specify a departure that's not located on a road, Amazon Location moves the position to the nearest road. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: [-180 to 180,-90 to 90]"];
+          "The start position for the route. Defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-123.115, 49.285\\] If you specify a departure that's not located on a road, Amazon Location moves the position to the nearest road. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: \\[-180 to 180,-90 to 90\\]"];
       departureTime: Timestamp.t option
         [@ocaml.doc
           "Specifies the desired time of departure. Uses the given time to calculate the route. Otherwise, the best time of day to travel with the best traffic conditions is used to calculate the route. Setting a departure time in the past returns a 400 ValidationException error. In ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
       destinationPosition: Position.t
         [@ocaml.doc
-          "The finish position for the route. Defined in WGS 84 format: [longitude, latitude]. For example, [-122.339, 47.615] If you specify a destination that's not located on a road, Amazon Location moves the position to the nearest road. Valid Values: [-180 to 180,-90 to 90]"];
+          "The finish position for the route. Defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-122.339, 47.615\\] If you specify a destination that's not located on a road, Amazon Location moves the position to the nearest road. Valid Values: \\[-180 to 180,-90 to 90\\]"];
       distanceUnit: DistanceUnit.t option
         [@ocaml.doc
           "Set the unit system to specify the distance. Default Value: Kilometers"];
@@ -11188,7 +11188,7 @@ module CalculateRouteRequest =
           "Specifies route preferences when traveling by Truck, such as avoiding routes that use ferries or tolls, and truck specifications to consider when choosing an optimal road. Requirements: TravelMode must be specified as Truck."];
       waypointPositions: CalculateRouteRequestWaypointPositionsList.t option
         [@ocaml.doc
-          "Specifies an ordered list of up to 23 intermediate positions to include along a route between the departure position and destination position. For example, from the DeparturePosition [-123.115, 49.285], the route follows the order that the waypoint positions are given [[-122.757, 49.0021],[-122.349, 47.620]] If you specify a waypoint position that's not located on a road, Amazon Location moves the position to the nearest road. Specifying more than 23 waypoints returns a 400 ValidationException error. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: [-180 to 180,-90 to 90]"]}
+          "Specifies an ordered list of up to 23 intermediate positions to include along a route between the departure position and destination position. For example, from the DeparturePosition \\[-123.115, 49.285\\], the route follows the order that the waypoint positions are given \\[\\[-122.757, 49.0021\\],\\[-122.349, 47.620\\]\\] If you specify a waypoint position that's not located on a road, Amazon Location moves the position to the nearest road. Specifying more than 23 waypoints returns a 400 ValidationException error. If Esri is the provider for your route calculator, specifying a route that is longer than 400 km returns a 400 RoutesValidationException error. Valid Values: \\[-180 to 180,-90 to 90\\]"]}
     let context_ = "CalculateRouteRequest"
     let make ?carModeOptions =
       fun ?departNow ->
@@ -11449,14 +11449,14 @@ module CalculateRouteMatrixRequest =
           "Sets the time of departure as the current time. Uses the current time to calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is set, the best time of day to travel with the best traffic conditions is used to calculate the route matrix. Default Value: false Valid Values: false | true"];
       departurePositions: CalculateRouteMatrixRequestDeparturePositionsList.t
         [@ocaml.doc
-          "The list of departure (origin) positions for the route matrix. An array of points, each of which is itself a 2-value array defined in WGS 84 format: [longitude, latitude]. For example, [-123.115, 49.285]. Depending on the data provider selected in the route calculator resource there may be additional restrictions on the inputs you can choose. See Position restrictions in the Amazon Location Service Developer Guide. For route calculators that use Esri as the data provider, if you specify a departure that's not located on a road, Amazon Location moves the position to the nearest road. The snapped value is available in the result in SnappedDeparturePositions. Valid Values: [-180 to 180,-90 to 90]"];
+          "The list of departure (origin) positions for the route matrix. An array of points, each of which is itself a 2-value array defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-123.115, 49.285\\]. Depending on the data provider selected in the route calculator resource there may be additional restrictions on the inputs you can choose. See Position restrictions in the Amazon Location Service Developer Guide. For route calculators that use Esri as the data provider, if you specify a departure that's not located on a road, Amazon Location moves the position to the nearest road. The snapped value is available in the result in SnappedDeparturePositions. Valid Values: \\[-180 to 180,-90 to 90\\]"];
       departureTime: Timestamp.t option
         [@ocaml.doc
           "Specifies the desired time of departure. Uses the given time to calculate the route matrix. You can't set both DepartureTime and DepartNow. If neither is set, the best time of day to travel with the best traffic conditions is used to calculate the route matrix. Setting a departure time in the past returns a 400 ValidationException error. In ISO 8601 format: YYYY-MM-DDThh:mm:ss.sssZ. For example, 2020\226\128\14707-2T12:15:20.000Z+01:00"];
       destinationPositions:
         CalculateRouteMatrixRequestDestinationPositionsList.t
         [@ocaml.doc
-          "The list of destination positions for the route matrix. An array of points, each of which is itself a 2-value array defined in WGS 84 format: [longitude, latitude]. For example, [-122.339, 47.615] Depending on the data provider selected in the route calculator resource there may be additional restrictions on the inputs you can choose. See Position restrictions in the Amazon Location Service Developer Guide. For route calculators that use Esri as the data provider, if you specify a destination that's not located on a road, Amazon Location moves the position to the nearest road. The snapped value is available in the result in SnappedDestinationPositions. Valid Values: [-180 to 180,-90 to 90]"];
+          "The list of destination positions for the route matrix. An array of points, each of which is itself a 2-value array defined in WGS 84 format: \\[longitude, latitude\\]. For example, \\[-122.339, 47.615\\] Depending on the data provider selected in the route calculator resource there may be additional restrictions on the inputs you can choose. See Position restrictions in the Amazon Location Service Developer Guide. For route calculators that use Esri as the data provider, if you specify a destination that's not located on a road, Amazon Location moves the position to the nearest road. The snapped value is available in the result in SnappedDestinationPositions. Valid Values: \\[-180 to 180,-90 to 90\\]"];
       distanceUnit: DistanceUnit.t option
         [@ocaml.doc
           "Set the unit system to specify the distance. Default Value: Kilometers"];
@@ -11652,7 +11652,7 @@ module BatchUpdateDevicePositionResponse =
       make ~errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads position update data for one or more devices to a tracker resource. Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value { \"Horizontal\": 0} when accuracy is not provided on a DevicePositionUpdate."]
+       "Uploads position update data for one or more devices to a tracker resource. Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value \\{ \"Horizontal\": 0\\} when accuracy is not provided on a DevicePositionUpdate."]
 module BatchUpdateDevicePositionRequest =
   struct
     type nonrec t =
@@ -11687,7 +11687,7 @@ module BatchUpdateDevicePositionRequest =
       make ~updates ~trackerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads position update data for one or more devices to a tracker resource. Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value { \"Horizontal\": 0} when accuracy is not provided on a DevicePositionUpdate."]
+       "Uploads position update data for one or more devices to a tracker resource. Amazon Location uses the data when it reports the last known device position and position history. Amazon Location retains location data for 30 days. Position updates are handled based on the PositionFiltering property of the tracker. When PositionFiltering is set to TimeBased, updates are evaluated against linked geofence collections, and location data is stored at a maximum of one position per 30 second interval. If your update frequency is more often than every 30 seconds, only one update per 30 seconds is stored for each unique device ID. When PositionFiltering is set to DistanceBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than 30 m (98.4 ft). When PositionFiltering is set to AccuracyBased filtering, location data is stored and evaluated against linked geofence collections only if the device has moved more than the measured accuracy. For example, if two consecutive updates from a device have a horizontal accuracy of 5 m and 10 m, the second update is neither stored or evaluated if the device has moved less than 15 m. If PositionFiltering is set to AccuracyBased filtering, Amazon Location uses the default value \\{ \"Horizontal\": 0\\} when accuracy is not provided on a DevicePositionUpdate."]
 module BatchPutGeofenceResponse =
   struct
     type nonrec t =
@@ -12315,7 +12315,7 @@ module BatchDeleteDevicePositionHistoryRequest =
       {
       deviceIds: BatchDeleteDevicePositionHistoryRequestDeviceIdsList.t
         [@ocaml.doc
-          "Devices whose position history you want to delete. For example, for two devices: \226\128\156DeviceIds\226\128\157 : [DeviceId1,DeviceId2]"];
+          "Devices whose position history you want to delete. For example, for two devices: \226\128\156DeviceIds\226\128\157 : \\[DeviceId1,DeviceId2\\]"];
       trackerName: ResourceName.t
         [@ocaml.doc
           "The name of the tracker resource to delete the device position history from."]}

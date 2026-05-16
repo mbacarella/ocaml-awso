@@ -2097,7 +2097,7 @@ module AwsEc2SecurityGroupUserIdGroupPair =
         [@ocaml.doc "The status of a VPC peering connection, if applicable."];
       userId: NonEmptyString.t option
         [@ocaml.doc
-          "The ID of an Amazon Web Services account. For a referenced security group in another VPC, the account ID of the referenced security group is returned in the response. If the referenced security group is deleted, this value is not returned. [EC2-Classic] Required when adding or removing rules that reference a security group in another VPC."];
+          "The ID of an Amazon Web Services account. For a referenced security group in another VPC, the account ID of the referenced security group is returned in the response. If the referenced security group is deleted, this value is not returned. \\[EC2-Classic\\] Required when adding or removing rules that reference a security group in another VPC."];
       vpcId: NonEmptyString.t option
         [@ocaml.doc
           "The ID of the VPC for the referenced security group, if applicable."];
@@ -7622,7 +7622,7 @@ module AwsEc2SecurityGroupIpPermission =
       {
       ipProtocol: NonEmptyString.t option
         [@ocaml.doc
-          "The IP protocol name (tcp, udp, icmp, icmpv6) or number. [VPC only] Use -1 to specify all protocols. When authorizing security group rules, specifying -1 or a protocol number other than tcp, udp, icmp, or icmpv6 allows traffic on all ports, regardless of any port range you specify. For tcp, udp, and icmp, you must specify a port range. For icmpv6, the port range is optional. If you omit the port range, traffic for all types and codes is allowed."];
+          "The IP protocol name (tcp, udp, icmp, icmpv6) or number. \\[VPC only\\] Use -1 to specify all protocols. When authorizing security group rules, specifying -1 or a protocol number other than tcp, udp, icmp, or icmpv6 allows traffic on all ports, regardless of any port range you specify. For tcp, udp, and icmp, you must specify a port range. For icmpv6, the port range is optional. If you omit the port range, traffic for all types and codes is allowed."];
       fromPort: Integer.t option
         [@ocaml.doc
           "The start of the port range for the TCP and UDP protocols, or an ICMP/ICMPv6 type number. A value of -1 indicates all ICMP/ICMPv6 types. If you specify all ICMP/ICMPv6 types, you must specify all codes."];
@@ -7638,7 +7638,7 @@ module AwsEc2SecurityGroupIpPermission =
         [@ocaml.doc "The IPv6 ranges."];
       prefixListIds: AwsEc2SecurityGroupPrefixListIdList.t option
         [@ocaml.doc
-          "[VPC only] The prefix list IDs for an Amazon Web Services service. With outbound rules, this is the Amazon Web Services service to access through a VPC endpoint from instances associated with the security group."]}
+          "\\[VPC only\\] The prefix list IDs for an Amazon Web Services service. With outbound rules, this is the Amazon Web Services service to access through a VPC endpoint from instances associated with the security group."]}
     let make ?ipProtocol =
       fun ?fromPort ->
         fun ?toPort ->
@@ -18564,7 +18564,7 @@ module AwsApiGatewayV2ApiDetails =
           "The API protocol for the API. Valid values: WEBSOCKET | HTTP"];
       routeSelectionExpression: NonEmptyString.t option
         [@ocaml.doc
-          "The route selection expression for the API. For HTTP APIs, must be ${request.method} ${request.path}. This is the default value for HTTP APIs. For WebSocket APIs, there is no default value."];
+          "The route selection expression for the API. For HTTP APIs, must be $\\{request.method\\} $\\{request.path\\}. This is the default value for HTTP APIs. For WebSocket APIs, there is no default value."];
       corsConfiguration: AwsCorsConfiguration.t option
         [@ocaml.doc
           "A cross-origin resource sharing (CORS) configuration. Supported only for HTTP APIs."]}
@@ -20646,12 +20646,13 @@ module AwsEc2SecurityGroupDetails =
         [@ocaml.doc
           "The Amazon Web Services account ID of the owner of the security group."];
       vpcId: NonEmptyString.t option
-        [@ocaml.doc "[VPC only] The ID of the VPC for the security group."];
+        [@ocaml.doc
+          "\\[VPC only\\] The ID of the VPC for the security group."];
       ipPermissions: AwsEc2SecurityGroupIpPermissionList.t option
         [@ocaml.doc "The inbound rules associated with the security group."];
       ipPermissionsEgress: AwsEc2SecurityGroupIpPermissionList.t option
         [@ocaml.doc
-          "[VPC only] The outbound rules associated with the security group."]}
+          "\\[VPC only\\] The outbound rules associated with the security group."]}
     let make ?groupName =
       fun ?groupId ->
         fun ?ownerId ->
@@ -23504,7 +23505,7 @@ module AwsLambdaFunctionDetails =
         [@ocaml.doc "The function's layers."];
       masterArn: NonEmptyString.t option
         [@ocaml.doc
-          "For Lambda@Edge functions, the ARN of the master function."];
+          "For Lambda\\@Edge functions, the ARN of the master function."];
       memorySize: Integer.t option
         [@ocaml.doc "The memory that is allocated to the function."];
       revisionId: NonEmptyString.t option

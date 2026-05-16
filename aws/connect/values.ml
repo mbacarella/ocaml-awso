@@ -11665,7 +11665,7 @@ module TagResourceRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       tags: TagMap.t
         [@ocaml.doc
-          "One or more tags. For example, { \"tags\": {\"key1\":\"value1\", \"key2\":\"value2\"} }."]}
+          "One or more tags. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -17611,7 +17611,7 @@ module GetCurrentMetricDataRequest =
           "The grouping applied to the metrics returned. For example, when grouped by QUEUE, the metrics returned apply to each queue rather than aggregated for all queues. If you group by CHANNEL, you should include a Channels filter. VOICE, CHAT, and TASK channels are supported. If no Grouping is included in the request, a summary of metrics is returned."];
       currentMetrics: CurrentMetrics.t
         [@ocaml.doc
-          "The metrics to retrieve. Specify the name and unit for each metric. The following metrics are available. For a description of all the metrics, see Real-time Metrics Definitions in the Amazon Connect Administrator Guide. AGENTS_AFTER_CONTACT_WORK Unit: COUNT Name in real-time metrics report: ACW AGENTS_AVAILABLE Unit: COUNT Name in real-time metrics report: Available AGENTS_ERROR Unit: COUNT Name in real-time metrics report: Error AGENTS_NON_PRODUCTIVE Unit: COUNT Name in real-time metrics report: NPT (Non-Productive Time) AGENTS_ON_CALL Unit: COUNT Name in real-time metrics report: On contact AGENTS_ON_CONTACT Unit: COUNT Name in real-time metrics report: On contact AGENTS_ONLINE Unit: COUNT Name in real-time metrics report: Online AGENTS_STAFFED Unit: COUNT Name in real-time metrics report: Staffed CONTACTS_IN_QUEUE Unit: COUNT Name in real-time metrics report: In queue CONTACTS_SCHEDULED Unit: COUNT Name in real-time metrics report: Scheduled OLDEST_CONTACT_AGE Unit: SECONDS When you use groupings, Unit says SECONDS and the Value is returned in SECONDS. When you do not use groupings, Unit says SECONDS but the Value is returned in MILLISECONDS. For example, if you get a response like this: { \"Metric\": { \"Name\": \"OLDEST_CONTACT_AGE\", \"Unit\": \"SECONDS\" }, \"Value\": 24113.0 } The actual OLDEST_CONTACT_AGE is 24 seconds. Name in real-time metrics report: Oldest SLOTS_ACTIVE Unit: COUNT Name in real-time metrics report: Active SLOTS_AVAILABLE Unit: COUNT Name in real-time metrics report: Availability"];
+          "The metrics to retrieve. Specify the name and unit for each metric. The following metrics are available. For a description of all the metrics, see Real-time Metrics Definitions in the Amazon Connect Administrator Guide. AGENTS_AFTER_CONTACT_WORK Unit: COUNT Name in real-time metrics report: ACW AGENTS_AVAILABLE Unit: COUNT Name in real-time metrics report: Available AGENTS_ERROR Unit: COUNT Name in real-time metrics report: Error AGENTS_NON_PRODUCTIVE Unit: COUNT Name in real-time metrics report: NPT (Non-Productive Time) AGENTS_ON_CALL Unit: COUNT Name in real-time metrics report: On contact AGENTS_ON_CONTACT Unit: COUNT Name in real-time metrics report: On contact AGENTS_ONLINE Unit: COUNT Name in real-time metrics report: Online AGENTS_STAFFED Unit: COUNT Name in real-time metrics report: Staffed CONTACTS_IN_QUEUE Unit: COUNT Name in real-time metrics report: In queue CONTACTS_SCHEDULED Unit: COUNT Name in real-time metrics report: Scheduled OLDEST_CONTACT_AGE Unit: SECONDS When you use groupings, Unit says SECONDS and the Value is returned in SECONDS. When you do not use groupings, Unit says SECONDS but the Value is returned in MILLISECONDS. For example, if you get a response like this: \\{ \"Metric\": \\{ \"Name\": \"OLDEST_CONTACT_AGE\", \"Unit\": \"SECONDS\" \\}, \"Value\": 24113.0 \\} The actual OLDEST_CONTACT_AGE is 24 seconds. Name in real-time metrics report: Oldest SLOTS_ACTIVE Unit: COUNT Name in real-time metrics report: Active SLOTS_AVAILABLE Unit: COUNT Name in real-time metrics report: Availability"];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results. The token expires after 5 minutes from the time it is created. Subsequent requests that use the token must use the same request parameters as the request that generated the token."];
@@ -20827,7 +20827,7 @@ module CreateUserRequest =
       {
       username: AgentUsername.t
         [@ocaml.doc
-          "The user name for the account. For instances not using SAML for identity management, the user name can include up to 20 characters. If you are using SAML for identity management, the user name can include up to 64 characters from [a-zA-Z0-9_-.\\@]+."];
+          "The user name for the account. For instances not using SAML for identity management, the user name can include up to 20 characters. If you are using SAML for identity management, the user name can include up to 64 characters from \\[a-zA-Z0-9_-.\\\\@\\]+."];
       password: Password.t option
         [@ocaml.doc
           "The password for the user account. A password is required if you are using Amazon Connect for identity management. Otherwise, it is an error to include a password."];

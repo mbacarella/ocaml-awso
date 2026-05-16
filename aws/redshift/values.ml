@@ -5158,7 +5158,7 @@ module ScheduledAction =
         [@ocaml.doc "The name of the scheduled action."];
       targetAction: ScheduledActionType.t option
         [@ocaml.doc
-          "A JSON format string of the Amazon Redshift API operation with input parameters. \"{\\\"ResizeCluster\\\":{\\\"NodeType\\\":\\\"ds2.8xlarge\\\",\\\"ClusterIdentifier\\\":\\\"my-test-cluster\\\",\\\"NumberOfNodes\\\":3}}\"."];
+          "A JSON format string of the Amazon Redshift API operation with input parameters. \"\\{\\\"ResizeCluster\\\":\\{\\\"NodeType\\\":\\\"ds2.8xlarge\\\",\\\"ClusterIdentifier\\\":\\\"my-test-cluster\\\",\\\"NumberOfNodes\\\":3\\}\\}\"."];
       schedule: String_.t option
         [@ocaml.doc
           "The schedule for a one-time (at format) or recurring (cron format) scheduled action. Schedule invocations must be separated by at least one hour. Format of at expressions is \"at(yyyy-mm-ddThh:mm:ss)\". For example, \"at(2016-03-04T17:27:00)\". Format of cron expressions is \"cron(Minutes Hours Day-of-month Month Day-of-week Year)\". For example, \"cron(0 10 ? * MON *)\". For more information, see Cron Expressions in the Amazon CloudWatch Events User Guide."];
@@ -6675,7 +6675,7 @@ module DataShare =
       {
       dataShareArn: String_.t option
         [@ocaml.doc
-          "An Amazon Resource Name (ARN) that references the datashare that is owned by a specific namespace of the producer cluster. A datashare ARN is in the arn:aws:redshift:{region}:{account-id}:{datashare}:{namespace-guid}/{datashare-name} format."];
+          "An Amazon Resource Name (ARN) that references the datashare that is owned by a specific namespace of the producer cluster. A datashare ARN is in the arn:aws:redshift:\\{region\\}:\\{account-id\\}:\\{datashare\\}:\\{namespace-guid\\}/\\{datashare-name\\} format."];
       producerArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the producer."];
       allowPubliclyAccessibleConsumers: Boolean.t option
@@ -15321,7 +15321,7 @@ module ModifyClusterMessage =
           "A list of virtual private cloud (VPC) security groups to be associated with the cluster. This change is asynchronously applied as soon as possible."];
       masterUserPassword: String_.t option
         [@ocaml.doc
-          "The new password for the cluster admin user. This change is asynchronously applied as soon as possible. Between the time of the request and the completion of the request, the MasterUserPassword element exists in the PendingModifiedValues element of the operation response. Operations never return the password, so this operation provides a way to regain access to the admin user account for a cluster if the password is lost. Default: Uses existing setting. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or @."];
+          "The new password for the cluster admin user. This change is asynchronously applied as soon as possible. Between the time of the request and the completion of the request, the MasterUserPassword element exists in the PendingModifiedValues element of the operation response. Operations never return the password, so this operation provides a way to regain access to the admin user account for a cluster if the password is lost. Default: Uses existing setting. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or \\@."];
       clusterParameterGroupName: String_.t option
         [@ocaml.doc
           "The name of the cluster parameter group to apply to this cluster. This change is applied only after the cluster is rebooted. To reboot a cluster use RebootCluster. Default: Uses existing setting. Constraints: The cluster parameter group must be in the same parameter group family that matches the cluster version."];
@@ -17061,10 +17061,10 @@ module GetClusterCredentialsMessage =
       {
       dbUser: String_.t
         [@ocaml.doc
-          "The name of a database user. If a user name matching DbUser exists in the database, the temporary user credentials have the same permissions as the existing user. If DbUser doesn't exist in the database and Autocreate is True, a new user is created using the value for DbUser with PUBLIC permissions. If a database user matching the value for DbUser doesn't exist and Autocreate is False, then the command succeeds but the connection attempt will fail because the user doesn't exist in the database. For more information, see CREATE USER in the Amazon Redshift Database Developer Guide. Constraints: Must be 1 to 64 alphanumeric characters or hyphens. The user name can't be PUBLIC. Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
+          "The name of a database user. If a user name matching DbUser exists in the database, the temporary user credentials have the same permissions as the existing user. If DbUser doesn't exist in the database and Autocreate is True, a new user is created using the value for DbUser with PUBLIC permissions. If a database user matching the value for DbUser doesn't exist and Autocreate is False, then the command succeeds but the connection attempt will fail because the user doesn't exist in the database. For more information, see CREATE USER in the Amazon Redshift Database Developer Guide. Constraints: Must be 1 to 64 alphanumeric characters or hyphens. The user name can't be PUBLIC. Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
       dbName: String_.t option
         [@ocaml.doc
-          "The name of a database that DbUser is authorized to log on to. If DbName is not specified, DbUser can log on to any existing database. Constraints: Must be 1 to 64 alphanumeric characters or hyphens Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
+          "The name of a database that DbUser is authorized to log on to. If DbName is not specified, DbUser can log on to any existing database. Constraints: Must be 1 to 64 alphanumeric characters or hyphens Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
       clusterIdentifier: String_.t
         [@ocaml.doc
           "The unique identifier of the cluster that contains the database for which your are requesting credentials. This parameter is case sensitive."];
@@ -17076,7 +17076,7 @@ module GetClusterCredentialsMessage =
           "Create a database user with the name specified for the user named in DbUser if one does not exist."];
       dbGroups: DbGroupList.t option
         [@ocaml.doc
-          "A list of the names of existing database groups that the user named in DbUser will join for the current session, in addition to any group memberships for an existing user. If not specified, a new user is added only to PUBLIC. Database group name constraints Must be 1 to 64 alphanumeric characters or hyphens Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."]}
+          "A list of the names of existing database groups that the user named in DbUser will join for the current session, in addition to any group memberships for an existing user. If not specified, a new user is added only to PUBLIC. Database group name constraints Must be 1 to 64 alphanumeric characters or hyphens Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."]}
     let context_ = "GetClusterCredentialsMessage"
     let make ?dbName =
       fun ?durationSeconds ->
@@ -23529,7 +23529,7 @@ module CreateClusterMessage =
           "The user name associated with the admin user account for the cluster that is being created. Constraints: Must be 1 - 128 alphanumeric characters. The user name can't be PUBLIC. First character must be a letter. Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
       masterUserPassword: String_.t
         [@ocaml.doc
-          "The password associated with the admin user account for the cluster that is being created. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or @."];
+          "The password associated with the admin user account for the cluster that is being created. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or \\@."];
       clusterSecurityGroups: ClusterSecurityGroupNameList.t option
         [@ocaml.doc
           "A list of security groups to be associated with this cluster. Default: The default cluster security group for Amazon Redshift."];

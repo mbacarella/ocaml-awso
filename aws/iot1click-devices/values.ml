@@ -765,7 +765,7 @@ module UntagResourceRequest =
       resourceArn: Zz__string.t [@ocaml.doc "The ARN of the resource."];
       tagKeys: Zz__listOf__string.t
         [@ocaml.doc
-          "A collections of tag keys. For example, {\"key1\",\"key2\"}"]}
+          "A collections of tag keys. For example, \\{\"key1\",\"key2\"\\}"]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -884,7 +884,7 @@ module TagResourceRequest =
       resourceArn: Zz__string.t [@ocaml.doc "The ARN of the resource."];
       tags: Zz__mapOf__string.t
         [@ocaml.doc
-          "A collection of key/value pairs defining the resource tags. For example, { \"tags\": {\"key1\": \"value1\", \"key2\": \"value2\"} }. For more information, see AWS Tagging Strategies."]}
+          "A collection of key/value pairs defining the resource tags. For example, \\{ \"tags\": \\{\"key1\": \"value1\", \"key2\": \"value2\"\\} \\}. For more information, see AWS Tagging Strategies."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -913,7 +913,7 @@ module ListTagsForResourceResponse =
       {
       tags: Zz__mapOf__string.t option
         [@ocaml.doc
-          "A collection of key/value pairs defining the resource tags. For example, { \"tags\": {\"key1\": \"value1\", \"key2\": \"value2\"} }. For more information, see AWS Tagging Strategies."]}
+          "A collection of key/value pairs defining the resource tags. For example, \\{ \"tags\": \\{\"key1\": \"value1\", \"key2\": \"value2\"\\} \\}. For more information, see AWS Tagging Strategies."]}
     type nonrec error =
       [ `InternalFailureException of InternalFailureException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -1674,7 +1674,7 @@ module FinalizeDeviceClaimRequest =
         [@ocaml.doc "The unique identifier of the device."];
       tags: Zz__mapOf__string.t option
         [@ocaml.doc
-          "A collection of key/value pairs defining the resource tags. For example, { \"tags\": {\"key1\": \"value1\", \"key2\": \"value2\"} }. For more information, see AWS Tagging Strategies."]}
+          "A collection of key/value pairs defining the resource tags. For example, \\{ \"tags\": \\{\"key1\": \"value1\", \"key2\": \"value2\"\\} \\}. For more information, see AWS Tagging Strategies."]}
     let context_ = "FinalizeDeviceClaimRequest"
     let make ?tags = fun ~deviceId -> fun () -> { tags; deviceId }
     let to_value x =

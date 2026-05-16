@@ -1071,7 +1071,7 @@ module Destination =
       make ?bccAddresses ?ccAddresses ?toAddresses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that describes the recipients for an email. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a destination email address (the part of the email address that precedes the @ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the @ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492."]
+       "An object that describes the recipients for an email. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a destination email address (the part of the email address that precedes the \\@ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the \\@ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492."]
 module MessageTagList =
   struct
     type nonrec t = MessageTag.t list
@@ -2315,7 +2315,7 @@ module BulkEmailEntry =
       {
       destination: Destination.t
         [@ocaml.doc
-          "Represents the destination of the message, consisting of To:, CC:, and BCC: fields. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a destination email address (the part of the email address that precedes the @ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the @ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492."];
+          "Represents the destination of the message, consisting of To:, CC:, and BCC: fields. Amazon SES does not support the SMTPUTF8 extension, as described in RFC6531. For this reason, the local part of a destination email address (the part of the email address that precedes the \\@ sign) may only contain 7-bit ASCII characters. If the domain part of an address (the part after the \\@ sign) contains non-ASCII characters, they must be encoded using Punycode, as described in RFC3492."];
       replacementTags: MessageTagList.t option
         [@ocaml.doc
           "A list of tags, in the form of name/value pairs, to apply to an email that you send using the SendBulkTemplatedEmail operation. Tags correspond to characteristics of the email that you define, so that you can publish email sending events."];
@@ -4406,13 +4406,13 @@ module DkimSigningAttributes =
       {
       domainSigningSelector: Selector.t option
         [@ocaml.doc
-          "[Bring Your Own DKIM] A string that's used to identify a public key in the DNS configuration for a domain."];
+          "\\[Bring Your Own DKIM\\] A string that's used to identify a public key in the DNS configuration for a domain."];
       domainSigningPrivateKey: PrivateKey.t option
         [@ocaml.doc
-          "[Bring Your Own DKIM] A private key that's used to generate a DKIM signature. The private key must use 1024 or 2048-bit RSA encryption, and must be encoded using base64 encoding."];
+          "\\[Bring Your Own DKIM\\] A private key that's used to generate a DKIM signature. The private key must use 1024 or 2048-bit RSA encryption, and must be encoded using base64 encoding."];
       nextSigningKeyLength: DkimSigningKeyLength.t option
         [@ocaml.doc
-          "[Easy DKIM] The key length of the future DKIM key pair to be generated. This can be changed at most once per day."]}
+          "\\[Easy DKIM\\] The key length of the future DKIM key pair to be generated. This can be changed at most once per day."]}
     let make ?domainSigningSelector =
       fun ?domainSigningPrivateKey ->
         fun ?nextSigningKeyLength ->
@@ -5074,13 +5074,13 @@ module DkimAttributes =
           "A string that indicates how DKIM was configured for the identity. These are the possible values: AWS_SES \226\128\147 Indicates that DKIM was configured for the identity by using Easy DKIM. EXTERNAL \226\128\147 Indicates that DKIM was configured for the identity by using Bring Your Own DKIM (BYODKIM)."];
       nextSigningKeyLength: DkimSigningKeyLength.t option
         [@ocaml.doc
-          "[Easy DKIM] The key length of the future DKIM key pair to be generated. This can be changed at most once per day."];
+          "\\[Easy DKIM\\] The key length of the future DKIM key pair to be generated. This can be changed at most once per day."];
       currentSigningKeyLength: DkimSigningKeyLength.t option
         [@ocaml.doc
-          "[Easy DKIM] The key length of the DKIM key pair in use."];
+          "\\[Easy DKIM\\] The key length of the DKIM key pair in use."];
       lastKeyGenerationTimestamp: Timestamp.t option
         [@ocaml.doc
-          "[Easy DKIM] The last time a key pair was generated for this identity."]}
+          "\\[Easy DKIM\\] The last time a key pair was generated for this identity."]}
     let make ?signingEnabled =
       fun ?status ->
         fun ?tokens ->
@@ -6923,7 +6923,7 @@ module SendEmailRequest =
           "The email address to use as the \"From\" address for the email. The address that you specify has to be verified."];
       fromEmailAddressIdentityArn: AmazonResourceName.t option
         [@ocaml.doc
-          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FromEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use sender@example.com, then you would specify the FromEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FromEmailAddress to be sender@example.com. For more information about sending authorization, see the Amazon SES Developer Guide. For Raw emails, the FromEmailAddressIdentityArn value overrides the X-SES-SOURCE-ARN and X-SES-FROM-ARN headers specified in raw email message content."];
+          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FromEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use sender\\@example.com, then you would specify the FromEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FromEmailAddress to be sender\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide. For Raw emails, the FromEmailAddressIdentityArn value overrides the X-SES-SOURCE-ARN and X-SES-FROM-ARN headers specified in raw email message content."];
       destination: Destination.t option
         [@ocaml.doc
           "An object that contains the recipients of the email message."];
@@ -6935,7 +6935,7 @@ module SendEmailRequest =
           "The address that you want bounce and complaint notifications to be sent to."];
       feedbackForwardingEmailAddressIdentityArn: AmazonResourceName.t option
         [@ocaml.doc
-          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FeedbackForwardingEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use feedback@example.com, then you would specify the FeedbackForwardingEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FeedbackForwardingEmailAddress to be feedback@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
+          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FeedbackForwardingEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use feedback\\@example.com, then you would specify the FeedbackForwardingEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FeedbackForwardingEmailAddress to be feedback\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
       content: EmailContent.t
         [@ocaml.doc
           "An object that contains the body of the message. You can send either a Simple message Raw message or a template Message."];
@@ -7335,7 +7335,7 @@ module SendBulkEmailRequest =
           "The email address to use as the \"From\" address for the email. The address that you specify has to be verified."];
       fromEmailAddressIdentityArn: AmazonResourceName.t option
         [@ocaml.doc
-          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FromEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use sender@example.com, then you would specify the FromEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FromEmailAddress to be sender@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
+          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FromEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use sender\\@example.com, then you would specify the FromEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FromEmailAddress to be sender\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
       replyToAddresses: EmailAddressList.t option
         [@ocaml.doc
           "The \"Reply-to\" email addresses for the message. When the recipient replies to the message, each Reply-to address receives the reply."];
@@ -7344,7 +7344,7 @@ module SendBulkEmailRequest =
           "The address that you want bounce and complaint notifications to be sent to."];
       feedbackForwardingEmailAddressIdentityArn: AmazonResourceName.t option
         [@ocaml.doc
-          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FeedbackForwardingEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use feedback@example.com, then you would specify the FeedbackForwardingEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FeedbackForwardingEmailAddress to be feedback@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
+          "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FeedbackForwardingEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use feedback\\@example.com, then you would specify the FeedbackForwardingEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FeedbackForwardingEmailAddress to be feedback\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
       defaultEmailTags: MessageTagList.t option
         [@ocaml.doc
           "A list of tags, in the form of name/value pairs, to apply to an email that you send using the SendEmail operation. Tags correspond to characteristics of the email that you define, so that you can publish email sending events."];

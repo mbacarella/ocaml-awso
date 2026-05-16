@@ -595,14 +595,14 @@ module UpdateSecurityGroupRuleDescriptionsIngressRequest =
           "The ID of the security group. You must specify either the security group ID or the security group name in the request. For security groups in a nondefault VPC, you must specify the security group ID."];
       groupName: SecurityGroupName.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] The name of the security group. You must specify either the security group ID or the security group name in the request."];
+          "\\[EC2-Classic, default VPC\\] The name of the security group. You must specify either the security group ID or the security group name in the request."];
       ipPermissions: IpPermissionList.t option
         [@ocaml.doc
           "The IP permissions for the security group rule. You must specify either IP permissions or a description."];
       securityGroupRuleDescriptions:
         SecurityGroupRuleDescriptionList.t option
         [@ocaml.doc
-          "[VPC only] The description for the ingress security group rules. You must specify either a description or IP permissions."]}
+          "\\[VPC only\\] The description for the ingress security group rules. You must specify either a description or IP permissions."]}
     let make ?dryRun =
       fun ?groupId ->
         fun ?groupName ->
@@ -695,7 +695,7 @@ module UpdateSecurityGroupRuleDescriptionsEgressResult =
       let return = field_map json "Return" Boolean.of_json in make ?return ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[VPC only] Updates the description of an egress (outbound) security group rule. You can replace an existing description, or add a description to a rule that did not have one previously. You can remove a description for a security group rule by omitting the description parameter in the request."]
+       "\\[VPC only\\] Updates the description of an egress (outbound) security group rule. You can replace an existing description, or add a description to a rule that did not have one previously. You can remove a description for a security group rule by omitting the description parameter in the request."]
 module UpdateSecurityGroupRuleDescriptionsEgressRequest =
   struct
     type nonrec t =
@@ -708,7 +708,7 @@ module UpdateSecurityGroupRuleDescriptionsEgressRequest =
           "The ID of the security group. You must specify either the security group ID or the security group name in the request. For security groups in a nondefault VPC, you must specify the security group ID."];
       groupName: SecurityGroupName.t option
         [@ocaml.doc
-          "[Default VPC] The name of the security group. You must specify either the security group ID or the security group name in the request."];
+          "\\[Default VPC\\] The name of the security group. You must specify either the security group ID or the security group name in the request."];
       ipPermissions: IpPermissionList.t option
         [@ocaml.doc
           "The IP permissions for the security group rule. You must specify either the IP permissions or the description."];
@@ -769,7 +769,7 @@ module UpdateSecurityGroupRuleDescriptionsEgressRequest =
         ?dryRun ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[VPC only] Updates the description of an egress (outbound) security group rule. You can replace an existing description, or add a description to a rule that did not have one previously. You can remove a description for a security group rule by omitting the description parameter in the request."]
+       "\\[VPC only\\] Updates the description of an egress (outbound) security group rule. You can replace an existing description, or add a description to a rule that did not have one previously. You can remove a description for a security group rule by omitting the description parameter in the request."]
 module UnmonitorInstancesResult =
   struct
     type nonrec t =
@@ -2171,10 +2171,10 @@ module RunInstancesRequest =
           "The instance type. For more information, see Instance types in the Amazon EC2 User Guide. Default: m1.small"];
       ipv6AddressCount: Integer.t option
         [@ocaml.doc
-          "[EC2-VPC] The number of IPv6 addresses to associate with the primary network interface. Amazon EC2 chooses the IPv6 addresses from the range of your subnet. You cannot specify this option and the option to assign specific IPv6 addresses in the same request. You can specify this option if you've specified a minimum number of instances to launch. You cannot specify this option and the network interfaces option in the same request."];
+          "\\[EC2-VPC\\] The number of IPv6 addresses to associate with the primary network interface. Amazon EC2 chooses the IPv6 addresses from the range of your subnet. You cannot specify this option and the option to assign specific IPv6 addresses in the same request. You can specify this option if you've specified a minimum number of instances to launch. You cannot specify this option and the network interfaces option in the same request."];
       ipv6Addresses: InstanceIpv6AddressList.t option
         [@ocaml.doc
-          "[EC2-VPC] The IPv6 addresses from the range of the subnet to associate with the primary network interface. You cannot specify this option and the option to assign a number of IPv6 addresses in the same request. You cannot specify this option if you've specified a minimum number of instances to launch. You cannot specify this option and the network interfaces option in the same request."];
+          "\\[EC2-VPC\\] The IPv6 addresses from the range of the subnet to associate with the primary network interface. You cannot specify this option and the option to assign a number of IPv6 addresses in the same request. You cannot specify this option if you've specified a minimum number of instances to launch. You cannot specify this option and the network interfaces option in the same request."];
       kernelId: KernelId.t option
         [@ocaml.doc
           "The ID of the kernel. We recommend that you use PV-GRUB instead of kernels and RAM disks. For more information, see PV-GRUB in the Amazon EC2 User Guide."];
@@ -2200,10 +2200,10 @@ module RunInstancesRequest =
           "The IDs of the security groups. You can create a security group using CreateSecurityGroup. If you specify a network interface, you must specify any security groups as part of the network interface."];
       securityGroups: SecurityGroupStringList.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] The names of the security groups. For a nondefault VPC, you must use security group IDs instead. If you specify a network interface, you must specify any security groups as part of the network interface. Default: Amazon EC2 uses the default security group."];
+          "\\[EC2-Classic, default VPC\\] The names of the security groups. For a nondefault VPC, you must use security group IDs instead. If you specify a network interface, you must specify any security groups as part of the network interface. Default: Amazon EC2 uses the default security group."];
       subnetId: SubnetId.t option
         [@ocaml.doc
-          "[EC2-VPC] The ID of the subnet to launch the instance into. If you specify a network interface, you must specify any subnets as part of the network interface."];
+          "\\[EC2-VPC\\] The ID of the subnet to launch the instance into. If you specify a network interface, you must specify any subnets as part of the network interface."];
       userData: String_.t option
         [@ocaml.doc
           "The user data to make available to the instance. For more information, see Run commands on your Linux instance at launch and Run commands on your Windows instance at launch. If you are using a command line tool, base64-encoding is performed for you, and you can load the text from a file. Otherwise, you must provide base64-encoded text. User data is limited to 16 KB."];
@@ -2231,7 +2231,7 @@ module RunInstancesRequest =
           "The network interfaces to associate with the instance. If you specify a network interface, you must specify any security groups and subnets as part of the network interface."];
       privateIpAddress: String_.t option
         [@ocaml.doc
-          "[EC2-VPC] The primary IPv4 address. You must specify a value from the IPv4 address range of the subnet. Only one private IP address can be designated as primary. You can't specify this option if you've specified the option to designate a private IP address as the primary IP address in a network interface specification. You cannot specify this option if you're launching more than one instance in the request. You cannot specify this option and the network interfaces option in the same request."];
+          "\\[EC2-VPC\\] The primary IPv4 address. You must specify a value from the IPv4 address range of the subnet. Only one private IP address can be designated as primary. You can't specify this option if you've specified the option to designate a private IP address as the primary IP address in a network interface specification. You cannot specify this option if you're launching more than one instance in the request. You cannot specify this option and the network interfaces option in the same request."];
       elasticGpuSpecification: ElasticGpuSpecifications.t option
         [@ocaml.doc
           "An elastic GPU to associate with the instance. An Elastic GPU is a GPU resource that you can attach to your Windows instance to accelerate the graphics performance of your applications. For more information, see Amazon EC2 Elastic GPUs in the Amazon EC2 User Guide."];
@@ -2676,7 +2676,7 @@ module RunInstancesRequest =
         ?ipv6AddressCount ?instanceType ?imageId ?blockDeviceMappings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Launches the specified number of instances using an AMI for which you have permissions. You can specify a number of options, or leave the default options. The following rules apply: [EC2-VPC] If you don't specify a subnet ID, we choose a default subnet from your default VPC for you. If you don't have a default VPC, you must specify a subnet ID in the request. [EC2-Classic] If don't specify an Availability Zone, we choose one for you. Some instance types must be launched into a VPC. If you do not have a default VPC, or if you do not specify a subnet ID, the request fails. For more information, see Instance types available only in a VPC. [EC2-VPC] All instances have a network interface with a primary private IPv4 address. If you don't specify this address, we choose one from the IPv4 range of your subnet. Not all instance types support IPv6 addresses. For more information, see Instance types. If you don't specify a security group ID, we use the default security group. For more information, see Security groups. If any of the AMIs have a product code attached for which the user has not subscribed, the request fails. You can create a launch template, which is a resource that contains the parameters to launch an instance. When you launch an instance using RunInstances, you can specify the launch template instead of specifying the launch parameters. To ensure faster instance launches, break up large requests into smaller batches. For example, create five separate launch requests for 100 instances each instead of one launch request for 500 instances. An instance is ready for you to use when it's in the running state. You can check the state of your instance using DescribeInstances. You can tag instances and EBS volumes during launch, after launch, or both. For more information, see CreateTags and Tagging your Amazon EC2 resources. Linux instances have access to the public key of the key pair at boot. You can use this key to provide secure access to the instance. Amazon EC2 public images use this feature to provide secure access without passwords. For more information, see Key pairs. For troubleshooting, see What to do if an instance immediately terminates, and Troubleshooting connecting to your instance."]
+       "Launches the specified number of instances using an AMI for which you have permissions. You can specify a number of options, or leave the default options. The following rules apply: \\[EC2-VPC\\] If you don't specify a subnet ID, we choose a default subnet from your default VPC for you. If you don't have a default VPC, you must specify a subnet ID in the request. \\[EC2-Classic\\] If don't specify an Availability Zone, we choose one for you. Some instance types must be launched into a VPC. If you do not have a default VPC, or if you do not specify a subnet ID, the request fails. For more information, see Instance types available only in a VPC. \\[EC2-VPC\\] All instances have a network interface with a primary private IPv4 address. If you don't specify this address, we choose one from the IPv4 range of your subnet. Not all instance types support IPv6 addresses. For more information, see Instance types. If you don't specify a security group ID, we use the default security group. For more information, see Security groups. If any of the AMIs have a product code attached for which the user has not subscribed, the request fails. You can create a launch template, which is a resource that contains the parameters to launch an instance. When you launch an instance using RunInstances, you can specify the launch template instead of specifying the launch parameters. To ensure faster instance launches, break up large requests into smaller batches. For example, create five separate launch requests for 100 instances each instead of one launch request for 500 instances. An instance is ready for you to use when it's in the running state. You can check the state of your instance using DescribeInstances. You can tag instances and EBS volumes during launch, after launch, or both. For more information, see CreateTags and Tagging your Amazon EC2 resources. Linux instances have access to the public key of the key pair at boot. You can use this key to provide secure access to the instance. Amazon EC2 public images use this feature to provide secure access without passwords. For more information, see Key pairs. For troubleshooting, see What to do if an instance immediately terminates, and Troubleshooting connecting to your instance."]
 module RevokeSecurityGroupIngressResult =
   struct
     type nonrec t =
@@ -2727,7 +2727,7 @@ module RevokeSecurityGroupIngressResult =
       make ?unknownIpPermissions ?return ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified inbound (ingress) rules from a security group. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and source (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. [EC2-Classic, default VPC] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
+       "Removes the specified inbound (ingress) rules from a security group. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and source (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. \\[EC2-Classic, default VPC\\] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
 module RevokeSecurityGroupIngressRequest =
   struct
     type nonrec t =
@@ -2743,7 +2743,7 @@ module RevokeSecurityGroupIngressRequest =
           "The ID of the security group. You must specify either the security group ID or the security group name in the request. For security groups in a nondefault VPC, you must specify the security group ID."];
       groupName: SecurityGroupName.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] The name of the security group. You must specify either the security group ID or the security group name in the request."];
+          "\\[EC2-Classic, default VPC\\] The name of the security group. You must specify either the security group ID or the security group name in the request."];
       ipPermissions: IpPermissionList.t option
         [@ocaml.doc
           "The sets of IP permissions. You can't specify a source security group and a CIDR IP address range in the same set of permissions."];
@@ -2752,10 +2752,10 @@ module RevokeSecurityGroupIngressRequest =
           "The IP protocol name (tcp, udp, icmp) or number (see Protocol Numbers). Use -1 to specify all."];
       sourceSecurityGroupName: String_.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] The name of the source security group. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the start of the port range, the IP protocol, and the end of the port range. For EC2-VPC, the source security group must be in the same VPC. To revoke a specific rule for an IP protocol and port range, use a set of IP permissions instead."];
+          "\\[EC2-Classic, default VPC\\] The name of the source security group. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the start of the port range, the IP protocol, and the end of the port range. For EC2-VPC, the source security group must be in the same VPC. To revoke a specific rule for an IP protocol and port range, use a set of IP permissions instead."];
       sourceSecurityGroupOwnerId: String_.t option
         [@ocaml.doc
-          "[EC2-Classic] The Amazon Web Services account ID of the source security group, if the source security group is in a different account. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the IP protocol, the start of the port range, and the end of the port range. To revoke a specific rule for an IP protocol and port range, use a set of IP permissions instead."];
+          "\\[EC2-Classic\\] The Amazon Web Services account ID of the source security group, if the source security group is in a different account. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the IP protocol, the start of the port range, and the end of the port range. To revoke a specific rule for an IP protocol and port range, use a set of IP permissions instead."];
       toPort: Integer.t option
         [@ocaml.doc
           "The end of port range for the TCP and UDP protocols, or an ICMP code number. For the ICMP code number, use -1 to specify all ICMP codes for the ICMP type."];
@@ -2860,7 +2860,7 @@ module RevokeSecurityGroupIngressRequest =
         ?groupId ?fromPort ?cidrIp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified inbound (ingress) rules from a security group. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and source (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. [EC2-Classic, default VPC] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
+       "Removes the specified inbound (ingress) rules from a security group. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and source (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. \\[EC2-Classic, default VPC\\] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
 module RevokeSecurityGroupEgressResult =
   struct
     type nonrec t =
@@ -2911,7 +2911,7 @@ module RevokeSecurityGroupEgressResult =
       make ?unknownIpPermissions ?return ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[VPC only] Removes the specified outbound (egress) rules from a security group for EC2-VPC. This action does not apply to security groups for use in EC2-Classic. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and destination (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. [Default VPC] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
+       "\\[VPC only\\] Removes the specified outbound (egress) rules from a security group for EC2-VPC. This action does not apply to security groups for use in EC2-Classic. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and destination (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. \\[Default VPC\\] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
 module RevokeSecurityGroupEgressRequest =
   struct
     type nonrec t =
@@ -3034,7 +3034,7 @@ module RevokeSecurityGroupEgressRequest =
         ~groupId ?dryRun ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[VPC only] Removes the specified outbound (egress) rules from a security group for EC2-VPC. This action does not apply to security groups for use in EC2-Classic. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and destination (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. [Default VPC] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
+       "\\[VPC only\\] Removes the specified outbound (egress) rules from a security group for EC2-VPC. This action does not apply to security groups for use in EC2-Classic. You can specify rules using either rule IDs or security group rule properties. If you use rule properties, the values that you specify (for example, ports) must match the existing rule's values exactly. Each rule has a protocol, from and to ports, and destination (CIDR range, security group, or prefix list). For the TCP and UDP protocols, you must also specify the destination port or range of ports. For the ICMP protocol, you must also specify the ICMP type and code. If the security group rule has a description, you do not need to specify the description to revoke the rule. \\[Default VPC\\] If the values you specify do not match the existing rule's values, no error is returned, and the output describes the security group rules that were not revoked. Amazon Web Services recommends that you describe the security group to verify that the rules were removed. Rule changes are propagated to instances within the security group as quickly as possible. However, a small delay might occur."]
 module RevokeClientVpnIngressResult =
   struct
     type nonrec t =
@@ -4010,7 +4010,7 @@ module ResetAddressAttributeRequest =
     type nonrec t =
       {
       allocationId: AllocationId.t
-        [@ocaml.doc "[EC2-VPC] The allocation ID."];
+        [@ocaml.doc "\\[EC2-VPC\\] The allocation ID."];
       attribute: AddressAttributeName.t
         [@ocaml.doc "The attribute of the IP address."];
       dryRun: Boolean.t option
@@ -4334,7 +4334,7 @@ module ReportInstanceStatusRequest =
       instances: InstanceIdStringList.t [@ocaml.doc "The instances."];
       reasonCodes: ReasonCodesList.t
         [@ocaml.doc
-          "The reason codes that describe the health state of your instance. instance-stuck-in-state: My instance is stuck in a state. unresponsive: My instance is unresponsive. not-accepting-credentials: My instance is not accepting my credentials. password-not-available: A password is not available for my instance. performance-network: My instance is experiencing performance problems that I believe are network related. performance-instance-store: My instance is experiencing performance problems that I believe are related to the instance stores. performance-ebs-volume: My instance is experiencing performance problems that I believe are related to an EBS volume. performance-other: My instance is experiencing performance problems. other: [explain using the description parameter]"];
+          "The reason codes that describe the health state of your instance. instance-stuck-in-state: My instance is stuck in a state. unresponsive: My instance is unresponsive. not-accepting-credentials: My instance is not accepting my credentials. password-not-available: A password is not available for my instance. performance-network: My instance is experiencing performance problems that I believe are network related. performance-instance-store: My instance is experiencing performance problems that I believe are related to the instance stores. performance-ebs-volume: My instance is experiencing performance problems that I believe are related to an EBS volume. performance-other: My instance is experiencing performance problems. other: \\[explain using the description parameter\\]"];
       startTime: DateTime.t option
         [@ocaml.doc
           "The time at which the reported instance health state began."];
@@ -4639,7 +4639,7 @@ module ReplaceRouteRequest =
           "The ID of a VPC endpoint. Supported for Gateway Load Balancer endpoints only."];
       egressOnlyInternetGatewayId: EgressOnlyInternetGatewayId.t option
         [@ocaml.doc
-          "[IPv6 traffic only] The ID of an egress-only internet gateway."];
+          "\\[IPv6 traffic only\\] The ID of an egress-only internet gateway."];
       gatewayId: RouteGatewayId.t option
         [@ocaml.doc
           "The ID of an internet gateway or virtual private gateway."];
@@ -4649,13 +4649,13 @@ module ReplaceRouteRequest =
         [@ocaml.doc
           "Specifies whether to reset the local route to its default target (local)."];
       natGatewayId: NatGatewayId.t option
-        [@ocaml.doc "[IPv4 traffic only] The ID of a NAT gateway."];
+        [@ocaml.doc "\\[IPv4 traffic only\\] The ID of a NAT gateway."];
       transitGatewayId: TransitGatewayId.t option
         [@ocaml.doc "The ID of a transit gateway."];
       localGatewayId: LocalGatewayId.t option
         [@ocaml.doc "The ID of the local gateway."];
       carrierGatewayId: CarrierGatewayId.t option
-        [@ocaml.doc "[IPv4 traffic only] The ID of a carrier gateway."];
+        [@ocaml.doc "\\[IPv4 traffic only\\] The ID of a carrier gateway."];
       networkInterfaceId: NetworkInterfaceId.t option
         [@ocaml.doc "The ID of a network interface."];
       routeTableId: RouteTableId.t [@ocaml.doc "The ID of the route table."];
@@ -5286,10 +5286,10 @@ module ReleaseAddressRequest =
     type nonrec t =
       {
       allocationId: AllocationId.t option
-        [@ocaml.doc "[EC2-VPC] The allocation ID. Required for EC2-VPC."];
+        [@ocaml.doc "\\[EC2-VPC\\] The allocation ID. Required for EC2-VPC."];
       publicIp: String_.t option
         [@ocaml.doc
-          "[EC2-Classic] The Elastic IP address. Required for EC2-Classic."];
+          "\\[EC2-Classic\\] The Elastic IP address. Required for EC2-Classic."];
       networkBorderGroup: String_.t option
         [@ocaml.doc
           "The set of Availability Zones, Local Zones, or Wavelength Zones from which Amazon Web Services advertises IP addresses. If you provide an incorrect network border group, you receive an InvalidAddress.NotFound error. You cannot use a network border group with EC2 Classic. If you attempt this operation on EC2 classic, you receive an InvalidParameterCombination error."];
@@ -5331,7 +5331,7 @@ module ReleaseAddressRequest =
       make ?dryRun ?networkBorderGroup ?publicIp ?allocationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Releases the specified Elastic IP address. [EC2-Classic, default VPC] Releasing an Elastic IP address automatically disassociates it from any instance that it's associated with. To disassociate an Elastic IP address without releasing it, use DisassociateAddress. [Nondefault VPC] You must use DisassociateAddress to disassociate the Elastic IP address before you can release it. Otherwise, Amazon EC2 returns an error (InvalidIPAddress.InUse). After releasing an Elastic IP address, it is released to the IP address pool. Be sure to update your DNS records and any servers or devices that communicate with the address. If you attempt to release an Elastic IP address that you already released, you'll get an AuthFailure error if the address is already allocated to another Amazon Web Services account. [EC2-VPC] After you release an Elastic IP address for use in a VPC, you might be able to recover it. For more information, see AllocateAddress."]
+       "Releases the specified Elastic IP address. \\[EC2-Classic, default VPC\\] Releasing an Elastic IP address automatically disassociates it from any instance that it's associated with. To disassociate an Elastic IP address without releasing it, use DisassociateAddress. \\[Nondefault VPC\\] You must use DisassociateAddress to disassociate the Elastic IP address before you can release it. Otherwise, Amazon EC2 returns an error (InvalidIPAddress.InUse). After releasing an Elastic IP address, it is released to the IP address pool. Be sure to update your DNS records and any servers or devices that communicate with the address. If you attempt to release an Elastic IP address that you already released, you'll get an AuthFailure error if the address is already allocated to another Amazon Web Services account. \\[EC2-VPC\\] After you release an Elastic IP address for use in a VPC, you might be able to recover it. For more information, see AllocateAddress."]
 module RejectVpcPeeringConnectionResult =
   struct
     type nonrec t =
@@ -6128,7 +6128,7 @@ module RegisterImageRequest =
       kernelId: KernelId.t option [@ocaml.doc "The ID of the kernel."];
       name: String_.t
         [@ocaml.doc
-          "A name for your AMI. Constraints: 3-128 alphanumeric characters, parentheses (()), square brackets ([]), spaces ( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs (@), or underscores(_)"];
+          "A name for your AMI. Constraints: 3-128 alphanumeric characters, parentheses (()), square brackets (\\[\\]), spaces ( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs (\\@), or underscores(_)"];
       billingProducts: BillingProductList.t option
         [@ocaml.doc
           "The billing product codes. Your account must be authorized to specify billing product codes. Otherwise, you can use the Amazon Web Services Marketplace to bill for the use of an AMI."];
@@ -11896,7 +11896,7 @@ module ModifyInstanceAttributeRequest =
           "Set to true to enable enhanced networking with ENA for the instance. This option is supported only for HVM instances. Specifying this option with a PV instance can make it unreachable."];
       groups: GroupIdStringList.t option
         [@ocaml.doc
-          "[EC2-VPC] Replaces the security groups of the instance with the specified security groups. You must specify at least one security group, even if it's just the default security group for the VPC. You must specify the security group ID, not the security group name."];
+          "\\[EC2-VPC\\] Replaces the security groups of the instance with the specified security groups. You must specify at least one security group, even if it's just the default security group for the VPC. You must specify the security group ID, not the security group name."];
       instanceId: InstanceId.t [@ocaml.doc "The ID of the instance."];
       instanceInitiatedShutdownBehavior: AttributeValue.t option
         [@ocaml.doc
@@ -13436,7 +13436,7 @@ module ModifyAddressAttributeRequest =
     type nonrec t =
       {
       allocationId: AllocationId.t
-        [@ocaml.doc "[EC2-VPC] The allocation ID."];
+        [@ocaml.doc "\\[EC2-VPC\\] The allocation ID."];
       domainName: String_.t option
         [@ocaml.doc "The domain name to modify for the IP address."];
       dryRun: Boolean.t option
@@ -19072,7 +19072,7 @@ module ExportImageRequest =
       imageId: ImageId.t [@ocaml.doc "The ID of the image."];
       s3ExportLocation: ExportTaskS3LocationRequest.t
         [@ocaml.doc
-          "Information about the destination Amazon S3 bucket. The bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export@amazon.com."];
+          "Information about the destination Amazon S3 bucket. The bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export\\@amazon.com."];
       roleName: String_.t option
         [@ocaml.doc
           "The name of the role that grants VM Import/Export permission to export images to your Amazon S3 bucket. If this parameter is not specified, the default role is named 'vmimport'."];

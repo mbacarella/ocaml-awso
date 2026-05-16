@@ -5593,7 +5593,7 @@ module TagResourceRequest =
           "The Amazon Resource Number (ARN) of an X-Ray group or sampling rule."];
       tags: TagList.t
         [@ocaml.doc
-          "A map that contains one or more tag keys and tag values to attach to an X-Ray group or sampling rule. For more information about ways to use tags, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference. The following restrictions apply to tags: Maximum number of user-applied tags per resource: 50 Maximum tag key length: 128 Unicode characters Maximum tag value length: 256 Unicode characters Valid values for key and value: a-z, A-Z, 0-9, space, and the following characters: _ . : / = + - and @ Tag keys and values are case sensitive. Don't use aws: as a prefix for keys; it's reserved for Amazon Web Services use. You cannot edit or delete system tags."]}
+          "A map that contains one or more tag keys and tag values to attach to an X-Ray group or sampling rule. For more information about ways to use tags, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference. The following restrictions apply to tags: Maximum number of user-applied tags per resource: 50 Maximum tag key length: 128 Unicode characters Maximum tag value length: 256 Unicode characters Valid values for key and value: a-z, A-Z, 0-9, space, and the following characters: _ . : / = + - and \\@ Tag keys and values are case sensitive. Don't use aws: as a prefix for keys; it's reserved for Amazon Web Services use. You cannot edit or delete system tags."]}
     let context_ = "TagResourceRequest"
     let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
     let to_value x =
@@ -7907,7 +7907,7 @@ module CreateSamplingRuleRequest =
       samplingRule: SamplingRule.t [@ocaml.doc "The rule definition."];
       tags: TagList.t option
         [@ocaml.doc
-          "A map that contains one or more tag keys and tag values to attach to an X-Ray sampling rule. For more information about ways to use tags, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference. The following restrictions apply to tags: Maximum number of user-applied tags per resource: 50 Maximum tag key length: 128 Unicode characters Maximum tag value length: 256 Unicode characters Valid values for key and value: a-z, A-Z, 0-9, space, and the following characters: _ . : / = + - and @ Tag keys and values are case sensitive. Don't use aws: as a prefix for keys; it's reserved for Amazon Web Services use."]}
+          "A map that contains one or more tag keys and tag values to attach to an X-Ray sampling rule. For more information about ways to use tags, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference. The following restrictions apply to tags: Maximum number of user-applied tags per resource: 50 Maximum tag key length: 128 Unicode characters Maximum tag value length: 256 Unicode characters Valid values for key and value: a-z, A-Z, 0-9, space, and the following characters: _ . : / = + - and \\@ Tag keys and values are case sensitive. Don't use aws: as a prefix for keys; it's reserved for Amazon Web Services use."]}
     let context_ = "CreateSamplingRuleRequest"
     let make ?tags = fun ~samplingRule -> fun () -> { tags; samplingRule }
     let to_value x =
@@ -7999,7 +7999,7 @@ module CreateGroupRequest =
           "The structure containing configurations related to insights. The InsightsEnabled boolean can be set to true to enable insights for the new group or false to disable insights for the new group. The NotifcationsEnabled boolean can be set to true to enable insights notifications for the new group. Notifications may only be enabled on a group with InsightsEnabled set to true."];
       tags: TagList.t option
         [@ocaml.doc
-          "A map that contains one or more tag keys and tag values to attach to an X-Ray group. For more information about ways to use tags, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference. The following restrictions apply to tags: Maximum number of user-applied tags per resource: 50 Maximum tag key length: 128 Unicode characters Maximum tag value length: 256 Unicode characters Valid values for key and value: a-z, A-Z, 0-9, space, and the following characters: _ . : / = + - and @ Tag keys and values are case sensitive. Don't use aws: as a prefix for keys; it's reserved for Amazon Web Services use."]}
+          "A map that contains one or more tag keys and tag values to attach to an X-Ray group. For more information about ways to use tags, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference. The following restrictions apply to tags: Maximum number of user-applied tags per resource: 50 Maximum tag key length: 128 Unicode characters Maximum tag value length: 256 Unicode characters Valid values for key and value: a-z, A-Z, 0-9, space, and the following characters: _ . : / = + - and \\@ Tag keys and values are case sensitive. Don't use aws: as a prefix for keys; it's reserved for Amazon Web Services use."]}
     let context_ = "CreateGroupRequest"
     let make ?filterExpression =
       fun ?insightsConfiguration ->

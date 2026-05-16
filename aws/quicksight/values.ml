@@ -17316,7 +17316,7 @@ module SearchFoldersRequest =
           "The ID for the Amazon Web Services account that contains the folder."];
       filters: FolderSearchFilterList.t
         [@ocaml.doc
-          "The filters to apply to the search. Currently, you can search only by the parent folder ARN. For example, \"Filters\": [ { \"Name\": \"PARENT_FOLDER_ARN\", \"Operator\": \"StringEquals\", \"Value\": \"arn:aws:quicksight:us-east-1:1:folder/folderId\" } ]."];
+          "The filters to apply to the search. Currently, you can search only by the parent folder ARN. For example, \"Filters\": \\[ \\{ \"Name\": \"PARENT_FOLDER_ARN\", \"Operator\": \"StringEquals\", \"Value\": \"arn:aws:quicksight:us-east-1:1:folder/folderId\" \\} \\]."];
       nextToken: String_.t option
         [@ocaml.doc
           "The token for the next set of results, or null if there are no more results."];
@@ -17492,7 +17492,7 @@ module SearchDashboardsRequest =
           "The ID of the Amazon Web Services account that contains the user whose dashboards you're searching for."];
       filters: DashboardSearchFilterList.t
         [@ocaml.doc
-          "The filters to apply to the search. Currently, you can search only by user name, for example, \"Filters\": [ { \"Name\": \"QUICKSIGHT_USER\", \"Operator\": \"StringEquals\", \"Value\": \"arn:aws:quicksight:us-east-1:1:user/default/UserName1\" } ]"];
+          "The filters to apply to the search. Currently, you can search only by user name, for example, \"Filters\": \\[ \\{ \"Name\": \"QUICKSIGHT_USER\", \"Operator\": \"StringEquals\", \"Value\": \"arn:aws:quicksight:us-east-1:1:user/default/UserName1\" \\} \\]"];
       nextToken: String_.t option
         [@ocaml.doc
           "The token for the next set of results, or null if there are no more results."];
@@ -22645,7 +22645,7 @@ module GenerateEmbedUrlForRegisteredUserRequest =
           "The ID for the Amazon Web Services account that contains the dashboard that you're embedding."];
       sessionLifetimeInMinutes: SessionLifetimeInMinutes.t option
         [@ocaml.doc
-          "How many minutes the session is valid. The session lifetime must be in [15-600] minutes range."];
+          "How many minutes the session is valid. The session lifetime must be in \\[15-600\\] minutes range."];
       userArn: Arn.t
         [@ocaml.doc "The Amazon Resource Name for the registered user."];
       experienceConfiguration:
@@ -22849,7 +22849,7 @@ module GenerateEmbedUrlForAnonymousUserRequest =
           "The ID for the Amazon Web Services account that contains the dashboard that you're embedding."];
       sessionLifetimeInMinutes: SessionLifetimeInMinutes.t option
         [@ocaml.doc
-          "How many minutes the session is valid. The session lifetime must be in [15-600] minutes range."];
+          "How many minutes the session is valid. The session lifetime must be in \\[15-600\\] minutes range."];
       namespace: Namespace.t
         [@ocaml.doc
           "The Amazon QuickSight namespace that the anonymous user virtually belongs to. If you are not using an Amazon QuickSight custom namespace, set this to default."];
@@ -33406,7 +33406,7 @@ module CreateAccountCustomizationRequest =
           "The Amazon QuickSight namespace that you want to add customizations to."];
       accountCustomization: AccountCustomization.t
         [@ocaml.doc
-          "The Amazon QuickSight customizations you're adding in the current Amazon Web Services Region. You can add these to an Amazon Web Services account and a QuickSight namespace. For example, you can add a default theme by setting AccountCustomization to the midnight theme: \"AccountCustomization\": { \"DefaultTheme\": \"arn:aws:quicksight::aws:theme/MIDNIGHT\" }. Or, you can add a custom theme by specifying \"AccountCustomization\": { \"DefaultTheme\": \"arn:aws:quicksight:us-west-2:111122223333:theme/bdb844d0-0fe9-4d9d-b520-0fe602d93639\" }."];
+          "The Amazon QuickSight customizations you're adding in the current Amazon Web Services Region. You can add these to an Amazon Web Services account and a QuickSight namespace. For example, you can add a default theme by setting AccountCustomization to the midnight theme: \"AccountCustomization\": \\{ \"DefaultTheme\": \"arn:aws:quicksight::aws:theme/MIDNIGHT\" \\}. Or, you can add a custom theme by specifying \"AccountCustomization\": \\{ \"DefaultTheme\": \"arn:aws:quicksight:us-west-2:111122223333:theme/bdb844d0-0fe9-4d9d-b520-0fe602d93639\" \\}."];
       tags: TagList.t option
         [@ocaml.doc
           "A list of the tags that you want to attach to this resource."]}

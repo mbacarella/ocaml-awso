@@ -709,7 +709,7 @@ module SettingsGroup =
 module EmbedHostDomain =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "Specifies a valid domain that can embed AppStream. Valid examples include: [\"testorigin.tt--com\", \"testingorigin.com.us\", \"test.com.us\"] Invalid examples include: [\"test,com\", \".com\", \"h*llo.com\". \"\"]"]
+                            "Specifies a valid domain that can embed AppStream. Valid examples include: \\[\"testorigin.tt--com\", \"testingorigin.com.us\", \"test.com.us\"\\] Invalid examples include: \\[\"test,com\", \".com\", \"h*llo.com\". \"\"\\]"]
     let context_ = "EmbedHostDomain"
     let make i =
       let open Result in
@@ -727,7 +727,7 @@ module EmbedHostDomain =
     let of_json j = string_of_json ~kind:"EmbedHostDomain" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "Specifies a valid domain that can embed AppStream. Valid examples include: [\"testorigin.tt--com\", \"testingorigin.com.us\", \"test.com.us\"] Invalid examples include: [\"test,com\", \".com\", \"h*llo.com\". \"\"]"]
+       "Specifies a valid domain that can embed AppStream. Valid examples include: \\[\"testorigin.tt--com\", \"testingorigin.com.us\", \"test.com.us\"\\] Invalid examples include: \\[\"test,com\", \".com\", \"h*llo.com\". \"\"\\]"]
 module StackError =
   struct
     type nonrec t =
@@ -6507,7 +6507,7 @@ module TagResourceRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       tags: Tags.t
         [@ocaml.doc
-          "The tags to associate. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. If you do not specify a value, the value is set to an empty string. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - @"]}
+          "The tags to associate. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. If you do not specify a value, the value is set to an empty string. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - \\@"]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -6785,7 +6785,7 @@ module StartImageBuilderRequest =
       name: String_.t [@ocaml.doc "The name of the image builder."];
       appstreamAgentVersion: AppstreamAgentVersion.t option
         [@ocaml.doc
-          "The version of the AppStream 2.0 agent to use for this image builder. To use the latest version of the AppStream 2.0 agent, specify [LATEST]."]}
+          "The version of the AppStream 2.0 agent to use for this image builder. To use the latest version of the AppStream 2.0 agent, specify \\[LATEST\\]."]}
     let context_ = "StartImageBuilderRequest"
     let make ?appstreamAgentVersion =
       fun ~name -> fun () -> { appstreamAgentVersion; name }
@@ -10587,7 +10587,7 @@ module CreateUpdatedImageRequest =
         [@ocaml.doc "The name to display for the new image."];
       newImageTags: Tags.t option
         [@ocaml.doc
-          "The tags to associate with the new image. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - @ If you do not specify a value, the value is set to an empty string. For more information about tags, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
+          "The tags to associate with the new image. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - \\@ If you do not specify a value, the value is set to an empty string. For more information about tags, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
       dryRun: Boolean.t option
         [@ocaml.doc
           "Indicates whether to display the status of image update availability before AppStream 2.0 initiates the process of creating a new updated image. If this value is set to true, AppStream 2.0 displays whether image updates are available. If this value is set to false, AppStream 2.0 initiates the process of creating a new updated image without displaying whether image updates are available."]}
@@ -10944,7 +10944,7 @@ module CreateStackRequest =
           "The persistent application settings for users of a stack. When these settings are enabled, changes that users make to applications and Windows settings are automatically saved after each session and applied to the next session."];
       tags: Tags.t option
         [@ocaml.doc
-          "The tags to associate with the stack. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. If you do not specify a value, the value is set to an empty string. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - @ For more information about tags, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
+          "The tags to associate with the stack. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. If you do not specify a value, the value is set to an empty string. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - \\@ For more information about tags, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
       accessEndpoints: AccessEndpointList.t option
         [@ocaml.doc
           "The list of interface VPC endpoint (interface endpoint) objects. Users of the stack can connect to AppStream 2.0 only through the specified endpoints."];
@@ -11333,10 +11333,10 @@ module CreateImageBuilderRequest =
           "The name of the directory and organizational unit (OU) to use to join the image builder to a Microsoft Active Directory domain."];
       appstreamAgentVersion: AppstreamAgentVersion.t option
         [@ocaml.doc
-          "The version of the AppStream 2.0 agent to use for this image builder. To use the latest version of the AppStream 2.0 agent, specify [LATEST]."];
+          "The version of the AppStream 2.0 agent to use for this image builder. To use the latest version of the AppStream 2.0 agent, specify \\[LATEST\\]."];
       tags: Tags.t option
         [@ocaml.doc
-          "The tags to associate with the image builder. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - @ If you do not specify a value, the value is set to an empty string. For more information about tags, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
+          "The tags to associate with the image builder. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - \\@ If you do not specify a value, the value is set to an empty string. For more information about tags, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
       accessEndpoints: AccessEndpointList.t option
         [@ocaml.doc
           "The list of interface VPC endpoint (interface endpoint) objects. Administrators can connect to the image builder only through the specified endpoints."]}
@@ -11640,7 +11640,7 @@ module CreateFleetRequest =
           "The name of the directory and organizational unit (OU) to use to join the fleet to a Microsoft Active Directory domain. This is not allowed for Elastic fleets."];
       tags: Tags.t option
         [@ocaml.doc
-          "The tags to associate with the fleet. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. If you do not specify a value, the value is set to an empty string. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - @ For more information, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
+          "The tags to associate with the fleet. A tag is a key-value pair, and the value is optional. For example, Environment=Test. If you do not specify a value, Environment=. If you do not specify a value, the value is set to an empty string. Generally allowed characters are: letters, numbers, and spaces representable in UTF-8, and the following special characters: _ . : / = + \\ - \\@ For more information, see Tagging Your Resources in the Amazon AppStream 2.0 Administration Guide."];
       idleDisconnectTimeoutInSeconds: Integer.t option
         [@ocaml.doc
           "The amount of time that users can be idle (inactive) before they are disconnected from their streaming session and the DisconnectTimeoutInSeconds time interval begins. Users are notified before they are disconnected due to inactivity. If they try to reconnect to the streaming session before the time interval specified in DisconnectTimeoutInSeconds elapses, they are connected to their previous session. Users are considered idle when they stop providing keyboard or mouse input during their streaming session. File uploads and downloads, audio in, audio out, and pixels changing do not qualify as user activity. If users continue to be idle after the time interval in IdleDisconnectTimeoutInSeconds elapses, they are disconnected. To prevent users from being disconnected due to inactivity, specify a value of 0. Otherwise, specify a value between 60 and 3600. The default value is 0. If you enable this feature, we recommend that you specify a value that corresponds exactly to a whole number of minutes (for example, 60, 120, and 180). If you don't do this, the value is rounded to the nearest minute. For example, if you specify a value of 70, users are disconnected after 1 minute of inactivity. If you specify a value that is at the midpoint between two different minutes, the value is rounded up. For example, if you specify a value of 90, users are disconnected after 2 minutes of inactivity."];

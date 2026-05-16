@@ -1117,10 +1117,10 @@ module Tag =
       {
       key: TagKey.t
         [@ocaml.doc
-          "A unique identifier for the tag. Maximum length: 128 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % @"];
+          "A unique identifier for the tag. Maximum length: 128 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"];
       value: TagValue.t option
         [@ocaml.doc
-          "An optional string, typically used to describe or define the tag. Maximum length: 256 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % @"]}
+          "An optional string, typically used to describe or define the tag. Maximum length: 256 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"]}
     let context_ = "Tag"
     let make ?value = fun ~key -> fun () -> { value; key }
     let to_value x =

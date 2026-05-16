@@ -5713,7 +5713,7 @@ module Tag =
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of key/value pairs that identify an index, FAQ, or data source. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - @."]
+       "A list of key/value pairs that identify an index, FAQ, or data source. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."]
 module TagList =
   struct
     type nonrec t = Tag.t list
@@ -7349,7 +7349,7 @@ module ServiceNowConfiguration =
       {
       hostUrl: ServiceNowHostUrl.t
         [@ocaml.doc
-          "The ServiceNow instance that the data source connects to. The host endpoint should look like the following: {instance}.service-now.com."];
+          "The ServiceNow instance that the data source connects to. The host endpoint should look like the following: \\{instance\\}.service-now.com."];
       secretArn: SecretArn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Secrets Manager secret that contains the user name and password required to connect to the ServiceNow instance."];
@@ -8444,7 +8444,7 @@ module OneDriveUsers =
       {
       oneDriveUserList: OneDriveUserList.t option
         [@ocaml.doc
-          "A list of users whose documents should be indexed. Specify the user names in email format, for example, username@tenantdomain. If you need to index the documents of more than 100 users, use the OneDriveUserS3Path field to specify the location of a file containing a list of users."];
+          "A list of users whose documents should be indexed. Specify the user names in email format, for example, username\\@tenantdomain. If you need to index the documents of more than 100 users, use the OneDriveUserS3Path field to specify the location of a file containing a list of users."];
       oneDriveUserS3Path: S3Path.t option
         [@ocaml.doc
           "The S3 bucket location of a file containing a list of users whose documents should be indexed."]}
@@ -8889,7 +8889,7 @@ module FsxConfiguration =
           "Configuration information for an Amazon Virtual Private Cloud to connect to your Amazon FSx. Your Amazon FSx instance must reside inside your VPC."];
       secretArn: SecretArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs required to connect to your Amazon FSx file system. Windows is currently the only supported type. The secret must contain a JSON structure with the following keys: username\226\128\148The Active Directory user name, along with the Domain Name System (DNS) domain name. For example, user@corp.example.com. The Active Directory user account must have read and mounting access to the Amazon FSx file system for Windows. password\226\128\148The password of the Active Directory user account with read and mounting access to the Amazon FSx Windows file system."];
+          "The Amazon Resource Name (ARN) of an Secrets Manager secret that contains the key-value pairs required to connect to your Amazon FSx file system. Windows is currently the only supported type. The secret must contain a JSON structure with the following keys: username\226\128\148The Active Directory user name, along with the Domain Name System (DNS) domain name. For example, user\\@corp.example.com. The Active Directory user account must have read and mounting access to the Amazon FSx file system for Windows. password\226\128\148The password of the Active Directory user account with read and mounting access to the Amazon FSx Windows file system."];
       inclusionPatterns: DataSourceInclusionsExclusionsStrings.t option
         [@ocaml.doc
           "A list of regular expression patterns to include certain files in your Amazon FSx file system. Files that match the patterns are included in the index. Files that don't match the patterns are excluded from the index. If a file matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the file isn't included in the index."];

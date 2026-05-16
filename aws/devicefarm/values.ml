@@ -5119,7 +5119,7 @@ module InternalServiceException =
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An internal exception was raised in the service. Contact aws-devicefarm-support@amazon.com if you see this error."]
+       "An internal exception was raised in the service. Contact aws-devicefarm-support\\@amazon.com if you see this error."]
 module ResourceDescription =
   struct
     type nonrec t = string
@@ -5558,7 +5558,7 @@ module ScheduleRunTest =
       filter: Filter.t option [@ocaml.doc "The test's filter."];
       parameters: TestParameters.t option
         [@ocaml.doc
-          "The test's parameters, such as test framework parameters and fixture settings. Parameters are represented by name-value pairs of strings. For all tests: app_performance_monitoring: Performance monitoring is enabled by default. Set this parameter to false to disable it. For Calabash tests: profile: A cucumber profile (for example, my_profile_name). tags: You can limit execution to features or scenarios that have (or don't have) certain tags (for example, @smoke or @smoke,~@wip). For Appium tests (all types): appium_version: The Appium version. Currently supported values are 1.6.5 (and later), latest, and default. latest runs the latest Appium version supported by Device Farm (1.9.1). For default, Device Farm selects a compatible version of Appium for the device. The current behavior is to run 1.7.2 on Android devices and iOS 9 and earlier and 1.7.2 for iOS 10 and later. This behavior is subject to change. For fuzz tests (Android only): event_count: The number of events, between 1 and 10000, that the UI fuzz test should perform. throttle: The time, in ms, between 0 and 1000, that the UI fuzz test should wait between events. seed: A seed to use for randomizing the UI fuzz test. Using the same seed value between tests ensures identical event sequences. For Explorer tests: username: A user name to use if the Explorer encounters a login form. If not supplied, no user name is inserted. password: A password to use if the Explorer encounters a login form. If not supplied, no password is inserted. For Instrumentation: filter: A test filter string. Examples: Running a single test case: com.android.abc.Test1 Running a single test: com.android.abc.Test1#smoke Running multiple tests: com.android.abc.Test1,com.android.abc.Test2 For XCTest and XCTestUI: filter: A test filter string. Examples: Running a single test class: LoginTests Running a multiple test classes: LoginTests,SmokeTests Running a single test: LoginTests/testValid Running multiple tests: LoginTests/testValid,LoginTests/testInvalid For UIAutomator: filter: A test filter string. Examples: Running a single test case: com.android.abc.Test1 Running a single test: com.android.abc.Test1#smoke Running multiple tests: com.android.abc.Test1,com.android.abc.Test2"]}
+          "The test's parameters, such as test framework parameters and fixture settings. Parameters are represented by name-value pairs of strings. For all tests: app_performance_monitoring: Performance monitoring is enabled by default. Set this parameter to false to disable it. For Calabash tests: profile: A cucumber profile (for example, my_profile_name). tags: You can limit execution to features or scenarios that have (or don't have) certain tags (for example, \\@smoke or \\@smoke,~\\@wip). For Appium tests (all types): appium_version: The Appium version. Currently supported values are 1.6.5 (and later), latest, and default. latest runs the latest Appium version supported by Device Farm (1.9.1). For default, Device Farm selects a compatible version of Appium for the device. The current behavior is to run 1.7.2 on Android devices and iOS 9 and earlier and 1.7.2 for iOS 10 and later. This behavior is subject to change. For fuzz tests (Android only): event_count: The number of events, between 1 and 10000, that the UI fuzz test should perform. throttle: The time, in ms, between 0 and 1000, that the UI fuzz test should wait between events. seed: A seed to use for randomizing the UI fuzz test. Using the same seed value between tests ensures identical event sequences. For Explorer tests: username: A user name to use if the Explorer encounters a login form. If not supplied, no user name is inserted. password: A password to use if the Explorer encounters a login form. If not supplied, no password is inserted. For Instrumentation: filter: A test filter string. Examples: Running a single test case: com.android.abc.Test1 Running a single test: com.android.abc.Test1#smoke Running multiple tests: com.android.abc.Test1,com.android.abc.Test2 For XCTest and XCTestUI: filter: A test filter string. Examples: Running a single test class: LoginTests Running a multiple test classes: LoginTests,SmokeTests Running a single test: LoginTests/testValid Running multiple tests: LoginTests/testValid,LoginTests/testInvalid For UIAutomator: filter: A test filter string. Examples: Running a single test case: com.android.abc.Test1 Running a single test: com.android.abc.Test1#smoke Running multiple tests: com.android.abc.Test1,com.android.abc.Test2"]}
     let context_ = "ScheduleRunTest"
     let make ?testPackageArn =
       fun ?testSpecArn ->
@@ -10549,7 +10549,7 @@ module ListOfferingPromotionsResult =
       make ?nextToken ?offeringPromotions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of offering promotions. Each offering promotion record contains the ID and description of the promotion. The API returns a NotEligible error if the caller is not permitted to invoke the operation. Contact aws-devicefarm-support@amazon.com if you must be able to invoke this operation."]
+       "Returns a list of offering promotions. Each offering promotion record contains the ID and description of the promotion. The API returns a NotEligible error if the caller is not permitted to invoke the operation. Contact aws-devicefarm-support\\@amazon.com if you must be able to invoke this operation."]
 module ListOfferingPromotionsRequest =
   struct
     type nonrec t =
@@ -10572,7 +10572,7 @@ module ListOfferingPromotionsRequest =
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of offering promotions. Each offering promotion record contains the ID and description of the promotion. The API returns a NotEligible error if the caller is not permitted to invoke the operation. Contact aws-devicefarm-support@amazon.com if you must be able to invoke this operation."]
+       "Returns a list of offering promotions. Each offering promotion record contains the ID and description of the promotion. The API returns a NotEligible error if the caller is not permitted to invoke the operation. Contact aws-devicefarm-support\\@amazon.com if you must be able to invoke this operation."]
 module ListNetworkProfilesResult =
   struct
     type nonrec t =

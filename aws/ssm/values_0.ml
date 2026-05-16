@@ -4200,7 +4200,7 @@ module AttachmentsSource =
           "The key of a key-value pair that identifies the location of an attachment to a document."];
       values: AttachmentsSourceValues.t option
         [@ocaml.doc
-          "The value of a key-value pair that identifies the location of an attachment to a document. The format for Value depends on the type of key you specify. For the key SourceUrl, the value is an S3 bucket location. For example: \"Values\": [ \"s3://doc-example-bucket/my-folder\" ] For the key S3FileUrl, the value is a file in an S3 bucket. For example: \"Values\": [ \"s3://doc-example-bucket/my-folder/my-file.py\" ] For the key AttachmentReference, the value is constructed from the name of another SSM document in your account, a version number of that document, and a file attached to that document version that you want to reuse. For example: \"Values\": [ \"MyOtherDocument/3/my-other-file.py\" ] However, if the SSM document is shared with you from another account, the full SSM document ARN must be specified instead of the document name only. For example: \"Values\": [ \"arn:aws:ssm:us-east-2:111122223333:document/OtherAccountDocument/3/their-file.py\" ]"];
+          "The value of a key-value pair that identifies the location of an attachment to a document. The format for Value depends on the type of key you specify. For the key SourceUrl, the value is an S3 bucket location. For example: \"Values\": \\[ \"s3://doc-example-bucket/my-folder\" \\] For the key S3FileUrl, the value is a file in an S3 bucket. For example: \"Values\": \\[ \"s3://doc-example-bucket/my-folder/my-file.py\" \\] For the key AttachmentReference, the value is constructed from the name of another SSM document in your account, a version number of that document, and a file attached to that document version that you want to reuse. For example: \"Values\": \\[ \"MyOtherDocument/3/my-other-file.py\" \\] However, if the SSM document is shared with you from another account, the full SSM document ARN must be specified instead of the document name only. For example: \"Values\": \\[ \"arn:aws:ssm:us-east-2:111122223333:document/OtherAccountDocument/3/their-file.py\" \\]"];
       name: AttachmentIdentifier.t option
         [@ocaml.doc "The name of the document attachment file."]}
     let make ?key =
@@ -6522,7 +6522,7 @@ module PatchSource =
           "The specific operating system versions a patch repository applies to, such as \"Ubuntu16.04\", \"AmazonLinux2016.09\", \"RedhatEnterpriseLinux7.2\" or \"Suse12.7\". For lists of supported product values, see PatchFilter."];
       configuration: PatchSourceConfiguration.t
         [@ocaml.doc
-          "The value of the yum repo configuration. For example: [main] name=MyCustomRepository baseurl=https://my-custom-repository enabled=1 For information about other options available for your yum repository configuration, see dnf.conf(5)."]}
+          "The value of the yum repo configuration. For example: \\[main\\] name=MyCustomRepository baseurl=https://my-custom-repository enabled=1 For information about other options available for your yum repository configuration, see dnf.conf(5)."]}
     let context_ = "PatchSource"
     let make ~name =
       fun ~products ->
@@ -6755,7 +6755,7 @@ module PatchFilter =
       make ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines which patches should be included in a patch baseline. A patch filter consists of a key and a set of values. The filter key is a patch property. For example, the available filter keys for WINDOWS are PATCH_SET, PRODUCT, PRODUCT_FAMILY, CLASSIFICATION, and MSRC_SEVERITY. The filter values define a matching criterion for the patch property indicated by the key. For example, if the filter key is PRODUCT and the filter values are [\"Office 2013\", \"Office 2016\"], then the filter accepts all patches where product name is either \"Office 2013\" or \"Office 2016\". The filter values can be exact values for the patch property given as a key, or a wildcard (*), which matches all values. You can view lists of valid values for the patch properties by running the DescribePatchProperties command. For information about which patch properties can be used with each major operating system, see DescribePatchProperties."]
+       "Defines which patches should be included in a patch baseline. A patch filter consists of a key and a set of values. The filter key is a patch property. For example, the available filter keys for WINDOWS are PATCH_SET, PRODUCT, PRODUCT_FAMILY, CLASSIFICATION, and MSRC_SEVERITY. The filter values define a matching criterion for the patch property indicated by the key. For example, if the filter key is PRODUCT and the filter values are \\[\"Office 2013\", \"Office 2016\"\\], then the filter accepts all patches where product name is either \"Office 2013\" or \"Office 2016\". The filter values can be exact values for the patch property given as a key, or a wildcard (*), which matches all values. You can view lists of valid values for the patch properties by running the DescribePatchProperties command. For information about which patch properties can be used with each major operating system, see DescribePatchProperties."]
 module PatchFilterList =
   struct
     type nonrec t = PatchFilter.t list

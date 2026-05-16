@@ -251,7 +251,7 @@ module SlotDefaultValue =
       {
       defaultValue: SlotDefaultValueString.t
         [@ocaml.doc
-          "The default value for the slot. You can specify one of the following: #context-name.slot-name - The slot value \"slot-name\" in the context \"context-name.\" {attribute} - The slot value of the session attribute \"attribute.\" 'value' - The discrete value \"value.\""]}
+          "The default value for the slot. You can specify one of the following: #context-name.slot-name - The slot value \"slot-name\" in the context \"context-name.\" \\{attribute\\} - The slot value of the session attribute \"attribute.\" 'value' - The discrete value \"value.\""]}
     let context_ = "SlotDefaultValue"
     let make ~defaultValue = fun () -> { defaultValue }
     let to_value x =
@@ -801,7 +801,7 @@ module SlotTypeRegexConfiguration =
       {
       pattern: RegexPattern.t
         [@ocaml.doc
-          "A regular expression used to validate the value of a slot. Use a standard regular expression. Amazon Lex supports the following characters in the regular expression: A-Z, a-z 0-9 Unicode characters (\"\\ u<Unicode>\") Represent Unicode characters with four digits, for example \"\\u0041\" or \"\\u005A\". The following regular expression operators are not supported: Infinite repeaters: *, +, or {x,} with no upper bound. Wild card (.)"]}
+          "A regular expression used to validate the value of a slot. Use a standard regular expression. Amazon Lex supports the following characters in the regular expression: A-Z, a-z 0-9 Unicode characters (\"\\ u<Unicode>\") Represent Unicode characters with four digits, for example \"\\u0041\" or \"\\u005A\". The following regular expression operators are not supported: Infinite repeaters: *, +, or \\{x,\\} with no upper bound. Wild card (.)"]}
     let context_ = "SlotTypeRegexConfiguration"
     let make ~pattern = fun () -> { pattern }
     let to_value x =
@@ -1770,7 +1770,7 @@ module Tag =
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of key/value pairs that identify a bot, bot alias, or bot channel. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - @."]
+       "A list of key/value pairs that identify a bot, bot alias, or bot channel. Tag keys and values can consist of Unicode letters, digits, white space, and any of the following symbols: _ . : / = + - \\@."]
 module Name =
   struct
     type nonrec t = string
@@ -2087,7 +2087,7 @@ module Slot =
           "A set of possible responses for the slot type used by text-based clients. A user chooses an option from the response card, instead of using text to reply."];
       obfuscationSetting: ObfuscationSetting.t option
         [@ocaml.doc
-          "Determines whether a slot is obfuscated in conversation logs and stored utterances. When you obfuscate a slot, the value is replaced by the slot name in curly braces ({}). For example, if the slot name is \"full_name\", obfuscated values are replaced with \"{full_name}\". For more information, see Slot Obfuscation ."];
+          "Determines whether a slot is obfuscated in conversation logs and stored utterances. When you obfuscate a slot, the value is replaced by the slot name in curly braces (\\{\\}). For example, if the slot name is \"full_name\", obfuscated values are replaced with \"\\{full_name\\}\". For more information, see Slot Obfuscation ."];
       defaultValueSpec: SlotDefaultValueSpec.t option
         [@ocaml.doc
           "A list of default values for the slot. Default values are used when Amazon Lex hasn't determined a value for a slot. You can specify default values from context variables, session attributes, and defined values."]}
@@ -4896,7 +4896,7 @@ module ResourceInUseException =
       make ?exampleReference ?referenceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The resource that you are attempting to delete is referred to by another resource. Use this information to remove references to the resource that you are trying to delete. The body of the exception contains a JSON object that describes the resource. { \"resourceType\": BOT | BOTALIAS | BOTCHANNEL | INTENT, \"resourceReference\": { \"name\": string, \"version\": string } }"]
+       "The resource that you are attempting to delete is referred to by another resource. Use this information to remove references to the resource that you are trying to delete. The body of the exception contains a JSON object that describes the resource. \\{ \"resourceType\": BOT | BOTALIAS | BOTCHANNEL | INTENT, \"resourceReference\": \\{ \"name\": string, \"version\": string \\} \\}"]
 module PutSlotTypeResponse =
   struct
     type nonrec t =
@@ -5515,7 +5515,7 @@ module PutIntentRequest =
           "An array of intent slots. At runtime, Amazon Lex elicits required slot values from the user using prompts defined in the slots. For more information, see how-it-works."];
       sampleUtterances: IntentUtteranceList.t option
         [@ocaml.doc
-          "An array of utterances (strings) that a user might say to signal the intent. For example, \"I want {PizzaSize} pizza\", \"Order {Quantity} {PizzaSize} pizzas\". In each utterance, a slot name is enclosed in curly braces."];
+          "An array of utterances (strings) that a user might say to signal the intent. For example, \"I want \\{PizzaSize\\} pizza\", \"Order \\{Quantity\\} \\{PizzaSize\\} pizzas\". In each utterance, a slot name is enclosed in curly braces."];
       confirmationPrompt: Prompt.t option
         [@ocaml.doc
           "Prompts the user to confirm the intent. This question should have a yes or no answer. Amazon Lex uses this prompt to ensure that the user acknowledges that the intent is ready for fulfillment. For example, with the OrderPizza intent, you might want to confirm that the order is correct before placing it. For other intents, such as intents that simply respond to user questions, you might not need to ask the user for confirmation before providing the information. You you must provide both the rejectionStatement and the confirmationPrompt, or neither."];

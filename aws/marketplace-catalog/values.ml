@@ -1371,7 +1371,7 @@ module StartChangeSetResponse =
       make ?changeSetArn ?changeSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to request changes for your entities. Within a single ChangeSet, you cannot start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the ChangeSet has completed (either succeeded, cancelled, or failed). If you try to start a ChangeSet containing a change against an entity that is already locked, you will receive a ResourceInUseException. For example, you cannot start the ChangeSet described in the example later in this topic, because it contains two changes to execute the same change type (AddRevisions) against the same entity (entity-id@1). For more information about working with change sets, see Working with change sets."]
+       "This operation allows you to request changes for your entities. Within a single ChangeSet, you cannot start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the ChangeSet has completed (either succeeded, cancelled, or failed). If you try to start a ChangeSet containing a change against an entity that is already locked, you will receive a ResourceInUseException. For example, you cannot start the ChangeSet described in the example later in this topic, because it contains two changes to execute the same change type (AddRevisions) against the same entity (entity-id\\@1). For more information about working with change sets, see Working with change sets."]
 module StartChangeSetRequest =
   struct
     type nonrec t =
@@ -1426,7 +1426,7 @@ module StartChangeSetRequest =
       make ?clientRequestToken ?changeSetName ~changeSet ~catalog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to request changes for your entities. Within a single ChangeSet, you cannot start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the ChangeSet has completed (either succeeded, cancelled, or failed). If you try to start a ChangeSet containing a change against an entity that is already locked, you will receive a ResourceInUseException. For example, you cannot start the ChangeSet described in the example later in this topic, because it contains two changes to execute the same change type (AddRevisions) against the same entity (entity-id@1). For more information about working with change sets, see Working with change sets."]
+       "This operation allows you to request changes for your entities. Within a single ChangeSet, you cannot start the same change type against the same entity multiple times. Additionally, when a ChangeSet is running, all the entities targeted by the different changes are locked until the ChangeSet has completed (either succeeded, cancelled, or failed). If you try to start a ChangeSet containing a change against an entity that is already locked, you will receive a ResourceInUseException. For example, you cannot start the ChangeSet described in the example later in this topic, because it contains two changes to execute the same change type (AddRevisions) against the same entity (entity-id\\@1). For more information about working with change sets, see Working with change sets."]
 module ListEntitiesResponse =
   struct
     type nonrec t =
@@ -1742,10 +1742,10 @@ module DescribeEntityResponse =
       {
       entityType: EntityType.t option
         [@ocaml.doc
-          "The named type of the entity, in the format of EntityType@Version."];
+          "The named type of the entity, in the format of EntityType\\@Version."];
       entityIdentifier: Identifier.t option
         [@ocaml.doc
-          "The identifier of the entity, in the format of EntityId@RevisionId."];
+          "The identifier of the entity, in the format of EntityId\\@RevisionId."];
       entityArn: ARN.t option
         [@ocaml.doc
           "The ARN associated to the unique identifier for the change set referenced in this request."];

@@ -1122,7 +1122,7 @@ module MemberFabricConfiguration =
           "The user name for the member's initial administrative user."];
       adminPassword: PasswordString.t
         [@ocaml.doc
-          "The password for the member's initial administrative user. The AdminPassword must be at least eight characters long and no more than 32 characters. It must contain at least one uppercase letter, one lowercase letter, and one digit. It cannot have a single quotation mark (\226\128\152), a double quotation marks (\226\128\156), a forward slash(/), a backward slash(\\), @, or a space."]}
+          "The password for the member's initial administrative user. The AdminPassword must be at least eight characters long and no more than 32 characters. It must contain at least one uppercase letter, one lowercase letter, and one digit. It cannot have a single quotation mark (\226\128\152), a double quotation marks (\226\128\156), a forward slash(/), a backward slash(\\), \\@, or a space."]}
     let context_ = "MemberFabricConfiguration"
     let make ~adminUsername =
       fun ~adminPassword -> fun () -> { adminUsername; adminPassword }

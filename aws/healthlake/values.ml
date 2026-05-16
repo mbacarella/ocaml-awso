@@ -597,7 +597,7 @@ module Tag =
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag is a label consisting of a user-defined key and value. The form for tags is {\"Key\", \"Value\"}"]
+       "A tag is a label consisting of a user-defined key and value. The form for tags is \\{\"Key\", \"Value\"\\}"]
 module ImportJobProperties =
   struct
     type nonrec t =

@@ -106,7 +106,7 @@ module All =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspect all of the elements that WAF has parsed and extracted from the web request JSON body that are within the JsonBody MatchScope. This is used with the FieldToMatch option JsonBody. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"All\": {}"]
+       "Inspect all of the elements that WAF has parsed and extracted from the web request JSON body that are within the JsonBody MatchScope. This is used with the FieldToMatch option JsonBody. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"All\": \\{\\}"]
 module AllQueryArguments =
   struct
     type nonrec t = unit
@@ -118,7 +118,7 @@ module AllQueryArguments =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "All query arguments of a web request. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"AllQueryArguments\": {}"]
+       "All query arguments of a web request. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"AllQueryArguments\": \\{\\}"]
 module CustomHTTPHeaderValue =
   struct
     type nonrec t = string
@@ -439,7 +439,7 @@ module UriPath =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The path component of the URI of a web request. This is the part of a web request that identifies a resource. For example, /images/daily-ad.jpg. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"UriPath\": {}"]
+       "The path component of the URI of a web request. This is the part of a web request that identifies a resource. For example, /images/daily-ad.jpg. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"UriPath\": \\{\\}"]
 module FieldToMatchData =
   struct
     type nonrec t = string
@@ -482,7 +482,7 @@ module SingleQueryArgument =
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "One query argument in a web request, identified by name, for example UserName or SalesRegion. The name can be up to 30 characters long and isn't case sensitive. Example JSON: \"SingleQueryArgument\": { \"Name\": \"myArgument\" }"]
+       "One query argument in a web request, identified by name, for example UserName or SalesRegion. The name can be up to 30 characters long and isn't case sensitive. Example JSON: \"SingleQueryArgument\": \\{ \"Name\": \"myArgument\" \\}"]
 module SingleHeader =
   struct
     type nonrec t =
@@ -505,7 +505,7 @@ module SingleHeader =
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "One of the headers in a web request, identified by name, for example, User-Agent or Referer. This setting isn't case sensitive. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. Example JSON: \"SingleHeader\": { \"Name\": \"haystack\" }"]
+       "One of the headers in a web request, identified by name, for example, User-Agent or Referer. This setting isn't case sensitive. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. Example JSON: \"SingleHeader\": \\{ \"Name\": \"haystack\" \\}"]
 module QueryString =
   struct
     type nonrec t = unit
@@ -517,7 +517,7 @@ module QueryString =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The query string of a web request. This is the part of a URL that appears after a ? character, if any. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"QueryString\": {}"]
+       "The query string of a web request. This is the part of a URL that appears after a ? character, if any. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"QueryString\": \\{\\}"]
 module Method =
   struct
     type nonrec t = unit
@@ -529,7 +529,7 @@ module Method =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The HTTP method of a web request. The method indicates the type of operation that the request is asking the origin to perform. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"Method\": {}"]
+       "The HTTP method of a web request. The method indicates the type of operation that the request is asking the origin to perform. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"Method\": \\{\\}"]
 module JsonMatchScope =
   struct
     type nonrec t =
@@ -614,7 +614,7 @@ module JsonMatchPattern =
           "Match all of the elements. See also MatchScope in JsonBody. You must specify either this setting or the IncludedPaths setting, but not both."];
       includedPaths: JsonPointerPaths.t option
         [@ocaml.doc
-          "Match only the specified include paths. See also MatchScope in JsonBody. Provide the include paths using JSON Pointer syntax. For example, \"IncludedPaths\": [\"/dogs/0/name\", \"/dogs/1/name\"]. For information about this syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. You must specify either this setting or the All setting, but not both. Don't use this option to include all paths. Instead, use the All setting."]}
+          "Match only the specified include paths. See also MatchScope in JsonBody. Provide the include paths using JSON Pointer syntax. For example, \"IncludedPaths\": \\[\"/dogs/0/name\", \"/dogs/1/name\"\\]. For information about this syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. You must specify either this setting or the All setting, but not both. Don't use this option to include all paths. Instead, use the All setting."]}
     let make ?all = fun ?includedPaths -> fun () -> { all; includedPaths }
     let to_value x =
       structure_to_value
@@ -679,7 +679,7 @@ module JsonBody =
           "The parts of the JSON to match against using the MatchPattern. If you specify All, WAF matches against keys and values."];
       invalidFallbackBehavior: BodyParsingFallbackBehavior.t option
         [@ocaml.doc
-          "What WAF should do if it fails to completely parse the JSON body. The options are the following: EVALUATE_AS_STRING - Inspect the body as plain text. WAF applies the text transformations and inspection criteria that you defined for the JSON inspection to the body text string. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement. If you don't provide this setting, WAF parses and evaluates the content only up to the first parsing failure that it encounters. WAF does its best to parse the entire JSON body, but might be forced to stop for reasons such as invalid characters, duplicate keys, truncation, and any content whose root node isn't an object or an array. WAF parses the JSON in the following examples as two valid key, value pairs: Missing comma: {\"key1\":\"value1\"\"key2\":\"value2\"} Missing colon: {\"key1\":\"value1\",\"key2\"\"value2\"} Extra colons: {\"key1\"::\"value1\",\"key2\"\"value2\"}"]}
+          "What WAF should do if it fails to completely parse the JSON body. The options are the following: EVALUATE_AS_STRING - Inspect the body as plain text. WAF applies the text transformations and inspection criteria that you defined for the JSON inspection to the body text string. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement. If you don't provide this setting, WAF parses and evaluates the content only up to the first parsing failure that it encounters. WAF does its best to parse the entire JSON body, but might be forced to stop for reasons such as invalid characters, duplicate keys, truncation, and any content whose root node isn't an object or an array. WAF parses the JSON in the following examples as two valid key, value pairs: Missing comma: \\{\"key1\":\"value1\"\"key2\":\"value2\"\\} Missing colon: \\{\"key1\":\"value1\",\"key2\"\"value2\"\\} Extra colons: \\{\"key1\"::\"value1\",\"key2\"\"value2\"\\}"]}
     let context_ = "JsonBody"
     let make ?invalidFallbackBehavior =
       fun ~matchPattern ->
@@ -714,7 +714,7 @@ module JsonBody =
       make ?invalidFallbackBehavior ~matchScope ~matchPattern ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The body of a web request, inspected as JSON. The body immediately follows the request headers. This is used in the FieldToMatch specification. Use the specifications in this object to indicate which parts of the JSON body to inspect using the rule's inspection criteria. WAF inspects only the parts of the JSON that result from the matches that you indicate. Example JSON: \"JsonBody\": { \"MatchPattern\": { \"All\": {} }, \"MatchScope\": \"ALL\" }"]
+       "The body of a web request, inspected as JSON. The body immediately follows the request headers. This is used in the FieldToMatch specification. Use the specifications in this object to indicate which parts of the JSON body to inspect using the rule's inspection criteria. WAF inspects only the parts of the JSON that result from the matches that you indicate. Example JSON: \"JsonBody\": \\{ \"MatchPattern\": \\{ \"All\": \\{\\} \\}, \"MatchScope\": \"ALL\" \\}"]
 module Body =
   struct
     type nonrec t = unit
@@ -726,17 +726,17 @@ module Body =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The body of a web request. This immediately follows the request headers. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"Body\": {}"]
+       "The body of a web request. This immediately follows the request headers. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"Body\": \\{\\}"]
 module FieldToMatch =
   struct
     type nonrec t =
       {
       singleHeader: SingleHeader.t option
         [@ocaml.doc
-          "Inspect a single header. Provide the name of the header to inspect, for example, User-Agent or Referer. This setting isn't case sensitive. Example JSON: \"SingleHeader\": { \"Name\": \"haystack\" }"];
+          "Inspect a single header. Provide the name of the header to inspect, for example, User-Agent or Referer. This setting isn't case sensitive. Example JSON: \"SingleHeader\": \\{ \"Name\": \"haystack\" \\}"];
       singleQueryArgument: SingleQueryArgument.t option
         [@ocaml.doc
-          "Inspect a single query argument. Provide the name of the query argument to inspect, such as UserName or SalesRegion. The name can be up to 30 characters long and isn't case sensitive. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. Example JSON: \"SingleQueryArgument\": { \"Name\": \"myArgument\" }"];
+          "Inspect a single query argument. Provide the name of the query argument to inspect, such as UserName or SalesRegion. The name can be up to 30 characters long and isn't case sensitive. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. Example JSON: \"SingleQueryArgument\": \\{ \"Name\": \"myArgument\" \\}"];
       allQueryArguments: AllQueryArguments.t option
         [@ocaml.doc "Inspect all query arguments."];
       uriPath: UriPath.t option
@@ -823,7 +823,7 @@ module FieldToMatch =
         ?singleQueryArgument ?singleHeader ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The part of a web request that you want WAF to inspect. Include the single FieldToMatch type that you want to inspect, with additional specifications as needed, according to the type. You specify a single request component in FieldToMatch for each rule statement that requires it. To inspect more than one component of a web request, create a separate rule statement for each component. JSON specification for a QueryString field to match: \"FieldToMatch\": { \"QueryString\": {} } Example JSON for a Method field to match specification: \"FieldToMatch\": { \"Method\": { \"Name\": \"DELETE\" } }"]
+       "The part of a web request that you want WAF to inspect. Include the single FieldToMatch type that you want to inspect, with additional specifications as needed, according to the type. You specify a single request component in FieldToMatch for each rule statement that requires it. To inspect more than one component of a web request, create a separate rule statement for each component. JSON specification for a QueryString field to match: \"FieldToMatch\": \\{ \"QueryString\": \\{\\} \\} Example JSON for a Method field to match specification: \"FieldToMatch\": \\{ \"Method\": \\{ \"Name\": \"DELETE\" \\} \\}"]
 module XssMatchStatement =
   struct
     type nonrec t =
@@ -2587,7 +2587,7 @@ module GeoMatchStatement =
       {
       countryCodes: CountryCodes.t option
         [@ocaml.doc
-          "An array of two-character country codes, for example, [ \"US\", \"CN\" ], from the alpha-2 country ISO codes of the ISO 3166 international standard."];
+          "An array of two-character country codes, for example, \\[ \"US\", \"CN\" \\], from the alpha-2 country ISO codes of the ISO 3166 international standard."];
       forwardedIPConfig: ForwardedIPConfig.t option
         [@ocaml.doc
           "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all."]}
@@ -4361,7 +4361,7 @@ module NoneAction =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies that WAF should do nothing. This is used for the OverrideAction setting on a Rule when the rule uses a rule group reference statement. This is used in the context of other settings, for example to specify values for RuleAction and web ACL DefaultAction. JSON specification: \"None\": {}"]
+       "Specifies that WAF should do nothing. This is used for the OverrideAction setting on a Rule when the rule uses a rule group reference statement. This is used in the context of other settings, for example to specify values for RuleAction and web ACL DefaultAction. JSON specification: \"None\": \\{\\}"]
 module OverrideAction =
   struct
     type nonrec t =
@@ -5124,7 +5124,7 @@ module CreateIPSetRequest =
         [@ocaml.doc "The version of the IP addresses, either IPV4 or IPV6."];
       addresses: IPAddresses.t
         [@ocaml.doc
-          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": [] Array with one address: \"Addresses\": [\"192.0.2.44/32\"] Array with three addresses: \"Addresses\": [\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"] INVALID specification: \"Addresses\": [\"\"] INVALID"];
+          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"];
       tags: TagList.t option
         [@ocaml.doc
           "An array of key:value pairs to associate with the resource."]}
@@ -8391,7 +8391,7 @@ module IPSet =
         [@ocaml.doc "The version of the IP addresses, either IPV4 or IPV6."];
       addresses: IPAddresses.t
         [@ocaml.doc
-          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": [] Array with one address: \"Addresses\": [\"192.0.2.44/32\"] Array with three addresses: \"Addresses\": [\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"] INVALID specification: \"Addresses\": [\"\"] INVALID"]}
+          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"]}
     let context_ = "IPSet"
     let make ?description =
       fun ~name ->
@@ -13857,7 +13857,7 @@ module UpdateIPSetRequest =
           "A description of the IP set that helps with identification."];
       addresses: IPAddresses.t
         [@ocaml.doc
-          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": [] Array with one address: \"Addresses\": [\"192.0.2.44/32\"] Array with three addresses: \"Addresses\": [\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"] INVALID specification: \"Addresses\": [\"\"] INVALID"];
+          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"];
       lockToken: LockToken.t
         [@ocaml.doc
           "A token used for optimistic locking. WAF returns a token to your get and list requests, to mark the state of the entity at the time of the request. To make changes to the entity associated with the token, you provide the token to operations like update and delete. WAF uses the token to ensure that no changes have been made to the entity since you last retrieved it. If a change has been made, the update fails with a WAFOptimisticLockException. If this happens, perform another get, and use the new token returned by that operation."]}

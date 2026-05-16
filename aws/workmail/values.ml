@@ -5463,7 +5463,7 @@ module PutMobileDeviceAccessOverrideRequest =
           "Identifies the Amazon WorkMail organization for which you create the override."];
       userId: EntityIdentifier.t
         [@ocaml.doc
-          "The WorkMail user for which you create the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user@domain.tld User name: user"];
+          "The WorkMail user for which you create the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
       deviceId: DeviceId.t
         [@ocaml.doc
           "The mobile device for which you create the override. DeviceId is case insensitive."];
@@ -6778,7 +6778,7 @@ module ListMobileDeviceAccessOverridesRequest =
           "The Amazon WorkMail organization under which to list mobile device access overrides."];
       userId: EntityIdentifier.t option
         [@ocaml.doc
-          "The WorkMail user under which you list the mobile device access overrides. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user@domain.tld User name: user"];
+          "The WorkMail user under which you list the mobile device access overrides. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
       deviceId: DeviceId.t option
         [@ocaml.doc
           "The mobile device to which the access override applies."];
@@ -7858,7 +7858,7 @@ module GetMobileDeviceAccessOverrideRequest =
           "The Amazon WorkMail organization to which you want to apply the override."];
       userId: EntityIdentifier.t
         [@ocaml.doc
-          "Identifies the WorkMail user for the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user@domain.tld User name: user"];
+          "Identifies the WorkMail user for the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
       deviceId: DeviceId.t
         [@ocaml.doc
           "The mobile device to which the override applies. DeviceId is case insensitive."]}
@@ -10809,7 +10809,7 @@ module DeleteMobileDeviceAccessOverrideRequest =
           "The Amazon WorkMail organization for which the access override will be deleted."];
       userId: EntityIdentifier.t
         [@ocaml.doc
-          "The WorkMail user for which you want to delete the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user@domain.tld User name: user"];
+          "The WorkMail user for which you want to delete the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
       deviceId: DeviceId.t
         [@ocaml.doc
           "The mobile device for which you delete the override. DeviceId is case insensitive."]}

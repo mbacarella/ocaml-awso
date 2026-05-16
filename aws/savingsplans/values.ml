@@ -2651,7 +2651,7 @@ module TagResourceRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
       tags: TagMap.t
         [@ocaml.doc
-          "One or more tags. For example, { \"tags\": {\"key1\":\"value1\", \"key2\":\"value2\"} }."]}
+          "One or more tags. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =

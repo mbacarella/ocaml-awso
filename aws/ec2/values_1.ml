@@ -2827,12 +2827,12 @@ module IpPermission =
           "The start of port range for the TCP and UDP protocols, or an ICMP/ICMPv6 type number. A value of -1 indicates all ICMP/ICMPv6 types. If you specify all ICMP/ICMPv6 types, you must specify all codes."];
       ipProtocol: String_.t option
         [@ocaml.doc
-          "The IP protocol name (tcp, udp, icmp, icmpv6) or number (see Protocol Numbers). [VPC only] Use -1 to specify all protocols. When authorizing security group rules, specifying -1 or a protocol number other than tcp, udp, icmp, or icmpv6 allows traffic on all ports, regardless of any port range you specify. For tcp, udp, and icmp, you must specify a port range. For icmpv6, the port range is optional; if you omit the port range, traffic for all types and codes is allowed."];
+          "The IP protocol name (tcp, udp, icmp, icmpv6) or number (see Protocol Numbers). \\[VPC only\\] Use -1 to specify all protocols. When authorizing security group rules, specifying -1 or a protocol number other than tcp, udp, icmp, or icmpv6 allows traffic on all ports, regardless of any port range you specify. For tcp, udp, and icmp, you must specify a port range. For icmpv6, the port range is optional; if you omit the port range, traffic for all types and codes is allowed."];
       ipRanges: IpRangeList.t option [@ocaml.doc "The IPv4 ranges."];
       ipv6Ranges: Ipv6RangeList.t option
-        [@ocaml.doc "[VPC only] The IPv6 ranges."];
+        [@ocaml.doc "\\[VPC only\\] The IPv6 ranges."];
       prefixListIds: PrefixListIdList.t option
-        [@ocaml.doc "[VPC only] The prefix list IDs."];
+        [@ocaml.doc "\\[VPC only\\] The prefix list IDs."];
       toPort: Integer.t option
         [@ocaml.doc
           "The end of port range for the TCP and UDP protocols, or an ICMP/ICMPv6 code. A value of -1 indicates all ICMP/ICMPv6 codes. If you specify all ICMP/ICMPv6 types, you must specify all codes."];
@@ -4330,7 +4330,7 @@ module NatGatewayAddress =
       {
       allocationId: String_.t option
         [@ocaml.doc
-          "[Public NAT gateway only] The allocation ID of the Elastic IP address that's associated with the NAT gateway."];
+          "\\[Public NAT gateway only\\] The allocation ID of the Elastic IP address that's associated with the NAT gateway."];
       networkInterfaceId: String_.t option
         [@ocaml.doc
           "The ID of the network interface associated with the NAT gateway."];
@@ -4339,7 +4339,7 @@ module NatGatewayAddress =
           "The private IP address associated with the NAT gateway."];
       publicIp: String_.t option
         [@ocaml.doc
-          "[Public NAT gateway only] The Elastic IP address associated with the NAT gateway."]}
+          "\\[Public NAT gateway only\\] The Elastic IP address associated with the NAT gateway."]}
     let make ?allocationId =
       fun ?networkInterfaceId ->
         fun ?privateIp ->
@@ -5151,7 +5151,7 @@ module Instance =
           "The value is Windows for Windows instances; otherwise blank."];
       privateDnsName: String_.t option
         [@ocaml.doc
-          "(IPv4 only) The private DNS hostname name assigned to the instance. This DNS hostname can only be used inside the Amazon EC2 network. This name is not available until the instance enters the running state. [EC2-VPC] The Amazon-provided DNS server resolves Amazon-provided private DNS hostnames if you've enabled DNS resolution and DNS hostnames in your VPC. If you are not using the Amazon-provided DNS server in your VPC, your custom domain name servers must resolve the hostname as appropriate."];
+          "(IPv4 only) The private DNS hostname name assigned to the instance. This DNS hostname can only be used inside the Amazon EC2 network. This name is not available until the instance enters the running state. \\[EC2-VPC\\] The Amazon-provided DNS server resolves Amazon-provided private DNS hostnames if you've enabled DNS resolution and DNS hostnames in your VPC. If you are not using the Amazon-provided DNS server in your VPC, your custom domain name servers must resolve the hostname as appropriate."];
       privateIpAddress: String_.t option
         [@ocaml.doc "The private IPv4 address assigned to the instance."];
       productCodes: ProductCodeList.t option
@@ -5173,10 +5173,10 @@ module Instance =
           "The reason for the most recent state transition. This might be an empty string."];
       subnetId: String_.t option
         [@ocaml.doc
-          "[EC2-VPC] The ID of the subnet in which the instance is running."];
+          "\\[EC2-VPC\\] The ID of the subnet in which the instance is running."];
       vpcId: String_.t option
         [@ocaml.doc
-          "[EC2-VPC] The ID of the VPC in which the instance is running."];
+          "\\[EC2-VPC\\] The ID of the VPC in which the instance is running."];
       architecture: ArchitectureValues.t option
         [@ocaml.doc "The architecture of the image."];
       blockDeviceMappings: InstanceBlockDeviceMappingList.t option
@@ -5206,7 +5206,7 @@ module Instance =
         [@ocaml.doc
           "The elastic inference accelerator associated with the instance."];
       networkInterfaces: InstanceNetworkInterfaceList.t option
-        [@ocaml.doc "[EC2-VPC] The network interfaces for the instance."];
+        [@ocaml.doc "\\[EC2-VPC\\] The network interfaces for the instance."];
       outpostArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the Outpost."];
       rootDeviceName: String_.t option
@@ -6541,7 +6541,7 @@ module InstanceStatusEvent =
       code: EventCode.t option [@ocaml.doc "The event code."];
       description: String_.t option
         [@ocaml.doc
-          "A description of the event. After a scheduled event is completed, it can still be described for up to a week. If the event has been completed, this description starts with the following text: [Completed]."];
+          "A description of the event. After a scheduled event is completed, it can still be described for up to a week. If the event has been completed, this description starts with the following text: \\[Completed\\]."];
       notAfter: DateTime.t option
         [@ocaml.doc "The latest scheduled end time for the event."];
       notBefore: DateTime.t option

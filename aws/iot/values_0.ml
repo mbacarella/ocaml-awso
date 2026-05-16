@@ -3945,7 +3945,7 @@ module DynamoDBAction =
           "The ARN of the IAM role that grants access to the DynamoDB table."];
       operation: DynamoOperation.t option
         [@ocaml.doc
-          "The type of operation to be performed. This follows the substitution template, so it can be ${operation}, but the substitution must result in one of the following: INSERT, UPDATE, or DELETE."];
+          "The type of operation to be performed. This follows the substitution template, so it can be $\\{operation\\}, but the substitution must result in one of the following: INSERT, UPDATE, or DELETE."];
       hashKeyField: HashKeyField.t [@ocaml.doc "The hash key name."];
       hashKeyValue: HashKeyValue.t [@ocaml.doc "The hash key value."];
       hashKeyType: DynamoKeyType.t option
@@ -4054,7 +4054,7 @@ module DynamoDBAction =
         ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an action to write to a DynamoDB table. The tableName, hashKeyField, and rangeKeyField values must match the values used when you created the table. The hashKeyValue and rangeKeyvalue fields use a substitution template syntax. These templates provide data at runtime. The syntax is as follows: ${sql-expression}. You can specify any valid expression in a WHERE or SELECT clause, including JSON properties, comparisons, calculations, and functions. For example, the following field uses the third level of the topic: \"hashKeyValue\": \"${topic(3)}\" The following field uses the timestamp: \"rangeKeyValue\": \"${timestamp()}\""]
+       "Describes an action to write to a DynamoDB table. The tableName, hashKeyField, and rangeKeyField values must match the values used when you created the table. The hashKeyValue and rangeKeyvalue fields use a substitution template syntax. These templates provide data at runtime. The syntax is as follows: $\\{sql-expression\\}. You can specify any valid expression in a WHERE or SELECT clause, including JSON properties, comparisons, calculations, and functions. For example, the following field uses the third level of the topic: \"hashKeyValue\": \"$\\{topic(3)\\}\" The following field uses the timestamp: \"rangeKeyValue\": \"$\\{timestamp()\\}\""]
 module DynamoDBv2Action =
   struct
     type nonrec t =
@@ -4064,7 +4064,7 @@ module DynamoDBv2Action =
           "The ARN of the IAM role that grants access to the DynamoDB table."];
       putItem: PutItemInput.t
         [@ocaml.doc
-          "Specifies the DynamoDB table to which the message data will be written. For example: { \"dynamoDBv2\": { \"roleArn\": \"aws:iam:12341251:my-role\" \"putItem\": { \"tableName\": \"my-table\" } } } Each attribute in the message payload will be written to a separate column in the DynamoDB database."]}
+          "Specifies the DynamoDB table to which the message data will be written. For example: \\{ \"dynamoDBv2\": \\{ \"roleArn\": \"aws:iam:12341251:my-role\" \"putItem\": \\{ \"tableName\": \"my-table\" \\} \\} \\} Each attribute in the message payload will be written to a separate column in the DynamoDB database."]}
     let context_ = "DynamoDBv2Action"
     let make ~roleArn = fun ~putItem -> fun () -> { roleArn; putItem }
     let to_value x =
@@ -9977,7 +9977,7 @@ module AttributePayload =
       {
       attributes: Attributes.t option
         [@ocaml.doc
-          "A JSON string containing up to three key-value pair in JSON format. For example: {\\\"attributes\\\":{\\\"string1\\\":\\\"string2\\\"}}"];
+          "A JSON string containing up to three key-value pair in JSON format. For example: \\{\\\"attributes\\\":\\{\\\"string1\\\":\\\"string2\\\"\\}\\}"];
       merge: Flag.t option
         [@ocaml.doc
           "Specifies whether the list of attributes provided in the AttributePayload is merged with the attributes stored in the registry, instead of overwriting them. To remove an attribute, call UpdateThing with an empty attribute value. The merge attribute is only valid when calling UpdateThing or UpdateThingGroup."]}

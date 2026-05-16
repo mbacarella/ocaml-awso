@@ -5327,7 +5327,7 @@ module CreateFileSystemRequest =
           "Specifies whether automatic backups are enabled on the file system that you are creating. Set the value to true to enable automatic backups. If you are creating a file system that uses One Zone storage classes, automatic backups are enabled by default. For more information, see Automatic backups in the Amazon EFS User Guide. Default is false. However, if you specify an AvailabilityZoneName, the default is true. Backup is not available in all Amazon Web Services Regions where Amazon EFS is available."];
       tags: Tags.t option
         [@ocaml.doc
-          "Use to create one or more tags associated with the file system. Each tag is a user-defined key-value pair. Name your file system on creation by including a \"Key\":\"Name\",\"Value\":\"{value}\" key-value pair. Each key must be unique. For more information, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference Guide."]}
+          "Use to create one or more tags associated with the file system. Each tag is a user-defined key-value pair. Name your file system on creation by including a \"Key\":\"Name\",\"Value\":\"\\{value\\}\" key-value pair. Each key must be unique. For more information, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference Guide."]}
     let context_ = "CreateFileSystemRequest"
     let make ?performanceMode =
       fun ?encrypted ->

@@ -1419,11 +1419,12 @@ module SecurityGroup =
       groupId: String_.t option [@ocaml.doc "The ID of the security group."];
       ipPermissionsEgress: IpPermissionList.t option
         [@ocaml.doc
-          "[VPC only] The outbound rules associated with the security group."];
+          "\\[VPC only\\] The outbound rules associated with the security group."];
       tags: TagList.t option
         [@ocaml.doc "Any tags assigned to the security group."];
       vpcId: String_.t option
-        [@ocaml.doc "[VPC only] The ID of the VPC for the security group."]}
+        [@ocaml.doc
+          "\\[VPC only\\] The ID of the VPC for the security group."]}
     let make ?description =
       fun ?groupName ->
         fun ?ipPermissions ->
@@ -5436,7 +5437,7 @@ module Reservation =
     type nonrec t =
       {
       groups: GroupIdentifierList.t option
-        [@ocaml.doc "[EC2-Classic only] The security groups."];
+        [@ocaml.doc "\\[EC2-Classic only\\] The security groups."];
       instances: InstanceList.t option [@ocaml.doc "The instances."];
       ownerId: String_.t option
         [@ocaml.doc
@@ -10207,7 +10208,7 @@ module AddressAttribute =
       publicIp: PublicIpAddress.t option
         [@ocaml.doc "The public IP address."];
       allocationId: AllocationId.t option
-        [@ocaml.doc "[EC2-VPC] The allocation ID."];
+        [@ocaml.doc "\\[EC2-VPC\\] The allocation ID."];
       ptrRecord: String_.t option
         [@ocaml.doc "The pointer (PTR) record for the IP address."];
       ptrRecordUpdate: PtrUpdateStatus.t option
@@ -16433,10 +16434,10 @@ module ImportInstanceLaunchSpecification =
         [@ocaml.doc "The placement information for the instance."];
       privateIpAddress: String_.t option
         [@ocaml.doc
-          "[EC2-VPC] An available IP address from the IP address range of the subnet."];
+          "\\[EC2-VPC\\] An available IP address from the IP address range of the subnet."];
       subnetId: SubnetId.t option
         [@ocaml.doc
-          "[EC2-VPC] The ID of the subnet in which to launch the instance."];
+          "\\[EC2-VPC\\] The ID of the subnet in which to launch the instance."];
       userData: UserData.t option
         [@ocaml.doc
           "The Base64-encoded user data to make available to the instance."]}

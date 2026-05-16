@@ -3077,7 +3077,7 @@ module OTAUpdateInfo =
       targets: Targets.t option [@ocaml.doc "The targets of the OTA update."];
       protocols: Protocols.t option
         [@ocaml.doc
-          "The protocol used to transfer the OTA update image. Valid values are [HTTP], [MQTT], [HTTP, MQTT]. When both HTTP and MQTT are specified, the target device can choose the protocol."];
+          "The protocol used to transfer the OTA update image. Valid values are \\[HTTP\\], \\[MQTT\\], \\[HTTP, MQTT\\]. When both HTTP and MQTT are specified, the target device can choose the protocol."];
       awsJobExecutionsRolloutConfig: AwsJobExecutionsRolloutConfig.t option
         [@ocaml.doc "Configuration for the rollout of OTA updates."];
       awsJobPresignedUrlConfig: AwsJobPresignedUrlConfig.t option
@@ -5563,7 +5563,7 @@ module UpdateThingRequest =
         [@ocaml.doc "The name of the thing type."];
       attributePayload: AttributePayload.t option
         [@ocaml.doc
-          "A list of thing attributes, a JSON string containing name-value pairs. For example: {\\\"attributes\\\":{\\\"name1\\\":\\\"value2\\\"}} This data is used to add new attributes or update existing attributes."];
+          "A list of thing attributes, a JSON string containing name-value pairs. For example: \\{\\\"attributes\\\":\\{\\\"name1\\\":\\\"value2\\\"\\}\\} This data is used to add new attributes or update existing attributes."];
       expectedVersion: OptionalVersion.t option
         [@ocaml.doc
           "The expected version of the thing record in the registry. If the version of the record in the registry does not match the expected version specified in the request, the UpdateThing request is rejected with a VersionConflictException."];
@@ -7231,7 +7231,7 @@ module UpdateFleetMetricRequest =
         [@ocaml.doc "The type of the aggregation query."];
       period: FleetMetricPeriod.t option
         [@ocaml.doc
-          "The time in seconds between fleet metric emissions. Range [60(1 min), 86400(1 day)] and must be multiple of 60."];
+          "The time in seconds between fleet metric emissions. Range \\[60(1 min), 86400(1 day)\\] and must be multiple of 60."];
       aggregationField: AggregationField.t option
         [@ocaml.doc "The field to aggregate."];
       description: FleetMetricDescription.t option
@@ -24849,7 +24849,7 @@ module DescribeFleetMetricResponse =
         [@ocaml.doc "The type of the aggregation query."];
       period: FleetMetricPeriod.t option
         [@ocaml.doc
-          "The time in seconds between fleet metric emissions. Range [60(1 min), 86400(1 day)] and must be multiple of 60."];
+          "The time in seconds between fleet metric emissions. Range \\[60(1 min), 86400(1 day)\\] and must be multiple of 60."];
       aggregationField: AggregationField.t option
         [@ocaml.doc "The field to aggregate."];
       description: FleetMetricDescription.t option
@@ -30426,7 +30426,7 @@ module CreateThingRequest =
           "The name of the thing type associated with the new thing."];
       attributePayload: AttributePayload.t option
         [@ocaml.doc
-          "The attribute payload, which consists of up to three name/value pairs in a JSON document. For example: {\\\"attributes\\\":{\\\"string1\\\":\\\"string2\\\"}}"];
+          "The attribute payload, which consists of up to three name/value pairs in a JSON document. For example: \\{\\\"attributes\\\":\\{\\\"string1\\\":\\\"string2\\\"\\}\\}"];
       billingGroupName: BillingGroupName.t option
         [@ocaml.doc
           "The name of the billing group the thing will be added to."]}
@@ -32410,7 +32410,7 @@ module CreateOTAUpdateRequest =
         [@ocaml.doc "The devices targeted to receive OTA updates."];
       protocols: Protocols.t option
         [@ocaml.doc
-          "The protocol used to transfer the OTA update image. Valid values are [HTTP], [MQTT], [HTTP, MQTT]. When both HTTP and MQTT are specified, the target device can choose the protocol."];
+          "The protocol used to transfer the OTA update image. Valid values are \\[HTTP\\], \\[MQTT\\], \\[HTTP, MQTT\\]. When both HTTP and MQTT are specified, the target device can choose the protocol."];
       targetSelection: TargetSelection.t option
         [@ocaml.doc
           "Specifies whether the update will continue to run (CONTINUOUS), or will be complete after all the things specified as targets have completed the update (SNAPSHOT). If continuous, the update may also be run on a thing when a change is detected in a target. For example, an update will run on a thing when the thing is added to a target group, even after the update was completed by all things originally in the group. Valid values: CONTINUOUS | SNAPSHOT."];
@@ -32962,7 +32962,7 @@ module CreateJobTemplateRequest =
           "The ARN of the job to use as the basis for the job template."];
       documentSource: JobDocumentSource.t option
         [@ocaml.doc
-          "An S3 link to the job document to use in the template. Required if you don't specify a value for document. If the job document resides in an S3 bucket, you must use a placeholder link when specifying the document. The placeholder link is of the following form: ${aws:iot:s3-presigned-url:https://s3.amazonaws.com/bucket/key} where bucket is your bucket name and key is the object in the bucket to which you are linking."];
+          "An S3 link to the job document to use in the template. Required if you don't specify a value for document. If the job document resides in an S3 bucket, you must use a placeholder link when specifying the document. The placeholder link is of the following form: $\\{aws:iot:s3-presigned-url:https://s3.amazonaws.com/bucket/key\\} where bucket is your bucket name and key is the object in the bucket to which you are linking."];
       document: JobDocument.t option
         [@ocaml.doc
           "The job document. Required if you don't specify a value for documentSource."];
@@ -33205,7 +33205,7 @@ module CreateJobRequest =
           "A list of things and thing groups to which the job should be sent."];
       documentSource: JobDocumentSource.t option
         [@ocaml.doc
-          "An S3 link to the job document. Required if you don't specify a value for document. If the job document resides in an S3 bucket, you must use a placeholder link when specifying the document. The placeholder link is of the following form: ${aws:iot:s3-presigned-url:https://s3.amazonaws.com/bucket/key} where bucket is your bucket name and key is the object in the bucket to which you are linking."];
+          "An S3 link to the job document. Required if you don't specify a value for document. If the job document resides in an S3 bucket, you must use a placeholder link when specifying the document. The placeholder link is of the following form: $\\{aws:iot:s3-presigned-url:https://s3.amazonaws.com/bucket/key\\} where bucket is your bucket name and key is the object in the bucket to which you are linking."];
       document: JobDocument.t option
         [@ocaml.doc
           "The job document. Required if you don't specify a value for documentSource."];
@@ -33541,7 +33541,7 @@ module CreateFleetMetricRequest =
         [@ocaml.doc "The type of the aggregation query."];
       period: FleetMetricPeriod.t
         [@ocaml.doc
-          "The time in seconds between fleet metric emissions. Range [60(1 min), 86400(1 day)] and must be multiple of 60."];
+          "The time in seconds between fleet metric emissions. Range \\[60(1 min), 86400(1 day)\\] and must be multiple of 60."];
       aggregationField: AggregationField.t
         [@ocaml.doc "The field to aggregate."];
       description: FleetMetricDescription.t option

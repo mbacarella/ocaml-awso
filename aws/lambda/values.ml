@@ -2995,7 +2995,7 @@ module SelfManagedEventSource =
       {
       endpoints: Endpoints.t option
         [@ocaml.doc
-          "The list of bootstrap servers for your Kafka brokers in the following format: \"KAFKA_BOOTSTRAP_SERVERS\": [\"abc.xyz.com:xxxx\",\"abc2.xyz.com:xxxx\"]."]}
+          "The list of bootstrap servers for your Kafka brokers in the following format: \"KAFKA_BOOTSTRAP_SERVERS\": \\[\"abc.xyz.com:xxxx\",\"abc2.xyz.com:xxxx\"\\]."]}
     let make ?endpoints = fun () -> { endpoints }
     let to_value x =
       structure_to_value
@@ -3369,7 +3369,7 @@ module FunctionConfiguration =
         [@ocaml.doc "The function's X-Ray tracing configuration."];
       masterArn: FunctionArn.t option
         [@ocaml.doc
-          "For Lambda@Edge functions, the ARN of the main function."];
+          "For Lambda\\@Edge functions, the ARN of the main function."];
       revisionId: String_.t option
         [@ocaml.doc "The latest updated revision of the function or alias."];
       layers: LayersReferenceList.t option
@@ -9207,7 +9207,7 @@ module ListFunctionsRequest =
       {
       masterRegion: MasterRegion.t option
         [@ocaml.doc
-          "For Lambda@Edge functions, the Amazon Web Services Region of the master function. For example, us-east-1 filters the list of functions to only include Lambda@Edge functions replicated from a master function in US East (N. Virginia). If specified, you must set FunctionVersion to ALL."];
+          "For Lambda\\@Edge functions, the Amazon Web Services Region of the master function. For example, us-east-1 filters the list of functions to only include Lambda\\@Edge functions replicated from a master function in US East (N. Virginia). If specified, you must set FunctionVersion to ALL."];
       functionVersion: FunctionVersion.t option
         [@ocaml.doc
           "Set to ALL to include entries for all published versions of each function."];
@@ -10466,7 +10466,7 @@ module InvocationRequest =
           "Up to 3583 bytes of base64-encoded data about the invoking client to pass to the function in the context object."];
       payload: Blob.t option
         [@ocaml.doc
-          "The JSON that you want to provide to your Lambda function as input. You can enter the JSON directly. For example, --payload '{ \"key\": \"value\" }'. You can also specify a file path. For example, --payload file://payload.json."];
+          "The JSON that you want to provide to your Lambda function as input. You can enter the JSON directly. For example, --payload '\\{ \"key\": \"value\" \\}'. You can also specify a file path. For example, --payload file://payload.json."];
       qualifier: Qualifier.t option
         [@ocaml.doc
           "Specify a version or alias to invoke a published version of the function."]}

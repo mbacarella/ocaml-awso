@@ -3788,7 +3788,7 @@ module PutResourcePolicyRequest =
         [@ocaml.doc "Name of the new policy. This parameter is required."];
       policyDocument: PolicyDocument.t option
         [@ocaml.doc
-          "Details of the new policy, including the identity of the principal that is enabled to put logs to this account. This is formatted as a JSON string. This parameter is required. The following example creates a resource policy enabling the Route 53 service to put DNS query logs in to the specified log group. Replace \"logArn\" with the ARN of your CloudWatch Logs resource, such as a log group or log stream. CloudWatch Logs also supports aws:SourceArn and aws:SourceAccount condition context keys. In the example resource policy, you would replace the value of SourceArn with the resource making the call from Route\194\16053 to CloudWatch Logs and replace the value of SourceAccount with the Amazon Web Services account ID making that call. { \"Version\": \"2012-10-17\", \"Statement\": [ { \"Sid\": \"Route53LogsToCloudWatchLogs\", \"Effect\": \"Allow\", \"Principal\": { \"Service\": [ \"route53.amazonaws.com\" ] }, \"Action\": \"logs:PutLogEvents\", \"Resource\": \"logArn\", \"Condition\": { \"ArnLike\": { \"aws:SourceArn\": \"myRoute53ResourceArn\" }, \"StringEquals\": { \"aws:SourceAccount\": \"myAwsAccountId\" } } } ] }"]}
+          "Details of the new policy, including the identity of the principal that is enabled to put logs to this account. This is formatted as a JSON string. This parameter is required. The following example creates a resource policy enabling the Route 53 service to put DNS query logs in to the specified log group. Replace \"logArn\" with the ARN of your CloudWatch Logs resource, such as a log group or log stream. CloudWatch Logs also supports aws:SourceArn and aws:SourceAccount condition context keys. In the example resource policy, you would replace the value of SourceArn with the resource making the call from Route\194\16053 to CloudWatch Logs and replace the value of SourceAccount with the Amazon Web Services account ID making that call. \\{ \"Version\": \"2012-10-17\", \"Statement\": \\[ \\{ \"Sid\": \"Route53LogsToCloudWatchLogs\", \"Effect\": \"Allow\", \"Principal\": \\{ \"Service\": \\[ \"route53.amazonaws.com\" \\] \\}, \"Action\": \"logs:PutLogEvents\", \"Resource\": \"logArn\", \"Condition\": \\{ \"ArnLike\": \\{ \"aws:SourceArn\": \"myRoute53ResourceArn\" \\}, \"StringEquals\": \\{ \"aws:SourceAccount\": \"myAwsAccountId\" \\} \\} \\} \\] \\}"]}
     let make ?policyName =
       fun ?policyDocument -> fun () -> { policyName; policyDocument }
     let to_value x =
@@ -4502,7 +4502,7 @@ module GetQueryResultsResponse =
       make ?status ?statistics ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the results from the specified query. Only the fields requested in the query are returned, along with a @ptr field, which is the identifier for the log record. You can use the value of @ptr in a GetLogRecord operation to get the full log record. GetQueryResults does not start a query execution. To run a query, use StartQuery. If the value of the Status field in the output is Running, this operation returns only partial results. If you see a value of Scheduled or Running for the status, you can retry the operation later to see the final results."]
+       "Returns the results from the specified query. Only the fields requested in the query are returned, along with a \\@ptr field, which is the identifier for the log record. You can use the value of \\@ptr in a GetLogRecord operation to get the full log record. GetQueryResults does not start a query execution. To run a query, use StartQuery. If the value of the Status field in the output is Running, this operation returns only partial results. If you see a value of Scheduled or Running for the status, you can retry the operation later to see the final results."]
 module GetQueryResultsRequest =
   struct
     type nonrec t =
@@ -4522,7 +4522,7 @@ module GetQueryResultsRequest =
       make ~queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the results from the specified query. Only the fields requested in the query are returned, along with a @ptr field, which is the identifier for the log record. You can use the value of @ptr in a GetLogRecord operation to get the full log record. GetQueryResults does not start a query execution. To run a query, use StartQuery. If the value of the Status field in the output is Running, this operation returns only partial results. If you see a value of Scheduled or Running for the status, you can retry the operation later to see the final results."]
+       "Returns the results from the specified query. Only the fields requested in the query are returned, along with a \\@ptr field, which is the identifier for the log record. You can use the value of \\@ptr in a GetLogRecord operation to get the full log record. GetQueryResults does not start a query execution. To run a query, use StartQuery. If the value of the Status field in the output is Running, this operation returns only partial results. If you see a value of Scheduled or Running for the status, you can retry the operation later to see the final results."]
 module GetLogRecordResponse =
   struct
     type nonrec t =
@@ -4599,14 +4599,14 @@ module GetLogRecordResponse =
       make ?logRecord ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves all of the fields and values of a single log event. All fields are retrieved, even if the original query that produced the logRecordPointer retrieved only a subset of fields. Fields are returned as field name/field value pairs. The full unparsed log event is returned within @message."]
+       "Retrieves all of the fields and values of a single log event. All fields are retrieved, even if the original query that produced the logRecordPointer retrieved only a subset of fields. Fields are returned as field name/field value pairs. The full unparsed log event is returned within \\@message."]
 module GetLogRecordRequest =
   struct
     type nonrec t =
       {
       logRecordPointer: LogRecordPointer.t
         [@ocaml.doc
-          "The pointer corresponding to the log event record you want to retrieve. You get this from the response of a GetQueryResults operation. In that response, the value of the @ptr field for a log event is the value to use as logRecordPointer to retrieve that complete log event record."]}
+          "The pointer corresponding to the log event record you want to retrieve. You get this from the response of a GetQueryResults operation. In that response, the value of the \\@ptr field for a log event is the value to use as logRecordPointer to retrieve that complete log event record."]}
     let context_ = "GetLogRecordRequest"
     let make ~logRecordPointer = fun () -> { logRecordPointer }
     let to_value x =
@@ -4625,7 +4625,7 @@ module GetLogRecordRequest =
       make ~logRecordPointer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves all of the fields and values of a single log event. All fields are retrieved, even if the original query that produced the logRecordPointer retrieved only a subset of fields. Fields are returned as field name/field value pairs. The full unparsed log event is returned within @message."]
+       "Retrieves all of the fields and values of a single log event. All fields are retrieved, even if the original query that produced the logRecordPointer retrieved only a subset of fields. Fields are returned as field name/field value pairs. The full unparsed log event is returned within \\@message."]
 module GetLogGroupFieldsResponse =
   struct
     type nonrec t =
@@ -4706,7 +4706,7 @@ module GetLogGroupFieldsResponse =
       make ?logGroupFields ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the fields that are included in log events in the specified log group, along with the percentage of log events that contain each field. The search is limited to a time period that you specify. In the results, fields that start with @ are fields generated by CloudWatch Logs. For example, @timestamp is the timestamp of each log event. For more information about the fields that are generated by CloudWatch logs, see Supported Logs and Discovered Fields. The response results are sorted by the frequency percentage, starting with the highest percentage."]
+       "Returns a list of the fields that are included in log events in the specified log group, along with the percentage of log events that contain each field. The search is limited to a time period that you specify. In the results, fields that start with \\@ are fields generated by CloudWatch Logs. For example, \\@timestamp is the timestamp of each log event. For more information about the fields that are generated by CloudWatch logs, see Supported Logs and Discovered Fields. The response results are sorted by the frequency percentage, starting with the highest percentage."]
 module GetLogGroupFieldsRequest =
   struct
     type nonrec t =
@@ -4736,7 +4736,7 @@ module GetLogGroupFieldsRequest =
       make ?time ~logGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the fields that are included in log events in the specified log group, along with the percentage of log events that contain each field. The search is limited to a time period that you specify. In the results, fields that start with @ are fields generated by CloudWatch Logs. For example, @timestamp is the timestamp of each log event. For more information about the fields that are generated by CloudWatch logs, see Supported Logs and Discovered Fields. The response results are sorted by the frequency percentage, starting with the highest percentage."]
+       "Returns a list of the fields that are included in log events in the specified log group, along with the percentage of log events that contain each field. The search is limited to a time period that you specify. In the results, fields that start with \\@ are fields generated by CloudWatch Logs. For example, \\@timestamp is the timestamp of each log event. For more information about the fields that are generated by CloudWatch logs, see Supported Logs and Discovered Fields. The response results are sorted by the frequency percentage, starting with the highest percentage."]
 module GetLogEventsResponse =
   struct
     type nonrec t =

@@ -537,7 +537,7 @@ module ResourceChangeDetail =
           "Indicates whether CloudFormation can determine the target value, and whether the target value will change before you execute a change set. For Static evaluations, CloudFormation can determine that the target value will change, and its value. For example, if you directly modify the InstanceType property of an EC2 instance, CloudFormation knows that this property value will change, and its value, so this is a Static evaluation. For Dynamic evaluations, can't determine the target value because it depends on the result of an intrinsic function, such as a Ref or Fn::GetAtt intrinsic function, when the stack is updated. For example, if your template includes a reference to a resource that's conditionally recreated, the value of the reference (the physical ID of the resource) might change, depending on if the resource is recreated. If the resource is recreated, it will have a new physical ID, so all references to that resource will also be updated."];
       changeSource: ChangeSource.t option
         [@ocaml.doc
-          "The group to which the CausingEntity value belongs. There are five entity groups: ResourceReference entities are Ref intrinsic functions that refer to resources in the template, such as { \"Ref\" : \"MyEC2InstanceResource\" }. ParameterReference entities are Ref intrinsic functions that get template parameter values, such as { \"Ref\" : \"MyPasswordParameter\" }. ResourceAttribute entities are Fn::GetAtt intrinsic functions that get resource attribute values, such as { \"Fn::GetAtt\" : [ \"MyEC2InstanceResource\", \"PublicDnsName\" ] }. DirectModification entities are changes that are made directly to the template. Automatic entities are AWS::CloudFormation::Stack resource types, which are also known as nested stacks. If you made no changes to the AWS::CloudFormation::Stack resource, CloudFormation sets the ChangeSource to Automatic because the nested stack's template might have changed. Changes to a nested stack's template aren't visible to CloudFormation until you run an update on the parent stack."];
+          "The group to which the CausingEntity value belongs. There are five entity groups: ResourceReference entities are Ref intrinsic functions that refer to resources in the template, such as \\{ \"Ref\" : \"MyEC2InstanceResource\" \\}. ParameterReference entities are Ref intrinsic functions that get template parameter values, such as \\{ \"Ref\" : \"MyPasswordParameter\" \\}. ResourceAttribute entities are Fn::GetAtt intrinsic functions that get resource attribute values, such as \\{ \"Fn::GetAtt\" : \\[ \"MyEC2InstanceResource\", \"PublicDnsName\" \\] \\}. DirectModification entities are changes that are made directly to the template. Automatic entities are AWS::CloudFormation::Stack resource types, which are also known as nested stacks. If you made no changes to the AWS::CloudFormation::Stack resource, CloudFormation sets the ChangeSource to Automatic because the nested stack's template might have changed. Changes to a nested stack's template aren't visible to CloudFormation until you run an update on the parent stack."];
       causingEntity: CausingEntity.t option
         [@ocaml.doc
           "The identity of the entity that triggered this change. This entity is a member of the group that's specified by the ChangeSource field. For example, if you modified the value of the KeyPairName parameter, the CausingEntity is the name of the parameter (KeyPairName). If the ChangeSource value is DirectModification, no value is given for CausingEntity."]}
@@ -2036,7 +2036,7 @@ module AutoDeployment =
       make ?retainStacksOnAccountRemoval ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[Service-managed permissions] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organization or organizational unit (OU)."]
+       "\\[Service-managed permissions\\] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organization or organizational unit (OU)."]
 module ManagedExecution =
   struct
     type nonrec t =
@@ -4636,7 +4636,7 @@ module StackSetSummary =
         [@ocaml.doc "The status of the stack set."];
       autoDeployment: AutoDeployment.t option
         [@ocaml.doc
-          "[Service-managed permissions] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organizational unit (OU)."];
+          "\\[Service-managed permissions\\] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organizational unit (OU)."];
       permissionModel: PermissionModels.t option
         [@ocaml.doc
           "Describes how the IAM roles required for stack set operations are created. With self-managed permissions, you must create the administrator and execution roles required to deploy to target accounts. For more information, see Grant Self-Managed Stack Set Permissions. With service-managed permissions, StackSets automatically creates the IAM roles required to deploy to accounts managed by Organizations. For more information, see Grant Service-Managed Stack Set Permissions."];
@@ -4747,7 +4747,7 @@ module StackSetOperationSummary =
           "The type of operation: CREATE, UPDATE, or DELETE. Create and delete operations affect only the specified stack instances that are associated with the specified stack set. Update operations affect both the stack set itself and all associated stack set instances."];
       status: StackSetOperationStatus.t option
         [@ocaml.doc
-          "The overall status of the operation. FAILED: The operation exceeded the specified failure tolerance. The failure tolerance value that you've set for an operation is applied for each Region during stack create and update operations. If the number of failed stacks within a Region exceeds the failure tolerance, the status of the operation in the Region is set to FAILED. This in turn sets the status of the operation as a whole to FAILED, and CloudFormation cancels the operation in any remaining Regions. QUEUED: [Service-managed permissions] For automatic deployments that require a sequence of operations, the operation is queued to be performed. For more information, see the stack set operation status codes in the CloudFormation User Guide. RUNNING: The operation is currently being performed. STOPPED: The user has canceled the operation. STOPPING: The operation is in the process of stopping, at user request. SUCCEEDED: The operation completed creating or updating all the specified stacks without exceeding the failure tolerance for the operation."];
+          "The overall status of the operation. FAILED: The operation exceeded the specified failure tolerance. The failure tolerance value that you've set for an operation is applied for each Region during stack create and update operations. If the number of failed stacks within a Region exceeds the failure tolerance, the status of the operation in the Region is set to FAILED. This in turn sets the status of the operation as a whole to FAILED, and CloudFormation cancels the operation in any remaining Regions. QUEUED: \\[Service-managed permissions\\] For automatic deployments that require a sequence of operations, the operation is queued to be performed. For more information, see the stack set operation status codes in the CloudFormation User Guide. RUNNING: The operation is currently being performed. STOPPED: The user has canceled the operation. STOPPING: The operation is in the process of stopping, at user request. SUCCEEDED: The operation completed creating or updating all the specified stacks without exceeding the failure tolerance for the operation."];
       creationTimestamp: Timestamp.t option
         [@ocaml.doc
           "The time at which the operation was initiated. Note that the creation times for the stack set operation might differ from the creation time of the individual stacks themselves. This is because CloudFormation needs to perform preparatory work for the operation, such as dispatching the work to the requested Regions, before actually creating the first stacks."];
@@ -4811,7 +4811,7 @@ module StackSetOperationResultSummary =
       {
       account: Account.t option
         [@ocaml.doc
-          "[Self-managed permissions] The name of the Amazon Web Services account for this operation result."];
+          "\\[Self-managed permissions\\] The name of the Amazon Web Services account for this operation result."];
       region: Region.t option
         [@ocaml.doc
           "The name of the Amazon Web Services Region for this operation result."];
@@ -4825,7 +4825,7 @@ module StackSetOperationResultSummary =
           "The results of the account gate function CloudFormation invokes, if present, before proceeding with stack set operations in an account."];
       organizationalUnitId: OrganizationalUnitId.t option
         [@ocaml.doc
-          "[Service-managed permissions] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."]}
+          "\\[Service-managed permissions\\] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."]}
     let make ?account =
       fun ?region ->
         fun ?status ->
@@ -5010,7 +5010,7 @@ module StackInstanceSummary =
           "The name of the Amazon Web Services Region that the stack instance is associated with."];
       account: Account.t option
         [@ocaml.doc
-          "[Self-managed permissions] The name of the Amazon Web Services account that the stack instance is associated with."];
+          "\\[Self-managed permissions\\] The name of the Amazon Web Services account that the stack instance is associated with."];
       stackId: StackId.t option [@ocaml.doc "The ID of the stack instance."];
       status: StackInstanceStatus.t option
         [@ocaml.doc
@@ -5022,7 +5022,7 @@ module StackInstanceSummary =
         [@ocaml.doc "The detailed status of the stack instance."];
       organizationalUnitId: OrganizationalUnitId.t option
         [@ocaml.doc
-          "[Service-managed permissions] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."];
+          "\\[Service-managed permissions\\] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."];
       driftStatus: StackDriftStatus.t option
         [@ocaml.doc
           "Status of the stack instance's actual configuration compared to the expected template and parameter configuration of the stack set to which it belongs. DRIFTED: The stack differs from the expected template and parameter configuration of the stack set to which it belongs. A stack instance is considered to have drifted if one or more of the resources in the associated stack have drifted. NOT_CHECKED: CloudFormation hasn't checked if the stack instance differs from its expected stack set configuration. IN_SYNC: The stack instance's actual configuration matches its expected stack set configuration. UNKNOWN: This value is reserved for future use."];
@@ -6010,7 +6010,7 @@ module DeploymentTargets =
       make ?organizationalUnitIds ?accountsUrl ?accounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[Service-managed permissions] The Organizations accounts to which StackSets deploys. StackSets doesn't deploy stack instances to the organization management account, even if the organization management account is in your organization or in an OU in your organization. For update operations, you can specify either Accounts or OrganizationalUnitIds. For create and delete operations, specify OrganizationalUnitIds."]
+       "\\[Service-managed permissions\\] The Organizations accounts to which StackSets deploys. StackSets doesn't deploy stack instances to the organization management account, even if the organization management account is in your organization or in an OU in your organization. For update operations, you can specify either Accounts or OrganizationalUnitIds. For create and delete operations, specify OrganizationalUnitIds."]
 module RetainStacksNullable =
   struct
     type nonrec t = bool
@@ -6877,7 +6877,7 @@ module TypeConfigurationDetails =
           "The alias specified for this configuration, if one was specified when the configuration was set."];
       configuration: TypeConfiguration.t option
         [@ocaml.doc
-          "A JSON string specifying the configuration data for the extension, in this account and region. If a configuration hasn't been set for a specified extension, CloudFormation returns {}."];
+          "A JSON string specifying the configuration data for the extension, in this account and region. If a configuration hasn't been set for a specified extension, CloudFormation returns \\{\\}."];
       lastUpdated: Timestamp.t option
         [@ocaml.doc
           "When the configuration data was last updated for this extension. If a configuration hasn't been set for a specified extension, CloudFormation returns null."];
@@ -8679,13 +8679,13 @@ module StackSet =
           "Detailed information about the drift status of the stack set. For stack sets, contains information about the last completed drift operation performed on the stack set. Information about drift operations currently in progress isn't included."];
       autoDeployment: AutoDeployment.t option
         [@ocaml.doc
-          "[Service-managed permissions] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organization or organizational unit (OU)."];
+          "\\[Service-managed permissions\\] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organization or organizational unit (OU)."];
       permissionModel: PermissionModels.t option
         [@ocaml.doc
           "Describes how the IAM roles required for stack set operations are created. With self-managed permissions, you must create the administrator and execution roles required to deploy to target accounts. For more information, see Grant Self-Managed Stack Set Permissions. With service-managed permissions, StackSets automatically creates the IAM roles required to deploy to accounts managed by Organizations. For more information, see Grant Service-Managed Stack Set Permissions."];
       organizationalUnitIds: OrganizationalUnitIdList.t option
         [@ocaml.doc
-          "[Service-managed permissions] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."];
+          "\\[Service-managed permissions\\] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."];
       managedExecution: ManagedExecution.t option
         [@ocaml.doc
           "Describes whether StackSets performs non-conflicting operations concurrently and queues conflicting operations."]}
@@ -8846,7 +8846,7 @@ module StackSetOperation =
           "The type of stack set operation: CREATE, UPDATE, or DELETE. Create and delete operations affect only the specified stack set instances that are associated with the specified stack set. Update operations affect both the stack set itself, in addition to all associated stack set instances."];
       status: StackSetOperationStatus.t option
         [@ocaml.doc
-          "The status of the operation. FAILED: The operation exceeded the specified failure tolerance. The failure tolerance value that you've set for an operation is applied for each Region during stack create and update operations. If the number of failed stacks within a Region exceeds the failure tolerance, the status of the operation in the Region is set to FAILED. This in turn sets the status of the operation as a whole to FAILED, and CloudFormation cancels the operation in any remaining Regions. QUEUED: [Service-managed permissions] For automatic deployments that require a sequence of operations, the operation is queued to be performed. For more information, see the stack set operation status codes in the CloudFormation User Guide. RUNNING: The operation is currently being performed. STOPPED: The user has canceled the operation. STOPPING: The operation is in the process of stopping, at user request. SUCCEEDED: The operation completed creating or updating all the specified stacks without exceeding the failure tolerance for the operation."];
+          "The status of the operation. FAILED: The operation exceeded the specified failure tolerance. The failure tolerance value that you've set for an operation is applied for each Region during stack create and update operations. If the number of failed stacks within a Region exceeds the failure tolerance, the status of the operation in the Region is set to FAILED. This in turn sets the status of the operation as a whole to FAILED, and CloudFormation cancels the operation in any remaining Regions. QUEUED: \\[Service-managed permissions\\] For automatic deployments that require a sequence of operations, the operation is queued to be performed. For more information, see the stack set operation status codes in the CloudFormation User Guide. RUNNING: The operation is currently being performed. STOPPED: The user has canceled the operation. STOPPING: The operation is in the process of stopping, at user request. SUCCEEDED: The operation completed creating or updating all the specified stacks without exceeding the failure tolerance for the operation."];
       operationPreferences: StackSetOperationPreferences.t option
         [@ocaml.doc
           "The preferences for how CloudFormation performs this stack set operation."];
@@ -8867,7 +8867,7 @@ module StackSetOperation =
           "The time at which the stack set operation ended, across all accounts and Regions specified. Note that this doesn't necessarily mean that the stack set operation was successful, or even attempted, in each account or Region."];
       deploymentTargets: DeploymentTargets.t option
         [@ocaml.doc
-          "[Service-managed permissions] The Organizations accounts affected by the stack operation."];
+          "\\[Service-managed permissions\\] The Organizations accounts affected by the stack operation."];
       stackSetDriftDetectionDetails: StackSetDriftDetectionDetails.t option
         [@ocaml.doc
           "Detailed information about the drift status of the stack set. This includes information about drift operations currently being performed on the stack set. This information will only be present for stack set operations whose Action type is DETECT_DRIFT. For more information, see Detecting Unmanaged Changes in Stack Sets in the CloudFormation User Guide."]}
@@ -9248,7 +9248,7 @@ module StackInstance =
           "The name of the Amazon Web Services Region that the stack instance is associated with."];
       account: Account.t option
         [@ocaml.doc
-          "[Self-managed permissions] The name of the Amazon Web Services account that the stack instance is associated with."];
+          "\\[Self-managed permissions\\] The name of the Amazon Web Services account that the stack instance is associated with."];
       stackId: StackId.t option [@ocaml.doc "The ID of the stack instance."];
       parameterOverrides: Parameters.t option
         [@ocaml.doc
@@ -9263,7 +9263,7 @@ module StackInstance =
           "The explanation for the specific status code that's assigned to this stack instance."];
       organizationalUnitId: OrganizationalUnitId.t option
         [@ocaml.doc
-          "[Service-managed permissions] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."];
+          "\\[Service-managed permissions\\] The organization root ID or organizational unit (OU) IDs that you specified for DeploymentTargets."];
       driftStatus: StackDriftStatus.t option
         [@ocaml.doc
           "Status of the stack instance's actual configuration compared to the expected template and parameter configuration of the stack set to which it belongs. DRIFTED: The stack differs from the expected template and parameter configuration of the stack set to which it belongs. A stack instance is considered to have drifted if one or more of the resources in the associated stack have drifted. NOT_CHECKED: CloudFormation hasn't checked if the stack instance differs from its expected stack set configuration. IN_SYNC: The stack instance's actual configuration matches its expected stack set configuration. UNKNOWN: This value is reserved for future use."];
@@ -10334,25 +10334,25 @@ module UpdateStackSetInput =
           "The name of the IAM execution role to use to update the stack set. If you do not specify an execution role, CloudFormation uses the AWSCloudFormationStackSetExecutionRole role for the stack set operation. Specify an IAM role only if you are using customized execution roles to control which stack resources users and groups can include in their stack sets. If you specify a customized execution role, CloudFormation uses that role to update the stack. If you do not specify a customized execution role, CloudFormation performs the update using the role previously associated with the stack set, so long as you have permissions to perform operations on the stack set."];
       deploymentTargets: DeploymentTargets.t option
         [@ocaml.doc
-          "[Service-managed permissions] The Organizations accounts in which to update associated stack instances. To update all the stack instances associated with this stack set, do not specify DeploymentTargets or Regions. If the stack set update includes changes to the template (that is, if TemplateBody or TemplateURL is specified), or the Parameters, CloudFormation marks all stack instances with a status of OUTDATED prior to updating the stack instances in the specified accounts and Amazon Web Services Regions. If the stack set update doesn't include changes to the template or parameters, CloudFormation updates the stack instances in the specified accounts and Regions, while leaving all other stack instances with their existing stack instance status."];
+          "\\[Service-managed permissions\\] The Organizations accounts in which to update associated stack instances. To update all the stack instances associated with this stack set, do not specify DeploymentTargets or Regions. If the stack set update includes changes to the template (that is, if TemplateBody or TemplateURL is specified), or the Parameters, CloudFormation marks all stack instances with a status of OUTDATED prior to updating the stack instances in the specified accounts and Amazon Web Services Regions. If the stack set update doesn't include changes to the template or parameters, CloudFormation updates the stack instances in the specified accounts and Regions, while leaving all other stack instances with their existing stack instance status."];
       permissionModel: PermissionModels.t option
         [@ocaml.doc
           "Describes how the IAM roles required for stack set operations are created. You cannot modify PermissionModel if there are stack instances associated with your stack set. With self-managed permissions, you must create the administrator and execution roles required to deploy to target accounts. For more information, see Grant Self-Managed Stack Set Permissions. With service-managed permissions, StackSets automatically creates the IAM roles required to deploy to accounts managed by Organizations. For more information, see Grant Service-Managed Stack Set Permissions."];
       autoDeployment: AutoDeployment.t option
         [@ocaml.doc
-          "[Service-managed permissions] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organization or organizational unit (OU). If you specify AutoDeployment, don't specify DeploymentTargets or Regions."];
+          "\\[Service-managed permissions\\] Describes whether StackSets automatically deploys to Organizations accounts that are added to a target organization or organizational unit (OU). If you specify AutoDeployment, don't specify DeploymentTargets or Regions."];
       operationId: ClientRequestToken.t option
         [@ocaml.doc
           "The unique ID for this stack set operation. The operation ID also functions as an idempotency token, to ensure that CloudFormation performs the stack set operation only once, even if you retry the request multiple times. You might retry stack set operation requests to ensure that CloudFormation successfully received them. If you don't specify an operation ID, CloudFormation generates one automatically. Repeating this stack set operation with a new operation ID retries all stack instances whose status is OUTDATED."];
       accounts: AccountList.t option
         [@ocaml.doc
-          "[Self-managed permissions] The accounts in which to update associated stack instances. If you specify accounts, you must also specify the Amazon Web Services Regions in which to update stack set instances. To update all the stack instances associated with this stack set, don't specify the Accounts or Regions properties. If the stack set update includes changes to the template (that is, if the TemplateBody or TemplateURL properties are specified), or the Parameters property, CloudFormation marks all stack instances with a status of OUTDATED prior to updating the stack instances in the specified accounts and Amazon Web Services Regions. If the stack set update does not include changes to the template or parameters, CloudFormation updates the stack instances in the specified accounts and Amazon Web Services Regions, while leaving all other stack instances with their existing stack instance status."];
+          "\\[Self-managed permissions\\] The accounts in which to update associated stack instances. If you specify accounts, you must also specify the Amazon Web Services Regions in which to update stack set instances. To update all the stack instances associated with this stack set, don't specify the Accounts or Regions properties. If the stack set update includes changes to the template (that is, if the TemplateBody or TemplateURL properties are specified), or the Parameters property, CloudFormation marks all stack instances with a status of OUTDATED prior to updating the stack instances in the specified accounts and Amazon Web Services Regions. If the stack set update does not include changes to the template or parameters, CloudFormation updates the stack instances in the specified accounts and Amazon Web Services Regions, while leaving all other stack instances with their existing stack instance status."];
       regions: RegionList.t option
         [@ocaml.doc
           "The Amazon Web Services Regions in which to update associated stack instances. If you specify Regions, you must also specify accounts in which to update stack set instances. To update all the stack instances associated with this stack set, do not specify the Accounts or Regions properties. If the stack set update includes changes to the template (that is, if the TemplateBody or TemplateURL properties are specified), or the Parameters property, CloudFormation marks all stack instances with a status of OUTDATED prior to updating the stack instances in the specified accounts and Regions. If the stack set update does not include changes to the template or parameters, CloudFormation updates the stack instances in the specified accounts and Regions, while leaving all other stack instances with their existing stack instance status."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."];
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."];
       managedExecution: ManagedExecution.t option
         [@ocaml.doc
           "Describes whether StackSets performs non-conflicting operations concurrently and queues conflicting operations."]}
@@ -10723,10 +10723,10 @@ module UpdateStackInstancesInput =
           "The name or unique ID of the stack set associated with the stack instances."];
       accounts: AccountList.t option
         [@ocaml.doc
-          "[Self-managed permissions] The names of one or more Amazon Web Services accounts for which you want to update parameter values for stack instances. The overridden parameter values will be applied to all stack instances in the specified accounts and Amazon Web Services Regions. You can specify Accounts or DeploymentTargets, but not both."];
+          "\\[Self-managed permissions\\] The names of one or more Amazon Web Services accounts for which you want to update parameter values for stack instances. The overridden parameter values will be applied to all stack instances in the specified accounts and Amazon Web Services Regions. You can specify Accounts or DeploymentTargets, but not both."];
       deploymentTargets: DeploymentTargets.t option
         [@ocaml.doc
-          "[Service-managed permissions] The Organizations accounts for which you want to update parameter values for stack instances. If your update targets OUs, the overridden parameter values only apply to the accounts that are currently in the target OUs and their child OUs. Accounts added to the target OUs and their child OUs in the future won't use the overridden values. You can specify Accounts or DeploymentTargets, but not both."];
+          "\\[Service-managed permissions\\] The Organizations accounts for which you want to update parameter values for stack instances. If your update targets OUs, the overridden parameter values only apply to the accounts that are currently in the target OUs and their child OUs. Accounts added to the target OUs and their child OUs in the future won't use the overridden values. You can specify Accounts or DeploymentTargets, but not both."];
       regions: RegionList.t
         [@ocaml.doc
           "The names of one or more Amazon Web Services Regions in which you want to update parameter values for stack instances. The overridden parameter values will be applied to all stack instances in the specified accounts and Amazon Web Services Regions."];
@@ -10741,7 +10741,7 @@ module UpdateStackInstancesInput =
           "The unique identifier for this stack set operation. The operation ID also functions as an idempotency token, to ensure that CloudFormation performs the stack set operation only once, even if you retry the request multiple times. You might retry stack set operation requests to ensure that CloudFormation successfully received them. If you don't specify an operation ID, the SDK generates one automatically."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "UpdateStackInstancesInput"
     let make ?accounts =
       fun ?deploymentTargets ->
@@ -11240,7 +11240,7 @@ module StopStackSetOperationInput =
         [@ocaml.doc "The ID of the stack operation."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "StopStackSetOperationInput"
     let make ?callAs =
       fun ~stackSetName ->
@@ -12861,7 +12861,7 @@ module ListStackSetsOutput =
       make ?nextToken ?summaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns summary information about stack sets that are associated with the user. [Self-managed permissions] If you set the CallAs parameter to SELF while signed in to your Amazon Web Services account, ListStackSets returns all self-managed stack sets in your Amazon Web Services account. [Service-managed permissions] If you set the CallAs parameter to SELF while signed in to the organization's management account, ListStackSets returns all stack sets in the management account. [Service-managed permissions] If you set the CallAs parameter to DELEGATED_ADMIN while signed in to your member account, ListStackSets returns all stack sets with service-managed permissions in the management account."]
+       "Returns summary information about stack sets that are associated with the user. \\[Self-managed permissions\\] If you set the CallAs parameter to SELF while signed in to your Amazon Web Services account, ListStackSets returns all self-managed stack sets in your Amazon Web Services account. \\[Service-managed permissions\\] If you set the CallAs parameter to SELF while signed in to the organization's management account, ListStackSets returns all stack sets in the management account. \\[Service-managed permissions\\] If you set the CallAs parameter to DELEGATED_ADMIN while signed in to your member account, ListStackSets returns all stack sets with service-managed permissions in the management account."]
 module ListStackSetsInput =
   struct
     type nonrec t =
@@ -12877,7 +12877,7 @@ module ListStackSetsInput =
           "The status of the stack sets that you want to get summary information about."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?status ->
@@ -12907,7 +12907,7 @@ module ListStackSetsInput =
       make ?callAs ?status ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns summary information about stack sets that are associated with the user. [Self-managed permissions] If you set the CallAs parameter to SELF while signed in to your Amazon Web Services account, ListStackSets returns all self-managed stack sets in your Amazon Web Services account. [Service-managed permissions] If you set the CallAs parameter to SELF while signed in to the organization's management account, ListStackSets returns all stack sets in the management account. [Service-managed permissions] If you set the CallAs parameter to DELEGATED_ADMIN while signed in to your member account, ListStackSets returns all stack sets with service-managed permissions in the management account."]
+       "Returns summary information about stack sets that are associated with the user. \\[Self-managed permissions\\] If you set the CallAs parameter to SELF while signed in to your Amazon Web Services account, ListStackSets returns all self-managed stack sets in your Amazon Web Services account. \\[Service-managed permissions\\] If you set the CallAs parameter to SELF while signed in to the organization's management account, ListStackSets returns all stack sets in the management account. \\[Service-managed permissions\\] If you set the CallAs parameter to DELEGATED_ADMIN while signed in to your member account, ListStackSets returns all stack sets with service-managed permissions in the management account."]
 module ListStackSetOperationsOutput =
   struct
     type listStackSetOperationsResult =
@@ -12998,7 +12998,7 @@ module ListStackSetOperationsInput =
           "The maximum number of results to be returned with a single call. If the number of available results exceeds this maximum, the response includes a NextToken value that you can assign to the NextToken request parameter to get the next set of results."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "ListStackSetOperationsInput"
     let make ?nextToken =
       fun ?maxResults ->
@@ -13138,7 +13138,7 @@ module ListStackSetOperationResultsInput =
           "The maximum number of results to be returned with a single call. If the number of available results exceeds this maximum, the response includes a NextToken value that you can assign to the NextToken request parameter to get the next set of results."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "ListStackSetOperationResultsInput"
     let make ?nextToken =
       fun ?maxResults ->
@@ -13375,7 +13375,7 @@ module ListStackInstancesInput =
           "The name of the Region where you want to list stack instances."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "ListStackInstancesInput"
     let make ?nextToken =
       fun ?maxResults ->
@@ -14107,7 +14107,7 @@ module GetTemplateSummaryInput =
           "The name or unique ID of the stack set from which the stack was created. Conditional: You must specify only one of the following parameters: StackName, StackSetName, TemplateBody, or TemplateURL."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let make ?templateBody =
       fun ?templateURL ->
         fun ?stackName ->
@@ -14666,7 +14666,7 @@ module DetectStackSetDriftInput =
         [@ocaml.doc "The ID of the stack set operation."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "DetectStackSetDriftInput"
     let make ?operationPreferences =
       fun ?operationId ->
@@ -15686,7 +15686,7 @@ module DescribeStackSetOperationInput =
         [@ocaml.doc "The unique ID of the stack set operation."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "DescribeStackSetOperationInput"
     let make ?callAs =
       fun ~stackSetName ->
@@ -15726,7 +15726,7 @@ module DescribeStackSetInput =
           "The name or unique ID of the stack set whose description you want."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "DescribeStackSetInput"
     let make ?callAs =
       fun ~stackSetName -> fun () -> { callAs; stackSetName }
@@ -16162,7 +16162,7 @@ module DescribeStackInstanceInput =
           "The name of a Region that's associated with this stack instance."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "DescribeStackInstanceInput"
     let make ?callAs =
       fun ~stackSetName ->
@@ -17312,7 +17312,7 @@ module DeleteStackSetInput =
           "The name or unique ID of the stack set that you're deleting. You can obtain this value by running ListStackSets."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "DeleteStackSetInput"
     let make ?callAs =
       fun ~stackSetName -> fun () -> { callAs; stackSetName }
@@ -17450,10 +17450,10 @@ module DeleteStackInstancesInput =
           "The name or unique ID of the stack set that you want to delete stack instances for."];
       accounts: AccountList.t option
         [@ocaml.doc
-          "[Self-managed permissions] The names of the Amazon Web Services accounts that you want to delete stack instances for. You can specify Accounts or DeploymentTargets, but not both."];
+          "\\[Self-managed permissions\\] The names of the Amazon Web Services accounts that you want to delete stack instances for. You can specify Accounts or DeploymentTargets, but not both."];
       deploymentTargets: DeploymentTargets.t option
         [@ocaml.doc
-          "[Service-managed permissions] The Organizations accounts from which to delete stack instances. You can specify Accounts or DeploymentTargets, but not both."];
+          "\\[Service-managed permissions\\] The Organizations accounts from which to delete stack instances. You can specify Accounts or DeploymentTargets, but not both."];
       regions: RegionList.t
         [@ocaml.doc
           "The Amazon Web Services Regions where you want to delete stack set instances."];
@@ -17468,7 +17468,7 @@ module DeleteStackInstancesInput =
           "The unique identifier for this stack set operation. If you don't specify an operation ID, the SDK generates one automatically. The operation ID also functions as an idempotency token, to ensure that CloudFormation performs the stack set operation only once, even if you retry the request multiple times. You can retry stack set operation requests to ensure that CloudFormation successfully received them. Repeating this stack set operation with a new operation ID retries all stack instances whose status is OUTDATED."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "DeleteStackInstancesInput"
     let make ?accounts =
       fun ?deploymentTargets ->
@@ -17893,7 +17893,7 @@ module CreateStackSetInput =
           "Describes whether StackSets automatically deploys to Organizations accounts that are added to the target organization or organizational unit (OU). Specify only if PermissionModel is SERVICE_MANAGED."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. To create a stack set with service-managed permissions while signed in to the management account, specify SELF. To create a stack set with service-managed permissions while signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated admin in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide. Stack sets with service-managed permissions are created in the management account, including stack sets that are created by delegated administrators."];
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. To create a stack set with service-managed permissions while signed in to the management account, specify SELF. To create a stack set with service-managed permissions while signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated admin in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide. Stack sets with service-managed permissions are created in the management account, including stack sets that are created by delegated administrators."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
           "A unique identifier for this CreateStackSet request. Specify this token if you plan to retry requests so that CloudFormation knows that you're not attempting to create another stack set with the same name. You might retry CreateStackSet requests to ensure that CloudFormation successfully received them. If you don't specify an operation ID, the SDK generates one automatically."];
@@ -18244,10 +18244,10 @@ module CreateStackInstancesInput =
           "The name or unique ID of the stack set that you want to create stack instances from."];
       accounts: AccountList.t option
         [@ocaml.doc
-          "[Self-managed permissions] The names of one or more Amazon Web Services accounts that you want to create stack instances in the specified Region(s) for. You can specify Accounts or DeploymentTargets, but not both."];
+          "\\[Self-managed permissions\\] The names of one or more Amazon Web Services accounts that you want to create stack instances in the specified Region(s) for. You can specify Accounts or DeploymentTargets, but not both."];
       deploymentTargets: DeploymentTargets.t option
         [@ocaml.doc
-          "[Service-managed permissions] The Organizations accounts for which to create stack instances in the specified Amazon Web Services Regions. You can specify Accounts or DeploymentTargets, but not both."];
+          "\\[Service-managed permissions\\] The Organizations accounts for which to create stack instances in the specified Amazon Web Services Regions. You can specify Accounts or DeploymentTargets, but not both."];
       regions: RegionList.t
         [@ocaml.doc
           "The names of one or more Amazon Web Services Regions where you want to create stack instances using the specified Amazon Web Services accounts."];
@@ -18262,7 +18262,7 @@ module CreateStackInstancesInput =
           "The unique identifier for this stack set operation. The operation ID also functions as an idempotency token, to ensure that CloudFormation performs the stack set operation only once, even if you retry the request multiple times. You might retry stack set operation requests to ensure that CloudFormation successfully received them. If you don't specify an operation ID, the SDK generates one automatically. Repeating this stack set operation with a new operation ID retries all stack instances whose status is OUTDATED."];
       callAs: CallAs.t option
         [@ocaml.doc
-          "[Service-managed permissions] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
+          "\\[Service-managed permissions\\] Specifies whether you are acting as an account administrator in the organization's management account or as a delegated administrator in a member account. By default, SELF is specified. Use SELF for stack sets with self-managed permissions. If you are signed in to the management account, specify SELF. If you are signed in to a delegated administrator account, specify DELEGATED_ADMIN. Your Amazon Web Services account must be registered as a delegated administrator in the management account. For more information, see Register a delegated administrator in the CloudFormation User Guide."]}
     let context_ = "CreateStackInstancesInput"
     let make ?accounts =
       fun ?deploymentTargets ->

@@ -3330,7 +3330,7 @@ module PlatformFilter =
       make ?values ?operator ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes criteria to restrict the results when listing platform versions. The filter is evaluated as follows: Type Operator Values[1]"]
+       "Describes criteria to restrict the results when listing platform versions. The filter is evaluated as follows: Type Operator Values\\[1\\]"]
 module PlatformBranchSummary =
   struct
     type nonrec t =
@@ -3445,7 +3445,7 @@ module SearchFilter =
       make ?values ?operator ?attribute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes criteria to restrict a list of results. For operators that apply a single value to the attribute, the filter is evaluated as follows: Attribute Operator Values[1] Some operators, e.g. in, can apply multiple values. In this case, the filter is evaluated as a logical union (OR) of applications of the operator to the attribute with each one of the values: (Attribute Operator Values[1]) OR (Attribute Operator Values[2]) OR ... The valid values for attributes of SearchFilter depend on the API action. For valid values, see the reference page for the API action you're calling that takes a SearchFilter parameter."]
+       "Describes criteria to restrict a list of results. For operators that apply a single value to the attribute, the filter is evaluated as follows: Attribute Operator Values\\[1\\] Some operators, e.g. in, can apply multiple values. In this case, the filter is evaluated as a logical union (OR) of applications of the operator to the attribute with each one of the values: (Attribute Operator Values\\[1\\]) OR (Attribute Operator Values\\[2\\]) OR ... The valid values for attributes of SearchFilter depend on the API action. For valid values, see the reference page for the API action you're calling that takes a SearchFilter parameter."]
 module SolutionStackDescription =
   struct
     type nonrec t =

@@ -483,7 +483,7 @@ module QueryForecastRequest =
           "The end date for the forecast. Specify the date using this format: yyyy-MM-dd'T'HH:mm:ss (ISO 8601 format). For example, 2015-01-01T20:00:00."];
       filters: Filters.t
         [@ocaml.doc
-          "The filtering criteria to apply when retrieving the forecast. For example, to get the forecast for client_21 in the electricity usage dataset, specify the following: {\"item_id\" : \"client_21\"} To get the full forecast, use the CreateForecastExportJob operation."];
+          "The filtering criteria to apply when retrieving the forecast. For example, to get the forecast for client_21 in the electricity usage dataset, specify the following: \\{\"item_id\" : \"client_21\"\\} To get the full forecast, use the CreateForecastExportJob operation."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If the result of the previous request was truncated, the response includes a NextToken. To retrieve the next set of results, use the token in the next request. Tokens expire after 24 hours."]}

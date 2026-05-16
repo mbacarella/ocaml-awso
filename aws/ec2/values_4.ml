@@ -8409,7 +8409,7 @@ module RequestLaunchTemplateData =
           "One or more security group IDs. You can create a security group using CreateSecurityGroup. You cannot specify both a security group ID and security name in the same request."];
       securityGroups: SecurityGroupStringList.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] One or more security group names. For a nondefault VPC, you must use security group IDs instead. You cannot specify both a security group ID and security name in the same request."];
+          "\\[EC2-Classic, default VPC\\] One or more security group names. For a nondefault VPC, you must use security group IDs instead. You cannot specify both a security group ID and security name in the same request."];
       instanceMarketOptions:
         LaunchTemplateInstanceMarketOptionsRequest.t option
         [@ocaml.doc "The market (purchasing) option for the instances."];
@@ -8788,7 +8788,7 @@ module ExportToS3TaskSpecification =
         [@ocaml.doc "The format for the exported image."];
       s3Bucket: String_.t option
         [@ocaml.doc
-          "The Amazon S3 bucket for the destination image. The destination bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export@amazon.com."];
+          "The Amazon S3 bucket for the destination image. The destination bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export\\@amazon.com."];
       s3Prefix: String_.t option
         [@ocaml.doc
           "The image is written to a single object in the Amazon S3 bucket at the S3 key s3prefix + exportTaskId + '.' + diskImageFormat."]}

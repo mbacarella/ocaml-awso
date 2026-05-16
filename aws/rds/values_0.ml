@@ -1439,10 +1439,10 @@ module Tag =
       {
       key: String_.t option
         [@ocaml.doc
-          "A key is the required name of the tag. The string value can be from 1 to 128 Unicode characters in length and can't be prefixed with aws: or rds:. The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', ':', '/', '=', '+', '-', '@' (Java regex: \"^([\\\\p{L}\\\\p{Z}\\\\p{N}_.:/=+\\\\-@]*)$\")."];
+          "A key is the required name of the tag. The string value can be from 1 to 128 Unicode characters in length and can't be prefixed with aws: or rds:. The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', ':', '/', '=', '+', '-', '\\@' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\@\\]*)$\")."];
       value: String_.t option
         [@ocaml.doc
-          "A value is the optional value of the tag. The string value can be from 1 to 256 Unicode characters in length and can't be prefixed with aws: or rds:. The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', ':', '/', '=', '+', '-', '@' (Java regex: \"^([\\\\p{L}\\\\p{Z}\\\\p{N}_.:/=+\\\\-@]*)$\")."]}
+          "A value is the optional value of the tag. The string value can be from 1 to 256 Unicode characters in length and can't be prefixed with aws: or rds:. The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', ':', '/', '=', '+', '-', '\\@' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\@\\]*)$\")."]}
     let make ?key = fun ?value -> fun () -> { key; value }
     let to_value x =
       structure_to_value
@@ -5337,7 +5337,7 @@ module OrderableDBInstanceOption =
           "Whether a DB instance supports RDS on Outposts. For more information about RDS on Outposts, see Amazon RDS on Amazon Web Services Outposts in the Amazon RDS User Guide."];
       supportedActivityStreamModes: ActivityStreamModeList.t option
         [@ocaml.doc
-          "The list of supported modes for Database Activity Streams. Aurora PostgreSQL returns the value [sync, async]. Aurora MySQL and RDS for Oracle return [async] only. If Database Activity Streams isn't supported, the return value is an empty list."];
+          "The list of supported modes for Database Activity Streams. Aurora PostgreSQL returns the value \\[sync, async\\]. Aurora MySQL and RDS for Oracle return \\[async\\] only. If Database Activity Streams isn't supported, the return value is an empty list."];
       supportsGlobalDatabases: Boolean.t option
         [@ocaml.doc
           "A value that indicates whether you can use Aurora global databases with a specific combination of other DB engine attributes."];

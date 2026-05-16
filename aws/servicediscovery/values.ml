@@ -4844,7 +4844,7 @@ module DiscoverInstancesRequest =
           "The maximum number of instances that you want Cloud Map to return in the response to a DiscoverInstances request. If you don't specify a value for MaxResults, Cloud Map returns up to 100 instances."];
       queryParameters: Attributes.t option
         [@ocaml.doc
-          "Filters to scope the results based on custom attributes for the instance (for example, {version=v1, az=1a}). Only instances that match all the specified key-value pairs are returned."];
+          "Filters to scope the results based on custom attributes for the instance (for example, \\{version=v1, az=1a\\}). Only instances that match all the specified key-value pairs are returned."];
       optionalParameters: Attributes.t option
         [@ocaml.doc
           "Opportunistic filters to scope the results based on custom attributes. If there are instances that match both the filters specified in both the QueryParameters parameter and this parameter, all of these instances are returned. Otherwise, the filters are ignored, and only instances that match the filters that are specified in the QueryParameters parameter are returned."];

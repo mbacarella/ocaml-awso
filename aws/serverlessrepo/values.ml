@@ -129,7 +129,7 @@ module ParameterDefinition =
           "An array containing the list of values allowed for the parameter."];
       constraintDescription: Zz__string.t option
         [@ocaml.doc
-          "A string that explains a constraint when the constraint is violated. For example, without a constraint description, a parameter that has an allowed pattern of [A-Za-z0-9]+ displays the following error message when the user specifies an invalid value: Malformed input-Parameter MyParameter must match pattern [A-Za-z0-9]+ By adding a constraint description, such as \"must contain only uppercase and lowercase letters and numbers,\" you can display the following customized error message: Malformed input-Parameter MyParameter must contain only uppercase and lowercase letters and numbers."];
+          "A string that explains a constraint when the constraint is violated. For example, without a constraint description, a parameter that has an allowed pattern of \\[A-Za-z0-9\\]+ displays the following error message when the user specifies an invalid value: Malformed input-Parameter MyParameter must match pattern \\[A-Za-z0-9\\]+ By adding a constraint description, such as \"must contain only uppercase and lowercase letters and numbers,\" you can display the following customized error message: Malformed input-Parameter MyParameter must contain only uppercase and lowercase letters and numbers."];
       defaultValue: Zz__string.t option
         [@ocaml.doc
           "A value of the appropriate type for the template to use if no value is specified when a stack is created. If you define constraints for the parameter, you must specify a value that adheres to those constraints."];
@@ -156,7 +156,7 @@ module ParameterDefinition =
         [@ocaml.doc "A list of AWS SAM resources that use this parameter."];
       type_: Zz__string.t option
         [@ocaml.doc
-          "The type of the parameter.Valid values: String | Number | List<Number> | CommaDelimitedList String: A literal string.For example, users can specify \"MyUserName\". Number: An integer or float. AWS CloudFormation validates the parameter value as a number. However, when you use the parameter elsewhere in your template (for example, by using the Ref intrinsic function), the parameter value becomes a string.For example, users might specify \"8888\". List<Number>: An array of integers or floats that are separated by commas. AWS CloudFormation validates the parameter value as numbers. However, when you use the parameter elsewhere in your template (for example, by using the Ref intrinsic function), the parameter value becomes a list of strings.For example, users might specify \"80,20\", and then Ref results in [\"80\",\"20\"]. CommaDelimitedList: An array of literal strings that are separated by commas. The total number of strings should be one more than the total number of commas. Also, each member string is space-trimmed.For example, users might specify \"test,dev,prod\", and then Ref results in [\"test\",\"dev\",\"prod\"]."]}
+          "The type of the parameter.Valid values: String | Number | List<Number> | CommaDelimitedList String: A literal string.For example, users can specify \"MyUserName\". Number: An integer or float. AWS CloudFormation validates the parameter value as a number. However, when you use the parameter elsewhere in your template (for example, by using the Ref intrinsic function), the parameter value becomes a string.For example, users might specify \"8888\". List<Number>: An array of integers or floats that are separated by commas. AWS CloudFormation validates the parameter value as numbers. However, when you use the parameter elsewhere in your template (for example, by using the Ref intrinsic function), the parameter value becomes a list of strings.For example, users might specify \"80,20\", and then Ref results in \\[\"80\",\"20\"\\]. CommaDelimitedList: An array of literal strings that are separated by commas. The total number of strings should be one more than the total number of commas. Also, each member string is space-trimmed.For example, users might specify \"test,dev,prod\", and then Ref results in \\[\"test\",\"dev\",\"prod\"\\]."]}
     let context_ = "ParameterDefinition"
     let make ?allowedPattern =
       fun ?allowedValues ->
@@ -403,7 +403,7 @@ module ApplicationSummary =
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
       author: Zz__string.t
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
       description: Zz__string.t
@@ -414,10 +414,10 @@ module ApplicationSummary =
           "A URL with more information about the application, for example the location of your GitHub repository for the application."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       name: Zz__string.t
         [@ocaml.doc
-          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"[a-zA-Z0-9\\\\-]+\";"];
+          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       spdxLicenseId: Zz__string.t option
         [@ocaml.doc "A valid identifier from https://spdx.org/licenses/."]}
     let context_ = "ApplicationSummary"
@@ -1204,7 +1204,7 @@ module UpdateApplicationResponse =
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
       author: Zz__string.t option
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
       description: Zz__string.t option
@@ -1218,13 +1218,13 @@ module UpdateApplicationResponse =
           "Whether the author of this application has been verified. This means means that AWS has made a good faith review, as a reasonable and prudent service provider, of the information provided by the requester and has confirmed that the requester's identity is as claimed."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       licenseUrl: Zz__string.t option
         [@ocaml.doc
           "A link to a license file of the app that matches the spdxLicenseID value of your application.Maximum size 5 MB"];
       name: Zz__string.t option
         [@ocaml.doc
-          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"[a-zA-Z0-9\\\\-]+\";"];
+          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       readmeUrl: Zz__string.t option
         [@ocaml.doc
           "A link to the readme file in Markdown language that contains a more detailed description of the application and how it works.Maximum size 5 MB"];
@@ -1422,7 +1422,7 @@ module UpdateApplicationRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the application."];
       author: Zz__string.t option
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       description: Zz__string.t option
         [@ocaml.doc
           "The description of the application.Minimum length=1. Maximum length=256"];
@@ -1431,7 +1431,7 @@ module UpdateApplicationRequest =
           "A URL with more information about the application, for example the location of your GitHub repository for the application."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       readmeBody: Zz__string.t option
         [@ocaml.doc
           "A text readme file in Markdown language that contains a more detailed description of the application and how it works.Maximum size 5 MB"];
@@ -1504,7 +1504,7 @@ module UpdateApplicationInput =
       {
       author: Zz__string.t option
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       description: Zz__string.t option
         [@ocaml.doc
           "The description of the application.Minimum length=1. Maximum length=256"];
@@ -1513,7 +1513,7 @@ module UpdateApplicationInput =
           "A URL with more information about the application, for example the location of your GitHub repository for the application."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       readmeBody: Zz__string.t option
         [@ocaml.doc
           "A text readme file in Markdown language that contains a more detailed description of the application and how it works.Maximum size 5 MB"];
@@ -1648,7 +1648,7 @@ module TemplateDetails =
           "Status of the template creation workflow.Possible values: PREPARING | ACTIVE | EXPIRED"];
       templateId: Zz__string.t
         [@ocaml.doc
-          "The UUID returned by CreateCloudFormationTemplate.Pattern: [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"];
+          "The UUID returned by CreateCloudFormationTemplate.Pattern: \\[0-9a-fA-F\\]\\{8\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{12\\}"];
       templateUrl: Zz__string.t
         [@ocaml.doc
           "A link to the template that can be used to deploy the application using AWS CloudFormation."]}
@@ -2258,7 +2258,7 @@ module GetCloudFormationTemplateResponse =
           "Status of the template creation workflow.Possible values: PREPARING | ACTIVE | EXPIRED"];
       templateId: Zz__string.t option
         [@ocaml.doc
-          "The UUID returned by CreateCloudFormationTemplate.Pattern: [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"];
+          "The UUID returned by CreateCloudFormationTemplate.Pattern: \\[0-9a-fA-F\\]\\{8\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{12\\}"];
       templateUrl: Zz__string.t option
         [@ocaml.doc
           "A link to the template that can be used to deploy the application using AWS CloudFormation."]}
@@ -2398,7 +2398,7 @@ module GetCloudFormationTemplateRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the application."];
       templateId: Zz__string.t
         [@ocaml.doc
-          "The UUID returned by CreateCloudFormationTemplate.Pattern: [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"]}
+          "The UUID returned by CreateCloudFormationTemplate.Pattern: \\[0-9a-fA-F\\]\\{8\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{12\\}"]}
     let context_ = "GetCloudFormationTemplateRequest"
     let make ~applicationId =
       fun ~templateId -> fun () -> { applicationId; templateId }
@@ -2430,7 +2430,7 @@ module GetApplicationResponse =
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
       author: Zz__string.t option
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
       description: Zz__string.t option
@@ -2444,13 +2444,13 @@ module GetApplicationResponse =
           "Whether the author of this application has been verified. This means means that AWS has made a good faith review, as a reasonable and prudent service provider, of the information provided by the requester and has confirmed that the requester's identity is as claimed."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       licenseUrl: Zz__string.t option
         [@ocaml.doc
           "A link to a license file of the app that matches the spdxLicenseID value of your application.Maximum size 5 MB"];
       name: Zz__string.t option
         [@ocaml.doc
-          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"[a-zA-Z0-9\\\\-]+\";"];
+          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       readmeUrl: Zz__string.t option
         [@ocaml.doc
           "A link to the readme file in Markdown language that contains a more detailed description of the application and how it works.Maximum size 5 MB"];
@@ -2820,7 +2820,7 @@ module CreateCloudFormationTemplateResponse =
           "Status of the template creation workflow.Possible values: PREPARING | ACTIVE | EXPIRED"];
       templateId: Zz__string.t option
         [@ocaml.doc
-          "The UUID returned by CreateCloudFormationTemplate.Pattern: [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"];
+          "The UUID returned by CreateCloudFormationTemplate.Pattern: \\[0-9a-fA-F\\]\\{8\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{12\\}"];
       templateUrl: Zz__string.t option
         [@ocaml.doc
           "A link to the template that can be used to deploy the application using AWS CloudFormation."]}
@@ -2994,7 +2994,7 @@ module CreateCloudFormationChangeSetResponse =
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
       changeSetId: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the change set.Length constraints: Minimum length of 1.Pattern: ARN:[-a-zA-Z0-9:/]*"];
+          "The Amazon Resource Name (ARN) of the change set.Length constraints: Minimum length of 1.Pattern: ARN:\\[-a-zA-Z0-9:/\\]*"];
       semanticVersion: Zz__string.t option
         [@ocaml.doc
           "The semantic version of the application: https://semver.org/"];
@@ -3133,7 +3133,7 @@ module CreateCloudFormationChangeSetRequest =
           "This property corresponds to the parameter of the same name for the AWS CloudFormation CreateChangeSet API."];
       templateId: Zz__string.t option
         [@ocaml.doc
-          "The UUID returned by CreateCloudFormationTemplate.Pattern: [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"]}
+          "The UUID returned by CreateCloudFormationTemplate.Pattern: \\[0-9a-fA-F\\]\\{8\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{12\\}"]}
     let context_ = "CreateCloudFormationChangeSetRequest"
     let make ?capabilities =
       fun ?changeSetName ->
@@ -3296,7 +3296,7 @@ module CreateCloudFormationChangeSetInput =
           "This property corresponds to the parameter of the same name for the AWS CloudFormation CreateChangeSet API."];
       templateId: Zz__string.t option
         [@ocaml.doc
-          "The UUID returned by CreateCloudFormationTemplate.Pattern: [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"]}
+          "The UUID returned by CreateCloudFormationTemplate.Pattern: \\[0-9a-fA-F\\]\\{8\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{4\\}\\-\\[0-9a-fA-F\\]\\{12\\}"]}
     let context_ = "CreateCloudFormationChangeSetInput"
     let make ?capabilities =
       fun ?changeSetName ->
@@ -3739,7 +3739,7 @@ module CreateApplicationResponse =
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
       author: Zz__string.t option
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
       description: Zz__string.t option
@@ -3753,13 +3753,13 @@ module CreateApplicationResponse =
           "Whether the author of this application has been verified. This means means that AWS has made a good faith review, as a reasonable and prudent service provider, of the information provided by the requester and has confirmed that the requester's identity is as claimed."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       licenseUrl: Zz__string.t option
         [@ocaml.doc
           "A link to a license file of the app that matches the spdxLicenseID value of your application.Maximum size 5 MB"];
       name: Zz__string.t option
         [@ocaml.doc
-          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"[a-zA-Z0-9\\\\-]+\";"];
+          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       readmeUrl: Zz__string.t option
         [@ocaml.doc
           "A link to the readme file in Markdown language that contains a more detailed description of the application and how it works.Maximum size 5 MB"];
@@ -3947,7 +3947,7 @@ module CreateApplicationRequest =
       {
       author: Zz__string.t
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       description: Zz__string.t
         [@ocaml.doc
           "The description of the application.Minimum length=1. Maximum length=256"];
@@ -3956,7 +3956,7 @@ module CreateApplicationRequest =
           "A URL with more information about the application, for example the location of your GitHub repository for the application."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       licenseBody: Zz__string.t option
         [@ocaml.doc
           "A local text file that contains the license of the app that matches the spdxLicenseID value of your application. The file has the format file://<path>/<filename>.Maximum size 5 MBYou can specify only one of licenseBody and licenseUrl; otherwise, an error results."];
@@ -3965,7 +3965,7 @@ module CreateApplicationRequest =
           "A link to the S3 object that contains the license of the app that matches the spdxLicenseID value of your application.Maximum size 5 MBYou can specify only one of licenseBody and licenseUrl; otherwise, an error results."];
       name: Zz__string.t
         [@ocaml.doc
-          "The name of the application that you want to publish.Minimum length=1. Maximum length=140Pattern: \"[a-zA-Z0-9\\\\-]+\";"];
+          "The name of the application that you want to publish.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       readmeBody: Zz__string.t option
         [@ocaml.doc
           "A local text readme file in Markdown language that contains a more detailed description of the application and how it works. The file has the format file://<path>/<filename>.Maximum size 5 MBYou can specify only one of readmeBody and readmeUrl; otherwise, an error results."];
@@ -4115,7 +4115,7 @@ module CreateApplicationInput =
       {
       author: Zz__string.t
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       description: Zz__string.t
         [@ocaml.doc
           "The description of the application.Minimum length=1. Maximum length=256"];
@@ -4124,7 +4124,7 @@ module CreateApplicationInput =
           "A URL with more information about the application, for example the location of your GitHub repository for the application."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       licenseBody: Zz__string.t option
         [@ocaml.doc
           "A local text file that contains the license of the app that matches the spdxLicenseID value of your application. The file has the format file://<path>/<filename>.Maximum size 5 MBYou can specify only one of licenseBody and licenseUrl; otherwise, an error results."];
@@ -4133,7 +4133,7 @@ module CreateApplicationInput =
           "A link to the S3 object that contains the license of the app that matches the spdxLicenseID value of your application.Maximum size 5 MBYou can specify only one of licenseBody and licenseUrl; otherwise, an error results."];
       name: Zz__string.t
         [@ocaml.doc
-          "The name of the application that you want to publish.Minimum length=1. Maximum length=140Pattern: \"[a-zA-Z0-9\\\\-]+\";"];
+          "The name of the application that you want to publish.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       readmeBody: Zz__string.t option
         [@ocaml.doc
           "A local text readme file in Markdown language that contains a more detailed description of the application and how it works. The file has the format file://<path>/<filename>.Maximum size 5 MBYou can specify only one of readmeBody and readmeUrl; otherwise, an error results."];
@@ -4284,7 +4284,7 @@ module ChangeSetDetails =
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
       changeSetId: Zz__string.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the change set.Length constraints: Minimum length of 1.Pattern: ARN:[-a-zA-Z0-9:/]*"];
+          "The Amazon Resource Name (ARN) of the change set.Length constraints: Minimum length of 1.Pattern: ARN:\\[-a-zA-Z0-9:/\\]*"];
       semanticVersion: Zz__string.t
         [@ocaml.doc
           "The semantic version of the application: https://semver.org/"];
@@ -4457,7 +4457,7 @@ module Application =
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
       author: Zz__string.t
         [@ocaml.doc
-          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^[a-z0-9](([a-z0-9]|-(?!-))*[a-z0-9])?$\";"];
+          "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
       description: Zz__string.t
@@ -4471,13 +4471,13 @@ module Application =
           "Whether the author of this application has been verified. This means means that AWS has made a good faith review, as a reasonable and prudent service provider, of the information provided by the requester and has confirmed that the requester's identity is as claimed."];
       labels: Zz__listOf__string.t option
         [@ocaml.doc
-          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^[a-zA-Z0-9+\\\\-_:\\\\/@]+$\";"];
+          "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
       licenseUrl: Zz__string.t option
         [@ocaml.doc
           "A link to a license file of the app that matches the spdxLicenseID value of your application.Maximum size 5 MB"];
       name: Zz__string.t
         [@ocaml.doc
-          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"[a-zA-Z0-9\\\\-]+\";"];
+          "The name of the application.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       readmeUrl: Zz__string.t option
         [@ocaml.doc
           "A link to the readme file in Markdown language that contains a more detailed description of the application and how it works.Maximum size 5 MB"];

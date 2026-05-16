@@ -2178,7 +2178,7 @@ module PackageVersionDescription =
         [@ocaml.doc "The name of the requested package."];
       displayName: String255.t option
         [@ocaml.doc
-          "The name of the package that is displayed. The displayName varies depending on the package version's format. For example, if an npm package is named ui, is in the namespace vue, and has the format npm, then the displayName is @vue/ui."];
+          "The name of the package that is displayed. The displayName varies depending on the package version's format. For example, if an npm package is named ui, is in the namespace vue, and has the format npm, then the displayName is \\@vue/ui."];
       version: PackageVersion.t option
         [@ocaml.doc "The version of the package."];
       summary: String_.t option

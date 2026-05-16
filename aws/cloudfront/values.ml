@@ -449,13 +449,13 @@ module LambdaFunctionAssociation =
       {
       lambdaFunctionARN: LambdaFunctionARN.t
         [@ocaml.doc
-          "The ARN of the Lambda@Edge function. You must specify the ARN of a function version; you can't specify an alias or $LATEST."];
+          "The ARN of the Lambda\\@Edge function. You must specify the ARN of a function version; you can't specify an alias or $LATEST."];
       eventType: EventType.t
         [@ocaml.doc
-          "Specifies the event type that triggers a Lambda@Edge function invocation. You can specify the following values: viewer-request: The function executes when CloudFront receives a request from a viewer and before it checks to see whether the requested object is in the edge cache. origin-request: The function executes only when CloudFront sends a request to your origin. When the requested object is in the edge cache, the function doesn't execute. origin-response: The function executes after CloudFront receives a response from the origin and before it caches the object in the response. When the requested object is in the edge cache, the function doesn't execute. viewer-response: The function executes before CloudFront returns the requested object to the viewer. The function executes regardless of whether the object was already in the edge cache. If the origin returns an HTTP status code other than HTTP 200 (OK), the function doesn't execute."];
+          "Specifies the event type that triggers a Lambda\\@Edge function invocation. You can specify the following values: viewer-request: The function executes when CloudFront receives a request from a viewer and before it checks to see whether the requested object is in the edge cache. origin-request: The function executes only when CloudFront sends a request to your origin. When the requested object is in the edge cache, the function doesn't execute. origin-response: The function executes after CloudFront receives a response from the origin and before it caches the object in the response. When the requested object is in the edge cache, the function doesn't execute. viewer-response: The function executes before CloudFront returns the requested object to the viewer. The function executes regardless of whether the object was already in the edge cache. If the origin returns an HTTP status code other than HTTP 200 (OK), the function doesn't execute."];
       includeBody: Boolean.t option
         [@ocaml.doc
-          "A flag that allows a Lambda@Edge function to have read access to the body content. For more information, see Accessing the Request Body by Choosing the Include Body Option in the Amazon CloudFront Developer Guide."]}
+          "A flag that allows a Lambda\\@Edge function to have read access to the body content. For more information, see Accessing the Request Body by Choosing the Include Body Option in the Amazon CloudFront Developer Guide."]}
     let context_ = "LambdaFunctionAssociation"
     let make ?includeBody =
       fun ~lambdaFunctionARN ->
@@ -486,7 +486,7 @@ module LambdaFunctionAssociation =
       make ?includeBody ~eventType ~lambdaFunctionARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains a Lambda@Edge function association."]
+       "A complex type that contains a Lambda\\@Edge function association."]
 module StatusCodeList =
   struct
     type nonrec t = Integer.t list
@@ -2075,7 +2075,7 @@ module LambdaFunctionAssociations =
       {
       quantity: Integer.t
         [@ocaml.doc
-          "The number of Lambda@Edge function associations for this cache behavior."];
+          "The number of Lambda\\@Edge function associations for this cache behavior."];
       items: LambdaFunctionAssociationList.t option
         [@ocaml.doc
           "Optional: A complex type that contains LambdaFunctionAssociation items for this cache behavior. If Quantity is 0, you can omit Items."]}
@@ -2101,7 +2101,7 @@ module LambdaFunctionAssociations =
       make ?items ~quantity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that specifies a list of Lambda@Edge functions associations for a cache behavior. If you want to invoke one or more Lambda@Edge functions triggered by requests that match the PathPattern of the cache behavior, specify the applicable values for Quantity and Items. Note that there can be up to 4 LambdaFunctionAssociation items in this list (one for each possible value of EventType) and each EventType can be associated with only one function. If you don't want to invoke any Lambda@Edge functions for the requests that match PathPattern, specify 0 for Quantity and omit Items."]
+       "A complex type that specifies a list of Lambda\\@Edge functions associations for a cache behavior. If you want to invoke one or more Lambda\\@Edge functions triggered by requests that match the PathPattern of the cache behavior, specify the applicable values for Quantity and Items. Note that there can be up to 4 LambdaFunctionAssociation items in this list (one for each possible value of EventType) and each EventType can be associated with only one function. If you don't want to invoke any Lambda\\@Edge functions for the requests that match PathPattern, specify 0 for Quantity and omit Items."]
 module TrustedKeyGroups =
   struct
     type nonrec t =
@@ -3157,7 +3157,7 @@ module CacheBehavior =
           "Whether you want CloudFront to automatically compress certain files for this cache behavior. If so, specify true; if not, specify false. For more information, see Serving Compressed Files in the Amazon CloudFront Developer Guide."];
       lambdaFunctionAssociations: LambdaFunctionAssociations.t option
         [@ocaml.doc
-          "A complex type that contains zero or more Lambda@Edge function associations for a cache behavior."];
+          "A complex type that contains zero or more Lambda\\@Edge function associations for a cache behavior."];
       functionAssociations: FunctionAssociations.t option
         [@ocaml.doc
           "A list of CloudFront functions that are associated with this cache behavior. CloudFront functions must be published to the LIVE stage to associate them with a cache behavior."];
@@ -4490,7 +4490,7 @@ module CachePolicyConfig =
 module TagKey =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "A string that contains Tag key. The string length should be between 1 and 128 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + @."]
+                            "A string that contains Tag key. The string length should be between 1 and 128 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + \\@."]
     let context_ = "TagKey"
     let make i =
       let open Result in
@@ -4510,7 +4510,7 @@ module TagKey =
     let of_json j = string_of_json ~kind:"TagKey" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "A string that contains Tag key. The string length should be between 1 and 128 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + @."]
+       "A string that contains Tag key. The string length should be between 1 and 128 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + \\@."]
 module TagValue =
   struct
     type nonrec t = string
@@ -5237,7 +5237,7 @@ module DefaultCacheBehavior =
           "Whether you want CloudFront to automatically compress certain files for this cache behavior. If so, specify true; if not, specify false. For more information, see Serving Compressed Files in the Amazon CloudFront Developer Guide."];
       lambdaFunctionAssociations: LambdaFunctionAssociations.t option
         [@ocaml.doc
-          "A complex type that contains zero or more Lambda@Edge function associations for a cache behavior."];
+          "A complex type that contains zero or more Lambda\\@Edge function associations for a cache behavior."];
       functionAssociations: FunctionAssociations.t option
         [@ocaml.doc
           "A list of CloudFront functions that are associated with this cache behavior. CloudFront functions must be published to the LIVE stage to associate them with a cache behavior."];
@@ -5741,10 +5741,10 @@ module Tag =
       {
       key: TagKey.t
         [@ocaml.doc
-          "A string that contains Tag key. The string length should be between 1 and 128 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + @."];
+          "A string that contains Tag key. The string length should be between 1 and 128 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + \\@."];
       value: TagValue.t option
         [@ocaml.doc
-          "A string that contains an optional Tag value. The string length should be between 0 and 256 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + @."]}
+          "A string that contains an optional Tag value. The string length should be between 0 and 256 characters. Valid characters include a-z, A-Z, 0-9, space, and the special characters _ - . : / = + \\@."]}
     let context_ = "Tag"
     let make ?value = fun ~key -> fun () -> { value; key }
     let to_value x =
@@ -9189,7 +9189,7 @@ module InvalidLambdaFunctionAssociation =
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified Lambda@Edge function association is invalid."]
+       "The specified Lambda\\@Edge function association is invalid."]
 module InvalidLocationCode =
   struct
     type nonrec t = {
@@ -9672,7 +9672,7 @@ module TooManyDistributionsWithLambdaAssociations =
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Processing your request would cause the maximum number of distributions with Lambda@Edge function associations per owner to be exceeded."]
+       "Processing your request would cause the maximum number of distributions with Lambda\\@Edge function associations per owner to be exceeded."]
 module TooManyDistributionsWithSingleFunctionARN =
   struct
     type nonrec t = {
@@ -9691,7 +9691,7 @@ module TooManyDistributionsWithSingleFunctionARN =
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The maximum number of distributions have been associated with the specified Lambda@Edge function."]
+       "The maximum number of distributions have been associated with the specified Lambda\\@Edge function."]
 module TooManyFunctionAssociations =
   struct
     type nonrec t = {
@@ -9767,7 +9767,7 @@ module TooManyLambdaFunctionAssociations =
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Your request contains more Lambda@Edge function associations than are allowed per distribution."]
+       "Your request contains more Lambda\\@Edge function associations than are allowed per distribution."]
 module TooManyOriginCustomHeaders =
   struct
     type nonrec t = {

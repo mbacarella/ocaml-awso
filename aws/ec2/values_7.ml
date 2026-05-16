@@ -1831,7 +1831,7 @@ module DeleteSecurityGroupRequest =
           "The ID of the security group. Required for a nondefault VPC."];
       groupName: SecurityGroupName.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] The name of the security group. You can specify either the security group name or the security group ID."];
+          "\\[EC2-Classic, default VPC\\] The name of the security group. You can specify either the security group name or the security group ID."];
       dryRun: Boolean.t option
         [@ocaml.doc
           "Checks whether you have the required permissions for the action, without actually making the request, and provides an error response. If you have the required permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation."]}
@@ -7740,12 +7740,12 @@ module CreateSecurityGroupRequest =
       {
       description: String_.t
         [@ocaml.doc
-          "A description for the security group. This is informational only. Constraints: Up to 255 characters in length Constraints for EC2-Classic: ASCII characters Constraints for EC2-VPC: a-z, A-Z, 0-9, spaces, and ._-:/()#,@[]+=&;{}!$*"];
+          "A description for the security group. This is informational only. Constraints: Up to 255 characters in length Constraints for EC2-Classic: ASCII characters Constraints for EC2-VPC: a-z, A-Z, 0-9, spaces, and ._-:/()#,\\@\\[\\]+=&;\\{\\}!$*"];
       groupName: String_.t
         [@ocaml.doc
-          "The name of the security group. Constraints: Up to 255 characters in length. Cannot start with sg-. Constraints for EC2-Classic: ASCII characters Constraints for EC2-VPC: a-z, A-Z, 0-9, spaces, and ._-:/()#,@[]+=&;{}!$*"];
+          "The name of the security group. Constraints: Up to 255 characters in length. Cannot start with sg-. Constraints for EC2-Classic: ASCII characters Constraints for EC2-VPC: a-z, A-Z, 0-9, spaces, and ._-:/()#,\\@\\[\\]+=&;\\{\\}!$*"];
       vpcId: VpcId.t option
-        [@ocaml.doc "[EC2-VPC] The ID of the VPC. Required for EC2-VPC."];
+        [@ocaml.doc "\\[EC2-VPC\\] The ID of the VPC. Required for EC2-VPC."];
       tagSpecifications: TagSpecificationList.t option
         [@ocaml.doc "The tags to assign to the security group."];
       dryRun: Boolean.t option
@@ -7930,7 +7930,7 @@ module CreateRouteRequest =
           "The ID of a VPC endpoint. Supported for Gateway Load Balancer endpoints only."];
       egressOnlyInternetGatewayId: EgressOnlyInternetGatewayId.t option
         [@ocaml.doc
-          "[IPv6 traffic only] The ID of an egress-only internet gateway."];
+          "\\[IPv6 traffic only\\] The ID of an egress-only internet gateway."];
       gatewayId: RouteGatewayId.t option
         [@ocaml.doc
           "The ID of an internet gateway or virtual private gateway attached to your VPC."];
@@ -7938,7 +7938,7 @@ module CreateRouteRequest =
         [@ocaml.doc
           "The ID of a NAT instance in your VPC. The operation fails if you specify an instance ID unless exactly one network interface is attached."];
       natGatewayId: NatGatewayId.t option
-        [@ocaml.doc "[IPv4 traffic only] The ID of a NAT gateway."];
+        [@ocaml.doc "\\[IPv4 traffic only\\] The ID of a NAT gateway."];
       transitGatewayId: TransitGatewayId.t option
         [@ocaml.doc "The ID of a transit gateway."];
       localGatewayId: LocalGatewayId.t option
@@ -9482,7 +9482,7 @@ module CreateNatGatewayRequest =
       {
       allocationId: AllocationId.t option
         [@ocaml.doc
-          "[Public NAT gateways only] The allocation ID of an Elastic IP address to associate with the NAT gateway. You cannot specify an Elastic IP address with a private NAT gateway. If the Elastic IP address is associated with another resource, you must first disassociate it."];
+          "\\[Public NAT gateways only\\] The allocation ID of an Elastic IP address to associate with the NAT gateway. You cannot specify an Elastic IP address with a private NAT gateway. If the Elastic IP address is associated with another resource, you must first disassociate it."];
       clientToken: String_.t option
         [@ocaml.doc
           "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. For more information, see How to ensure idempotency. Constraint: Maximum 64 ASCII characters."];
@@ -11008,7 +11008,7 @@ module CreateImageRequest =
       instanceId: InstanceId.t [@ocaml.doc "The ID of the instance."];
       name: String_.t
         [@ocaml.doc
-          "A name for the new image. Constraints: 3-128 alphanumeric characters, parentheses (()), square brackets ([]), spaces ( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs (@), or underscores(_)"];
+          "A name for the new image. Constraints: 3-128 alphanumeric characters, parentheses (()), square brackets (\\[\\]), spaces ( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs (\\@), or underscores(_)"];
       noReboot: Boolean.t option
         [@ocaml.doc
           "By default, Amazon EC2 attempts to shut down and reboot the instance before creating the image. If the No Reboot option is set, Amazon EC2 doesn't shut down the instance before creating the image. Without a reboot, the AMI will be crash consistent (all the volumes are snapshotted at the same time), but not application consistent (all the operating system buffers are not flushed to disk before the snapshots are created)."];
@@ -11310,7 +11310,7 @@ module CreateFlowLogsRequest =
           "The destination to which the flow log data is to be published. Flow log data can be published to a CloudWatch Logs log group or an Amazon S3 bucket. The value specified for this parameter depends on the value specified for LogDestinationType. If LogDestinationType is not specified or cloud-watch-logs, specify the Amazon Resource Name (ARN) of the CloudWatch Logs log group. For example, to publish to a log group called my-logs, specify arn:aws:logs:us-east-1:123456789012:log-group:my-logs. Alternatively, use LogGroupName instead. If LogDestinationType is s3, specify the ARN of the Amazon S3 bucket. You can also specify a subfolder in the bucket. To specify a subfolder in the bucket, use the following ARN format: bucket_ARN/subfolder_name/. For example, to specify a subfolder named my-logs in a bucket named my-bucket, use the following ARN: arn:aws:s3:::my-bucket/my-logs/. You cannot use AWSLogs as a subfolder name. This is a reserved term."];
       logFormat: String_.t option
         [@ocaml.doc
-          "The fields to include in the flow log record, in the order in which they should appear. For a list of available fields, see Flow log records. If you omit this parameter, the flow log is created using the default format. If you specify this parameter, you must specify at least one field. Specify the fields using the ${field-id} format, separated by spaces. For the CLI, surround this parameter value with single quotes on Linux or double quotes on Windows."];
+          "The fields to include in the flow log record, in the order in which they should appear. For a list of available fields, see Flow log records. If you omit this parameter, the flow log is created using the default format. If you specify this parameter, you must specify at least one field. Specify the fields using the $\\{field-id\\} format, separated by spaces. For the CLI, surround this parameter value with single quotes on Linux or double quotes on Windows."];
       tagSpecifications: TagSpecificationList.t option
         [@ocaml.doc "The tags to apply to the flow logs."];
       maxAggregationInterval: Integer.t option
@@ -11730,7 +11730,7 @@ module CreateEgressOnlyInternetGatewayResult =
       make ?egressOnlyInternetGateway ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[IPv6 only] Creates an egress-only internet gateway for your VPC. An egress-only internet gateway is used to enable outbound communication over IPv6 from instances in your VPC to the internet, and prevents hosts outside of your VPC from initiating an IPv6 connection with your instance."]
+       "\\[IPv6 only\\] Creates an egress-only internet gateway for your VPC. An egress-only internet gateway is used to enable outbound communication over IPv6 from instances in your VPC to the internet, and prevents hosts outside of your VPC from initiating an IPv6 connection with your instance."]
 module CreateEgressOnlyInternetGatewayRequest =
   struct
     type nonrec t =
@@ -11781,7 +11781,7 @@ module CreateEgressOnlyInternetGatewayRequest =
       make ?tagSpecifications ~vpcId ?dryRun ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[IPv6 only] Creates an egress-only internet gateway for your VPC. An egress-only internet gateway is used to enable outbound communication over IPv6 from instances in your VPC to the internet, and prevents hosts outside of your VPC from initiating an IPv6 connection with your instance."]
+       "\\[IPv6 only\\] Creates an egress-only internet gateway for your VPC. An egress-only internet gateway is used to enable outbound communication over IPv6 from instances in your VPC to the internet, and prevents hosts outside of your VPC from initiating an IPv6 connection with your instance."]
 module CreateDhcpOptionsResult =
   struct
     type nonrec t =
@@ -14453,18 +14453,18 @@ module AuthorizeSecurityGroupIngressRequest =
           "The ID of the security group. You must specify either the security group ID or the security group name in the request. For security groups in a nondefault VPC, you must specify the security group ID."];
       groupName: SecurityGroupName.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] The name of the security group. You must specify either the security group ID or the security group name in the request."];
+          "\\[EC2-Classic, default VPC\\] The name of the security group. You must specify either the security group ID or the security group name in the request."];
       ipPermissions: IpPermissionList.t option
         [@ocaml.doc "The sets of IP permissions."];
       ipProtocol: String_.t option
         [@ocaml.doc
-          "The IP protocol name (tcp, udp, icmp) or number (see Protocol Numbers). To specify icmpv6, use a set of IP permissions. [VPC only] Use -1 to specify all protocols. If you specify -1 or a protocol other than tcp, udp, or icmp, traffic on all ports is allowed, regardless of any ports you specify. Alternatively, use a set of IP permissions to specify multiple rules and a description for the rule."];
+          "The IP protocol name (tcp, udp, icmp) or number (see Protocol Numbers). To specify icmpv6, use a set of IP permissions. \\[VPC only\\] Use -1 to specify all protocols. If you specify -1 or a protocol other than tcp, udp, or icmp, traffic on all ports is allowed, regardless of any ports you specify. Alternatively, use a set of IP permissions to specify multiple rules and a description for the rule."];
       sourceSecurityGroupName: String_.t option
         [@ocaml.doc
-          "[EC2-Classic, default VPC] The name of the source security group. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the start of the port range, the IP protocol, and the end of the port range. Creates rules that grant full ICMP, UDP, and TCP access. To create a rule with a specific IP protocol and port range, use a set of IP permissions instead. For EC2-VPC, the source security group must be in the same VPC."];
+          "\\[EC2-Classic, default VPC\\] The name of the source security group. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the start of the port range, the IP protocol, and the end of the port range. Creates rules that grant full ICMP, UDP, and TCP access. To create a rule with a specific IP protocol and port range, use a set of IP permissions instead. For EC2-VPC, the source security group must be in the same VPC."];
       sourceSecurityGroupOwnerId: String_.t option
         [@ocaml.doc
-          "[nondefault VPC] The Amazon Web Services account ID for the source security group, if the source security group is in a different account. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the IP protocol, the start of the port range, and the end of the port range. Creates rules that grant full ICMP, UDP, and TCP access. To create a rule with a specific IP protocol and port range, use a set of IP permissions instead."];
+          "\\[nondefault VPC\\] The Amazon Web Services account ID for the source security group, if the source security group is in a different account. You can't specify this parameter in combination with the following parameters: the CIDR IP address range, the IP protocol, the start of the port range, and the end of the port range. Creates rules that grant full ICMP, UDP, and TCP access. To create a rule with a specific IP protocol and port range, use a set of IP permissions instead."];
       toPort: Integer.t option
         [@ocaml.doc
           "The end of port range for the TCP and UDP protocols, or an ICMP code number. For the ICMP code number, use -1 to specify all codes. If you specify all ICMP types, you must specify all codes. Alternatively, use a set of IP permissions to specify multiple rules and a description for the rule."];
@@ -14473,7 +14473,7 @@ module AuthorizeSecurityGroupIngressRequest =
           "Checks whether you have the required permissions for the action, without actually making the request, and provides an error response. If you have the required permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation."];
       tagSpecifications: TagSpecificationList.t option
         [@ocaml.doc
-          "[VPC Only] The tags applied to the security group rule."]}
+          "\\[VPC Only\\] The tags applied to the security group rule."]}
     let make ?cidrIp =
       fun ?fromPort ->
         fun ?groupId ->
@@ -14620,7 +14620,7 @@ module AuthorizeSecurityGroupEgressResult =
       make ?securityGroupRules ?return ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[VPC only] Adds the specified outbound (egress) rules to a security group for use with a VPC. An outbound rule permits instances to send traffic to the specified IPv4 or IPv6 CIDR address ranges, or to the instances that are associated with the specified source security groups. You specify a protocol for each rule (for example, TCP). For the TCP and UDP protocols, you must also specify the destination port or port range. For the ICMP protocol, you must also specify the ICMP type and code. You can use -1 for the type or code to mean all types or all codes. Rule changes are propagated to affected instances as quickly as possible. However, a small delay might occur. For information about VPC security group quotas, see Amazon VPC quotas."]
+       "\\[VPC only\\] Adds the specified outbound (egress) rules to a security group for use with a VPC. An outbound rule permits instances to send traffic to the specified IPv4 or IPv6 CIDR address ranges, or to the instances that are associated with the specified source security groups. You specify a protocol for each rule (for example, TCP). For the TCP and UDP protocols, you must also specify the destination port or port range. For the ICMP protocol, you must also specify the ICMP type and code. You can use -1 for the type or code to mean all types or all codes. Rule changes are propagated to affected instances as quickly as possible. However, a small delay might occur. For information about VPC security group quotas, see Amazon VPC quotas."]
 module AuthorizeSecurityGroupEgressRequest =
   struct
     type nonrec t =
@@ -14742,7 +14742,7 @@ module AuthorizeSecurityGroupEgressRequest =
         ~groupId ?dryRun ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "[VPC only] Adds the specified outbound (egress) rules to a security group for use with a VPC. An outbound rule permits instances to send traffic to the specified IPv4 or IPv6 CIDR address ranges, or to the instances that are associated with the specified source security groups. You specify a protocol for each rule (for example, TCP). For the TCP and UDP protocols, you must also specify the destination port or port range. For the ICMP protocol, you must also specify the ICMP type and code. You can use -1 for the type or code to mean all types or all codes. Rule changes are propagated to affected instances as quickly as possible. However, a small delay might occur. For information about VPC security group quotas, see Amazon VPC quotas."]
+       "\\[VPC only\\] Adds the specified outbound (egress) rules to a security group for use with a VPC. An outbound rule permits instances to send traffic to the specified IPv4 or IPv6 CIDR address ranges, or to the instances that are associated with the specified source security groups. You specify a protocol for each rule (for example, TCP). For the TCP and UDP protocols, you must also specify the destination port or port range. For the ICMP protocol, you must also specify the ICMP type and code. You can use -1 for the type or code to mean all types or all codes. Rule changes are propagated to affected instances as quickly as possible. However, a small delay might occur. For information about VPC security group quotas, see Amazon VPC quotas."]
 module AuthorizeClientVpnIngressResult =
   struct
     type nonrec t =
@@ -16371,7 +16371,7 @@ module AssociateAddressResult =
       {
       associationId: String_.t option
         [@ocaml.doc
-          "[EC2-VPC] The ID that represents the association of the Elastic IP address with an instance."]}
+          "\\[EC2-VPC\\] The ID that represents the association of the Elastic IP address with an instance."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?associationId = fun () -> { associationId }
@@ -16404,32 +16404,32 @@ module AssociateAddressResult =
       make ?associationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates an Elastic IP address, or carrier IP address (for instances that are in subnets in Wavelength Zones) with an instance or a network interface. Before you can use an Elastic IP address, you must allocate it to your account. An Elastic IP address is for use in either the EC2-Classic platform or in a VPC. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. [EC2-Classic, VPC in an EC2-VPC-only account] If the Elastic IP address is already associated with a different instance, it is disassociated from that instance and associated with the specified instance. If you associate an Elastic IP address with an instance that has an existing Elastic IP address, the existing address is disassociated from the instance, but remains allocated to your account. [VPC in an EC2-Classic account] If you don't specify a private IP address, the Elastic IP address is associated with the primary IP address. If the Elastic IP address is already associated with a different instance or a network interface, you get an error unless you allow reassociation. You cannot associate an Elastic IP address with an instance or network interface that has an existing Elastic IP address. [Subnets in Wavelength Zones] You can associate an IP address from the telecommunication carrier to the instance or network interface. You cannot associate an Elastic IP address with an interface in a different network border group. This is an idempotent operation. If you perform the operation more than once, Amazon EC2 doesn't return an error, and you may be charged for each time the Elastic IP address is remapped to the same instance. For more information, see the Elastic IP Addresses section of Amazon EC2 Pricing."]
+       "Associates an Elastic IP address, or carrier IP address (for instances that are in subnets in Wavelength Zones) with an instance or a network interface. Before you can use an Elastic IP address, you must allocate it to your account. An Elastic IP address is for use in either the EC2-Classic platform or in a VPC. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. \\[EC2-Classic, VPC in an EC2-VPC-only account\\] If the Elastic IP address is already associated with a different instance, it is disassociated from that instance and associated with the specified instance. If you associate an Elastic IP address with an instance that has an existing Elastic IP address, the existing address is disassociated from the instance, but remains allocated to your account. \\[VPC in an EC2-Classic account\\] If you don't specify a private IP address, the Elastic IP address is associated with the primary IP address. If the Elastic IP address is already associated with a different instance or a network interface, you get an error unless you allow reassociation. You cannot associate an Elastic IP address with an instance or network interface that has an existing Elastic IP address. \\[Subnets in Wavelength Zones\\] You can associate an IP address from the telecommunication carrier to the instance or network interface. You cannot associate an Elastic IP address with an interface in a different network border group. This is an idempotent operation. If you perform the operation more than once, Amazon EC2 doesn't return an error, and you may be charged for each time the Elastic IP address is remapped to the same instance. For more information, see the Elastic IP Addresses section of Amazon EC2 Pricing."]
 module AssociateAddressRequest =
   struct
     type nonrec t =
       {
       allocationId: AllocationId.t option
         [@ocaml.doc
-          "[EC2-VPC] The allocation ID. This is required for EC2-VPC."];
+          "\\[EC2-VPC\\] The allocation ID. This is required for EC2-VPC."];
       instanceId: InstanceId.t option
         [@ocaml.doc
           "The ID of the instance. The instance must have exactly one attached network interface. For EC2-VPC, you can specify either the instance ID or the network interface ID, but not both. For EC2-Classic, you must specify an instance ID and the instance must be in the running state."];
       publicIp: String_.t option
         [@ocaml.doc
-          "[EC2-Classic] The Elastic IP address to associate with the instance. This is required for EC2-Classic."];
+          "\\[EC2-Classic\\] The Elastic IP address to associate with the instance. This is required for EC2-Classic."];
       allowReassociation: Boolean.t option
         [@ocaml.doc
-          "[EC2-VPC] For a VPC in an EC2-Classic account, specify true to allow an Elastic IP address that is already associated with an instance or network interface to be reassociated with the specified instance or network interface. Otherwise, the operation fails. In a VPC in an EC2-VPC-only account, reassociation is automatic, therefore you can specify false to ensure the operation fails if the Elastic IP address is already associated with another resource."];
+          "\\[EC2-VPC\\] For a VPC in an EC2-Classic account, specify true to allow an Elastic IP address that is already associated with an instance or network interface to be reassociated with the specified instance or network interface. Otherwise, the operation fails. In a VPC in an EC2-VPC-only account, reassociation is automatic, therefore you can specify false to ensure the operation fails if the Elastic IP address is already associated with another resource."];
       dryRun: Boolean.t option
         [@ocaml.doc
           "Checks whether you have the required permissions for the action, without actually making the request, and provides an error response. If you have the required permissions, the error response is DryRunOperation. Otherwise, it is UnauthorizedOperation."];
       networkInterfaceId: NetworkInterfaceId.t option
         [@ocaml.doc
-          "[EC2-VPC] The ID of the network interface. If the instance has more than one network interface, you must specify a network interface ID. For EC2-VPC, you can specify either the instance ID or the network interface ID, but not both."];
+          "\\[EC2-VPC\\] The ID of the network interface. If the instance has more than one network interface, you must specify a network interface ID. For EC2-VPC, you can specify either the instance ID or the network interface ID, but not both."];
       privateIpAddress: String_.t option
         [@ocaml.doc
-          "[EC2-VPC] The primary or secondary private IP address to associate with the Elastic IP address. If no private IP address is specified, the Elastic IP address is associated with the primary private IP address."]}
+          "\\[EC2-VPC\\] The primary or secondary private IP address to associate with the Elastic IP address. If no private IP address is specified, the Elastic IP address is associated with the primary private IP address."]}
     let make ?allocationId =
       fun ?instanceId ->
         fun ?publicIp ->
@@ -16497,7 +16497,7 @@ module AssociateAddressRequest =
         ?publicIp ?instanceId ?allocationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates an Elastic IP address, or carrier IP address (for instances that are in subnets in Wavelength Zones) with an instance or a network interface. Before you can use an Elastic IP address, you must allocate it to your account. An Elastic IP address is for use in either the EC2-Classic platform or in a VPC. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. [EC2-Classic, VPC in an EC2-VPC-only account] If the Elastic IP address is already associated with a different instance, it is disassociated from that instance and associated with the specified instance. If you associate an Elastic IP address with an instance that has an existing Elastic IP address, the existing address is disassociated from the instance, but remains allocated to your account. [VPC in an EC2-Classic account] If you don't specify a private IP address, the Elastic IP address is associated with the primary IP address. If the Elastic IP address is already associated with a different instance or a network interface, you get an error unless you allow reassociation. You cannot associate an Elastic IP address with an instance or network interface that has an existing Elastic IP address. [Subnets in Wavelength Zones] You can associate an IP address from the telecommunication carrier to the instance or network interface. You cannot associate an Elastic IP address with an interface in a different network border group. This is an idempotent operation. If you perform the operation more than once, Amazon EC2 doesn't return an error, and you may be charged for each time the Elastic IP address is remapped to the same instance. For more information, see the Elastic IP Addresses section of Amazon EC2 Pricing."]
+       "Associates an Elastic IP address, or carrier IP address (for instances that are in subnets in Wavelength Zones) with an instance or a network interface. Before you can use an Elastic IP address, you must allocate it to your account. An Elastic IP address is for use in either the EC2-Classic platform or in a VPC. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. \\[EC2-Classic, VPC in an EC2-VPC-only account\\] If the Elastic IP address is already associated with a different instance, it is disassociated from that instance and associated with the specified instance. If you associate an Elastic IP address with an instance that has an existing Elastic IP address, the existing address is disassociated from the instance, but remains allocated to your account. \\[VPC in an EC2-Classic account\\] If you don't specify a private IP address, the Elastic IP address is associated with the primary IP address. If the Elastic IP address is already associated with a different instance or a network interface, you get an error unless you allow reassociation. You cannot associate an Elastic IP address with an instance or network interface that has an existing Elastic IP address. \\[Subnets in Wavelength Zones\\] You can associate an IP address from the telecommunication carrier to the instance or network interface. You cannot associate an Elastic IP address with an interface in a different network border group. This is an idempotent operation. If you perform the operation more than once, Amazon EC2 doesn't return an error, and you may be charged for each time the Elastic IP address is remapped to the same instance. For more information, see the Elastic IP Addresses section of Amazon EC2 Pricing."]
 module AssignPrivateIpAddressesResult =
   struct
     type nonrec t =
@@ -17187,7 +17187,7 @@ module AllocateAddressResult =
       publicIp: String_.t option [@ocaml.doc "The Elastic IP address."];
       allocationId: String_.t option
         [@ocaml.doc
-          "[EC2-VPC] The ID that Amazon Web Services assigns to represent the allocation of the Elastic IP address for use with instances in a VPC."];
+          "\\[EC2-VPC\\] The ID that Amazon Web Services assigns to represent the allocation of the Elastic IP address for use with instances in a VPC."];
       publicIpv4Pool: String_.t option
         [@ocaml.doc "The ID of an address pool."];
       networkBorderGroup: String_.t option
@@ -17290,7 +17290,7 @@ module AllocateAddressResult =
         ?networkBorderGroup ?publicIpv4Pool ?allocationId ?publicIp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allocates an Elastic IP address to your Amazon Web Services account. After you allocate the Elastic IP address you can associate it with an instance or network interface. After you release an Elastic IP address, it is released to the IP address pool and can be allocated to a different Amazon Web Services account. You can allocate an Elastic IP address from an address pool owned by Amazon Web Services or from an address pool created from a public IPv4 address range that you have brought to Amazon Web Services for use with your Amazon Web Services resources using bring your own IP addresses (BYOIP). For more information, see Bring Your Own IP Addresses (BYOIP) in the Amazon Elastic Compute Cloud User Guide. [EC2-VPC] If you release an Elastic IP address, you might be able to recover it. You cannot recover an Elastic IP address that you released after it is allocated to another Amazon Web Services account. You cannot recover an Elastic IP address for EC2-Classic. To attempt to recover an Elastic IP address that you released, specify it in this operation. An Elastic IP address is for use either in the EC2-Classic platform or in a VPC. By default, you can allocate 5 Elastic IP addresses for EC2-Classic per Region and 5 Elastic IP addresses for EC2-VPC per Region. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. You can allocate a carrier IP address which is a public IP address from a telecommunication carrier, to a network interface which resides in a subnet in a Wavelength Zone (for example an EC2 instance)."]
+       "Allocates an Elastic IP address to your Amazon Web Services account. After you allocate the Elastic IP address you can associate it with an instance or network interface. After you release an Elastic IP address, it is released to the IP address pool and can be allocated to a different Amazon Web Services account. You can allocate an Elastic IP address from an address pool owned by Amazon Web Services or from an address pool created from a public IPv4 address range that you have brought to Amazon Web Services for use with your Amazon Web Services resources using bring your own IP addresses (BYOIP). For more information, see Bring Your Own IP Addresses (BYOIP) in the Amazon Elastic Compute Cloud User Guide. \\[EC2-VPC\\] If you release an Elastic IP address, you might be able to recover it. You cannot recover an Elastic IP address that you released after it is allocated to another Amazon Web Services account. You cannot recover an Elastic IP address for EC2-Classic. To attempt to recover an Elastic IP address that you released, specify it in this operation. An Elastic IP address is for use either in the EC2-Classic platform or in a VPC. By default, you can allocate 5 Elastic IP addresses for EC2-Classic per Region and 5 Elastic IP addresses for EC2-VPC per Region. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. You can allocate a carrier IP address which is a public IP address from a telecommunication carrier, to a network interface which resides in a subnet in a Wavelength Zone (for example an EC2 instance)."]
 module AllocateAddressRequest =
   struct
     type nonrec t =
@@ -17300,7 +17300,7 @@ module AllocateAddressRequest =
           "Indicates whether the Elastic IP address is for use with instances in a VPC or instances in EC2-Classic. Default: If the Region supports EC2-Classic, the default is standard. Otherwise, the default is vpc."];
       address: PublicIpAddress.t option
         [@ocaml.doc
-          "[EC2-VPC] The Elastic IP address to recover or an IPv4 address from an address pool."];
+          "\\[EC2-VPC\\] The Elastic IP address to recover or an IPv4 address from an address pool."];
       publicIpv4Pool: Ipv4PoolEc2Id.t option
         [@ocaml.doc
           "The ID of an address pool that you own. Use this parameter to let Amazon EC2 select an address from the address pool. To specify a specific address from the address pool, use the Address parameter instead."];
@@ -17383,7 +17383,7 @@ module AllocateAddressRequest =
         ?networkBorderGroup ?publicIpv4Pool ?address ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allocates an Elastic IP address to your Amazon Web Services account. After you allocate the Elastic IP address you can associate it with an instance or network interface. After you release an Elastic IP address, it is released to the IP address pool and can be allocated to a different Amazon Web Services account. You can allocate an Elastic IP address from an address pool owned by Amazon Web Services or from an address pool created from a public IPv4 address range that you have brought to Amazon Web Services for use with your Amazon Web Services resources using bring your own IP addresses (BYOIP). For more information, see Bring Your Own IP Addresses (BYOIP) in the Amazon Elastic Compute Cloud User Guide. [EC2-VPC] If you release an Elastic IP address, you might be able to recover it. You cannot recover an Elastic IP address that you released after it is allocated to another Amazon Web Services account. You cannot recover an Elastic IP address for EC2-Classic. To attempt to recover an Elastic IP address that you released, specify it in this operation. An Elastic IP address is for use either in the EC2-Classic platform or in a VPC. By default, you can allocate 5 Elastic IP addresses for EC2-Classic per Region and 5 Elastic IP addresses for EC2-VPC per Region. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. You can allocate a carrier IP address which is a public IP address from a telecommunication carrier, to a network interface which resides in a subnet in a Wavelength Zone (for example an EC2 instance)."]
+       "Allocates an Elastic IP address to your Amazon Web Services account. After you allocate the Elastic IP address you can associate it with an instance or network interface. After you release an Elastic IP address, it is released to the IP address pool and can be allocated to a different Amazon Web Services account. You can allocate an Elastic IP address from an address pool owned by Amazon Web Services or from an address pool created from a public IPv4 address range that you have brought to Amazon Web Services for use with your Amazon Web Services resources using bring your own IP addresses (BYOIP). For more information, see Bring Your Own IP Addresses (BYOIP) in the Amazon Elastic Compute Cloud User Guide. \\[EC2-VPC\\] If you release an Elastic IP address, you might be able to recover it. You cannot recover an Elastic IP address that you released after it is allocated to another Amazon Web Services account. You cannot recover an Elastic IP address for EC2-Classic. To attempt to recover an Elastic IP address that you released, specify it in this operation. An Elastic IP address is for use either in the EC2-Classic platform or in a VPC. By default, you can allocate 5 Elastic IP addresses for EC2-Classic per Region and 5 Elastic IP addresses for EC2-VPC per Region. For more information, see Elastic IP Addresses in the Amazon Elastic Compute Cloud User Guide. You can allocate a carrier IP address which is a public IP address from a telecommunication carrier, to a network interface which resides in a subnet in a Wavelength Zone (for example an EC2 instance)."]
 module AdvertiseByoipCidrResult =
   struct
     type nonrec t =

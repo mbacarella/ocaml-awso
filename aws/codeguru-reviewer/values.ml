@@ -4124,10 +4124,10 @@ module ListCodeReviewsRequest =
       {
       providerTypes: ProviderTypes.t option
         [@ocaml.doc
-          "List of provider types for filtering that needs to be applied before displaying the result. For example, providerTypes=[GitHub] lists code reviews from GitHub."];
+          "List of provider types for filtering that needs to be applied before displaying the result. For example, providerTypes=\\[GitHub\\] lists code reviews from GitHub."];
       states: JobStates.t option
         [@ocaml.doc
-          "List of states for filtering that needs to be applied before displaying the result. For example, states=[Pending] lists code reviews in the Pending state. The valid code review states are: Completed: The code review is complete. Pending: The code review started and has not completed or failed. Failed: The code review failed. Deleting: The code review is being deleted."];
+          "List of states for filtering that needs to be applied before displaying the result. For example, states=\\[Pending\\] lists code reviews in the Pending state. The valid code review states are: Completed: The code review is complete. Pending: The code review started and has not completed or failed. Failed: The code review failed. Deleting: The code review is being deleted."];
       repositoryNames: RepositoryNames.t option
         [@ocaml.doc
           "List of repository names for filtering that needs to be applied before displaying the result."];

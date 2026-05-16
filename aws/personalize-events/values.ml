@@ -190,7 +190,7 @@ module User =
       userId: StringType.t [@ocaml.doc "The ID associated with the user."];
       properties: UserProperties.t option
         [@ocaml.doc
-          "A string map of user-specific metadata. Each element in the map consists of a key-value pair. For example, {\"numberOfVideosWatched\": \"45\"}. The keys use camel case names that match the fields in the schema for the Users dataset. In the previous example, the numberOfVideosWatched matches the 'NUMBER_OF_VIDEOS_WATCHED' field defined in the Users schema. For categorical string data, to include multiple categories for a single user, separate each category with a pipe separator (|). For example, \\\"Member|Frequent shopper\\\"."]}
+          "A string map of user-specific metadata. Each element in the map consists of a key-value pair. For example, \\{\"numberOfVideosWatched\": \"45\"\\}. The keys use camel case names that match the fields in the schema for the Users dataset. In the previous example, the numberOfVideosWatched matches the 'NUMBER_OF_VIDEOS_WATCHED' field defined in the Users schema. For categorical string data, to include multiple categories for a single user, separate each category with a pipe separator (|). For example, \\\"Member|Frequent shopper\\\"."]}
     let context_ = "User"
     let make ?properties = fun ~userId -> fun () -> { properties; userId }
     let to_value x =
@@ -219,7 +219,7 @@ module Item =
       itemId: StringType.t [@ocaml.doc "The ID associated with the item."];
       properties: ItemProperties.t option
         [@ocaml.doc
-          "A string map of item-specific metadata. Each element in the map consists of a key-value pair. For example, {\"numberOfRatings\": \"12\"}. The keys use camel case names that match the fields in the schema for the Items dataset. In the previous example, the numberOfRatings matches the 'NUMBER_OF_RATINGS' field defined in the Items schema. For categorical string data, to include multiple categories for a single item, separate each category with a pipe separator (|). For example, \\\"Horror|Action\\\"."]}
+          "A string map of item-specific metadata. Each element in the map consists of a key-value pair. For example, \\{\"numberOfRatings\": \"12\"\\}. The keys use camel case names that match the fields in the schema for the Items dataset. In the previous example, the numberOfRatings matches the 'NUMBER_OF_RATINGS' field defined in the Items schema. For categorical string data, to include multiple categories for a single item, separate each category with a pipe separator (|). For example, \\\"Horror|Action\\\"."]}
     let context_ = "Item"
     let make ?properties = fun ~itemId -> fun () -> { properties; itemId }
     let to_value x =
@@ -259,7 +259,7 @@ module Event =
           "The item ID key that corresponds to the ITEM_ID field of the Interactions schema."];
       properties: EventPropertiesJSON.t option
         [@ocaml.doc
-          "A string map of event-specific data that you might choose to record. For example, if a user rates a movie on your site, other than movie ID (itemId) and rating (eventValue) , you might also send the number of movie ratings made by the user. Each item in the map consists of a key-value pair. For example, {\"numberOfRatings\": \"12\"} The keys use camel case names that match the fields in the Interactions schema. In the above example, the numberOfRatings would match the 'NUMBER_OF_RATINGS' field defined in the Interactions schema."];
+          "A string map of event-specific data that you might choose to record. For example, if a user rates a movie on your site, other than movie ID (itemId) and rating (eventValue) , you might also send the number of movie ratings made by the user. Each item in the map consists of a key-value pair. For example, \\{\"numberOfRatings\": \"12\"\\} The keys use camel case names that match the fields in the Interactions schema. In the above example, the numberOfRatings would match the 'NUMBER_OF_RATINGS' field defined in the Interactions schema."];
       sentAt: Date.t
         [@ocaml.doc
           "The timestamp (in Unix time) on the client side when the event occurred."];
@@ -267,7 +267,7 @@ module Event =
         [@ocaml.doc "The ID of the recommendation."];
       impression: Impression.t option
         [@ocaml.doc
-          "A list of item IDs that represents the sequence of items you have shown the user. For example, [\"itemId1\", \"itemId2\", \"itemId3\"]."]}
+          "A list of item IDs that represents the sequence of items you have shown the user. For example, \\[\"itemId1\", \"itemId2\", \"itemId3\"\\]."]}
     let context_ = "Event"
     let make ?eventId =
       fun ?eventValue ->

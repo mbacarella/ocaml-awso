@@ -4605,7 +4605,7 @@ module TagResourceRequest =
         [@ocaml.doc "The resource's Amazon Resource Name (ARN)."];
       tags: TagMap.t
         [@ocaml.doc
-          "Tags to apply to the resource. Tag keys and values can contain letters, numbers, spaces, and the following symbols: _.:/=+@-"]}
+          "Tags to apply to the resource. Tag keys and values can contain letters, numbers, spaces, and the following symbols: _.:/=+\\@-"]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =

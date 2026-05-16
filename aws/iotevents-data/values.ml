@@ -3474,7 +3474,7 @@ module BatchPutMessageRequest =
       {
       messages: Messages.t
         [@ocaml.doc
-          "The list of messages to send. Each message has the following format: '{ \"messageId\": \"string\", \"inputName\": \"string\", \"payload\": \"string\"}'"]}
+          "The list of messages to send. Each message has the following format: '\\{ \"messageId\": \"string\", \"inputName\": \"string\", \"payload\": \"string\"\\}'"]}
     let context_ = "BatchPutMessageRequest"
     let make ~messages = fun () -> { messages }
     let to_value x =

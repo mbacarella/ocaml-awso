@@ -794,7 +794,7 @@ module RenderingConfiguration =
       {
       templateUri: Uri_.t option
         [@ocaml.doc
-          "A URI template containing exactly one variable in ${variableName} format. This can only be set for EXTERNAL knowledge bases. For Salesforce and ServiceNow, the variable must be one of the following: Salesforce: Id, ArticleNumber, VersionNumber, Title, PublishStatus, or IsDeleted ServiceNow: number, short_description, sys_mod_count, workflow_state, or active <p>The variable is replaced with the actual value for a piece of content when calling <a href=\"https://docs.aws.amazon.com/wisdom/latest/APIReference/API_GetContent.html\">GetContent</a>. </p>"]}
+          "A URI template containing exactly one variable in $\\{variableName\\} format. This can only be set for EXTERNAL knowledge bases. For Salesforce and ServiceNow, the variable must be one of the following: Salesforce: Id, ArticleNumber, VersionNumber, Title, PublishStatus, or IsDeleted ServiceNow: number, short_description, sys_mod_count, workflow_state, or active <p>The variable is replaced with the actual value for a piece of content when calling <a href=\"https://docs.aws.amazon.com/wisdom/latest/APIReference/API_GetContent.html\">GetContent</a>. </p>"]}
     let make ?templateUri = fun () -> { templateUri }
     let to_value x =
       structure_to_value
@@ -1279,7 +1279,7 @@ module KnowledgeBaseSummary =
         ServerSideEncryptionConfiguration.t option
         [@ocaml.doc "The KMS key used for encryption."];
       sourceConfiguration: SourceConfiguration.t option
-        [@ocaml.doc "[KEVIN]"];
+        [@ocaml.doc "\\[KEVIN\\]"];
       status: KnowledgeBaseStatus.t
         [@ocaml.doc "The status of the knowledge base summary."];
       tags: Tags.t option
@@ -2786,7 +2786,7 @@ module UpdateKnowledgeBaseTemplateUriResponse =
       make ?knowledgeBase ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the template URI of a knowledge base. This is only supported for knowledge bases of type EXTERNAL. Include a single variable in ${variable} format; this interpolated by Wisdom using ingested content. For example, if you ingest a Salesforce article, it has an Id value, and you can set the template URI to https://myInstanceName.lightning.force.com/lightning/r/Knowledge__kav/*${Id}*/view."]
+       "Updates the template URI of a knowledge base. This is only supported for knowledge bases of type EXTERNAL. Include a single variable in $\\{variable\\} format; this interpolated by Wisdom using ingested content. For example, if you ingest a Salesforce article, it has an Id value, and you can set the template URI to https://myInstanceName.lightning.force.com/lightning/r/Knowledge__kav/*$\\{Id\\}*/view."]
 module UpdateKnowledgeBaseTemplateUriRequest =
   struct
     type nonrec t =
@@ -2817,7 +2817,7 @@ module UpdateKnowledgeBaseTemplateUriRequest =
       make ~templateUri ~knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the template URI of a knowledge base. This is only supported for knowledge bases of type EXTERNAL. Include a single variable in ${variable} format; this interpolated by Wisdom using ingested content. For example, if you ingest a Salesforce article, it has an Id value, and you can set the template URI to https://myInstanceName.lightning.force.com/lightning/r/Knowledge__kav/*${Id}*/view."]
+       "Updates the template URI of a knowledge base. This is only supported for knowledge bases of type EXTERNAL. Include a single variable in $\\{variable\\} format; this interpolated by Wisdom using ingested content. For example, if you ingest a Salesforce article, it has an Id value, and you can set the template URI to https://myInstanceName.lightning.force.com/lightning/r/Knowledge__kav/*$\\{Id\\}*/view."]
 module UpdateContentResponse =
   struct
     type nonrec t =
