@@ -43,7 +43,7 @@ Here is a short example that lists all EC2 instances using Async:
 ```dune
 ; dune
 (executable
- (name awso_ec2_describe_instances)
+ (name ec2_describe_instances)
  (libraries awso-async.ec2 core_unix.command_unix)
  (preprocess
   (pps ppx_jane)))
