@@ -22,7 +22,7 @@ all APIs composed using Core.Command.
 The library is massive and not currently released to OPAM to avoid
 overwhelming the package repository.
 
-To use awso in your project, we recommend installing it with `opam`. It's big, it may take awhile.
+To use `awso` in your project, we recommend installing it with `opam`.
 
 ```shell
 opam install awso-async # if using async

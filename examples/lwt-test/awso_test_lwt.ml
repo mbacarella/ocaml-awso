@@ -1,11 +1,10 @@
 open Lwt.Infix
-module Cfg = Awso_lwt.Cfg
 module Ec2 = Awso_ec2_lwt
 module Ecs = Awso_ecs_lwt
 module Ecr = Awso_ecr_lwt
 module S3 = Awso_s3_lwt
 
-let pr = Caml.print_endline
+let pr = Stdlib.print_endline
 
 let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
@@ -14,18 +13,21 @@ let dispatch_exn ~name ~error_to_json ~f =
     failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
 ;;
 
+(* With --sso we fetch credentials via the SSO flow and pass them explicitly
+   to each API call. Without --sso each call resolves its own cfg via the
+   normal default (~/.aws/credentials etc), so we don't need to pre-fetch. *)
 let suite_main ~sso bucket () =
   let%bind cfg =
-    match sso with
-    | true -> Awso_sso_lwt.Util.Cfg.get_exn ()
-    | false -> Cfg.get_exn ()
+    if sso
+    then Awso_sso_lwt.Util.Cfg.get_exn () >|= Option.some
+    else Lwt.return None
   in
   let%bind () =
     pr "=== EC2 ===";
     dispatch_exn
       ~name:"ec2.describe_instances"
       ~error_to_json:Ec2.Ec2_error.to_json
-      ~f:(fun () -> Ec2.describe_instances ~cfg (Ec2.DescribeInstancesRequest.make ()))
+      ~f:(fun () -> Ec2.describe_instances ?cfg (Ec2.DescribeInstancesRequest.make ()))
     >|= fun v ->
     Option.iter v.Ec2.DescribeInstancesResult.reservations ~f:(fun reservation ->
       List.iter reservation ~f:(fun x -> Option.iter x.Ec2.Reservation.ownerId ~f:pr))
@@ -35,7 +37,7 @@ let suite_main ~sso bucket () =
     dispatch_exn
       ~name:"ecs.describe_clusters"
       ~error_to_json:Ecs.DescribeClustersResponse.error_to_json
-      ~f:(fun () -> Ecs.describe_clusters ~cfg (Ecs.DescribeClustersRequest.make ()))
+      ~f:(fun () -> Ecs.describe_clusters ?cfg (Ecs.DescribeClustersRequest.make ()))
     >|= fun v ->
     Option.iter v.Ecs.DescribeClustersResponse.clusters ~f:(fun cluster ->
       List.iter cluster ~f:(fun repo -> Option.iter repo.Ecs.Cluster.clusterName ~f:pr))
@@ -48,7 +50,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.get_authorization_token"
         ~error_to_json:Ecr.GetAuthorizationTokenResponse.error_to_json
         ~f:(fun () ->
-          Ecr.get_authorization_token ~cfg (Ecr.GetAuthorizationTokenRequest.make ()))
+          Ecr.get_authorization_token ?cfg (Ecr.GetAuthorizationTokenRequest.make ()))
       >|= fun v ->
       Option.iter v.Ecr.GetAuthorizationTokenResponse.authorizationData ~f:(fun xl ->
         List.iter xl ~f:(fun ad ->
@@ -59,7 +61,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.create_repository"
         ~error_to_json:Ecr.CreateRepositoryResponse.error_to_json
         ~f:(fun () ->
-          Ecr.create_repository ~cfg (Ecr.CreateRepositoryRequest.make ~repositoryName ()))
+          Ecr.create_repository ?cfg (Ecr.CreateRepositoryRequest.make ~repositoryName ()))
       >|= fun _v -> ()
     in
     let%bind () =
@@ -67,7 +69,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.describe_repositories"
         ~error_to_json:Ecr.DescribeRepositoriesResponse.error_to_json
         ~f:(fun () ->
-          Ecr.describe_repositories ~cfg (Ecr.DescribeRepositoriesRequest.make ()))
+        Ecr.describe_repositories ?cfg (Ecr.DescribeRepositoriesRequest.make ()))
       >>= fun v ->
       Option.value_map
         v.Ecr.DescribeRepositoriesResponse.repositories
@@ -83,7 +85,7 @@ let suite_main ~sso bucket () =
                   ~name:"ecr.list_images"
                   ~error_to_json:Ecr.ListImagesResponse.error_to_json
                   ~f:(fun () ->
-                    Ecr.list_images ~cfg (Ecr.ListImagesRequest.make ~repositoryName ()))
+                    Ecr.list_images ?cfg (Ecr.ListImagesRequest.make ~repositoryName ()))
                 >|= fun images ->
                 let imageIds =
                   Option.value
@@ -103,7 +105,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.delete_repository"
         ~error_to_json:Ecr.DeleteRepositoryResponse.error_to_json
         ~f:(fun () ->
-          Ecr.delete_repository ~cfg (Ecr.DeleteRepositoryRequest.make ~repositoryName ()))
+          Ecr.delete_repository ?cfg (Ecr.DeleteRepositoryRequest.make ~repositoryName ()))
       >|= fun _v -> ()
     in
     return ()
@@ -114,13 +116,13 @@ let suite_main ~sso bucket () =
       dispatch_exn
         ~name:"s3.list_buckets"
         ~error_to_json:S3.ListBucketsOutput.error_to_json
-        ~f:(fun () -> S3.list_buckets ~cfg ())
+        ~f:(fun () -> S3.list_buckets ?cfg ())
       >|= fun _ -> ()
     in
     dispatch_exn
       ~name:"s3.list_objects"
       ~error_to_json:S3.ListObjectsOutput.error_to_json
-      ~f:(fun () -> S3.list_objects ~cfg (S3.ListObjectsRequest.make ~bucket ()))
+      ~f:(fun () -> S3.list_objects ?cfg (S3.ListObjectsRequest.make ~bucket ()))
     >|= fun v ->
     Option.iter v.S3.ListObjectsOutput.name ~f:pr;
     let contents = Option.value ~default:[] v.S3.ListObjectsOutput.contents in
@@ -152,9 +154,9 @@ let read_slice ~start ~end_ fn =
 
 let multipart_main ~sso bucket key file () =
   let%bind cfg =
-    match sso with
-    | true -> Awso_sso_lwt.Util.Cfg.get_exn ()
-    | false -> Cfg.get_exn ()
+    if sso
+    then Awso_sso_lwt.Util.Cfg.get_exn () >|= Option.some
+    else Lwt.return None
   in
   Lwt_unix.stat file
   >>= fun { st_size = file_size; _ } ->
@@ -168,7 +170,7 @@ let multipart_main ~sso bucket key file () =
       ~error_to_json:S3.CreateMultipartUploadOutput.error_to_json
       ~f:(fun () ->
         S3.create_multipart_upload
-          ~cfg
+          ?cfg
           (S3.CreateMultipartUploadRequest.make ~bucket ~key:(S3.ObjectKey.make key) ()))
     >|= function
     | { S3.CreateMultipartUploadOutput.uploadId; _ } ->
@@ -182,7 +184,7 @@ let multipart_main ~sso bucket key file () =
       ~error_to_json:S3.UploadPartOutput.error_to_json
       ~f:(fun () ->
         S3.upload_part
-          ~cfg
+          ?cfg
           (S3.UploadPartRequest.make
              ~bucket
              ~uploadId
@@ -214,7 +216,7 @@ let multipart_main ~sso bucket key file () =
           ~uploadId
           ()
       in
-      S3.complete_multipart_upload ~cfg req)
+      S3.complete_multipart_upload ?cfg req)
   >|= fun _ -> ()
 ;;
 
@@ -236,7 +238,7 @@ let suite_command =
 let sso_suite_command =
   let open Command.Let_syntax in
   Command.basic
-    ~summary:"Test script"
+    ~summary:"Test script (SSO auth)"
     [%map_open
       let bucket = Param.bucket in
       fun () -> Lwt_main.run (suite_main ~sso:true bucket ())]
@@ -256,7 +258,7 @@ let multipart_command =
 let sso_multipart_command =
   let open Command.Let_syntax in
   Command.basic
-    ~summary:"Multipart upload test (but with Sso auth)"
+    ~summary:"Multipart upload test (SSO auth)"
     [%map_open
       let bucket = Param.bucket
       and key = Param.key

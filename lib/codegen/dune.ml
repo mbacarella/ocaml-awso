@@ -60,7 +60,7 @@ let has_addendum ~io_kind ~service =
       ~equal:String.equal
       [ "cognito-identity"; "cognito-idp"; "glue"; "s3"; "sqs"; "sso"; "sts" ]
       service
-  | `Lwt -> false
+  | `Lwt -> List.mem ~equal:String.equal [ "sso" ] service
 ;;
 
 let needs_yojson_conv ~io_kind ~service =
