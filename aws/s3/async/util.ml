@@ -178,7 +178,7 @@ let multipart
       let part = Source.File.read_slice ~start ~end_ file in
       let i' = i + one in
       let contentLength = String.length part |> Int64.of_int in
-      let contentMD5 = Awso.Client.content_md5 part in
+      let contentMD5 = Awso.Client.content_md5_insecure part in
       let upload_part_request =
         UploadPartRequest.make
           ~bucket

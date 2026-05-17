@@ -26,4 +26,4 @@ module Query : sig
   val render : t -> (String.t * string list) list
 end
 
-val content_md5 : string -> string
+val content_md5_insecure : string -> string

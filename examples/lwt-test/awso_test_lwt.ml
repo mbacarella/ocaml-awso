@@ -190,7 +190,7 @@ let multipart_main ~sso bucket key file () =
              ~body:(S3.Body.of_string part)
              ~contentLength:(part |> String.length |> Int64.of_int)
              ~key
-             ~contentMD5:(Awso.Client.content_md5 part)
+             ~contentMD5:(Awso.Client.content_md5_insecure part)
              ()))
     >|= fun uploadPartResp ->
     let eTag = Option.value_exn uploadPartResp.S3.UploadPartOutput.eTag in

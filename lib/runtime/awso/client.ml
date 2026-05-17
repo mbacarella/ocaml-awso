@@ -71,7 +71,9 @@ module Query = struct
   let render q = render_aux "" q
 end
 
-let content_md5 body =
+(* In content_md5_insecure below, [@alert "-crypto"] suppresses the "MD5 is broken" alert
+   from Cryptokit. We know. AWS unfortunately requires MD5 for some opreations. *)
+let content_md5_insecure body =
   (Cryptokit.hash_string (Cryptokit.Hash.md5 ()) body
    |> Cryptokit.transform_string (Cryptokit.Base64.encode_compact ()))
   [@alert "-crypto"]
