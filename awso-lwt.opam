@@ -12,7 +12,7 @@ license: "MIT"
 homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
-  "dune" {>= "3.0"}
+  "dune" {>= "3.6"}
   "ocaml" {>= "4.14"}
   "awso"
   "lwt"

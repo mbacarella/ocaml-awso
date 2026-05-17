@@ -2,7 +2,6 @@ open Core
 open Async
 open Awso_athena_async
 
-
 let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
@@ -15,18 +14,18 @@ module Query = struct
     { execution_id : string
     ; next_token : string option
     }
-  
+
   type athena_start =
     { result_configuration : ResultConfiguration.t
     ; query_execution_output : StartQueryExecutionOutput.t
     }
-  
+
   type t =
     [ `Athena_execution_id of string
     | `Athena_start of athena_start
     | `Athena_execution of GetQueryExecutionOutput.t
     ]
-  
+
   let of_id id : [< t ] = `Athena_execution_id id
 
   let submit ?idem_potency_token ?output_location ~query_string ~bucket cfg =
@@ -48,14 +47,14 @@ module Query = struct
       ~name:"athena.start_query_execution"
       ~error_to_json:StartQueryExecutionOutput.error_to_json
       ~f:(fun () ->
-      start_query_execution
-        ~cfg
-        (StartQueryExecutionInput.make
-           ~clientRequestToken
-           ~queryString:(QueryString.make query_string)
-           ?queryExecutionContext:None
-           ~resultConfiguration:result_configuration
-           ()))
+        start_query_execution
+          ~cfg
+          (StartQueryExecutionInput.make
+             ~clientRequestToken
+             ~queryString:(QueryString.make query_string)
+             ?queryExecutionContext:None
+             ~resultConfiguration:result_configuration
+             ()))
     >>| fun query_execution_output ->
     `Ok (`Athena_start { result_configuration; query_execution_output })
   ;;
@@ -74,21 +73,19 @@ module Query = struct
   ;;
 
   let as_execution_id : [< t ] -> [ `Athena_execution_id of string ] option =
-   fun t -> execution_id t |> Option.map ~f:(fun id -> `Athena_execution_id id)
- ;;
+    fun t -> execution_id t |> Option.map ~f:(fun id -> `Athena_execution_id id)
+  ;;
 
   let status : [< t ] -> QueryExecutionStatus.t option = function
     | `Athena_execution
-        { GetQueryExecutionOutput.queryExecution =
-            Some { QueryExecution.status; _ }
-        } -> status
+        { GetQueryExecutionOutput.queryExecution = Some { QueryExecution.status; _ } } ->
+      status
     | `Athena_start _ | `Athena_execution_id _ -> None
     | `Athena_execution { GetQueryExecutionOutput.queryExecution = None } -> None
   ;;
 
   let state t =
-    status t
-    |> Option.bind ~f:(function { QueryExecutionStatus.state; _ } -> state)
+    status t |> Option.bind ~f:(function { QueryExecutionStatus.state; _ } -> state)
   ;;
 
   let is_state t s =
@@ -109,9 +106,9 @@ module Query = struct
         ~name:"athena.get_query_execution"
         ~error_to_json:GetQueryExecutionOutput.error_to_json
         ~f:(fun () ->
-        get_query_execution
-          ~cfg
-          (GetQueryExecutionInput.make ~queryExecutionId:execution_id ()))
+          get_query_execution
+            ~cfg
+            (GetQueryExecutionInput.make ~queryExecutionId:execution_id ()))
       >>| fun x -> `Ok (`Athena_execution x)
   ;;
 
@@ -126,12 +123,12 @@ module Query = struct
       ~name:"athena.get_query_results"
       ~error_to_json:GetQueryResultsOutput.error_to_json
       ~f:(fun () ->
-      get_query_results
-        ~cfg
-        (GetQueryResultsInput.make
-           ?nextToken:next_token
-           ~queryExecutionId:execution_id
-           ()))
+        get_query_results
+          ~cfg
+          (GetQueryResultsInput.make
+             ?nextToken:next_token
+             ~queryExecutionId:execution_id
+             ()))
     >>| fun x -> `Ok (`Athena_result x)
   ;;
 
@@ -141,28 +138,25 @@ module Query = struct
     | Some execution_id -> (
       get_query_results_page cfg ?next_token:None ~execution_id
       >>= (function
-            | `Ok
-                (`Athena_result
-                  { GetQueryResultsOutput.resultSet
-                  ; nextToken = next_token
-                  ; updateCount = _
-                  }) -> (
-              match resultSet with
-              | None
-              | Some { ResultSet.rows = _; resultSetMetadata = None }
-              | Some
-                  { ResultSet.rows = _
-                  ; resultSetMetadata =
-                      Some { ResultSetMetadata.columnInfo = None }
-                  } ->
-                return (`Missing_result_set_metadata { execution_id; next_token = None })
-              | Some
-                  { ResultSet.rows
-                  ; resultSetMetadata =
-                      Some { ResultSetMetadata.columnInfo = Some column_infos }
-                  } ->
-                let rows = Option.value ~default:[] rows in
-                return (`Ok (rows, next_token, column_infos))))
+       | `Ok
+           (`Athena_result
+              { GetQueryResultsOutput.resultSet; nextToken = next_token; updateCount = _ })
+         -> (
+         match resultSet with
+         | None
+         | Some { ResultSet.rows = _; resultSetMetadata = None }
+         | Some
+             { ResultSet.rows = _
+             ; resultSetMetadata = Some { ResultSetMetadata.columnInfo = None }
+             } ->
+           return (`Missing_result_set_metadata { execution_id; next_token = None })
+         | Some
+             { ResultSet.rows
+             ; resultSetMetadata =
+                 Some { ResultSetMetadata.columnInfo = Some column_infos }
+             } ->
+           let rows = Option.value ~default:[] rows in
+           return (`Ok (rows, next_token, column_infos))))
       >>= function
       | `Missing_result_set_metadata _ as e -> return e
       | `Ok (rows, next_token, result_set_metadata) ->
@@ -183,10 +177,10 @@ module Query = struct
                 >>= function
                 | `Ok
                     (`Athena_result
-                      { GetQueryResultsOutput.resultSet
-                      ; nextToken = next_token
-                      ; updateCount = _
-                      }) -> (
+                       { GetQueryResultsOutput.resultSet
+                       ; nextToken = next_token
+                       ; updateCount = _
+                       }) -> (
                   match resultSet with
                   | None -> return ()
                   | Some { ResultSet.rows = rows_opt; resultSetMetadata = _ } ->
@@ -257,15 +251,13 @@ module Query = struct
         ~name:"athena.list_query_executions"
         ~error_to_json:ListQueryExecutionsOutput.error_to_json
         ~f:(fun () ->
-        list_query_executions
-          ~cfg
-          (ListQueryExecutionsInput.make
-             ?maxResults:(Option.map max_results ~f:MaxQueryExecutionsCount.make)
-             ?nextToken:next_token
-             ()))
-      >>= fun { ListQueryExecutionsOutput.nextToken = next_token
-              ; queryExecutionIds
-              } ->
+          list_query_executions
+            ~cfg
+            (ListQueryExecutionsInput.make
+               ?maxResults:(Option.map max_results ~f:MaxQueryExecutionsCount.make)
+               ?nextToken:next_token
+               ()))
+      >>= fun { ListQueryExecutionsOutput.nextToken = next_token; queryExecutionIds } ->
       let ids =
         Option.value ~default:[] queryExecutionIds
         |> List.map ~f:(fun s -> `Athena_execution_id s)

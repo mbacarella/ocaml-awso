@@ -12,7 +12,7 @@ module Cohttp : sig
   module Client = Cohttp_lwt_unix.Client
   module Header = Cohttp.Header
   module Request = Cohttp.Request
-  module Response = Cohttp_lwt.Response
+  module Response = Cohttp.Response
 
   val to_meth : Awso.Http.Meth.t -> Cohttp.Code.meth
   val to_headers : Awso.Http.Request.t -> Cohttp.Header.t
@@ -25,7 +25,7 @@ end = struct
   module Client = Cohttp_lwt_unix.Client
   module Header = Cohttp.Header
   module Request = Cohttp.Request
-  module Response = Cohttp_lwt.Response
+  module Response = Cohttp.Response
 
   let to_meth meth = (meth :> Cohttp.Code.meth)
 

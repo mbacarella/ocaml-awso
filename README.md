@@ -29,12 +29,6 @@ opam install awso-async # if using async
 opam install awso-lwt   # if using lwt
 ```
 
-If you get stack overflow errors during installation, try increasing stack size:
-
-```
-prlimit --stack=unlimited dune ...
-```
-
 ### Examples
 
 See the [examples](./examples) directory.

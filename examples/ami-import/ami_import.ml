@@ -1,8 +1,6 @@
 open Core
 open Async
-
 module Cfg = Awso_async.Cfg
-
 module Ec2 = Awso_ec2_async
 module Ebs = Awso_ebs_async
 
@@ -37,16 +35,14 @@ let start_snapshot ~cfg ~volume_size ~description =
     ~name:"start_snapshot"
     ~error_to_json:Ebs.StartSnapshotResponse.error_to_json
     ~f:(fun () ->
-    Ebs.start_snapshot
-      ~cfg
-      (Ebs.StartSnapshotRequest.make
-         ~description
-         ~volumeSize:(Int64.of_int volume_size)
-         ()))
+      Ebs.start_snapshot
+        ~cfg
+        (Ebs.StartSnapshotRequest.make
+           ~description
+           ~volumeSize:(Int64.of_int volume_size)
+           ()))
   >>| fun v ->
-  Option.value_exn
-    ~message:"snapshotId is None"
-    v.Ebs.StartSnapshotResponse.snapshotId
+  Option.value_exn ~message:"snapshotId is None" v.Ebs.StartSnapshotResponse.snapshotId
 ;;
 
 let put_snapshot_block ~cfg request =
@@ -64,12 +60,12 @@ let complete_snapshot ~cfg ~snapshot_id ~changed_blocks_count =
     ~name:"complete_snapshot"
     ~error_to_json:Ebs.CompleteSnapshotResponse.error_to_json
     ~f:(fun () ->
-    Ebs.complete_snapshot
-      ~cfg
-      (Ebs.CompleteSnapshotRequest.make
-         ~snapshotId:snapshot_id
-         ~changedBlocksCount:changed_blocks_count
-         ()))
+      Ebs.complete_snapshot
+        ~cfg
+        (Ebs.CompleteSnapshotRequest.make
+           ~snapshotId:snapshot_id
+           ~changedBlocksCount:changed_blocks_count
+           ()))
   >>| fun v ->
   Option.value_exn
     ~message:"No completeSnapshotResponse.status"
@@ -81,9 +77,9 @@ let describe_snapshots ~cfg ~snapshot_id =
     ~name:"describe_snapshots"
     ~error_to_json:Ec2.Ec2_error.to_json
     ~f:(fun () ->
-    Ec2.describe_snapshots
-      ~cfg
-      (Ec2.DescribeSnapshotsRequest.make ~snapshotIds:[ snapshot_id ] ()))
+      Ec2.describe_snapshots
+        ~cfg
+        (Ec2.DescribeSnapshotsRequest.make ~snapshotIds:[ snapshot_id ] ()))
   >>| fun v ->
   match v.Ec2.DescribeSnapshotsResult.snapshots with
   | None -> failwithf "No snapshots for %s at all" snapshot_id ()
@@ -97,13 +93,8 @@ let describe_snapshots ~cfg ~snapshot_id =
 ;;
 
 let describe_images ~cfg ~image_id =
-  dispatch_exn
-    ~name:"describe_images"
-    ~error_to_json:Ec2.Ec2_error.to_json
-    ~f:(fun () ->
-    Ec2.describe_images
-      ~cfg
-      (Ec2.DescribeImagesRequest.make ~imageIds:[ image_id ] ()))
+  dispatch_exn ~name:"describe_images" ~error_to_json:Ec2.Ec2_error.to_json ~f:(fun () ->
+    Ec2.describe_images ~cfg (Ec2.DescribeImagesRequest.make ~imageIds:[ image_id ] ()))
   >>| fun v ->
   match v.Ec2.DescribeImagesResult.images with
   | None -> failwithf "No images for %s at all" image_id ()
@@ -117,7 +108,8 @@ let waiter_retry_logic ~f ~max_attempts ~delay =
     match Int.( >= ) attempt max_attempts with
     | true ->
       failwithf
-        !"waiter_retry_logic: gave up after %d attempts (%{Time_float_unix.Span} per attempt)"
+        !"waiter_retry_logic: gave up after %d attempts (%{Time_float_unix.Span} per \
+          attempt)"
         max_attempts
         delay
         ()
@@ -151,10 +143,7 @@ let image_available_waiter ~cfg ~image_id =
 ;;
 
 let all_regions ~cfg =
-  dispatch_exn
-    ~name:"describe_regions"
-    ~error_to_json:Ec2.Ec2_error.to_json
-    ~f:(fun () ->
+  dispatch_exn ~name:"describe_regions" ~error_to_json:Ec2.Ec2_error.to_json ~f:(fun () ->
     Ec2.describe_regions ~cfg (Ec2.DescribeRegionsRequest.make ()))
   >>| fun v ->
   Option.value_exn ~message:"regions is None" v.Ec2.DescribeRegionsResult.regions
@@ -189,8 +178,7 @@ let create_snapshot ~cfg ~description ~image =
              ~blockData:(Ebs.BlockData.of_string block_data)
              ~dataLength:block_size
              ~checksum
-             ~checksumAlgorithm:
-               (Ebs.ChecksumAlgorithm.of_string checksum_algorithm)
+             ~checksumAlgorithm:(Ebs.ChecksumAlgorithm.of_string checksum_algorithm)
              ())
       in
       put_block_loop (Int.succ block_index)
@@ -274,18 +262,20 @@ let () =
     Command.async
       ~summary:"Import AWS EC2 image (AMI)"
       (let open Command.Let_syntax in
-      let%map_open name = flag "-name" (optional string) ~doc:"NAME image name"
-      and regions =
-        flag "-region" (listed string) ~doc:"REGION AWS region(s) (default: all)"
-      and images = anon (non_empty_sequence_as_list ("image" %: string)) in
-      fun () ->
-        let name =
-          Option.value
-            ~default:
-              (sprintf "iPXE (%s)" (Date.today ~zone:Time_float_unix.Zone.utc |> Date.to_string))
-            name
-        in
-        main ~name ~regions ~images)
+       let%map_open name = flag "-name" (optional string) ~doc:"NAME image name"
+       and regions =
+         flag "-region" (listed string) ~doc:"REGION AWS region(s) (default: all)"
+       and images = anon (non_empty_sequence_as_list ("image" %: string)) in
+       fun () ->
+         let name =
+           Option.value
+             ~default:
+               (sprintf
+                  "iPXE (%s)"
+                  (Date.today ~zone:Time_float_unix.Zone.utc |> Date.to_string))
+             name
+         in
+         main ~name ~regions ~images)
   in
   Command_unix.run cmd
 ;;

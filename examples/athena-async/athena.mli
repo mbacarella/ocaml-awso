@@ -9,18 +9,18 @@ module Query : sig
     { execution_id : string
     ; next_token : string option
     }
-  
+
   type athena_start =
     { result_configuration : ResultConfiguration.t
     ; query_execution_output : StartQueryExecutionOutput.t
     }
-  
+
   type t =
     [ `Athena_execution_id of string
     | `Athena_start of athena_start
     | `Athena_execution of GetQueryExecutionOutput.t
     ]
-  
+
   val of_id : string -> [< t > `Athena_execution_id ]
 
   val submit
@@ -53,7 +53,7 @@ module Query : sig
        | `Missing_result_set_metadata of query_id_params
        | `Ok of ColumnInfo.t list * Row.t Pipe.Reader.t
        ]
-       Deferred.t
+         Deferred.t
 
   val ls
     :  ?max_results:int

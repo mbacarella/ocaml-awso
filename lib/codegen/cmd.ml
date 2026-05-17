@@ -225,7 +225,6 @@ module Generate_all = struct
         let base_dir = outdir ^/ service in
         let async_dir = outdir ^/ service ^/ "async" in
         let lwt_dir = outdir ^/ service ^/ "lwt" in
-        let cli_dir = outdir ^/ service ^/ "cli-async" in
         eprintf "generating %s ...\n%!" service;
         (* base service: dune, endpoints.ml, values.ml (+ submodules) *)
         write_dune_file ~argv:argv_strs ~outdir:base_dir ~data:(Dune.make ~service);
@@ -317,16 +316,7 @@ module Generate_all = struct
           write_generated
             ~argv:argv_strs
             (lwt_dir ^/ sprintf "awso_%s_lwt.ml" service_under)
-            "include Io\ninclude Values";
-        (* cli-async: dune, script *)
-        write_dune_file
-          ~argv:argv_strs
-          ~outdir:cli_dir
-          ~data:(Dune.make_cli_async ~service);
-        write_generated
-          ~argv:argv_strs
-          (cli_dir ^/ sprintf "awso_%s.ml" service_under)
-          (sprintf "let () = Command_unix.run Awso_%s_async.Cli.main" service_under));
+            "include Io\ninclude Values");
     (* aggregate awso-cli: one binary that dispatches to every service *)
     (match cli_dir_opt with
      | None -> ()

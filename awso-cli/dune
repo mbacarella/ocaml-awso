@@ -2,7 +2,8 @@
 (executable
  (package awso-cli)
  (name awso_main)
- (public_name awso)
+ (public_name awso-cli)
+ (modes byte_complete)
  (libraries
   awso-async
   core_unix.command_unix

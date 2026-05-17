@@ -1,6 +1,5 @@
 open Core
 open Async
-
 open Awso_sqs_async
 
 let main () =
@@ -20,7 +19,9 @@ let main () =
   let lqr = res.ListQueuesResult.listQueuesResult in
   Option.iter lqr.ListQueuesResult.queueUrls ~f:(fun queue_urls ->
     List.iter queue_urls ~f:(fun url -> printf "- %s\n" url));
-  let message_body = sprintf !"Test message body %{Time_float_unix}" (Time_float_unix.now ()) in
+  let message_body =
+    sprintf !"Test message body %{Time_float_unix}" (Time_float_unix.now ())
+  in
   printf "sending message '%s' to queue %s\n" message_body queue_url;
   let%bind res = Sqs.send_message cfg ~queue_url ~message_body in
   printf
@@ -39,14 +40,14 @@ let main () =
 let () =
   don't_wait_for
     (Monitor.try_with (fun () -> main ())
-    >>= fun res ->
-    match res with
-    | Ok () ->
-      Shutdown.shutdown 0;
-      return ()
-    | Error e ->
-      eprintf "error: %s\n" (Exn.to_string e);
-      Shutdown.shutdown 1;
-      return ());
+     >>= fun res ->
+     match res with
+     | Ok () ->
+       Shutdown.shutdown 0;
+       return ()
+     | Error e ->
+       eprintf "error: %s\n" (Exn.to_string e);
+       Shutdown.shutdown 1;
+       return ());
   never_returns (Scheduler.go ())
 ;;
